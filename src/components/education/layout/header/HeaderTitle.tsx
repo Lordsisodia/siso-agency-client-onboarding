@@ -17,7 +17,7 @@ export const HeaderTitle = () => {
           className="!pb-2 tracking-tight text-4xl md:text-5xl"
           variant="sunset"
         >
-          SISO Education Hub
+          Development Resources
         </GradientHeading>
         <motion.div
           animate={{ scale: [1, 1.2, 1] }}
@@ -26,7 +26,7 @@ export const HeaderTitle = () => {
         >
           <span className="text-xs font-semibold text-siso-orange flex items-center gap-1.5">
             <span className="w-2 h-2 bg-siso-orange rounded-full animate-pulse" />
-            Live Learning
+            Expert Resources
           </span>
         </motion.div>
       </div>
@@ -37,7 +37,7 @@ export const HeaderTitle = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
-        Discover expert educators, tutorials, and resources
+        Access app development guides, documentation, and technical resources
       </motion.p>
     </motion.div>
   );

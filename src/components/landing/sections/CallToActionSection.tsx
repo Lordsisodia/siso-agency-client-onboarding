@@ -42,18 +42,18 @@ export const CallToActionSection = () => {
                 >
                   <span className="w-2 h-2 bg-siso-orange rounded-full animate-pulse" />
                   <span className="text-sm font-semibold text-siso-orange">
-                    Join 2,000+ Agency Owners
+                    Trusted by 2,000+ Agency Owners
                   </span>
                 </motion.div>
 
                 {/* Main Copy */}
                 <div className="space-y-4">
                   <h3 className="text-4xl md:text-5xl font-bold text-white leading-tight">
-                    Transform Your Agency with AI-Powered Solutions
+                    Transform Your Agency with Custom Applications
                   </h3>
                   <p className="text-xl text-gray-300 leading-relaxed">
-                    Stop struggling with manual processes. Start delivering 3x faster results 
-                    to your clients with our proven frameworks and templates.
+                    Stop struggling with off-the-shelf solutions. Get a tailor-made application 
+                    that perfectly fits your agency's unique workflow and client needs.
                   </p>
                 </div>
 
@@ -67,7 +67,7 @@ export const CallToActionSection = () => {
                       className="text-lg px-8 py-4 font-semibold shadow-2xl w-full sm:w-auto"
                       onClick={handleGetStarted}
                     >
-                      Start Free Trial <ArrowRight className="w-5 h-5 ml-2" />
+                      Start Your Project <ArrowRight className="w-5 h-5 ml-2" />
                     </RainbowButton>
                   </motion.div>
                   <motion.button
@@ -78,7 +78,7 @@ export const CallToActionSection = () => {
                       justify-center gap-2 font-semibold"
                   >
                     <PhoneCall className="w-5 h-5" />
-                    Schedule Demo
+                    Book a Consultation
                   </motion.button>
                 </div>
 
@@ -86,11 +86,11 @@ export const CallToActionSection = () => {
                 <div className="flex items-center gap-6 text-gray-400">
                   <div className="flex items-center gap-2">
                     <BadgeCheck className="w-5 h-5 text-siso-orange" />
-                    <span className="text-sm">14-day free trial</span>
+                    <span className="text-sm">Custom development</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <BadgeCheck className="w-5 h-5 text-siso-orange" />
-                    <span className="text-sm">No credit card required</span>
+                    <span className="text-sm">Ongoing support</span>
                   </div>
                 </div>
               </div>
@@ -112,12 +112,12 @@ export const CallToActionSection = () => {
                 {/* Stats */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-4 bg-white/5 rounded-lg">
-                    <div className="text-2xl font-bold text-siso-orange">90%</div>
-                    <div className="text-sm text-gray-400">Satisfaction Rate</div>
+                    <div className="text-2xl font-bold text-siso-orange">95%</div>
+                    <div className="text-sm text-gray-400">Client Satisfaction</div>
                   </div>
                   <div className="text-center p-4 bg-white/5 rounded-lg">
-                    <div className="text-2xl font-bold text-siso-orange">3x</div>
-                    <div className="text-sm text-gray-400">Faster Delivery</div>
+                    <div className="text-2xl font-bold text-siso-orange">2x</div>
+                    <div className="text-sm text-gray-400">Efficiency Boost</div>
                   </div>
                 </div>
 
@@ -125,10 +125,10 @@ export const CallToActionSection = () => {
                 <div className="relative">
                   <div className="absolute -top-2 -left-2 text-4xl text-siso-orange">"</div>
                   <blockquote className="pt-4 px-6 text-gray-300 italic">
-                    SISO has completely transformed how we deliver results to our clients. 
-                    The AI tools have cut our workflow time in half.
+                    Their custom app solution completely transformed how our agency handles client projects. 
+                    It's like they built exactly what we needed before we even knew we needed it.
                     <footer className="mt-4 text-sm text-gray-400 not-italic">
-                      - Sarah K., Digital Marketing Director
+                      - Michael R., Creative Agency Founder
                     </footer>
                   </blockquote>
                 </div>

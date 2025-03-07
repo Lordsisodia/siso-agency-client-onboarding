@@ -1,6 +1,6 @@
 
 import { motion } from 'framer-motion';
-import { Sparkles, MessageCircle, Brain } from 'lucide-react';
+import { Sparkles, Code, Laptop } from 'lucide-react';
 
 export function HeaderTitle() {
   const iconProps = {
@@ -29,14 +29,14 @@ export function HeaderTitle() {
           animate={{ y: [-4, 4, -4], rotate: [0, -5, 0] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
         >
-          <MessageCircle {...iconProps} />
+          <Code {...iconProps} />
         </motion.div>
         <motion.div
           className="absolute right-0 bottom-0"
           animate={{ y: [-3, 3, -3], rotate: [0, 3, 0] }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         >
-          <Brain {...iconProps} />
+          <Laptop {...iconProps} />
         </motion.div>
 
         {/* Main Title */}
@@ -45,7 +45,7 @@ export function HeaderTitle() {
             text-transparent bg-clip-text 
             animate-gradient bg-[length:200%_auto]
             [text-shadow:0_4px_12px_rgba(155,135,245,0.1)]">
-            ChatGPT Assistants
+            App Development Framework
           </span>
         </h1>
       </div>
@@ -56,8 +56,8 @@ export function HeaderTitle() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
-        Discover our curated collection of AI assistants to streamline your workflow 
-        and boost productivity with the power of ChatGPT
+        Explore our comprehensive app development framework designed specifically 
+        for agencies to create custom solutions for their unique workflows
       </motion.p>
     </motion.div>
   );
