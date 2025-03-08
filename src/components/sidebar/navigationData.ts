@@ -3,16 +3,21 @@ import {
   Home,
   GraduationCap,
   Network,
+  Trophy,
+  BarChart,
   BookOpen,
   Bot,
   Wrench,
-  Bell,
+  Users,
+  Newspaper,
   LayoutDashboard,
   FileText,
   FolderKanban,
   Building,
+  Lightbulb,
   Briefcase,
-  TrendingUp
+  TrendingUp,
+  Bell
 } from 'lucide-react';
 import { MenuSection } from './types';
 
@@ -64,6 +69,21 @@ export const menuSections: MenuSection[] = [
         href: '/competitive-analysis',
         icon: TrendingUp,
         label: 'Competitive Analysis',
+      },
+      {
+        href: '/education',
+        icon: GraduationCap,
+        label: 'Education',
+      },
+      {
+        href: '/assistants',
+        icon: Bot,
+        label: 'AI Assistants',
+      },
+      {
+        href: '/tools',
+        icon: Wrench,
+        label: 'Tools',
       }
     ]
   },
@@ -76,7 +96,40 @@ export const menuSections: MenuSection[] = [
         href: '/notifications',
         icon: Bell,
         label: 'Notifications',
+      },
+      {
+        href: '/networking',
+        icon: Network,
+        label: 'Networking',
       }
     ]
+  },
+  {
+    type: 'section',
+    title: 'Economy',
+    icon: Users,
+    items: [
+      {
+        href: '/economy/crypto-exchange',
+        icon: Network,
+        label: 'Crypto Exchange',
+      },
+      {
+        href: '/economy/earn',
+        icon: Trophy,
+        label: 'How to Earn',
+      },
+      {
+        href: '/economy/leaderboards',
+        icon: BarChart,
+        label: 'Leaderboards',
+      }
+    ]
+  },
+  {
+    type: 'main',
+    href: '/ai-news',
+    icon: Newspaper,
+    label: 'AI News',
   }
 ];
