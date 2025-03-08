@@ -8,18 +8,20 @@ import { Waves } from '@/components/ui/waves-background';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 
 export default function Auth() {
-  const { user } = useAuthSession();
-  const { handleGoogleSignIn, loading } = useGoogleAuth();
+  const { user, loading } = useAuthSession();
+  const { handleGoogleSignIn, loading: authLoading } = useGoogleAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Only redirect to profile if user exists and we're not in the middle of onboarding
-    const currentPath = window.location.pathname;
-    if (user && !currentPath.includes('onboarding')) {
-      navigate('/profile');
+    console.log('Auth: auth state', { user: !!user, loading });
+    
+    // Only redirect to home if user exists and we're not loading
+    if (user && !loading) {
+      console.log('Auth: user is authenticated, redirecting to home');
+      navigate('/home', { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
 
   const handleSignIn = async () => {
     try {
@@ -40,6 +42,11 @@ export default function Auth() {
       });
     }
   };
+
+  // Don't render auth page if user is already authenticated and we're not loading
+  if (user && !loading) {
+    return null;
+  }
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
@@ -78,7 +85,7 @@ export default function Auth() {
           <div className="flex justify-center">
             <GoogleSignInButton
               onClick={handleSignIn}
-              disabled={loading}
+              disabled={authLoading || loading}
             />
           </div>
 

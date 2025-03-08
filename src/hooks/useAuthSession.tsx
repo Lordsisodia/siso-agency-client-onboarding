@@ -15,6 +15,7 @@ export const useAuthSession = () => {
   const isInitialized = useRef(false);
   const isAuthEvent = useRef(false);
   const profileCache = useRef<any>(null);
+  const authErrorsRef = useRef(0);
 
   // [Analysis] Memoized profile check to prevent unnecessary API calls
   const checkProfile = useCallback(async (userId: string) => {
@@ -23,6 +24,7 @@ export const useAuthSession = () => {
     }
 
     try {
+      console.log('Checking profile for user:', userId);
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
@@ -35,30 +37,52 @@ export const useAuthSession = () => {
       }
       
       if (profile) {
+        console.log('Profile found:', profile);
         profileCache.current = profile;
+      } else {
+        console.log('No profile found for user');
       }
       
       return profile;
     } catch (error) {
-      console.error('Error in checkProfile:', error);
+      console.error('Exception in checkProfile:', error);
       return null;
     }
   }, []);
+
+  // Reset auth errors counter
+  const resetAuthErrors = () => {
+    authErrorsRef.current = 0;
+  };
 
   // [Analysis] Initialize session state without triggering navigation
   useEffect(() => {
     const initializeSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        console.log('Initializing session...');
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+          setLoading(false);
+          return;
+        }
         
         if (session?.user) {
+          console.log('Session found, checking profile');
           const profile = await checkProfile(session.user.id);
           if (profile) {
+            console.log('Profile verified, setting user');
             setUser(session.user);
           } else {
-            await supabase.auth.signOut();
+            console.log('No profile found, signing out');
+            // Don't auto sign out on init - just don't set the user
+            // This prevents white screens when profiles table doesn't exist yet
             setUser(null);
           }
+        } else {
+          console.log('No session found');
+          setUser(null);
         }
         
         isInitialized.current = true;
@@ -85,6 +109,7 @@ export const useAuthSession = () => {
           const profile = await checkProfile(session.user.id);
           if (profile) {
             setUser(session.user);
+            resetAuthErrors();
             // [Fix] Only navigate on explicit sign in, not session restore
             if (!user) {
               navigate('/home', { replace: true });
@@ -94,14 +119,16 @@ export const useAuthSession = () => {
               });
             }
           } else {
-            await supabase.auth.signOut();
-            setUser(null);
+            // Don't auto sign out - it could be a new user
+            // Let the app handle this case
+            setUser(session.user);
           }
         }
       } else if (event === 'SIGNED_OUT') {
         isAuthEvent.current = true;
         setUser(null);
         profileCache.current = null;
+        resetAuthErrors();
         navigate('/', { replace: true });
         toast({
           title: "Signed out",
@@ -131,14 +158,19 @@ export const useAuthSession = () => {
       
       if (profile) {
         setUser(session.user);
+        resetAuthErrors();
         console.log('Profile verified, proceeding to home');
         return true;
       } else {
         console.error('Profile not found after sign in');
-        throw new Error('Profile creation failed');
+        // Don't throw an error, just return false
+        // The app can handle this case
+        return false;
       }
     } catch (error) {
       console.error('Error in sign in handler:', error);
+      authErrorsRef.current += 1;
+      
       toast({
         variant: "destructive",
         title: "Error signing in",
@@ -157,12 +189,16 @@ export const useAuthSession = () => {
       await supabase.auth.signOut();
       setUser(null);
       profileCache.current = null;
+      resetAuthErrors();
+      
       toast({
         title: "Signed out",
         description: "Come back soon!",
       });
     } catch (error) {
       console.error('Error signing out:', error);
+      authErrorsRef.current += 1;
+      
       toast({
         variant: "destructive",
         title: "Error signing out",

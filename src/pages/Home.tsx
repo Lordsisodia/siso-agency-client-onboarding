@@ -1,13 +1,14 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
-import { Sidebar } from "@/components/Sidebar";
 import { Waves } from '@/components/ui/waves-background';
 import { PreChatState } from '@/components/home/PreChatState';
 import { EnhancedChatState } from '@/components/home/EnhancedChatState';
 import { ChatMessage, ProcessingStage, AgentCategory } from '@/types/chat';
+import { useAuthSession } from '@/hooks/useAuthSession';
 
 // [Analysis] Separated concerns for better maintainability
 export default function Home() {
@@ -15,6 +16,16 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuthSession();
+  const navigate = useNavigate();
+
+  // Ensure user is authenticated
+  useEffect(() => {
+    if (!user) {
+      console.log('No user in Home component, redirecting to auth');
+      navigate('/auth', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (message: string) => {
     if (!message.trim() || isLoading) return;
@@ -142,6 +153,10 @@ export default function Home() {
     });
   };
 
+  if (!user) {
+    return null; // Don't render anything if not authenticated
+  }
+
   return (
     <div className="relative flex min-h-screen w-full bg-gradient-to-b from-siso-bg to-siso-bg/95 overflow-hidden">
       <div className="absolute inset-0 z-0">
@@ -159,7 +174,6 @@ export default function Home() {
         />
       </div>
 
-      <Sidebar />
       <div className="relative z-10 flex-1 p-4 md:p-8">
         <div className="h-[calc(100vh-4rem)]">
           <AnimatePresence mode="wait">
