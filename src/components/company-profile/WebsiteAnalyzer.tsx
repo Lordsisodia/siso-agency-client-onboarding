@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Globe, ArrowRight } from 'lucide-react';
+import { Loader2, Globe, ArrowRight, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -16,6 +16,7 @@ export const WebsiteAnalyzer = ({ onAnalysisComplete }: WebsiteAnalyzerProps) =>
   const { toast } = useToast();
   const [url, setUrl] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisSuccess, setAnalysisSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,6 +36,7 @@ export const WebsiteAnalyzer = ({ onAnalysisComplete }: WebsiteAnalyzerProps) =>
     }
 
     setIsAnalyzing(true);
+    setAnalysisSuccess(false);
 
     try {
       const { data, error } = await supabase.functions
@@ -45,6 +47,7 @@ export const WebsiteAnalyzer = ({ onAnalysisComplete }: WebsiteAnalyzerProps) =>
       if (error) throw error;
 
       if (data.success) {
+        setAnalysisSuccess(true);
         toast({
           title: "Analysis Complete",
           description: `Successfully analyzed ${extractDomain(processedUrl)}`
@@ -118,6 +121,23 @@ export const WebsiteAnalyzer = ({ onAnalysisComplete }: WebsiteAnalyzerProps) =>
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-siso-orange" />
           <p>Analyzing your website. This may take a few moments...</p>
         </div>
+      )}
+
+      {analysisSuccess && (
+        <motion.div 
+          className="mt-4 p-3 rounded-lg bg-green-500/10 border border-green-500/30 flex items-start"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <AlertCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5" />
+          <div>
+            <h4 className="font-medium text-green-500">Analysis Complete</h4>
+            <p className="text-sm text-siso-text/80">
+              Website information has been extracted and applied to the form below. 
+              Please review and edit as needed before saving your profile.
+            </p>
+          </div>
+        </motion.div>
       )}
     </motion.div>
   );

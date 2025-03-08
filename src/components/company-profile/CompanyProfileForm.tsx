@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -50,6 +50,10 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
     accent_color: initialData?.accent_color || '#D6BCFA',
   });
   const [showAnalysisAlert, setShowAnalysisAlert] = useState(false);
+  const [highlightedFields, setHighlightedFields] = useState<string[]>([]);
+
+  // Track which fields were modified by analysis
+  const analysisFieldsRef = useRef<Set<string>>(new Set());
 
   // Apply website analysis data when it becomes available
   useEffect(() => {
@@ -59,41 +63,74 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
     const basicData = analysisData.basicExtraction || {};
     const updatedData = { ...formData };
     let hasChanges = false;
+    const fieldsToHighlight: string[] = [];
+    const fieldsModified = new Set<string>();
 
     // Fill in company_name if available from AI analysis
     if (aiData.companyName && !formData.company_name) {
       updatedData.company_name = aiData.companyName;
       hasChanges = true;
+      fieldsToHighlight.push('company_name');
+      fieldsModified.add('company_name');
     }
 
     // Fill in industry if available from AI analysis
     if (aiData.industry && !formData.industry) {
       updatedData.industry = aiData.industry;
       hasChanges = true;
+      fieldsToHighlight.push('industry');
+      fieldsModified.add('industry');
     }
 
     // Fill in description if available from AI analysis
     if (aiData.companyDescription && !formData.description) {
       updatedData.description = aiData.companyDescription;
       hasChanges = true;
+      fieldsToHighlight.push('description');
+      fieldsModified.add('description');
+    }
+
+    // Fill in location if available from AI analysis
+    if (aiData.location && !formData.location) {
+      updatedData.location = aiData.location;
+      hasChanges = true;
+      fieldsToHighlight.push('location');
+      fieldsModified.add('location');
     }
 
     // Use website that was analyzed
     if (analysisData.url && !formData.website) {
       updatedData.website = analysisData.url;
       hasChanges = true;
+      fieldsToHighlight.push('website');
+      fieldsModified.add('website');
     }
 
     // Set email if found
     if (basicData.emails && basicData.emails.length > 0 && !formData.email) {
       updatedData.email = basicData.emails[0];
       hasChanges = true;
+      fieldsToHighlight.push('email');
+      fieldsModified.add('email');
     }
 
     // Set phone if found
     if (basicData.phones && basicData.phones.length > 0 && !formData.phone) {
       updatedData.phone = basicData.phones[0];
       hasChanges = true;
+      fieldsToHighlight.push('phone');
+      fieldsModified.add('phone');
+    }
+
+    // Try to extract founded year if mentioned
+    if (aiData.yearFounded && !formData.year_founded) {
+      const yearMatch = aiData.yearFounded.toString().match(/\b(19|20)\d{2}\b/);
+      if (yearMatch) {
+        updatedData.year_founded = parseInt(yearMatch[0]);
+        hasChanges = true;
+        fieldsToHighlight.push('year_founded');
+        fieldsModified.add('year_founded');
+      }
     }
 
     // Estimate company type based on services/products
@@ -102,25 +139,50 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
       if (services.includes('market') || services.includes('advertising')) {
         updatedData.company_type = 'agency';
         hasChanges = true;
+        fieldsToHighlight.push('company_type');
+        fieldsModified.add('company_type');
       } else if (services.includes('design') || services.includes('creative')) {
         updatedData.company_type = 'studio';
         hasChanges = true;
+        fieldsToHighlight.push('company_type');
+        fieldsModified.add('company_type');
       } else if (services.includes('develop') || services.includes('software') || services.includes('web')) {
         updatedData.company_type = 'development';
         hasChanges = true;
+        fieldsToHighlight.push('company_type');
+        fieldsModified.add('company_type');
       } else if (services.includes('consult') || services.includes('advisory')) {
         updatedData.company_type = 'consulting';
         hasChanges = true;
+        fieldsToHighlight.push('company_type');
+        fieldsModified.add('company_type');
       }
+    }
+
+    // Detect brand colors if available
+    const colors = basicData.colors || [];
+    if (colors.length >= 3 && (!formData.primary_color || formData.primary_color === '#6E59A5')) {
+      // Use the first three colors for primary, secondary, and accent
+      updatedData.primary_color = colors[0] || '#6E59A5';
+      updatedData.secondary_color = colors[1] || '#9b87f5';
+      updatedData.accent_color = colors[2] || '#D6BCFA';
+      hasChanges = true;
+      fieldsToHighlight.push('primary_color', 'secondary_color', 'accent_color');
+      fieldsModified.add('primary_color');
+      fieldsModified.add('secondary_color');
+      fieldsModified.add('accent_color');
     }
 
     if (hasChanges) {
       setFormData(updatedData);
       setShowAnalysisAlert(true);
+      setHighlightedFields(fieldsToHighlight);
+      analysisFieldsRef.current = fieldsModified;
       
+      // Auto-hide the analysis alert after a while
       setTimeout(() => {
         setShowAnalysisAlert(false);
-      }, 5000);
+      }, 8000);
     }
   }, [analysisData]);
 
@@ -129,6 +191,19 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
       ...prev,
       [field]: value,
     }));
+    
+    // Remove highlighting when the user manually edits a field
+    if (highlightedFields.includes(field)) {
+      setHighlightedFields(prev => prev.filter(f => f !== field));
+    }
+  };
+
+  const getFieldClassName = (field: string) => {
+    const baseClass = "w-full p-3 rounded-lg bg-black/20 border text-siso-text focus:border-siso-orange/50 focus:outline-none";
+    if (highlightedFields.includes(field)) {
+      return `${baseClass} border-green-500/50 bg-green-500/5`;
+    }
+    return `${baseClass} border-siso-orange/20`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -182,15 +257,18 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
     <form onSubmit={handleSubmit} className="space-y-8">
       {showAnalysisAlert && (
         <motion.div 
-          className="p-4 rounded-lg bg-siso-orange/10 border border-siso-orange flex items-start mb-6"
+          className="p-4 rounded-lg bg-green-500/10 border border-green-500/30 flex items-start mb-6"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
         >
-          <AlertCircle className="w-5 h-5 text-siso-orange mr-3 mt-0.5" />
+          <AlertCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5" />
           <div>
-            <h4 className="font-medium text-siso-orange">Website Analysis Complete</h4>
-            <p className="text-sm text-siso-text/80">Some fields have been pre-filled based on your website. You can review and edit them before saving.</p>
+            <h4 className="font-medium text-green-500">Website Analysis Complete</h4>
+            <p className="text-sm text-siso-text/80">
+              {highlightedFields.length} fields have been pre-filled based on your website analysis. 
+              These fields are highlighted in green. You can review and edit them before saving.
+            </p>
           </div>
         </motion.div>
       )}
@@ -211,7 +289,7 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
             <Input 
               value={formData.company_name || ''}
               onChange={(e) => handleChange('company_name', e.target.value)}
-              className="w-full p-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
+              className={getFieldClassName('company_name')}
               placeholder="Your company name"
             />
           </div>
@@ -221,7 +299,7 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
               value={formData.company_type || ''}
               onValueChange={(value) => handleChange('company_type', value)}
             >
-              <SelectTrigger className="w-full p-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none">
+              <SelectTrigger className={getFieldClassName('company_type')}>
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
@@ -238,7 +316,7 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
             <Input 
               value={formData.industry || ''}
               onChange={(e) => handleChange('industry', e.target.value)}
-              className="w-full p-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
+              className={getFieldClassName('industry')}
               placeholder="e.g., Technology, Finance, etc."
             />
           </div>
@@ -248,7 +326,7 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
               type="number"
               value={formData.year_founded || ''}
               onChange={(e) => handleChange('year_founded', parseInt(e.target.value) || undefined)}
-              className="w-full p-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
+              className={getFieldClassName('year_founded')}
               placeholder="e.g., 2020"
             />
           </div>
@@ -257,8 +335,9 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
             <Textarea 
               value={formData.description || ''}
               onChange={(e) => handleChange('description', e.target.value)}
-              className="w-full p-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none min-h-[100px]"
+              className={getFieldClassName('description')}
               placeholder="Tell us about your company..."
+              rows={5}
             />
           </div>
         </div>
@@ -281,7 +360,7 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
               type="email"
               value={formData.email || ''}
               onChange={(e) => handleChange('email', e.target.value)}
-              className="w-full p-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
+              className={getFieldClassName('email')}
               placeholder="contact@yourcompany.com"
             />
           </div>
@@ -291,7 +370,7 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
               type="tel"
               value={formData.phone || ''}
               onChange={(e) => handleChange('phone', e.target.value)}
-              className="w-full p-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
+              className={getFieldClassName('phone')}
               placeholder="+1 (123) 456-7890"
             />
           </div>
@@ -301,7 +380,7 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
               type="url"
               value={formData.website || ''}
               onChange={(e) => handleChange('website', e.target.value)}
-              className="w-full p-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
+              className={getFieldClassName('website')}
               placeholder="https://yourcompany.com"
             />
           </div>
@@ -310,7 +389,7 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
             <Input 
               value={formData.location || ''}
               onChange={(e) => handleChange('location', e.target.value)}
-              className="w-full p-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
+              className={getFieldClassName('location')}
               placeholder="City, Country"
             />
           </div>
@@ -320,7 +399,7 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
               value={formData.employee_count?.toString() || ''}
               onValueChange={(value) => handleChange('employee_count', parseInt(value) || undefined)}
             >
-              <SelectTrigger className="w-full p-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none">
+              <SelectTrigger className={getFieldClassName('employee_count')}>
                 <SelectValue placeholder="Select size" />
               </SelectTrigger>
               <SelectContent>
@@ -356,13 +435,21 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
                 type="color"
                 value={formData.primary_color || '#6E59A5'}
                 onChange={(e) => handleChange('primary_color', e.target.value)}
-                className="h-10 w-10 rounded-lg border border-siso-orange/20 bg-transparent cursor-pointer"
+                className={`h-10 w-10 rounded-lg border cursor-pointer ${
+                  highlightedFields.includes('primary_color') 
+                    ? 'border-green-500/50 bg-green-500/5' 
+                    : 'border-siso-orange/20 bg-transparent'
+                }`}
               />
               <Input 
                 type="text"
                 value={formData.primary_color || '#6E59A5'}
                 onChange={(e) => handleChange('primary_color', e.target.value)}
-                className="flex-1 p-3 ml-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
+                className={`flex-1 p-3 ml-3 rounded-lg text-siso-text focus:border-siso-orange/50 focus:outline-none ${
+                  highlightedFields.includes('primary_color') 
+                    ? 'border-green-500/50 bg-green-500/5' 
+                    : 'border-siso-orange/20 bg-black/20'
+                }`}
               />
             </div>
           </div>
@@ -373,13 +460,21 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
                 type="color"
                 value={formData.secondary_color || '#9b87f5'}
                 onChange={(e) => handleChange('secondary_color', e.target.value)}
-                className="h-10 w-10 rounded-lg border border-siso-orange/20 bg-transparent cursor-pointer"
+                className={`h-10 w-10 rounded-lg border cursor-pointer ${
+                  highlightedFields.includes('secondary_color') 
+                    ? 'border-green-500/50 bg-green-500/5' 
+                    : 'border-siso-orange/20 bg-transparent'
+                }`}
               />
               <Input 
                 type="text"
                 value={formData.secondary_color || '#9b87f5'}
                 onChange={(e) => handleChange('secondary_color', e.target.value)}
-                className="flex-1 p-3 ml-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
+                className={`flex-1 p-3 ml-3 rounded-lg text-siso-text focus:border-siso-orange/50 focus:outline-none ${
+                  highlightedFields.includes('secondary_color') 
+                    ? 'border-green-500/50 bg-green-500/5' 
+                    : 'border-siso-orange/20 bg-black/20'
+                }`}
               />
             </div>
           </div>
@@ -390,14 +485,49 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
                 type="color"
                 value={formData.accent_color || '#D6BCFA'}
                 onChange={(e) => handleChange('accent_color', e.target.value)}
-                className="h-10 w-10 rounded-lg border border-siso-orange/20 bg-transparent cursor-pointer"
+                className={`h-10 w-10 rounded-lg border cursor-pointer ${
+                  highlightedFields.includes('accent_color') 
+                    ? 'border-green-500/50 bg-green-500/5' 
+                    : 'border-siso-orange/20 bg-transparent'
+                }`}
               />
               <Input 
                 type="text"
                 value={formData.accent_color || '#D6BCFA'}
                 onChange={(e) => handleChange('accent_color', e.target.value)}
-                className="flex-1 p-3 ml-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
+                className={`flex-1 p-3 ml-3 rounded-lg text-siso-text focus:border-siso-orange/50 focus:outline-none ${
+                  highlightedFields.includes('accent_color') 
+                    ? 'border-green-500/50 bg-green-500/5' 
+                    : 'border-siso-orange/20 bg-black/20'
+                }`}
               />
+            </div>
+          </div>
+          
+          <div className="md:col-span-3">
+            <p className="text-sm text-siso-text/70 mb-4">Preview your brand colors:</p>
+            <div className="flex flex-wrap gap-4">
+              <div className="flex-1 min-w-[100px]">
+                <div 
+                  className="w-full h-20 rounded-lg shadow-md transition-all duration-300"
+                  style={{ backgroundColor: formData.primary_color || '#6E59A5' }}
+                ></div>
+                <p className="text-xs text-center mt-2 text-siso-text/70">Primary</p>
+              </div>
+              <div className="flex-1 min-w-[100px]">
+                <div 
+                  className="w-full h-20 rounded-lg shadow-md transition-all duration-300"
+                  style={{ backgroundColor: formData.secondary_color || '#9b87f5' }}
+                ></div>
+                <p className="text-xs text-center mt-2 text-siso-text/70">Secondary</p>
+              </div>
+              <div className="flex-1 min-w-[100px]">
+                <div 
+                  className="w-full h-20 rounded-lg shadow-md transition-all duration-300"
+                  style={{ backgroundColor: formData.accent_color || '#D6BCFA' }}
+                ></div>
+                <p className="text-xs text-center mt-2 text-siso-text/70">Accent</p>
+              </div>
             </div>
           </div>
         </div>
