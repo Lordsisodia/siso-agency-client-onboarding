@@ -45,9 +45,21 @@ export function useChatAssistant() {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(`Function error: ${error.message}`);
+      }
 
-      if (!data || !data.response) {
+      if (!data) {
+        throw new Error('No data received from assistant');
+      }
+
+      if (data.error) {
+        console.error('Assistant API error:', data.error);
+        throw new Error(data.error);
+      }
+
+      if (!data.response) {
         throw new Error('No response received from assistant');
       }
 
@@ -81,11 +93,27 @@ export function useChatAssistant() {
       }
     } catch (error) {
       console.error('Error:', error);
-      setError(error instanceof Error ? error.message : 'Failed to get response from assistant');
+      
+      // Set a user-friendly error message
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Failed to get response from assistant';
+      
+      setError(errorMessage);
+      
+      // Remove the last message which would have been a blank assistant message
+      // this prevents the UI from showing a permanent loading state
+      setMessages(prev => {
+        const lastMessage = prev[prev.length - 1];
+        if (lastMessage?.role === 'assistant' && !lastMessage.content) {
+          return prev.slice(0, -1);
+        }
+        return prev;
+      });
       
       toast({
         title: "Error",
-        description: "Failed to get response from assistant. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
