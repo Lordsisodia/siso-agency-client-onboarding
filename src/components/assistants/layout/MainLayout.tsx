@@ -1,21 +1,17 @@
 
-import { Sidebar } from '@/components/Sidebar';
-import { ReactNode } from 'react';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import React from 'react';
+import { useLocation } from 'react-router-dom';
 
 interface MainLayoutProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
-export function MainLayout({ children }: MainLayoutProps) {
+export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  const location = useLocation();
+  
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        <Sidebar />
-        <main className="flex-1 overflow-y-auto">
-          {children}
-        </main>
-      </div>
-    </SidebarProvider>
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-siso-bg to-siso-bg/95">
+      <div className="flex-1">{children}</div>
+    </div>
   );
-}
+};

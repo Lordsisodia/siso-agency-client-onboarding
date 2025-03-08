@@ -1,33 +1,29 @@
 
-// Simplified types file to maintain folder structure
-// The full video/education related types are temporarily removed
-// to resolve build errors
-
+// Basic types for education components
 export interface Video {
   id: string;
   title: string;
-  url: string;
+  thumbnailUrl: string;
   duration: string;
-  thumbnail_url: string;
-  created_at?: string;
+  viewCount?: number;
   date?: string;
-  educator: {
-    name: string;
-    avatar_url: string;
-    title?: string;
-    slug?: string;
-  };
-  metrics: {
-    views: number;
-    likes: number;
-    sentiment_score: number;
-    difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
-    impact_score: number;
-    category?: string;
-  };
-  topics: string[];
-  ai_analysis: {
-    key_takeaways: string[];
-    implementation_steps: string[];
-  };
+  description?: string;
+  url?: string;
+}
+
+export interface Educator {
+  id: string;
+  name: string;
+  description?: string;
+  channel_avatar_url: string;
+  number_of_subscribers: number;
+  specialization?: string[];
+  slug?: string;
+  videos?: Video[];
+}
+
+export interface VideoCategory {
+  id: string;
+  name: string;
+  count: number;
 }

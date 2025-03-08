@@ -1,10 +1,9 @@
 
-// Education related hooks
+// Education related hooks - simplified placeholder implementations
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Video } from '@/components/education/types';
 
-// Placeholder hook to avoid TypeScript errors
+// Placeholder hook for educator details
 export const useEducatorDetails = (slug: string) => {
   const [educator, setEducator] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +25,7 @@ export const useEducatorDetails = (slug: string) => {
   return { educator, loading, error };
 };
 
-// Placeholder hook to avoid TypeScript errors
+// Placeholder hook for educator videos
 export const useEducatorVideos = (educatorId: string) => {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +38,7 @@ export const useEducatorVideos = (educatorId: string) => {
   return { videos, loading };
 };
 
-// Placeholder hook to avoid TypeScript errors
+// Placeholder hook for educators list
 export const useEducatorsList = () => {
   const [educators, setEducators] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +51,7 @@ export const useEducatorsList = () => {
   return { educators, loading };
 };
 
-// Placeholder function to avoid TypeScript errors
+// Placeholder hook for featured videos
 export const useFeaturedVideos = () => {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,7 +64,7 @@ export const useFeaturedVideos = () => {
   return { videos, loading };
 };
 
-// Placeholder function to avoid TypeScript errors
+// Placeholder hook for video categories
 export const useVideoCategories = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,7 +81,7 @@ export const useVideoCategories = () => {
   return { categories, loading };
 };
 
-// Placeholder function to avoid TypeScript errors
+// Placeholder hook for correlated videos
 export const useEducatorCorrelatedVideos = () => {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
