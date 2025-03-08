@@ -1,32 +1,28 @@
 
-import React, { useEffect, useRef, useState } from 'react';
-import { ChatMessage } from './ChatMessage';
-import { ChatInput } from './ChatInput';
+import React, { useState, useEffect, useRef } from 'react';
+import { ChatMessage } from '@/components/chat/ChatMessage';
+import { ChatInput } from '@/components/chat/ChatInput';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useChatAssistant, ChatMessage as ChatMessageType } from '@/hooks/use-chat-assistant';
+import { useChatAssistant } from '@/hooks/use-chat-assistant';
 import { Button } from '@/components/ui/button';
 import { Trash2, AlertCircle, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 
-interface ChatInterfaceProps {
+interface OnboardingChatProps {
   title?: string;
   systemPrompt?: string;
   welcomeMessage?: string;
   inputPlaceholder?: string;
   className?: string;
-  isOnboarding?: boolean;
-  projectId?: string;
 }
 
-export const ChatInterface: React.FC<ChatInterfaceProps> = ({
-  title = 'AI Assistant',
+export const OnboardingChat: React.FC<OnboardingChatProps> = ({
+  title = 'Project Onboarding',
   systemPrompt,
-  welcomeMessage = 'Hello! How can I help you today?',
-  inputPlaceholder = 'Type your message...',
-  className,
-  isOnboarding = false,
-  projectId
+  welcomeMessage = "Hi there! I'm here to help gather information about your app project. Let's start with some basic details about your company. What's your company name?",
+  inputPlaceholder = "Type your answer...",
+  className
 }) => {
   const { 
     messages, 
@@ -34,11 +30,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     error, 
     sendMessage, 
     clearMessages,
-    onboardingProgress
-  } = useChatAssistant({ 
-    isOnboarding,
-    projectId
-  });
+    onboardingProgress 
+  } = useChatAssistant({ isOnboarding: true });
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -64,7 +57,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   };
 
-  // Map onboarding stages to user-friendly names (if in onboarding mode)
+  // Map onboarding stages to user-friendly names
   const stageLabels: Record<string, string> = {
     'COMPANY_INFO': 'Company Information',
     'PROJECT_OVERVIEW': 'Project Overview',
@@ -79,7 +72,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         <div className="p-4 border-b border-siso-border flex items-center justify-between bg-gradient-to-r from-siso-red/10 to-siso-orange/10">
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-siso-text">{title}</h2>
-            {isOnboarding && onboardingProgress && (
+            {onboardingProgress && (
               <div className="mt-2">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-siso-text-muted">
@@ -111,9 +104,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               key={index}
               role={message.role}
               content={message.content}
+              assistantType={message.role === 'assistant' ? 'Project Consultant' : undefined}
               isLoading={isLoading && index === messages.length - 1 && message.role === 'assistant'}
               timestamp={message.timestamp}
-              assistantType={isOnboarding && message.role === 'assistant' ? 'Project Consultant' : undefined}
             />
           ))}
           
@@ -140,8 +133,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             <ChatMessage
               role="assistant"
               content=""
+              assistantType="Project Consultant"
               isLoading={true}
-              assistantType={isOnboarding ? 'Project Consultant' : undefined}
             />
           )}
           
