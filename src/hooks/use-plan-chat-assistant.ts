@@ -36,13 +36,14 @@ export function usePlanChatAssistant(projectId?: string) {
     setMessages(prev => [...prev, userMessage]);
 
     try {
-      console.log('Sending message to chat-with-plan-assistant function:', {
+      console.log('Preparing to send message to chat-with-plan-assistant function');
+      console.log('Request payload:', {
         messages: [...messages, userMessage],
         projectId,
         formData
       });
       
-      // Call the plan assistant edge function
+      // Call the plan assistant edge function with improved error handling
       const { data, error: functionError } = await supabase.functions.invoke('chat-with-plan-assistant', {
         body: { 
           messages: [...messages, userMessage],
@@ -52,15 +53,15 @@ export function usePlanChatAssistant(projectId?: string) {
       });
 
       if (functionError) {
-        console.error('Function error:', functionError);
-        throw functionError;
+        console.error('Function error details:', functionError);
+        throw new Error(`Supabase function error: ${functionError.message || 'Unknown error'}`);
       }
       
       if (!data) {
         throw new Error('No data returned from function');
       }
       
-      console.log('Response from assistant:', data);
+      console.log('Success! Response from assistant:', data);
       
       if (data.threadId && !threadId) {
         setThreadId(data.threadId);
@@ -75,16 +76,21 @@ export function usePlanChatAssistant(projectId?: string) {
       
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('Error communicating with assistant:', error);
+      console.error('Error communicating with assistant (detailed):', error);
       let errorMessage = 'Failed to get response from assistant';
       
       if (error instanceof Error) {
         errorMessage = `Error: ${error.message}`;
       }
       
+      // Check for specific network issues
+      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+        errorMessage = 'Network error: Unable to connect to the assistant service. Please check your connection and try again.';
+      }
+      
       setError(errorMessage);
       toast({
-        title: "Error",
+        title: "Communication Error",
         description: errorMessage,
         variant: "destructive"
       });

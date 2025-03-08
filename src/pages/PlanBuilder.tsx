@@ -1,17 +1,37 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';
 import { Button } from '@/components/ui/button';
 import { FileEdit } from 'lucide-react';
 import { usePlanChatAssistant } from '@/hooks/use-plan-chat-assistant';
+import { useToast } from '@/hooks/use-toast';
 
 export default function PlanBuilder() {
   const [isManualInputOpen, setIsManualInputOpen] = useState(false);
   const { sendMessage } = usePlanChatAssistant();
+  const { toast } = useToast();
+  const [projectId, setProjectId] = useState<string>(() => {
+    // Generate a unique project ID for this session if one doesn't exist
+    const existingId = sessionStorage.getItem('planProjectId');
+    if (existingId) return existingId;
+    
+    const newId = `plan-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    sessionStorage.setItem('planProjectId', newId);
+    return newId;
+  });
 
   const handleSubmitToAI = async (prompt: string, formData?: Record<string, any>) => {
-    await sendMessage(prompt, undefined, formData);
+    try {
+      await sendMessage(prompt, undefined, formData);
+    } catch (error) {
+      console.error("Error submitting to AI:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send your request to the AI assistant. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -40,6 +60,7 @@ export default function PlanBuilder() {
           inputPlaceholder="Describe your project requirements..."
           systemPrompt="You are a professional project planning assistant specialized in helping users create comprehensive software project plans. Help users define requirements, select features, estimate timelines, and budget effectively."
           usePlanAssistant={true}
+          projectId={projectId}
         />
       </div>
 
