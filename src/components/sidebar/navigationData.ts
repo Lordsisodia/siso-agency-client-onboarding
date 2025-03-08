@@ -1,18 +1,12 @@
 
 import { 
-  Home,
-  GraduationCap,
-  Network,
-  BookOpen,
-  Bot,
-  Wrench,
-  Bell,
   LayoutDashboard,
   FileText,
   FolderKanban,
   Building,
   Briefcase,
-  TrendingUp
+  BookOpen,
+  Bell
 } from 'lucide-react';
 import { MenuSection } from './types';
 
