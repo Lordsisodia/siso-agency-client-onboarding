@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { OpenAI } from "https://esm.sh/openai@4.26.0";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
@@ -589,11 +588,14 @@ async function streamResponseContent(req: Request) {
 // Non-streaming chat handler
 async function handleRegularChat(req: Request) {
   try {
-    const { prompt, projectId, formData } = await req.json();
-    
-    if (!prompt) {
+    // Parse request body
+    let body;
+    try {
+      body = await req.json();
+    } catch (err) {
+      console.error('Error parsing request body:', err);
       return new Response(
-        JSON.stringify({ error: 'No prompt provided' }),
+        JSON.stringify({ error: 'Invalid request body' }),
         {
           status: 400,
           headers: {
@@ -604,52 +606,188 @@ async function handleRegularChat(req: Request) {
       );
     }
     
+    const { messages, projectId, formData } = body;
+    
+    // Validate request data
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      console.error('Invalid or missing messages in request:', body);
+      return new Response(
+        JSON.stringify({ error: 'No messages provided or invalid message format' }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
+    
+    // Get the user's message (last message in the array)
+    const userMessage = messages[messages.length - 1];
+    
+    if (!userMessage || !userMessage.content) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid user message format' }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
+    
+    console.log('Processing message:', userMessage.content);
+    
     // Get or create assistant
-    const assistantId = await getOrCreateAssistant();
+    let assistantId;
+    try {
+      assistantId = await getOrCreateAssistant();
+      console.log('Using assistant ID:', assistantId);
+    } catch (err) {
+      console.error('Error getting or creating assistant:', err);
+      return new Response(
+        JSON.stringify({ error: 'Failed to initialize OpenAI assistant' }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
     
     // Get or create thread
-    const threadId = projectId ? await getOrCreateThread(projectId) : await openai.beta.threads.create().then(t => t.id);
+    let threadId;
+    try {
+      threadId = projectId ? await getOrCreateThread(projectId) : await openai.beta.threads.create().then(t => t.id);
+      console.log('Using thread ID:', threadId);
+    } catch (err) {
+      console.error('Error getting or creating thread:', err);
+      return new Response(
+        JSON.stringify({ error: 'Failed to create or retrieve thread' }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
     
     // Add user message to thread
-    await openai.beta.threads.messages.create(threadId, {
-      role: 'user',
-      content: prompt
-    });
+    try {
+      await openai.beta.threads.messages.create(threadId, {
+        role: 'user',
+        content: userMessage.content
+      });
+      console.log('Added user message to thread');
+    } catch (err) {
+      console.error('Error adding message to thread:', err);
+      return new Response(
+        JSON.stringify({ error: 'Failed to add message to thread' }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
     
     // Run the assistant on the thread
-    const run = await openai.beta.threads.runs.create(threadId, {
-      assistant_id: assistantId,
-    });
+    let run;
+    try {
+      run = await openai.beta.threads.runs.create(threadId, {
+        assistant_id: assistantId,
+      });
+      console.log('Created run:', run.id);
+    } catch (err) {
+      console.error('Error creating assistant run:', err);
+      return new Response(
+        JSON.stringify({ error: 'Failed to run assistant' }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
     
-    // Wait for the run to complete or require action
-    const runResult = await pollForCompletion(threadId, run.id);
+    // Wait for the run to complete
+    let runResult;
+    try {
+      runResult = await pollForCompletion(threadId, run.id);
+      console.log('Run completed with status:', runResult.status);
+    } catch (err) {
+      console.error('Error during run polling:', err);
+      return new Response(
+        JSON.stringify({ error: 'Assistant processing failed: ' + err.message }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
     
     // Get the assistant's response
-    const messages = await openai.beta.threads.messages.list(threadId);
-    
-    // Find the assistant's messages after our user prompt
-    const assistantMessages = messages.data
-      .filter(msg => msg.role === 'assistant')
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    
-    // Extract the content from the most recent message
     let responseContent = '';
-    if (assistantMessages.length > 0) {
-      const message = assistantMessages[0];
-      responseContent = message.content.map(content => {
-        if (content.type === 'text') {
-          return content.text.value;
+    try {
+      const messages = await openai.beta.threads.messages.list(threadId);
+      
+      // Find the assistant's messages after our user prompt
+      const assistantMessages = messages.data
+        .filter(msg => msg.role === 'assistant')
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      
+      // Extract the content from the most recent message
+      if (assistantMessages.length > 0) {
+        const message = assistantMessages[0];
+        responseContent = message.content.map(content => {
+          if (content.type === 'text') {
+            return content.text.value;
+          }
+          return '';
+        }).join('\n');
+      }
+      
+      console.log('Got assistant response of length:', responseContent.length);
+    } catch (err) {
+      console.error('Error retrieving assistant response:', err);
+      return new Response(
+        JSON.stringify({ error: 'Failed to retrieve assistant response' }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
         }
-        return '';
-      }).join('\n');
+      );
     }
     
     // Save chat history if we have a project ID
     if (projectId) {
-      await saveChatHistory(projectId, prompt, responseContent, formData, {
-        thread_id: threadId,
-        run_id: run.id
-      });
+      try {
+        await saveChatHistory(projectId, userMessage.content, responseContent, formData, {
+          thread_id: threadId,
+          run_id: run.id
+        });
+        console.log('Saved chat history for project:', projectId);
+      } catch (err) {
+        // Non-critical error, log but continue
+        console.error('Failed to save chat history:', err);
+      }
     }
     
     // Return the assistant's response
@@ -666,7 +804,7 @@ async function handleRegularChat(req: Request) {
       }
     );
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in handleRegularChat:', error);
     return new Response(
       JSON.stringify({ 
         error: error.message || 'An error occurred',
@@ -698,6 +836,8 @@ serve(async (req) => {
                          req.headers.get('Accept') === 'text/event-stream';
   
   try {
+    console.log('Received request to chat-with-plan-assistant');
+    
     if (wantsStreaming) {
       return await streamResponseContent(req);
     } else {
@@ -709,7 +849,8 @@ serve(async (req) => {
       JSON.stringify({ 
         error: 'Internal server error', 
         message: error.message,
-        stack: error.stack // Include stack trace for debugging
+        stack: error.stack, // Include stack trace for debugging
+        details: 'This error occurred in the chat-with-plan-assistant edge function'
       }),
       {
         status: 500,

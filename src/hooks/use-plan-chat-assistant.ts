@@ -36,8 +36,14 @@ export function usePlanChatAssistant(projectId?: string) {
     setMessages(prev => [...prev, userMessage]);
 
     try {
+      console.log('Sending message to chat-with-plan-assistant function:', {
+        messages: [...messages, userMessage],
+        projectId,
+        formData
+      });
+      
       // Call the plan assistant edge function
-      const { data, error } = await supabase.functions.invoke('chat-with-plan-assistant', {
+      const { data, error: functionError } = await supabase.functions.invoke('chat-with-plan-assistant', {
         body: { 
           messages: [...messages, userMessage],
           projectId,
@@ -45,7 +51,16 @@ export function usePlanChatAssistant(projectId?: string) {
         },
       });
 
-      if (error) throw error;
+      if (functionError) {
+        console.error('Function error:', functionError);
+        throw functionError;
+      }
+      
+      if (!data) {
+        throw new Error('No data returned from function');
+      }
+      
+      console.log('Response from assistant:', data);
       
       if (data.threadId && !threadId) {
         setThreadId(data.threadId);
@@ -61,10 +76,16 @@ export function usePlanChatAssistant(projectId?: string) {
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error communicating with assistant:', error);
-      setError(error instanceof Error ? error.message : 'Failed to get response from assistant');
+      let errorMessage = 'Failed to get response from assistant';
+      
+      if (error instanceof Error) {
+        errorMessage = `Error: ${error.message}`;
+      }
+      
+      setError(errorMessage);
       toast({
         title: "Error",
-        description: "Failed to get response from assistant",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {

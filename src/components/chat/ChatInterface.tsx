@@ -42,6 +42,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   // Add welcome message on mount, but only if there are no existing messages
   useEffect(() => {
@@ -69,8 +70,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     // Find the last user message and resend it
     const lastUserMessage = [...messages].reverse().find(m => m.role === 'user');
     if (lastUserMessage) {
+      setRetryCount(prev => prev + 1);
       sendMessage(lastUserMessage.content, systemPrompt);
     }
+  };
+
+  const handleSendMessage = async (message: string) => {
+    // Reset retry count on new message
+    setRetryCount(0);
+    await sendMessage(message, systemPrompt);
   };
 
   return (
@@ -107,7 +115,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           <AnimatePresence>
             {messages.map((message, index) => (
               <motion.div
-                key={index}
+                key={`${index}-${retryCount}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, height: 0 }}
@@ -166,7 +174,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       
       <div className="p-4 border-t border-siso-border bg-gradient-to-r from-black/10 to-transparent backdrop-blur-lg">
         <ChatInput 
-          onSubmit={(message) => sendMessage(message, systemPrompt)} 
+          onSubmit={handleSendMessage} 
           isLoading={isLoading} 
           placeholder={inputPlaceholder}
         />
