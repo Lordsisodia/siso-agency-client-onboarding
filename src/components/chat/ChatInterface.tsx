@@ -7,7 +7,6 @@ import { useChatAssistant, ChatMessage as ChatMessageType } from '@/hooks/use-ch
 import { Button } from '@/components/ui/button';
 import { Trash2, AlertCircle, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
 
 interface ChatInterfaceProps {
   title?: string;
@@ -15,8 +14,6 @@ interface ChatInterfaceProps {
   welcomeMessage?: string;
   inputPlaceholder?: string;
   className?: string;
-  isOnboarding?: boolean;
-  projectId?: string;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -24,22 +21,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   systemPrompt,
   welcomeMessage = 'Hello! How can I help you today?',
   inputPlaceholder = 'Type your message...',
-  className,
-  isOnboarding = false,
-  projectId
+  className
 }) => {
-  const { 
-    messages, 
-    isLoading, 
-    error, 
-    sendMessage, 
-    clearMessages,
-    onboardingProgress
-  } = useChatAssistant({ 
-    isOnboarding,
-    projectId
-  });
-  
+  const { messages, isLoading, error, sendMessage, clearMessages } = useChatAssistant();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -64,33 +48,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   };
 
-  // Map onboarding stages to user-friendly names (if in onboarding mode)
-  const stageLabels: Record<string, string> = {
-    'COMPANY_INFO': 'Company Information',
-    'PROJECT_OVERVIEW': 'Project Overview',
-    'FEATURE_SELECTION': 'Features & Requirements',
-    'BUDGET_TIMELINE': 'Budget & Timeline',
-    'ADDITIONAL_INFO': 'Additional Details',
-  };
-
   return (
     <div className={`flex flex-col h-full bg-siso-bg-card border border-siso-border rounded-lg overflow-hidden ${className}`}>
       {title && (
         <div className="p-4 border-b border-siso-border flex items-center justify-between bg-gradient-to-r from-siso-red/10 to-siso-orange/10">
-          <div className="flex-1">
-            <h2 className="text-lg font-semibold text-siso-text">{title}</h2>
-            {isOnboarding && onboardingProgress && (
-              <div className="mt-2">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-siso-text-muted">
-                    Current stage: {stageLabels[onboardingProgress.current_stage] || onboardingProgress.current_stage}
-                  </span>
-                  <span className="text-xs font-medium text-siso-text-muted">{onboardingProgress.progress}%</span>
-                </div>
-                <Progress value={onboardingProgress.progress} className="h-1.5" />
-              </div>
-            )}
-          </div>
+          <h2 className="text-lg font-semibold text-siso-text">{title}</h2>
           <Button 
             variant="ghost" 
             size="sm" 
@@ -113,7 +75,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               content={message.content}
               isLoading={isLoading && index === messages.length - 1 && message.role === 'assistant'}
               timestamp={message.timestamp}
-              assistantType={isOnboarding && message.role === 'assistant' ? 'Project Consultant' : undefined}
             />
           ))}
           
@@ -141,7 +102,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               role="assistant"
               content=""
               isLoading={true}
-              assistantType={isOnboarding ? 'Project Consultant' : undefined}
             />
           )}
           

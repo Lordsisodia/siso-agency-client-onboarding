@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { showPointsEarnedToast } from '@/components/points/PointsEarnedToast';
@@ -10,68 +10,11 @@ export type ChatMessage = {
   timestamp?: Date;
 };
 
-export type OnboardingProgress = {
-  current_stage: string;
-  progress: number;
-  data: Record<string, any>;
-};
-
-export interface UseChatAssistantProps {
-  isOnboarding?: boolean;
-  projectId?: string;
-}
-
-export function useChatAssistant({ isOnboarding = false, projectId }: UseChatAssistantProps = {}) {
+export function useChatAssistant() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [onboardingProgress, setOnboardingProgress] = useState<OnboardingProgress | null>(null);
   const { toast } = useToast();
-
-  // Fetch onboarding progress at initialization if in onboarding mode
-  useEffect(() => {
-    if (isOnboarding) {
-      const fetchOnboardingProgress = async () => {
-        try {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (!user) return;
-
-          const { data, error } = await supabase
-            .from('client_onboarding')
-            .select('*')
-            .eq('user_id', user.id)
-            .single();
-
-          if (error && error.code !== 'PGRST116') {
-            console.error("Error fetching onboarding progress:", error);
-            return;
-          }
-
-          if (data) {
-            const stages = ['COMPANY_INFO', 'PROJECT_OVERVIEW', 'FEATURE_SELECTION', 'BUDGET_TIMELINE', 'ADDITIONAL_INFO'];
-            const completedStages = Object.keys(data.data || {}).filter(key => stages.includes(key));
-            const progress = Math.round((completedStages.length / stages.length) * 100);
-
-            setOnboardingProgress({
-              current_stage: data.current_stage || 'COMPANY_INFO',
-              progress,
-              data: data.data || {}
-            });
-          } else {
-            setOnboardingProgress({
-              current_stage: 'COMPANY_INFO',
-              progress: 0,
-              data: {}
-            });
-          }
-        } catch (error) {
-          console.error("Error in fetchOnboardingProgress:", error);
-        }
-      };
-
-      fetchOnboardingProgress();
-    }
-  }, [isOnboarding]);
 
   const sendMessage = useCallback(async (message: string, systemPrompt?: string) => {
     if (!message.trim() || isLoading) return;
@@ -98,9 +41,7 @@ export function useChatAssistant({ isOnboarding = false, projectId }: UseChatAss
         body: { 
           message,
           systemPrompt,
-          userId,
-          projectId,
-          isOnboarding
+          userId
         },
       });
 
@@ -108,11 +49,6 @@ export function useChatAssistant({ isOnboarding = false, projectId }: UseChatAss
 
       if (!data || !data.response) {
         throw new Error('No response received from assistant');
-      }
-
-      // Update onboarding progress if available
-      if (data.onboardingProgress) {
-        setOnboardingProgress(data.onboardingProgress);
       }
 
       // Add assistant response with timestamp
@@ -155,7 +91,7 @@ export function useChatAssistant({ isOnboarding = false, projectId }: UseChatAss
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, toast, projectId, isOnboarding]);
+  }, [isLoading, toast]);
 
   const clearMessages = useCallback(() => {
     setMessages([]);
@@ -167,7 +103,6 @@ export function useChatAssistant({ isOnboarding = false, projectId }: UseChatAss
     isLoading,
     error,
     sendMessage,
-    clearMessages,
-    onboardingProgress
+    clearMessages
   };
 }

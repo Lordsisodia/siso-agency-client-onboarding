@@ -5,22 +5,19 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { AIThinkingLoader } from '@/components/ui/ai-thinking-loader';
-import { format } from 'date-fns';
 
 interface ChatMessageProps {
   role: 'assistant' | 'user';
   content: string;
   assistantType?: string;
   isLoading?: boolean;
-  timestamp?: Date;
 }
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ 
   role, 
   content, 
   assistantType = 'AI Assistant',
-  isLoading = false,
-  timestamp
+  isLoading = false
 }) => {
   const isAssistant = role === 'assistant';
   
@@ -50,15 +47,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
       </div>
       
       <div className="flex-1">
-        <div className="flex justify-between items-center mb-1">
-          <span className="text-xs text-siso-text-muted">
-            {isAssistant ? assistantType : 'You'}
-          </span>
-          {timestamp && (
-            <span className="text-xs text-siso-text-muted">
-              {format(timestamp, 'MMM d, h:mm a')}
-            </span>
-          )}
+        <div className="text-xs text-siso-text-muted mb-1">
+          {isAssistant ? assistantType : 'You'}
         </div>
         
         {isLoading ? (

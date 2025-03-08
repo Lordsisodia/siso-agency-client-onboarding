@@ -1,9 +1,6 @@
 
 import React from 'react';
 import { ChatInterface } from '@/components/chat/ChatInterface';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { ArrowRightIcon } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -13,18 +10,9 @@ export default function Home() {
           <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-siso-red to-siso-orange bg-clip-text text-transparent">
             SISO AI Assistant
           </h1>
-          <p className="text-siso-text-muted mb-6">
+          <p className="text-siso-text-muted">
             Ask me anything about AI tools, education, networking, or get help with your projects
           </p>
-          
-          <div className="flex items-center justify-center gap-4 mb-8">
-            <Link to="/onboarding">
-              <Button className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90 text-white">
-                Start Project Onboarding
-                <ArrowRightIcon className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
         </header>
         
         <ChatInterface 
