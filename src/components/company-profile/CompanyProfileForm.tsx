@@ -1,11 +1,11 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building, MapPin, Globe, Mail, Phone, Palette, Save, Loader2, Upload } from 'lucide-react';
+import { Building, MapPin, Globe, Mail, Phone, Palette, Save, Loader2, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
@@ -26,11 +26,12 @@ interface CompanyProfileFormProps {
     secondary_color?: string | null;
     accent_color?: string | null;
   };
+  analysisData?: any;
   onSave?: () => void;
   userId: string;
 }
 
-export const CompanyProfileForm = ({ initialData, onSave, userId }: CompanyProfileFormProps) => {
+export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }: CompanyProfileFormProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -48,6 +49,80 @@ export const CompanyProfileForm = ({ initialData, onSave, userId }: CompanyProfi
     secondary_color: initialData?.secondary_color || '#9b87f5',
     accent_color: initialData?.accent_color || '#D6BCFA',
   });
+  const [showAnalysisAlert, setShowAnalysisAlert] = useState(false);
+
+  // Apply website analysis data when it becomes available
+  useEffect(() => {
+    if (!analysisData) return;
+
+    const aiData = analysisData.aiAnalysis || {};
+    const basicData = analysisData.basicExtraction || {};
+    const updatedData = { ...formData };
+    let hasChanges = false;
+
+    // Fill in company_name if available from AI analysis
+    if (aiData.companyName && !formData.company_name) {
+      updatedData.company_name = aiData.companyName;
+      hasChanges = true;
+    }
+
+    // Fill in industry if available from AI analysis
+    if (aiData.industry && !formData.industry) {
+      updatedData.industry = aiData.industry;
+      hasChanges = true;
+    }
+
+    // Fill in description if available from AI analysis
+    if (aiData.companyDescription && !formData.description) {
+      updatedData.description = aiData.companyDescription;
+      hasChanges = true;
+    }
+
+    // Use website that was analyzed
+    if (analysisData.url && !formData.website) {
+      updatedData.website = analysisData.url;
+      hasChanges = true;
+    }
+
+    // Set email if found
+    if (basicData.emails && basicData.emails.length > 0 && !formData.email) {
+      updatedData.email = basicData.emails[0];
+      hasChanges = true;
+    }
+
+    // Set phone if found
+    if (basicData.phones && basicData.phones.length > 0 && !formData.phone) {
+      updatedData.phone = basicData.phones[0];
+      hasChanges = true;
+    }
+
+    // Estimate company type based on services/products
+    if (aiData.productsOrServices && !formData.company_type) {
+      const services = aiData.productsOrServices.toLowerCase();
+      if (services.includes('market') || services.includes('advertising')) {
+        updatedData.company_type = 'agency';
+        hasChanges = true;
+      } else if (services.includes('design') || services.includes('creative')) {
+        updatedData.company_type = 'studio';
+        hasChanges = true;
+      } else if (services.includes('develop') || services.includes('software') || services.includes('web')) {
+        updatedData.company_type = 'development';
+        hasChanges = true;
+      } else if (services.includes('consult') || services.includes('advisory')) {
+        updatedData.company_type = 'consulting';
+        hasChanges = true;
+      }
+    }
+
+    if (hasChanges) {
+      setFormData(updatedData);
+      setShowAnalysisAlert(true);
+      
+      setTimeout(() => {
+        setShowAnalysisAlert(false);
+      }, 5000);
+    }
+  }, [analysisData]);
 
   const handleChange = (field: string, value: string | number) => {
     setFormData((prev) => ({
@@ -105,6 +180,21 @@ export const CompanyProfileForm = ({ initialData, onSave, userId }: CompanyProfi
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
+      {showAnalysisAlert && (
+        <motion.div 
+          className="p-4 rounded-lg bg-siso-orange/10 border border-siso-orange flex items-start mb-6"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+        >
+          <AlertCircle className="w-5 h-5 text-siso-orange mr-3 mt-0.5" />
+          <div>
+            <h4 className="font-medium text-siso-orange">Website Analysis Complete</h4>
+            <p className="text-sm text-siso-text/80">Some fields have been pre-filled based on your website. You can review and edit them before saving.</p>
+          </div>
+        </motion.div>
+      )}
+
       <motion.div 
         className="p-6 rounded-xl border border-siso-orange/20 bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-sm"
         initial={{ opacity: 0, y: 20 }}

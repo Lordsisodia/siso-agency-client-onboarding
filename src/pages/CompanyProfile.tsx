@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { CompanyProfileForm } from '@/components/company-profile/CompanyProfileForm';
 import { CompanyImageUpload } from '@/components/company-profile/CompanyImageUpload';
 import { CompanyProfileStats } from '@/components/company-profile/CompanyProfileStats';
+import { WebsiteAnalyzer } from '@/components/company-profile/WebsiteAnalyzer';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -17,6 +18,7 @@ export default function CompanyProfile() {
   const [userId, setUserId] = useState<string | null>(null);
   const [companyProfile, setCompanyProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [analysisData, setAnalysisData] = useState<any>(null);
 
   useEffect(() => {
     const fetchUserAndProfile = async () => {
@@ -91,6 +93,15 @@ export default function CompanyProfile() {
     setCompanyProfile((prev: any) => ({ ...prev, banner_url: url }));
   };
 
+  const handleAnalysisComplete = (data: any) => {
+    setAnalysisData(data);
+    
+    // If we're not in editing mode, switch to editing mode to show the form
+    if (!isEditing) {
+      setIsEditing(true);
+    }
+  };
+
   return (
     <MainLayout>
       <div className="relative min-h-screen">
@@ -154,49 +165,56 @@ export default function CompanyProfile() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-siso-orange"></div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-1">
-                <div className="space-y-6">
-                  <CompanyProfileStats 
-                    companyName={companyProfile?.company_name}
-                    yearFounded={companyProfile?.year_founded}
-                    employeeCount={companyProfile?.employee_count}
-                    industry={companyProfile?.industry}
-                    companyType={companyProfile?.company_type}
-                  />
-                  
-                  {isEditing && userId && (
-                    <>
-                      <CompanyImageUpload 
-                        userId={userId}
-                        type="logo"
-                        currentUrl={companyProfile?.logo_url}
-                        onUploadComplete={handleLogoUpdate}
-                      />
-                      
-                      <CompanyImageUpload 
-                        userId={userId}
-                        type="banner"
-                        currentUrl={companyProfile?.banner_url}
-                        onUploadComplete={handleBannerUpdate}
-                      />
-                    </>
+            <>
+              {(!companyProfile || isEditing) && (
+                <WebsiteAnalyzer onAnalysisComplete={handleAnalysisComplete} />
+              )}
+              
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-1">
+                  <div className="space-y-6">
+                    <CompanyProfileStats 
+                      companyName={companyProfile?.company_name}
+                      yearFounded={companyProfile?.year_founded}
+                      employeeCount={companyProfile?.employee_count}
+                      industry={companyProfile?.industry}
+                      companyType={companyProfile?.company_type}
+                    />
+                    
+                    {isEditing && userId && (
+                      <>
+                        <CompanyImageUpload 
+                          userId={userId}
+                          type="logo"
+                          currentUrl={companyProfile?.logo_url}
+                          onUploadComplete={handleLogoUpdate}
+                        />
+                        
+                        <CompanyImageUpload 
+                          userId={userId}
+                          type="banner"
+                          currentUrl={companyProfile?.banner_url}
+                          onUploadComplete={handleBannerUpdate}
+                        />
+                      </>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="lg:col-span-2">
+                  {isEditing && userId ? (
+                    <CompanyProfileForm 
+                      initialData={companyProfile} 
+                      analysisData={analysisData}
+                      onSave={handleRefreshProfile}
+                      userId={userId}
+                    />
+                  ) : (
+                    <CompanyProfilePreview profile={companyProfile} />
                   )}
                 </div>
               </div>
-              
-              <div className="lg:col-span-2">
-                {isEditing && userId ? (
-                  <CompanyProfileForm 
-                    initialData={companyProfile} 
-                    onSave={handleRefreshProfile}
-                    userId={userId}
-                  />
-                ) : (
-                  <CompanyProfilePreview profile={companyProfile} />
-                )}
-              </div>
-            </div>
+            </>
           )}
         </div>
       </div>
