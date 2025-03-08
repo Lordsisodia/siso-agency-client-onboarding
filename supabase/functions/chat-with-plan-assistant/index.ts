@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { OpenAI } from "https://esm.sh/openai@4.26.0";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
@@ -21,8 +20,8 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Use the fixed assistant ID provided by the user
-const PLAN_BUILDER_ASSISTANT_ID = "asst_VMa6tFDDh65o0R0VEhuzzdSA";
+// Get the assistant ID from environment variables, with a fallback to the hardcoded value
+const PLAN_BUILDER_ASSISTANT_ID = Deno.env.get('PLAN_BUILDER_ASSISTANT_ID') || "asst_VMa6tFDDh65o0R0VEhuzzdSA";
 
 /**
  * Validates environment variables and configuration
@@ -550,6 +549,8 @@ serve(async (req) => {
   
   try {
     console.log('Received request to chat-with-plan-assistant');
+    console.log('Using OpenAI assistant ID:', PLAN_BUILDER_ASSISTANT_ID);
+    
     return await handleRegularChat(req);
   } catch (error) {
     console.error('Unhandled error:', error);
