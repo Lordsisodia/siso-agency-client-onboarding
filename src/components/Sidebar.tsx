@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { SidebarLogo } from './sidebar/SidebarLogo';
 import { SidebarNavigation } from './sidebar/SidebarNavigation';
 import { SidebarFooter } from './sidebar/SidebarFooter';
@@ -14,6 +14,7 @@ export const Sidebar = () => {
   const [showNavigation, setShowNavigation] = useState(true);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const isMobile = useIsMobile();
 
   const handleItemClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -42,11 +43,13 @@ export const Sidebar = () => {
     }
   };
 
+  // Close mobile menu on route change
   useEffect(() => {
     if (isMobile) {
       setIsMobileMenuOpen(false);
     }
-  }, [location.pathname]);
+    console.log('Route changed to:', location.pathname);
+  }, [location.pathname, isMobile]);
 
   const sidebarVariants = {
     expanded: {
@@ -155,32 +158,19 @@ export const Sidebar = () => {
         />
       </motion.div>
 
-      {/* Main Content Wrapper with smooth margin transition */}
-      <motion.div 
-        className="min-h-screen"
-        animate={{
-          marginLeft: !isMobile ? (isExpanded ? '16rem' : '4rem') : 0
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 200,
-          damping: 25
-        }}
-      >
-        {/* Mobile Overlay with improved backdrop blur */}
-        <AnimatePresence>
-          {isMobile && isMobileMenuOpen && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30"
-              onClick={() => setIsMobileMenuOpen(false)}
-            />
-          )}
-        </AnimatePresence>
-      </motion.div>
+      {/* Mobile Overlay with improved backdrop blur */}
+      <AnimatePresence>
+        {isMobile && isMobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 };

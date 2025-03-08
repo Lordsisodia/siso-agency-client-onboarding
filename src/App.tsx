@@ -24,6 +24,7 @@ import Notifications from '@/pages/Notifications';
 import { Toaster } from '@/components/ui/toaster';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { MainLayout } from '@/components/assistants/layout/MainLayout';
 
 function App() {
   const location = useLocation();
@@ -51,51 +52,69 @@ function App() {
         {/* Protected routes */}
         <Route path="/home" element={
           <ProtectedRoute>
-            <Home />
+            <MainLayout>
+              <Home />
+            </MainLayout>
           </ProtectedRoute>
         } />
         
         {/* Primary routes */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
-            <Dashboard />
+            <MainLayout>
+              <Dashboard />
+            </MainLayout>
           </ProtectedRoute>
         } />
         <Route path="/projects" element={
           <ProtectedRoute>
-            <Projects />
+            <MainLayout>
+              <Projects />
+            </MainLayout>
           </ProtectedRoute>
         } />
         <Route path="/plan-builder" element={
           <ProtectedRoute>
-            <PlanBuilder />
+            <MainLayout>
+              <PlanBuilder />
+            </MainLayout>
           </ProtectedRoute>
         } />
         <Route path="/company-profile" element={
           <ProtectedRoute>
-            <CompanyProfile />
+            <MainLayout>
+              <CompanyProfile />
+            </MainLayout>
           </ProtectedRoute>
         } />
         <Route path="/resource-hub" element={
           <ProtectedRoute>
-            <ResourceHub />
+            <MainLayout>
+              <ResourceHub />
+            </MainLayout>
           </ProtectedRoute>
         } />
         <Route path="/portfolio" element={
           <ProtectedRoute>
-            <Portfolio />
+            <MainLayout>
+              <Portfolio />
+            </MainLayout>
           </ProtectedRoute>
         } />
         <Route path="/notifications" element={
           <ProtectedRoute>
-            <Notifications />
+            <MainLayout>
+              <Notifications />
+            </MainLayout>
           </ProtectedRoute>
         } />
         
         {/* Profile route */}
         <Route path="/profile" element={
           <ProtectedRoute>
-            <Profile />
+            <MainLayout>
+              <Profile />
+            </MainLayout>
           </ProtectedRoute>
         } />
 

@@ -1,5 +1,3 @@
-
-import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { ResourceHub as ResourceHubComponent } from '@/components/features/resource-hub';
 import { Waves } from '@/components/ui/waves-background';
 import { motion } from 'framer-motion';
@@ -88,46 +86,44 @@ export default function ResourceHub() {
   ];
 
   return (
-    <MainLayout>
-      <div className="relative min-h-screen">
-        <div className="absolute inset-0 z-0">
-          <Waves 
-            lineColor="rgba(255, 87, 34, 0.2)"
-            waveSpeedX={0.02}
-            waveSpeedY={0.01}
-            waveAmpX={40}
-            waveAmpY={20}
-            friction={0.9}
-            tension={0.01}
-            maxCursorMove={120}
-            xGap={12}
-            yGap={36}
-          />
-        </div>
-        
-        <div className="relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="container mx-auto px-4 pt-16 text-center"
-          >
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-siso-red to-siso-orange text-transparent bg-clip-text mb-4">
-              Resource Hub
-            </h1>
-            <p className="text-lg text-siso-text/80 max-w-2xl mx-auto">
-              Access our comprehensive collection of guides, resources, and insights to support your app development journey.
-            </p>
-          </motion.div>
-          
-          <ResourceHubComponent 
-            badge="SISO Agency"
-            heading="Resource Hub Features"
-            description="Access our comprehensive suite of tools and insights designed to accelerate your agency's growth."
-            tabs={tabs}
-          />
-        </div>
+    <div className="relative min-h-screen">
+      <div className="absolute inset-0 z-0">
+        <Waves 
+          lineColor="rgba(255, 87, 34, 0.2)"
+          waveSpeedX={0.02}
+          waveSpeedY={0.01}
+          waveAmpX={40}
+          waveAmpY={20}
+          friction={0.9}
+          tension={0.01}
+          maxCursorMove={120}
+          xGap={12}
+          yGap={36}
+        />
       </div>
-    </MainLayout>
+      
+      <div className="relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="container mx-auto px-4 pt-16 text-center"
+        >
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-siso-red to-siso-orange text-transparent bg-clip-text mb-4">
+            Resource Hub
+          </h1>
+          <p className="text-lg text-siso-text/80 max-w-2xl mx-auto">
+            Access our comprehensive collection of guides, resources, and insights to support your app development journey.
+          </p>
+        </motion.div>
+        
+        <ResourceHubComponent 
+          badge="SISO Agency"
+          heading="Resource Hub Features"
+          description="Access our comprehensive suite of tools and insights designed to accelerate your agency's growth."
+          tabs={tabs}
+        />
+      </div>
+    </div>
   );
 }
