@@ -9,6 +9,7 @@ import { CompanyProfileForm } from '@/components/company-profile/CompanyProfileF
 import { CompanyImageUpload } from '@/components/company-profile/CompanyImageUpload';
 import { CompanyProfileStats } from '@/components/company-profile/CompanyProfileStats';
 import { WebsiteAnalyzer } from '@/components/company-profile/WebsiteAnalyzer';
+import { AnalysisGuide } from '@/components/company-profile/AnalysisGuide';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -56,6 +57,11 @@ export default function CompanyProfile() {
         }
         
         setCompanyProfile(profile || null);
+        
+        // If no profile exists yet, start in edit mode
+        if (!profile) {
+          setIsEditing(true);
+        }
       } catch (error) {
         console.error('Error in fetchUserAndProfile:', error);
       } finally {
@@ -138,7 +144,7 @@ export default function CompanyProfile() {
               </p>
             </div>
             
-            {!isLoading && (
+            {!isLoading && companyProfile && (
               <Button
                 onClick={() => setIsEditing(!isEditing)}
                 className={`mt-4 sm:mt-0 ${isEditing 
@@ -166,6 +172,14 @@ export default function CompanyProfile() {
             </div>
           ) : (
             <>
+              {!companyProfile && !isEditing && (
+                <AnalysisGuide 
+                  isEditing={isEditing} 
+                  hasAnalysisData={!!analysisData}
+                  onStartEditing={() => setIsEditing(true)} 
+                />
+              )}
+              
               {(!companyProfile || isEditing) && (
                 <WebsiteAnalyzer onAnalysisComplete={handleAnalysisComplete} />
               )}

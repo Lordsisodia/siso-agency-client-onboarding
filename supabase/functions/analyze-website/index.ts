@@ -1,255 +1,285 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { corsHeaders } from "../_shared/cors.ts";
 
-// Set up CORS headers
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+interface AnalyzeWebsiteRequest {
+  url: string;
+}
 
-// OpenAI API for advanced analysis
-const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-
-// Main function to serve requests
 serve(async (req) => {
   // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    // Get URL from request
-    const { url } = await req.json();
-    
+    const { url } = await req.json() as AnalyzeWebsiteRequest;
+
     if (!url) {
-      throw new Error('URL is required');
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: "URL is required" 
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
     }
 
-    console.log(`Starting analysis of website: ${url}`);
-    
-    // Validate URL format
-    let validatedUrl: string;
-    try {
-      const urlObj = new URL(url);
-      // Ensure protocol is http or https
-      if (!['http:', 'https:'].includes(urlObj.protocol)) {
-        validatedUrl = 'https://' + url;
-      } else {
-        validatedUrl = url;
-      }
-    } catch (e) {
-      // If URL is invalid, try adding https://
-      validatedUrl = 'https://' + url;
-    }
+    console.log(`Analyzing website: ${url}`);
 
-    // Fetch website
-    console.log(`Fetching website: ${validatedUrl}`);
-    let text = '';
     try {
-      const response = await fetch(validatedUrl, {
+      // Fetch the website content
+      const response = await fetch(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; CompanyInfoBot/1.0; +https://aisoapps.io)',
-        },
+          'User-Agent': 'Mozilla/5.0 (compatible; SisoWebsiteAnalyzer/1.0)'
+        }
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch website: ${response.status} ${response.statusText}`);
       }
+
+      const html = await response.text();
       
-      text = await response.text();
-      console.log(`Successfully fetched website (${text.length} characters)`);
+      // Basic extraction
+      const basicExtraction = {
+        title: extractTitle(html),
+        description: extractDescription(html),
+        emails: extractEmails(html),
+        phones: extractPhones(html),
+        colors: extractColors(html),
+        socialLinks: extractSocialLinks(html, url),
+      };
+
+      // AI analysis of the content would normally go here
+      // For now, we'll do some basic heuristics to extract information
+      const aiAnalysis = {
+        companyName: extractCompanyName(html, url),
+        industry: inferIndustry(html),
+        companyDescription: extractDescription(html) || inferDescription(html),
+        location: extractLocation(html),
+        productsOrServices: inferProductsOrServices(html),
+        yearFounded: inferYearFounded(html),
+      };
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          url,
+          basicExtraction,
+          aiAnalysis,
+        }),
+        { 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
     } catch (error) {
-      console.error(`Error fetching website: ${error.message}`);
-      throw new Error(`Failed to fetch website: ${error.message}`);
-    }
-
-    // Extract initial information using regex patterns
-    const extractionResults = {
-      title: extractTitle(text),
-      metaDescription: extractMetaDescription(text),
-      emails: extractEmails(text),
-      phones: extractPhones(text),
-      socialLinks: extractSocialLinks(text, validatedUrl),
-    };
-
-    console.log('Initial extraction results:', extractionResults);
-
-    // Use OpenAI for more detailed analysis if API key is available
-    if (OPENAI_API_KEY) {
-      console.log('Using OpenAI to analyze website content');
-      const openAIAnalysis = await analyzeWithOpenAI(text, validatedUrl);
-      
-      // Return combined results
-      return new Response(JSON.stringify({
-        success: true,
-        url: validatedUrl,
-        basicExtraction: extractionResults,
-        aiAnalysis: openAIAnalysis,
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    } else {
-      console.log('OpenAI API key not available, returning basic extraction only');
-      // Return basic extraction results if OpenAI key is not available
-      return new Response(JSON.stringify({
-        success: true,
-        url: validatedUrl,
-        basicExtraction: extractionResults,
-        aiAnalysis: null,
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      console.error(`Error analyzing website: ${error.message}`);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: `Failed to analyze website: ${error.message}` 
+        }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
     }
   } catch (error) {
-    console.error('Error analyzing website:', error);
-    return new Response(JSON.stringify({ 
-      success: false, 
-      error: error.message 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error(`Error processing request: ${error.message}`);
+    return new Response(
+      JSON.stringify({ 
+        success: false, 
+        error: `Internal server error: ${error.message}` 
+      }),
+      { 
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      }
+    );
   }
 });
 
-// Helper function to extract title
-function extractTitle(html: string): string {
+// Helper functions for extracting information from HTML
+function extractTitle(html: string): string | null {
   const titleMatch = html.match(/<title>(.*?)<\/title>/i);
-  return titleMatch ? titleMatch[1].trim() : '';
+  return titleMatch ? titleMatch[1].trim() : null;
 }
 
-// Helper function to extract meta description
-function extractMetaDescription(html: string): string {
-  const metaMatch = html.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i);
-  return metaMatch ? metaMatch[1].trim() : '';
+function extractDescription(html: string): string | null {
+  const descMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["'](.*?)["'][^>]*>/i) ||
+                   html.match(/<meta[^>]*content=["'](.*?)["'][^>]*name=["']description["'][^>]*>/i);
+  return descMatch ? descMatch[1].trim() : null;
 }
 
-// Helper function to extract emails
 function extractEmails(html: string): string[] {
-  const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-  const emails = html.match(emailRegex) || [];
-  // Filter out common false positives and duplicates
-  return [...new Set(emails.filter(email => 
-    !email.includes('example.com') && 
-    !email.includes('yourdomain') &&
-    !email.includes('domain.com')
-  ))];
+  const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
+  return [...new Set(html.match(emailRegex) || [])];
 }
 
-// Helper function to extract phone numbers
 function extractPhones(html: string): string[] {
-  // This regex is simplified and may need improvement for global phone formats
+  // This is a simplified regex for phone numbers
   const phoneRegex = /(?:\+\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g;
-  const phones = html.match(phoneRegex) || [];
-  return [...new Set(phones)];
+  return [...new Set(html.match(phoneRegex) || [])];
 }
 
-// Helper function to extract social media links
+function extractColors(html: string): string[] {
+  // Extract color codes from CSS in the HTML
+  const hexColorRegex = /#([0-9a-f]{3}){1,2}\b/gi;
+  const rgbColorRegex = /rgb\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)/gi;
+  
+  const hexColors = html.match(hexColorRegex) || [];
+  const rgbColors = html.match(rgbColorRegex) || [];
+  
+  // Combine and deduplicate
+  return [...new Set([...hexColors, ...rgbColors])].slice(0, 5);
+}
+
 function extractSocialLinks(html: string, baseUrl: string): Record<string, string> {
-  const socialPlatforms = {
-    facebook: /facebook\.com\/[a-zA-Z0-9._%+-]+/g,
-    twitter: /twitter\.com\/[a-zA-Z0-9_]+/g,
-    linkedin: /linkedin\.com\/(?:company\/[a-zA-Z0-9_-]+|in\/[a-zA-Z0-9_-]+)/g,
-    instagram: /instagram\.com\/[a-zA-Z0-9_]+/g,
-    youtube: /youtube\.com\/(?:user\/|channel\/)?[a-zA-Z0-9_-]+/g,
+  const socialPatterns = {
+    facebook: /(?:https?:)?\/\/(?:www\.)?facebook\.com\/[a-zA-Z0-9.]+/g,
+    twitter: /(?:https?:)?\/\/(?:www\.)?twitter\.com\/[a-zA-Z0-9_]+/g,
+    instagram: /(?:https?:)?\/\/(?:www\.)?instagram\.com\/[a-zA-Z0-9_.]+/g,
+    linkedin: /(?:https?:)?\/\/(?:www\.)?linkedin\.com\/(?:company|in)\/[a-zA-Z0-9_-]+/g,
+    youtube: /(?:https?:)?\/\/(?:www\.)?youtube\.com\/(?:user|channel)\/[a-zA-Z0-9_-]+/g,
   };
+
+  const result: Record<string, string> = {};
   
-  const results: Record<string, string> = {};
-  
-  for (const [platform, regex] of Object.entries(socialPlatforms)) {
-    const matches = html.match(regex);
+  for (const [platform, pattern] of Object.entries(socialPatterns)) {
+    const matches = html.match(pattern);
     if (matches && matches.length > 0) {
-      // Use the first match and ensure it's a full URL
-      let url = matches[0];
-      if (!url.startsWith('http')) {
-        url = 'https://' + url;
-      }
-      results[platform] = url;
+      result[platform] = matches[0];
     }
   }
   
-  return results;
+  return result;
 }
 
-// Function to analyze website content using OpenAI
-async function analyzeWithOpenAI(html: string, url: string) {
+function extractCompanyName(html: string, url: string): string | null {
+  // Try to extract from OpenGraph metadata first
+  const ogSiteNameMatch = html.match(/<meta[^>]*property=["']og:site_name["'][^>]*content=["'](.*?)["'][^>]*>/i);
+  if (ogSiteNameMatch) return ogSiteNameMatch[1].trim();
+  
+  // Try to extract from title
+  const titleMatch = extractTitle(html);
+  if (titleMatch) {
+    // Remove common suffixes like "Home", "Welcome", etc.
+    return titleMatch.replace(/\s*[-|]\s*.+$/, '').trim();
+  }
+  
+  // Extract from URL domain
   try {
-    // Clean HTML to extract main text content
-    const textContent = extractTextFromHtml(html);
-    
-    // Prepare a subset of the content if it's too large
-    // OpenAI has token limits, so we need to truncate long content
-    const truncatedContent = textContent.slice(0, 5000);
-    
-    const prompt = `
-    I need you to analyze website content for a business. The content is from ${url}.
-    Extract the following information:
-    
-    1. Company name
-    2. Industry/sector
-    3. Products or services offered
-    4. Target audience
-    5. Value proposition
-    6. Company description
-    
-    If you can't determine any of these items with confidence, indicate that with "Unknown".
-    Format your response as a JSON object with these fields.
-    
-    Here's the website content:
-    ${truncatedContent}
-    `;
-    
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',  // Using the more affordable model
-        messages: [
-          { role: 'system', content: 'You are a website analyzer tasked with extracting business information.' },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.3,  // Lower temperature for more deterministic results
-      }),
-    });
-    
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    const aiResponse = data.choices[0].message.content;
-    
-    // Try to parse JSON from the response
-    try {
-      // First try direct parsing
-      return JSON.parse(aiResponse);
-    } catch (e) {
-      // If direct parsing fails, try to extract JSON from the text
-      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
-      } else {
-        // If all parsing fails, return the text response
-        return { raw: aiResponse };
-      }
-    }
-  } catch (error) {
-    console.error('Error in OpenAI analysis:', error);
-    return { error: error.message };
+    const domain = new URL(url).hostname;
+    return domain.replace(/^www\./, '').split('.')[0];
+  } catch {
+    return null;
   }
 }
 
-// Helper function to extract text from HTML
-function extractTextFromHtml(html: string): string {
-  // Basic text extraction - in a production environment, use a proper HTML parser
-  return html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ' ')  // Remove scripts
-    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, ' ')     // Remove styles
-    .replace(/<[^>]+>/g, ' ')                                             // Remove HTML tags
-    .replace(/\s+/g, ' ')                                                 // Normalize whitespace
-    .trim();
+function inferIndustry(html: string): string | null {
+  const lowerHtml = html.toLowerCase();
+  
+  const industries = [
+    { name: "Technology", keywords: ["software", "tech", "technology", "digital", "app", "computer"] },
+    { name: "Marketing", keywords: ["marketing", "advertising", "agency", "branding", "campaign"] },
+    { name: "Finance", keywords: ["finance", "financial", "banking", "investment", "insurance"] },
+    { name: "Healthcare", keywords: ["health", "healthcare", "medical", "doctor", "hospital", "clinic"] },
+    { name: "Education", keywords: ["education", "school", "university", "college", "learning", "teaching"] },
+    { name: "Real Estate", keywords: ["real estate", "property", "housing", "apartment", "home"] },
+    { name: "Retail", keywords: ["retail", "shop", "store", "ecommerce", "product"] },
+    { name: "Manufacturing", keywords: ["manufacturing", "factory", "production", "industrial"] },
+    { name: "Hospitality", keywords: ["hospitality", "hotel", "restaurant", "travel", "tourism"] },
+  ];
+  
+  // Count occurrences of keywords for each industry
+  const counts = industries.map(industry => ({
+    industry: industry.name,
+    count: industry.keywords.reduce((sum, keyword) => {
+      const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+      const matches = lowerHtml.match(regex);
+      return sum + (matches ? matches.length : 0);
+    }, 0)
+  }));
+  
+  // Sort by count and return the top match if any
+  counts.sort((a, b) => b.count - a.count);
+  return counts[0]?.count > 0 ? counts[0].industry : null;
+}
+
+function inferDescription(html: string): string | null {
+  // Extract the first paragraph that's likely to be a description
+  const paragraphMatch = html.match(/<p[^>]*>(.*?)<\/p>/i);
+  if (paragraphMatch) {
+    const text = paragraphMatch[1].replace(/<[^>]+>/g, '').trim();
+    if (text.length > 20) return text;
+  }
+  
+  return null;
+}
+
+function extractLocation(html: string): string | null {
+  // Try to find common location patterns
+  const addressRegex = /(?:address|location)[\s\n]*:[\s\n]*([^<]+)/i;
+  const addressMatch = html.match(addressRegex);
+  
+  if (addressMatch) {
+    return addressMatch[1].trim();
+  }
+  
+  return null;
+}
+
+function inferProductsOrServices(html: string): string | null {
+  const lowerHtml = html.toLowerCase();
+  
+  // Check for service sections
+  const serviceKeywords = ["service", "product", "solution", "offering"];
+  
+  for (const keyword of serviceKeywords) {
+    const regex = new RegExp(`<h[2-4][^>]*>.*?${keyword}.*?</h[2-4]>`, 'i');
+    const match = html.match(regex);
+    
+    if (match) {
+      // Find the next paragraph or list
+      const index = html.indexOf(match[0]) + match[0].length;
+      const nextSection = html.substring(index, index + 500);
+      
+      // Extract text from lists
+      const listMatch = nextSection.match(/<li[^>]*>(.*?)<\/li>/i);
+      if (listMatch) {
+        return listMatch[1].replace(/<[^>]+>/g, '').trim();
+      }
+      
+      // Extract from paragraph
+      const paragraphMatch = nextSection.match(/<p[^>]*>(.*?)<\/p>/i);
+      if (paragraphMatch) {
+        return paragraphMatch[1].replace(/<[^>]+>/g, '').trim();
+      }
+    }
+  }
+  
+  return null;
+}
+
+function inferYearFounded(html: string): number | null {
+  // Look for common founding year patterns
+  const foundedRegex = /(?:founded|established|since|est\.?)(?:\s+in)?(?:\s+the)?(?:\s+year)?\s+(\d{4})/i;
+  const foundedMatch = html.match(foundedRegex);
+  
+  if (foundedMatch) {
+    const year = parseInt(foundedMatch[1]);
+    const currentYear = new Date().getFullYear();
+    
+    // Validate the year is reasonable
+    if (year >= 1800 && year <= currentYear) {
+      return year;
+    }
+  }
+  
+  return null;
 }

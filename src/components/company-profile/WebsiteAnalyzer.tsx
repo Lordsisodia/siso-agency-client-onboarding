@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Globe, ArrowRight, AlertCircle } from 'lucide-react';
+import { Loader2, Globe, ArrowRight, AlertCircle, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -17,6 +17,7 @@ export const WebsiteAnalyzer = ({ onAnalysisComplete }: WebsiteAnalyzerProps) =>
   const [url, setUrl] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisSuccess, setAnalysisSuccess] = useState(false);
+  const [analyzedDomain, setAnalyzedDomain] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +40,9 @@ export const WebsiteAnalyzer = ({ onAnalysisComplete }: WebsiteAnalyzerProps) =>
     setAnalysisSuccess(false);
 
     try {
+      const extractedDomain = extractDomain(processedUrl);
+      setAnalyzedDomain(extractedDomain);
+      
       const { data, error } = await supabase.functions
         .invoke('analyze-website', {
           body: { url: processedUrl }
@@ -50,7 +54,7 @@ export const WebsiteAnalyzer = ({ onAnalysisComplete }: WebsiteAnalyzerProps) =>
         setAnalysisSuccess(true);
         toast({
           title: "Analysis Complete",
-          description: `Successfully analyzed ${extractDomain(processedUrl)}`
+          description: `Successfully analyzed ${extractedDomain}`
         });
         
         // Process the data and call the callback
@@ -130,12 +134,20 @@ export const WebsiteAnalyzer = ({ onAnalysisComplete }: WebsiteAnalyzerProps) =>
           animate={{ opacity: 1, y: 0 }}
         >
           <AlertCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5" />
-          <div>
+          <div className="flex-1">
             <h4 className="font-medium text-green-500">Analysis Complete</h4>
             <p className="text-sm text-siso-text/80">
               Website information has been extracted and applied to the form below. 
               Please review and edit as needed before saving your profile.
             </p>
+            {analyzedDomain && (
+              <div className="mt-2 flex items-center">
+                <span className="text-xs bg-green-500/20 rounded-full px-2 py-1 text-green-400 flex items-center">
+                  {analyzedDomain}
+                  <ExternalLink className="w-3 h-3 ml-1" />
+                </span>
+              </div>
+            )}
           </div>
         </motion.div>
       )}
