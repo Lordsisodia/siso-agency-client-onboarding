@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useLocation } from 'react-router-dom';
@@ -85,144 +86,36 @@ function App() {
         {/* Home route - redirect to plan-builder */}
         <Route path="/home" element={<Navigate to="/plan-builder" replace />} />
         
-        {/* Protected routes */}
-        
-        {/* New primary routes */}
-        <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/projects" element={
-          <ProtectedRoute>
-            <Projects />
-          </ProtectedRoute>
-        } />
-        <Route path="/plan-builder" element={
-          <ProtectedRoute>
-            <PlanBuilder />
-          </ProtectedRoute>
-        } />
-        <Route path="/resource-hub" element={
-          <ProtectedRoute>
-            <ResourceHub />
-          </ProtectedRoute>
-        } />
-        <Route path="/portfolio" element={
-          <ProtectedRoute>
-            <Portfolio />
-          </ProtectedRoute>
-        } />
-        <Route path="/competitive-analysis" element={
-          <ProtectedRoute>
-            <CompetitiveAnalysis />
-          </ProtectedRoute>
-        } />
-        <Route path="/notifications" element={
-          <ProtectedRoute>
-            <Notifications />
-          </ProtectedRoute>
-        } />
-        
-        {/* Existing protected routes */}
-        <Route path="/profile" element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        } />
-        <Route path="/assistants" element={
-          <ProtectedRoute>
-            <ChatGPTAssistants />
-          </ProtectedRoute>
-        } />
-        <Route path="/education" element={
-          <ProtectedRoute>
-            <SisoEducation />
-          </ProtectedRoute>
-        } />
-        <Route path="/education/video/:videoId" element={
-          <ProtectedRoute>
-            <VideoDetail />
-          </ProtectedRoute>
-        } />
-        <Route path="/education/educator/:slug" element={
-          <ProtectedRoute>
-            <EducatorDetail />
-          </ProtectedRoute>
-        } />
-        <Route path="/tools" element={
-          <ProtectedRoute>
-            <Tools />
-          </ProtectedRoute>
-        } />
-        <Route path="/tools/:toolId" element={
-          <ProtectedRoute>
-            <ToolPage />
-          </ProtectedRoute>
-        } />
+        {/* All routes now accessible without authentication */}
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/projects" element={<Projects />} />
+        <Route path="/plan-builder" element={<PlanBuilder />} />
+        <Route path="/resource-hub" element={<ResourceHub />} />
+        <Route path="/portfolio" element={<Portfolio />} />
+        <Route path="/competitive-analysis" element={<CompetitiveAnalysis />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/assistants" element={<ChatGPTAssistants />} />
+        <Route path="/education" element={<SisoEducation />} />
+        <Route path="/education/video/:videoId" element={<VideoDetail />} />
+        <Route path="/education/educator/:slug" element={<EducatorDetail />} />
+        <Route path="/tools" element={<Tools />} />
+        <Route path="/tools/:toolId" element={<ToolPage />} />
         
         {/* Economy section routes - grouped together for clarity */}
-        <Route path="/economy" element={
-          <ProtectedRoute>
-            <Economy />
-          </ProtectedRoute>
-        } />
-        <Route path="/economy/earn" element={
-          <ProtectedRoute>
-            <HowToEarn />
-          </ProtectedRoute>
-        } />
-        <Route path="/economy/leaderboards" element={
-          <ProtectedRoute>
-            <Leaderboards />
-          </ProtectedRoute>
-        } />
-        <Route path="/economy/crypto-exchange" element={
-          <ProtectedRoute>
-            <CryptoExchange />
-          </ProtectedRoute>
-        } />
+        <Route path="/economy" element={<Economy />} />
+        <Route path="/economy/earn" element={<HowToEarn />} />
+        <Route path="/economy/leaderboards" element={<Leaderboards />} />
+        <Route path="/economy/crypto-exchange" element={<CryptoExchange />} />
         
-        <Route path="/community" element={
-          <ProtectedRoute>
-            <Community />
-          </ProtectedRoute>
-        } />
-        <Route path="/networking" element={
-          <ProtectedRoute>
-            <Networking />
-          </ProtectedRoute>
-        } />
-        <Route path="/siso" element={
-          <ProtectedRoute>
-            <SisoAI />
-          </ProtectedRoute>
-        } />
-        <Route path="/learn-network" element={
-          <ProtectedRoute>
-            <LearnNetwork />
-          </ProtectedRoute>
-        } />
-        <Route path="/onboarding/social" element={
-          <ProtectedRoute>
-            <SocialOnboarding />
-          </ProtectedRoute>
-        } />
-        <Route path="/onboarding/congratulations" element={
-          <ProtectedRoute>
-            <OnboardingCongratulations />
-          </ProtectedRoute>
-        } />
-        <Route path="/automations" element={
-          <ProtectedRoute>
-            <Automations />
-          </ProtectedRoute>
-        } />
-        <Route path="/crypto" element={
-          <ProtectedRoute>
-            <Crypto />
-          </ProtectedRoute>
-        } />
+        <Route path="/community" element={<Community />} />
+        <Route path="/networking" element={<Networking />} />
+        <Route path="/siso" element={<SisoAI />} />
+        <Route path="/learn-network" element={<LearnNetwork />} />
+        <Route path="/onboarding/social" element={<SocialOnboarding />} />
+        <Route path="/onboarding/congratulations" element={<OnboardingCongratulations />} />
+        <Route path="/automations" element={<Automations />} />
+        <Route path="/crypto" element={<Crypto />} />
 
         {/* Modified fallback route with more specific handling */}
         <Route path="/economy/*" element={<Navigate to="/economy" replace />} />

@@ -10,22 +10,13 @@ interface ProtectedRouteProps {
   publicRoutes?: string[];
 }
 
-export const ProtectedRoute = ({ children, allowUnauth = false, publicRoutes = ['/company-profile'] }: ProtectedRouteProps) => {
-  const { user, loading } = useAuthSession();
-  const navigate = useNavigate();
-  const location = useLocation();
+export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+  const { loading } = useAuthSession();
   
-  const isPublicRoute = publicRoutes.includes(location.pathname);
-
-  useEffect(() => {
-    if (!loading && !user && !allowUnauth && !isPublicRoute) {
-      navigate('/auth');
-    }
-  }, [user, loading, navigate, allowUnauth, isPublicRoute]);
-
   if (loading) {
     return <ProfileSkeleton />;
   }
 
+  // Simply return children without any authentication checks
   return <>{children}</>;
 };
