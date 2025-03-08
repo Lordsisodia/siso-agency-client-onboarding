@@ -1,10 +1,96 @@
 
+import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Waves } from '@/components/ui/waves-background';
 import { motion } from 'framer-motion';
-import { Building, Briefcase, Mail, Phone, Globe, MapPin, Palette } from 'lucide-react';
+import { Building, Edit, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CompanyProfileForm } from '@/components/company-profile/CompanyProfileForm';
+import { CompanyImageUpload } from '@/components/company-profile/CompanyImageUpload';
+import { CompanyProfileStats } from '@/components/company-profile/CompanyProfileStats';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 export default function CompanyProfile() {
+  const { toast } = useToast();
+  const [isEditing, setIsEditing] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [companyProfile, setCompanyProfile] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserAndProfile = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Get current session
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session?.user) {
+          toast({
+            variant: "destructive",
+            title: "Authentication required",
+            description: "Please sign in to access your company profile",
+          });
+          return;
+        }
+        
+        setUserId(session.user.id);
+        
+        // Fetch company profile
+        const { data: profile, error } = await supabase
+          .from('company_profiles')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .single();
+        
+        if (error && error.code !== 'PGRST116') {  // PGRST116 means "no rows returned"
+          console.error('Error fetching profile:', error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to load company profile"
+          });
+        }
+        
+        setCompanyProfile(profile || null);
+      } catch (error) {
+        console.error('Error in fetchUserAndProfile:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchUserAndProfile();
+  }, [toast]);
+
+  const handleRefreshProfile = async () => {
+    if (!userId) return;
+    
+    try {
+      const { data: profile, error } = await supabase
+        .from('company_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+      
+      if (error) throw error;
+      
+      setCompanyProfile(profile);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error refreshing profile:', error);
+    }
+  };
+
+  const handleLogoUpdate = (url: string) => {
+    setCompanyProfile((prev: any) => ({ ...prev, logo_url: url }));
+  };
+
+  const handleBannerUpdate = (url: string) => {
+    setCompanyProfile((prev: any) => ({ ...prev, banner_url: url }));
+  };
+
   return (
     <MainLayout>
       <div className="relative min-h-screen">
@@ -22,206 +108,278 @@ export default function CompanyProfile() {
             yGap={36}
           />
         </div>
-        
-        <div className="relative z-10 container px-4 py-16 mx-auto">
+
+        <div className="relative z-10 container px-4 py-8 sm:py-16 mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="mb-8"
+            className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between"
           >
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-siso-red to-siso-orange text-transparent bg-clip-text">
-              Company Profile
-            </h1>
-            <p className="mt-4 text-lg text-siso-text/80">
-              Manage your agency information and preferences for your custom app development
-            </p>
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-siso-red to-siso-orange text-transparent bg-clip-text">
+                Company Profile
+              </h1>
+              <p className="mt-4 text-lg text-siso-text/80">
+                {isEditing 
+                  ? "Update your company information and branding" 
+                  : "Manage your company information and branding preferences"}
+              </p>
+            </div>
+            
+            {!isLoading && (
+              <Button
+                onClick={() => setIsEditing(!isEditing)}
+                className={`mt-4 sm:mt-0 ${isEditing 
+                  ? "bg-siso-text/10 text-siso-text hover:bg-siso-text/20" 
+                  : "bg-gradient-to-r from-siso-red to-siso-orange text-white hover:from-siso-red/90 hover:to-siso-orange/90"}`}
+              >
+                {isEditing ? (
+                  <>
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Cancel Editing
+                  </>
+                ) : (
+                  <>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit Profile
+                  </>
+                )}
+              </Button>
+            )}
           </motion.div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="lg:col-span-1"
-            >
-              <div className="p-6 rounded-xl border border-siso-orange/20 bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-sm sticky top-24">
-                <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-siso-red/20 to-siso-orange/20 flex items-center justify-center mb-4">
-                  <Building className="w-10 h-10 text-siso-orange" />
-                </div>
-                <h3 className="text-xl font-semibold mb-4 text-siso-text-bold">Your Agency Name</h3>
-                <p className="text-siso-text/70 mb-6">
-                  Complete your company profile to help us better understand your needs and customize your app development experience.
-                </p>
-                <div className="space-y-4">
-                  <div className="flex items-center">
-                    <Briefcase className="w-5 h-5 text-siso-orange mr-3" />
-                    <span className="text-siso-text/70">Agency Type: Not specified</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Mail className="w-5 h-5 text-siso-orange mr-3" />
-                    <span className="text-siso-text/70">Email: Not specified</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Phone className="w-5 h-5 text-siso-orange mr-3" />
-                    <span className="text-siso-text/70">Phone: Not specified</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Globe className="w-5 h-5 text-siso-orange mr-3" />
-                    <span className="text-siso-text/70">Website: Not specified</span>
-                  </div>
-                  <div className="flex items-center">
-                    <MapPin className="w-5 h-5 text-siso-orange mr-3" />
-                    <span className="text-siso-text/70">Location: Not specified</span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-            
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="lg:col-span-2"
-            >
-              <div className="p-6 rounded-xl border border-siso-orange/20 bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-sm mb-8">
-                <h3 className="text-xl font-semibold mb-4 text-siso-text-bold flex items-center">
-                  <Building className="w-5 h-5 mr-2 text-siso-orange" />
-                  Basic Information
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-siso-text/70 mb-2">Agency Name</label>
-                    <input 
-                      type="text"
-                      className="w-full p-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
-                      placeholder="Your agency name"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-siso-text/70 mb-2">Agency Type</label>
-                    <select 
-                      className="w-full p-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
-                    >
-                      <option value="">Select type</option>
-                      <option value="marketing">Marketing Agency</option>
-                      <option value="creative">Creative Studio</option>
-                      <option value="development">Web Development</option>
-                      <option value="consulting">Consulting Firm</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-siso-text/70 mb-2">Email</label>
-                    <input 
-                      type="email"
-                      className="w-full p-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
-                      placeholder="contact@youragency.com"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-siso-text/70 mb-2">Phone</label>
-                    <input 
-                      type="tel"
-                      className="w-full p-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
-                      placeholder="+1 (123) 456-7890"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-siso-text/70 mb-2">Website</label>
-                    <input 
-                      type="url"
-                      className="w-full p-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
-                      placeholder="https://youragency.com"
-                    />
-                  </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-siso-orange"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-1">
+                <div className="space-y-6">
+                  <CompanyProfileStats 
+                    companyName={companyProfile?.company_name}
+                    yearFounded={companyProfile?.year_founded}
+                    employeeCount={companyProfile?.employee_count}
+                    industry={companyProfile?.industry}
+                    companyType={companyProfile?.company_type}
+                  />
+                  
+                  {isEditing && userId && (
+                    <>
+                      <CompanyImageUpload 
+                        userId={userId}
+                        type="logo"
+                        currentUrl={companyProfile?.logo_url}
+                        onUploadComplete={handleLogoUpdate}
+                      />
+                      
+                      <CompanyImageUpload 
+                        userId={userId}
+                        type="banner"
+                        currentUrl={companyProfile?.banner_url}
+                        onUploadComplete={handleBannerUpdate}
+                      />
+                    </>
+                  )}
                 </div>
               </div>
               
-              <div className="p-6 rounded-xl border border-siso-orange/20 bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-sm mb-8">
-                <h3 className="text-xl font-semibold mb-4 text-siso-text-bold flex items-center">
-                  <MapPin className="w-5 h-5 mr-2 text-siso-orange" />
-                  Location
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-siso-text/70 mb-2">Address</label>
-                    <input 
-                      type="text"
-                      className="w-full p-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
-                      placeholder="123 Main St."
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-siso-text/70 mb-2">City</label>
-                    <input 
-                      type="text"
-                      className="w-full p-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
-                      placeholder="New York"
-                    />
-                  </div>
-                </div>
+              <div className="lg:col-span-2">
+                {isEditing && userId ? (
+                  <CompanyProfileForm 
+                    initialData={companyProfile} 
+                    onSave={handleRefreshProfile}
+                    userId={userId}
+                  />
+                ) : (
+                  <CompanyProfilePreview profile={companyProfile} />
+                )}
               </div>
-              
-              <div className="p-6 rounded-xl border border-siso-orange/20 bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-sm mb-8">
-                <h3 className="text-xl font-semibold mb-4 text-siso-text-bold flex items-center">
-                  <Palette className="w-5 h-5 mr-2 text-siso-orange" />
-                  Branding
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-siso-text/70 mb-2">Primary Color</label>
-                    <div className="flex">
-                      <input 
-                        type="color"
-                        className="h-10 w-10 rounded-lg border border-siso-orange/20 bg-transparent cursor-pointer"
-                        defaultValue="#ff5722"
-                      />
-                      <input 
-                        type="text"
-                        className="flex-1 p-3 ml-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
-                        placeholder="#ff5722"
-                        defaultValue="#ff5722"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-siso-text/70 mb-2">Secondary Color</label>
-                    <div className="flex">
-                      <input 
-                        type="color"
-                        className="h-10 w-10 rounded-lg border border-siso-orange/20 bg-transparent cursor-pointer"
-                        defaultValue="#ffa726"
-                      />
-                      <input 
-                        type="text"
-                        className="flex-1 p-3 ml-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
-                        placeholder="#ffa726"
-                        defaultValue="#ffa726"
-                      />
-                    </div>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-siso-text/70 mb-2">Logo</label>
-                    <div className="border-2 border-dashed border-siso-orange/20 rounded-lg p-6 text-center">
-                      <p className="text-siso-text/70 mb-2">Drag and drop your logo here or</p>
-                      <button className="px-4 py-2 bg-siso-orange/20 text-siso-orange rounded-lg hover:bg-siso-orange/30 transition-colors">
-                        Browse Files
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex justify-end">
-                <button className="px-6 py-3 rounded-lg bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90 text-white font-medium transition-all">
-                  Save Profile
-                </button>
-              </div>
-            </motion.div>
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </MainLayout>
   );
 }
+
+interface CompanyProfilePreviewProps {
+  profile: any;
+}
+
+const CompanyProfilePreview = ({ profile }: CompanyProfilePreviewProps) => {
+  if (!profile) {
+    return (
+      <motion.div 
+        className="p-8 rounded-xl border border-siso-orange/20 bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-sm text-center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <Building className="w-16 h-16 mx-auto mb-4 text-siso-orange/70" />
+        <h3 className="text-2xl font-semibold text-siso-text-bold mb-2">No Company Profile Yet</h3>
+        <p className="text-siso-text/70 mb-6">
+          Click the "Edit Profile" button to create your company profile and customize your brand identity.
+        </p>
+      </motion.div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      {profile.banner_url && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full h-48 rounded-xl overflow-hidden"
+        >
+          <img 
+            src={profile.banner_url} 
+            alt="Company Banner" 
+            className="w-full h-full object-cover"
+          />
+        </motion.div>
+      )}
+
+      <div className="flex flex-col sm:flex-row gap-6">
+        {profile.logo_url && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-32 h-32 rounded-xl overflow-hidden bg-black/30 flex-shrink-0 p-2"
+          >
+            <img 
+              src={profile.logo_url} 
+              alt="Company Logo" 
+              className="w-full h-full object-contain"
+            />
+          </motion.div>
+        )}
+
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex-grow"
+        >
+          <h2 className="text-2xl font-bold text-siso-text-bold mb-2">
+            {profile.company_name || 'Unnamed Company'}
+          </h2>
+          
+          <div className="flex flex-wrap gap-2 mb-4">
+            {profile.company_type && (
+              <span className="px-3 py-1 rounded-full bg-siso-orange/10 text-siso-orange text-sm">
+                {profile.company_type === 'agency' ? 'Marketing Agency' : 
+                 profile.company_type === 'studio' ? 'Creative Studio' :
+                 profile.company_type === 'development' ? 'Web Development' :
+                 profile.company_type === 'consulting' ? 'Consulting Firm' :
+                 profile.company_type}
+              </span>
+            )}
+            
+            {profile.industry && (
+              <span className="px-3 py-1 rounded-full bg-siso-text/10 text-siso-text text-sm">
+                {profile.industry}
+              </span>
+            )}
+            
+            {profile.year_founded && (
+              <span className="px-3 py-1 rounded-full bg-siso-text/10 text-siso-text text-sm">
+                Founded {profile.year_founded}
+              </span>
+            )}
+          </div>
+          
+          {profile.description && (
+            <p className="text-siso-text/80 mb-4">
+              {profile.description}
+            </p>
+          )}
+        </motion.div>
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="p-6 rounded-xl border border-siso-orange/20 bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-sm"
+      >
+        <h3 className="text-xl font-semibold mb-4 text-siso-text-bold">Contact Information</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {profile.email && (
+            <div>
+              <p className="text-sm text-siso-text/60">Email</p>
+              <p className="text-siso-text">{profile.email}</p>
+            </div>
+          )}
+          
+          {profile.phone && (
+            <div>
+              <p className="text-sm text-siso-text/60">Phone</p>
+              <p className="text-siso-text">{profile.phone}</p>
+            </div>
+          )}
+          
+          {profile.website && (
+            <div>
+              <p className="text-sm text-siso-text/60">Website</p>
+              <a 
+                href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`}
+                target="_blank"
+                rel="noopener noreferrer" 
+                className="text-siso-orange hover:underline"
+              >
+                {profile.website}
+              </a>
+            </div>
+          )}
+          
+          {profile.location && (
+            <div>
+              <p className="text-sm text-siso-text/60">Location</p>
+              <p className="text-siso-text">{profile.location}</p>
+            </div>
+          )}
+        </div>
+      </motion.div>
+
+      {profile.primary_color && profile.secondary_color && profile.accent_color && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="p-6 rounded-xl border border-siso-orange/20 bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-sm"
+        >
+          <h3 className="text-xl font-semibold mb-4 text-siso-text-bold">Brand Colors</h3>
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <div 
+                className="w-full h-12 rounded-lg mb-2" 
+                style={{ backgroundColor: profile.primary_color }}
+              ></div>
+              <p className="text-sm text-siso-text/60">Primary</p>
+              <p className="text-siso-text">{profile.primary_color}</p>
+            </div>
+            
+            <div>
+              <div 
+                className="w-full h-12 rounded-lg mb-2" 
+                style={{ backgroundColor: profile.secondary_color }}
+              ></div>
+              <p className="text-sm text-siso-text/60">Secondary</p>
+              <p className="text-siso-text">{profile.secondary_color}</p>
+            </div>
+            
+            <div>
+              <div 
+                className="w-full h-12 rounded-lg mb-2" 
+                style={{ backgroundColor: profile.accent_color }}
+              ></div>
+              <p className="text-sm text-siso-text/60">Accent</p>
+              <p className="text-siso-text">{profile.accent_color}</p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </div>
+  );
+};
