@@ -5,8 +5,9 @@ import { ChatInput } from './ChatInput';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatAssistant, ChatMessage as ChatMessageType } from '@/hooks/use-chat-assistant';
 import { Button } from '@/components/ui/button';
-import { Trash2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Trash2, AlertCircle, RefreshCw, Sparkles } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { motion } from 'framer-motion';
 
 interface ChatInterfaceProps {
   title?: string;
@@ -49,10 +50,21 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   };
 
   return (
-    <div className={`flex flex-col h-full bg-siso-bg-card border border-siso-border rounded-lg overflow-hidden ${className}`}>
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className={`flex flex-col h-full bg-siso-bg-card/30 backdrop-blur-md border border-siso-border rounded-xl overflow-hidden shadow-xl ${className}`}
+    >
       {title && (
         <div className="p-4 border-b border-siso-border flex items-center justify-between bg-gradient-to-r from-siso-red/10 to-siso-orange/10">
-          <h2 className="text-lg font-semibold text-siso-text">{title}</h2>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-r from-siso-red to-siso-orange flex items-center justify-center">
+              <Sparkles className="w-3 h-3 text-white" />
+            </div>
+            <h2 className="text-lg font-semibold text-siso-text">{title}</h2>
+          </div>
+          
           <Button 
             variant="ghost" 
             size="sm" 
@@ -66,8 +78,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </div>
       )}
       
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
+      <ScrollArea className="flex-1 px-4 py-6">
+        <div className="space-y-6 max-w-3xl mx-auto">
           {messages.map((message, index) => (
             <ChatMessage
               key={index}
@@ -109,13 +121,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </div>
       </ScrollArea>
       
-      <div className="p-4 border-t border-siso-border">
+      <div className="p-4 border-t border-siso-border bg-gradient-to-r from-black/10 to-transparent backdrop-blur-lg">
         <ChatInput 
           onSubmit={(message) => sendMessage(message, systemPrompt)} 
           isLoading={isLoading} 
           placeholder={inputPlaceholder}
         />
       </div>
-    </div>
+    </motion.div>
   );
 };
