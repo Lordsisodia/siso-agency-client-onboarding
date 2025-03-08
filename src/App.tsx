@@ -20,7 +20,7 @@ import PlanBuilder from '@/pages/PlanBuilder';
 import CompanyProfile from '@/pages/CompanyProfile';
 import ResourceHub from '@/pages/ResourceHub';
 import Portfolio from '@/pages/Portfolio';
-import CompetitiveAnalysis from '@/pages/CompetitiveAnalysis';
+import Support from '@/pages/Support';
 import Notifications from '@/pages/Notifications';
 
 import { Toaster } from '@/components/ui/toaster';
@@ -62,7 +62,7 @@ function App() {
         <Route path="/plan-builder" element={<PlanBuilder />} />
         <Route path="/resource-hub" element={<ResourceHub />} />
         <Route path="/portfolio" element={<Portfolio />} />
-        <Route path="/competitive-analysis" element={<CompetitiveAnalysis />} />
+        <Route path="/support" element={<Support />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/tools" element={<Tools />} />

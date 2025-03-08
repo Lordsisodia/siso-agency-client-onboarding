@@ -12,7 +12,9 @@ import {
   FolderKanban,
   Building,
   Briefcase,
-  TrendingUp
+  TrendingUp,
+  HelpCircle,
+  MessageCircle
 } from 'lucide-react';
 import { MenuSection } from './types';
 
@@ -62,9 +64,9 @@ export const menuSections: MenuSection[] = [
         isExternal: true,
       },
       {
-        href: '/competitive-analysis',
-        icon: TrendingUp,
-        label: 'Competitive Analysis',
+        href: '/support',
+        icon: HelpCircle,
+        label: 'Support & Help Center',
       }
     ]
   },
