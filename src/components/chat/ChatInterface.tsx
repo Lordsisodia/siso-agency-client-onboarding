@@ -1,8 +1,10 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatAssistant, ChatMessage as ChatMessageType } from '@/hooks/use-chat-assistant';
+import { usePlanChatAssistant } from '@/hooks/use-plan-chat-assistant';
 import { Button } from '@/components/ui/button';
 import { Trash2, AlertCircle, RefreshCw, Sparkles } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -14,6 +16,7 @@ interface ChatInterfaceProps {
   welcomeMessage?: string;
   inputPlaceholder?: string;
   className?: string;
+  usePlanAssistant?: boolean;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -21,9 +24,22 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   systemPrompt,
   welcomeMessage = 'Hello! How can I help you today?',
   inputPlaceholder = 'Type your message...',
-  className
+  className,
+  usePlanAssistant = false
 }) => {
-  const { messages, isLoading, error, sendMessage, clearMessages } = useChatAssistant();
+  // Choose which chat hook to use based on the usePlanAssistant prop
+  const regularChat = useChatAssistant();
+  const planChat = usePlanChatAssistant();
+  
+  // Use the appropriate chat hook
+  const { 
+    messages, 
+    isLoading, 
+    error, 
+    sendMessage, 
+    clearMessages 
+  } = usePlanAssistant ? planChat : regularChat;
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -157,4 +173,4 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       </div>
     </motion.div>
   );
-};
+}
