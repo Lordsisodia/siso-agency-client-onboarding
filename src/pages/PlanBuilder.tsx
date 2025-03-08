@@ -20,15 +20,22 @@ export default function PlanBuilder() {
     return newId;
   });
 
+  const { sendMessage } = usePlanChatAssistant(projectId);
+
   const handleSubmitToAI = async (prompt: string, formData?: Record<string, any>) => {
     try {
-      // This function will be passed to the ManualInputSheet component
-      // It will be used to send the form data to the AI
+      // Send the form data to the AI assistant
       toast({
         title: "Submitting to AI",
         description: "Your project details are being processed by the AI assistant...",
         variant: "default"
       });
+      
+      // Send the form data to the AI assistant using the sendMessage function
+      await sendMessage(prompt, undefined, formData);
+      
+      // Close the manual input sheet after submission
+      setIsManualInputOpen(false);
     } catch (error) {
       console.error("Error submitting to AI:", error);
       toast({
