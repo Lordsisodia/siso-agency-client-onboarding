@@ -64,7 +64,7 @@ export const PreChatState = ({
           <img 
             src="/lovable-uploads/dee36671-c662-422f-a9a0-deb2eeb03973.png" 
             alt="SISO Lion Logo" 
-            className="w-24 h-24 object-contain rounded-full bg-black/30 p-2 border border-white/10"
+            className="w-24 h-24 object-contain rounded-full bg-black/40 p-2 border border-white/20 shadow-lg"
           />
         </motion.div>
 
@@ -80,7 +80,7 @@ export const PreChatState = ({
         </motion.h1>
 
         <motion.p
-          className="text-center text-siso-text/80 mb-8 max-w-2xl"
+          className="text-center text-white/80 mb-8 max-w-2xl"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
@@ -89,7 +89,7 @@ export const PreChatState = ({
         </motion.p>
 
         <motion.div
-          className="w-full"
+          className="w-full max-w-xl"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
@@ -98,13 +98,13 @@ export const PreChatState = ({
             placeholders={searchPlaceholders}
             onChange={handleInputChange}
             onSubmit={handleInputSubmit}
-            className="bg-black/30 border-white/10 focus:border-siso-orange/50 text-white placeholder-gray-400"
+            className="bg-black/40 border-white/20 focus:border-siso-orange/60 text-white placeholder-gray-400 shadow-lg"
           />
         </motion.div>
 
         {/* Additional buttons */}
         <motion.div 
-          className="flex gap-3 mt-4 justify-center"
+          className="flex gap-3 mt-6 justify-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
@@ -112,7 +112,7 @@ export const PreChatState = ({
           <Button 
             variant="outline" 
             size="sm" 
-            className="bg-black/30 border-white/10 hover:bg-black/50 hover:text-siso-orange text-white flex items-center gap-2"
+            className="bg-black/40 border-white/20 hover:bg-black/60 hover:border-siso-orange/50 hover:text-siso-orange text-white flex items-center gap-2 transition-all duration-300"
             onClick={openManualInput}
           >
             <FileText size={16} />
@@ -122,7 +122,7 @@ export const PreChatState = ({
           <Button 
             variant="outline" 
             size="sm" 
-            className="bg-black/30 border-white/10 hover:bg-black/50 text-white flex items-center gap-2 relative overflow-hidden"
+            className="bg-black/40 border-white/20 hover:bg-black/60 text-white flex items-center gap-2 relative overflow-hidden transition-all duration-300"
             disabled
           >
             <Phone size={16} />
