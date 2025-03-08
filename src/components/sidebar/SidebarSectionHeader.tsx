@@ -10,10 +10,9 @@ interface SidebarSectionHeaderProps {
 export const SidebarSectionHeader = ({ icon: Icon, title }: SidebarSectionHeaderProps) => {
   return (
     <motion.div 
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2 }}
       className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-siso-text-bold"
     >
       <Icon className="w-4 h-4 text-siso-text-muted" />

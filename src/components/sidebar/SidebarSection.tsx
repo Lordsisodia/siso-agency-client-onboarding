@@ -18,15 +18,14 @@ export const SidebarSection = ({
   onItemClick, 
   isItemActive 
 }: SidebarSectionProps) => {
+  // Simplified container animation variant
   const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0 },
     show: { 
-      opacity: 1, 
-      y: 0,
+      opacity: 1,
       transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 30
+        staggerChildren: 0.05,
+        duration: 0.2
       }
     }
   };
@@ -56,6 +55,8 @@ export const SidebarSection = ({
           !collapsed && "pl-3 border-l-2 border-siso-border ml-4"
         )}
         variants={containerVariants}
+        initial="hidden"
+        animate="show"
       >
         {section.items?.map((item, index) => (
           <SidebarMenuItem

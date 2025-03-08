@@ -2,48 +2,12 @@
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { useEffect, useState } from 'react';
 import { SidebarSection } from './SidebarSection';
 import { NavigationProps } from './types';
 import { menuSections } from './navigationData';
 
 export const SidebarNavigation = ({ collapsed, onItemClick, visible }: NavigationProps) => {
   const location = useLocation();
-  const [activeSection, setActiveSection] = useState<string | null>(null);
-
-  // [Analysis] Only use IntersectionObserver for hash-based navigation
-  useEffect(() => {
-    if (location.hash) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setActiveSection(`#${entry.target.id}`);
-            }
-          });
-        },
-        { threshold: 0.5 }
-      );
-
-      document.querySelectorAll('section[id]').forEach((section) => {
-        observer.observe(section);
-      });
-
-      return () => observer.disconnect();
-    }
-  }, [location.hash]);
-
-  // [Analysis] Enhanced debugging for route matching
-  useEffect(() => {
-    console.log('Current pathname:', location.pathname);
-    
-    // Test some key routes for debugging
-    const testRoutes = ['/economy/leaderboards', '/economy/crypto-exchange', '/economy/earn'];
-    testRoutes.forEach(route => {
-      const isActive = isItemActive(route);
-      console.log(`Route ${route} active?`, isActive);
-    });
-  }, [location.pathname]);
 
   if (!visible) return null;
 
@@ -52,42 +16,37 @@ export const SidebarNavigation = ({ collapsed, onItemClick, visible }: Navigatio
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2
+        staggerChildren: 0.05,
+        duration: 0.2
       }
     }
   };
 
-  // [Analysis] Improved route matching with exact, nested, and parent path handling
-  const isItemActive = (href: string, isMainRoute: boolean = false) => {
-    // Handle hash-based navigation
-    if (href.startsWith('#')) {
-      return href === activeSection;
-    }
-
+  // Simplified route matching logic
+  const isItemActive = (href: string) => {
     // Remove trailing slashes for consistency
     const currentPath = location.pathname.replace(/\/$/, '');
     const targetPath = href.replace(/\/$/, '');
 
-    // Check if the current path exactly matches the target path
-    const exactMatch = currentPath === targetPath;
-    
-    // Check if the current path is a child of the target path
-    // This is important for sections like /economy/* where we want the parent item to be active
-    const isChildPath = currentPath.startsWith(targetPath + '/');
-    
-    // For main routes like /ai-news, match both exact and child routes
-    if (isMainRoute) {
-      return exactMatch || isChildPath;
+    // For exact matching
+    if (currentPath === targetPath) {
+      return true;
     }
-    
-    // For economy section items, we need special handling to ensure they activate properly
-    if (targetPath.startsWith('/economy/')) {
-      return exactMatch;
+
+    // Special case for dashboard as home
+    if (targetPath === '/dashboard' && currentPath === '/') {
+      return true;
     }
-    
-    // For section items (like /tools), use strict matching by default
-    return exactMatch;
+
+    // For nested routes like /projects/123
+    if (targetPath !== '/' && currentPath.startsWith(targetPath)) {
+      // Make sure it's a true parent path (e.g., /projects is parent of /projects/123)
+      // but /project is not a parent of /projects
+      const nextChar = currentPath.substring(targetPath.length, targetPath.length + 1);
+      return nextChar === '' || nextChar === '/';
+    }
+
+    return false;
   };
 
   return (
@@ -104,14 +63,14 @@ export const SidebarNavigation = ({ collapsed, onItemClick, visible }: Navigatio
               key={index}
               className={cn(
                 "space-y-1",
-                section.type === 'section' && "border-b border-siso-border pb-2"
+                section.type === 'section' && "border-b border-siso-border pb-2 mb-2"
               )}
             >
               <SidebarSection
                 section={section}
                 collapsed={collapsed}
                 onItemClick={onItemClick}
-                isItemActive={(href) => isItemActive(href, section.type === 'main')}
+                isItemActive={isItemActive}
               />
             </motion.div>
           ))}
