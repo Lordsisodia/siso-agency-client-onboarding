@@ -1,11 +1,12 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChatMessage } from '@/types/chat';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
   createProjectPlan, 
-  chatWithPlanAssistant, 
+  chatWithPlanAssistant,
+  streamChatWithPlanAssistant,
   getProjectChatHistory,
   ProjectChatHistory
 } from '@/services/project-plan.service';
@@ -15,6 +16,8 @@ export function useProjectPlanning() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [chatHistory, setChatHistory] = useState<ProjectChatHistory[]>([]);
+  const [useStreaming, setUseStreaming] = useState(true);
+  const streamControllerRef = useRef<AbortController | null>(null);
   const { toast } = useToast();
 
   // Check if user is authenticated
@@ -35,6 +38,11 @@ export function useProjectPlanning() {
     
     return () => {
       subscription.unsubscribe();
+      
+      // Cleanup stream controller if exists
+      if (streamControllerRef.current) {
+        streamControllerRef.current.abort();
+      }
     };
   }, []);
 
@@ -91,6 +99,12 @@ export function useProjectPlanning() {
   const sendMessage = async (message: string, formData?: Record<string, any>) => {
     if (!message.trim() || isLoading) return;
 
+    // Abort any existing stream
+    if (streamControllerRef.current) {
+      streamControllerRef.current.abort();
+      streamControllerRef.current = null;
+    }
+
     setIsLoading(true);
 
     // Add user message
@@ -100,26 +114,72 @@ export function useProjectPlanning() {
     ];
     setMessages(updatedMessages);
     
+    // Add placeholder for streaming response
+    if (useStreaming) {
+      setMessages(prev => [
+        ...prev,
+        { role: 'assistant', content: '', loading: true }
+      ]);
+    }
+    
     try {
-      // Call OpenAI via our edge function
-      const response = await chatWithPlanAssistant(
-        updatedMessages, 
-        currentProjectId || undefined,
-        formData
-      );
-      
-      if (response) {
-        // Add assistant response
-        setMessages(prev => [
-          ...prev,
-          { role: 'assistant', content: response }
-        ]);
+      if (useStreaming) {
+        // Use streaming API
+        let responseContent = '';
+        
+        streamControllerRef.current = streamChatWithPlanAssistant(
+          updatedMessages,
+          currentProjectId || undefined,
+          formData,
+          // Process each chunk as it arrives
+          (chunk) => {
+            setMessages(prev => {
+              const newMessages = [...prev];
+              const lastIndex = newMessages.length - 1;
+              
+              if (lastIndex >= 0 && newMessages[lastIndex].role === 'assistant') {
+                // Update the last message with the accumulated response
+                newMessages[lastIndex] = {
+                  role: 'assistant',
+                  content: responseContent + chunk,
+                  loading: false
+                };
+              }
+              
+              return newMessages;
+            });
+            
+            // Accumulate the response content
+            responseContent += chunk;
+          },
+          // Complete handler
+          (fullResponse) => {
+            setIsLoading(false);
+          }
+        );
       } else {
-        toast({
-          title: "Error",
-          description: "Failed to get a response. Please try again.",
-          variant: "destructive"
-        });
+        // Use traditional non-streaming approach
+        const response = await chatWithPlanAssistant(
+          updatedMessages, 
+          currentProjectId || undefined,
+          formData
+        );
+        
+        if (response) {
+          // Add assistant response
+          setMessages(prev => [
+            ...prev,
+            { role: 'assistant', content: response }
+          ]);
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to get a response. Please try again.",
+            variant: "destructive"
+          });
+        }
+        
+        setIsLoading(false);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -128,9 +188,19 @@ export function useProjectPlanning() {
         description: "An unexpected error occurred",
         variant: "destructive"
       });
-    } finally {
       setIsLoading(false);
     }
+  };
+
+  // Toggle streaming mode
+  const toggleStreaming = () => {
+    setUseStreaming(prev => !prev);
+    toast({
+      title: useStreaming ? "Streaming disabled" : "Streaming enabled",
+      description: useStreaming 
+        ? "Responses will be shown after completion" 
+        : "Responses will stream in real-time"
+    });
   };
 
   return {
@@ -139,8 +209,10 @@ export function useProjectPlanning() {
     currentProjectId,
     chatHistory,
     isAuthenticated,
+    useStreaming,
     sendMessage,
     startNewProject,
-    loadChatHistory
+    loadChatHistory,
+    toggleStreaming
   };
 }

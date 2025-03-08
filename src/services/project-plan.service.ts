@@ -88,6 +88,90 @@ export async function getProjectChatHistory(planId: string): Promise<ProjectChat
   return data;
 }
 
+// Streaming response handler for chat function
+export function streamChatWithPlanAssistant(
+  messages: ChatMessage[],
+  projectId?: string,
+  formData?: Record<string, any>,
+  onChunk?: (chunk: string) => void,
+  onComplete?: (fullResponse: string) => void
+): AbortController {
+  const controller = new AbortController();
+  
+  (async () => {
+    try {
+      // Format messages for the API
+      const apiMessages = messages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+      
+      // Call the edge function with streaming enabled
+      const response = await fetch(`${supabase.functions.url}/chat-with-plan-assistant`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabase.auth.session()?.access_token || ''}`,
+          'Accept': 'text/event-stream',
+        },
+        body: JSON.stringify({ 
+          messages: apiMessages,
+          projectId,
+          formData
+        }),
+        signal: controller.signal
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+      
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('Response body is not readable');
+      
+      const decoder = new TextDecoder();
+      let fullResponse = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n').filter(line => line.trim() !== '');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') continue;
+            
+            try {
+              const parsed = JSON.parse(data);
+              const content = parsed.content || '';
+              
+              if (content) {
+                fullResponse += content;
+                onChunk?.(content);
+              }
+            } catch (e) {
+              console.error('Error parsing SSE chunk:', e);
+            }
+          }
+        }
+      }
+      
+      // Call the completion handler when done
+      onComplete?.(fullResponse);
+      
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Error in streamChatWithPlanAssistant:', err);
+      }
+    }
+  })();
+  
+  return controller;
+}
+
 export async function chatWithPlanAssistant(
   messages: ChatMessage[], 
   projectId?: string, 

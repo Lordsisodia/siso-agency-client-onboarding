@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Waves } from '@/components/ui/waves-background';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { PreChatState } from '@/components/home/PreChatState';
 import { EnhancedChatState } from '@/components/home/EnhancedChatState';
 import { ChatMessage } from '@/types/chat';
@@ -10,9 +10,13 @@ import { useProjectPlanning } from '@/hooks/use-project-planning';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';
+import { PlusSquare, FileText, ToggleRight, ToggleLeft, Globe, Zap } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function PlanBuilder() {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showManualInput, setShowManualInput] = useState(false);
   const { toast } = useToast();
   
   const { 
@@ -21,7 +25,9 @@ export default function PlanBuilder() {
     sendMessage, 
     startNewProject,
     isAuthenticated,
-    currentProjectId
+    currentProjectId,
+    useStreaming,
+    toggleStreaming
   } = useProjectPlanning();
 
   // Start a new project if none exists
@@ -65,6 +71,7 @@ export default function PlanBuilder() {
     }
     
     await sendMessage(prompt, formData);
+    setShowManualInput(false);
   };
 
   return (
@@ -97,6 +104,66 @@ export default function PlanBuilder() {
           </div>
         )}
         
+        {/* Control Panel - only visible when expanded */}
+        {isExpanded && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed top-4 left-1/2 transform -translate-x-1/2 z-30 flex items-center gap-2 bg-black/50 backdrop-blur-lg px-4 py-2 rounded-full border border-white/10 shadow-lg"
+          >
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="rounded-full text-white/70 hover:text-white hover:bg-white/10"
+                    onClick={() => setShowManualInput(true)}
+                  >
+                    <FileText className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">Use structured form input</TooltipContent>
+              </Tooltip>
+              
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="rounded-full text-white/70 hover:text-white hover:bg-white/10"
+                    onClick={toggleStreaming}
+                  >
+                    {useStreaming ? (
+                      <Zap className="h-4 w-4 text-siso-orange" />
+                    ) : (
+                      <Zap className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  {useStreaming ? "Disable streaming responses" : "Enable streaming responses"}
+                </TooltipContent>
+              </Tooltip>
+              
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="rounded-full text-white/70 hover:text-white hover:bg-white/10"
+                    onClick={() => startNewProject("New Project")}
+                  >
+                    <PlusSquare className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">Start new project</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </motion.div>
+        )}
+        
         <div className="relative z-10 flex-1 p-4 md:p-8">
           <div className="h-[calc(100vh-8rem)]">
             <AnimatePresence mode="wait">
@@ -125,6 +192,13 @@ export default function PlanBuilder() {
           </div>
         </div>
       </div>
+      
+      {/* Manual Input Sheet */}
+      <ManualInputSheet 
+        isOpen={showManualInput}
+        onClose={() => setShowManualInput(false)}
+        onSubmitToAI={handleManualFormSubmit}
+      />
     </MainLayout>
   );
 }
