@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Bot, User, Code, Copy, Check, Notebook, MessageSquare, ExternalLink, PlayCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -6,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
+import { AIThinkingLoader } from '@/components/ui/ai-thinking-loader';
 
 interface ChatMessageProps {
   role: 'assistant' | 'user';
@@ -406,11 +406,7 @@ export const ChatMessage = ({ role, content, assistantType, isLoading, steps, ri
         <div className="text-siso-text prose prose-invert max-w-none">
           {role === 'assistant' && renderIntegrationActions()}
           {isLoading ? (
-            <div className="flex gap-2">
-              <span className="w-2 h-2 bg-siso-orange/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-2 h-2 bg-siso-orange/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-2 h-2 bg-siso-orange/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-            </div>
+            <AIThinkingLoader variant="default" showStages={true} className="my-4" />
           ) : (
             <>
               {steps && (

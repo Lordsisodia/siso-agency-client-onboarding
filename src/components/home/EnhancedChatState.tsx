@@ -1,4 +1,3 @@
-
 import { ChatMessage } from '@/types/chat';
 import { Bot, Command, History, Send, Copy, Notebook, Search, Globe, Lightbulb } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -7,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { AIThinkingLoader } from '@/components/ui/ai-thinking-loader';
 
 interface EnhancedChatStateProps {
   messages: ChatMessage[];
@@ -137,12 +137,7 @@ export const EnhancedChatState = ({ messages, handleSubmit, isLoading }: Enhance
             )}
             <div className="flex-1 space-y-4">
               {message.loading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="h-2 w-2 rounded-full bg-siso-orange animate-bounce"></div>
-                  <div className="h-2 w-2 rounded-full bg-siso-orange animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                  <div className="h-2 w-2 rounded-full bg-siso-orange animate-bounce" style={{animationDelay: '0.4s'}}></div>
-                  <span className="text-sm text-siso-text/70 ml-2">AI is thinking...</span>
-                </div>
+                <AIThinkingLoader variant="default" showStages={true} />
               ) : (
                 <div className="relative">
                   {message.role === 'assistant' && (
@@ -180,12 +175,7 @@ export const EnhancedChatState = ({ messages, handleSubmit, isLoading }: Enhance
               <Bot className="h-5 w-5 text-white" />
             </div>
             <div className="flex-1">
-              <div className="flex items-center space-x-2">
-                <div className="h-2 w-2 rounded-full bg-siso-orange animate-bounce"></div>
-                <div className="h-2 w-2 rounded-full bg-siso-orange animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                <div className="h-2 w-2 rounded-full bg-siso-orange animate-bounce" style={{animationDelay: '0.4s'}}></div>
-                <span className="text-sm text-siso-text/70 ml-2">AI is thinking...</span>
-              </div>
+              <AIThinkingLoader variant="detailed" showStages={true} />
             </div>
           </div>
         )}

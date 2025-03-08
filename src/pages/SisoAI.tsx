@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { AIThinkingLoader } from '@/components/ui/ai-thinking-loader';
 
 interface Message {
   role: 'assistant' | 'user';
