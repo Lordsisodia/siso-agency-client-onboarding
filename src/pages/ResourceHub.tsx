@@ -2,8 +2,8 @@
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Waves } from '@/components/ui/waves-background';
 import { motion } from 'framer-motion';
-import { ResourceHub as ResourceHubComponent } from '@/components/features/resource-hub';
 import { FileText, BookOpen, Lightbulb, Briefcase, BarChart, Code } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 export default function ResourceHub() {
   const tabs = [
@@ -120,12 +120,37 @@ export default function ResourceHub() {
             </p>
           </motion.div>
           
-          <ResourceHubComponent 
-            badge="Development Resources"
-            heading="App Development Knowledge Base"
-            description="Access our comprehensive suite of resources designed to support and accelerate your app development projects."
-            tabs={tabs}
-          />
+          <div className="container mx-auto px-4 py-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {tabs.map((tab) => (
+                <motion.div
+                  key={tab.value}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                  className="p-6 rounded-xl border border-siso-orange/20 bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-sm hover:border-siso-orange/40 transition-all"
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-gradient-to-br from-siso-red/20 to-siso-orange/20 w-10 h-10 rounded-lg flex items-center justify-center">
+                      {tab.icon}
+                    </div>
+                    <h3 className="text-xl font-semibold text-siso-text-bold">{tab.label}</h3>
+                  </div>
+                  <p className="text-siso-text/70 mb-6">{tab.content.description}</p>
+                  <div className="aspect-video rounded-lg overflow-hidden mb-4">
+                    <img 
+                      src={tab.content.imageSrc} 
+                      alt={tab.content.imageAlt}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <Button className="w-full bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90">
+                    {tab.content.buttonText}
+                  </Button>
+                </motion.div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </MainLayout>

@@ -1,4 +1,8 @@
 
+// Simplified types file to maintain folder structure
+// The full video/education related types are temporarily removed
+// to resolve build errors
+
 export interface Video {
   id: string;
   title: string;
@@ -6,7 +10,7 @@ export interface Video {
   duration: string;
   thumbnail_url: string;
   created_at?: string;
-  date?: string; // [Analysis] Added date field from youtube_videos table
+  date?: string;
   educator: {
     name: string;
     avatar_url: string;

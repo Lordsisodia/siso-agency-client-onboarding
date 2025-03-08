@@ -1,7 +1,8 @@
 
-import { ReactNode } from 'react';
+import { LucideIcon } from "lucide-react";
+import { ReactElement } from "react";
 
-export interface TabContent {
+export interface ResourceTabContent {
   badge: string;
   title: string;
   description: string;
@@ -10,24 +11,16 @@ export interface TabContent {
   imageAlt: string;
 }
 
-export interface Tab {
+export interface ResourceTab {
   value: string;
-  icon: ReactNode;
+  icon: ReactElement;
   label: string;
-  content: TabContent;
+  content: ResourceTabContent;
 }
 
 export interface ResourceHubProps {
   badge?: string;
   heading?: string;
   description?: string;
-  tabs?: Tab[];
-}
-
-export interface CardStats {
-  mainStat: string;
-  mainLabel: string;
-  secondaryStat: string;
-  secondaryLabel: string;
-  benefits: string[];
+  tabs: ResourceTab[];
 }

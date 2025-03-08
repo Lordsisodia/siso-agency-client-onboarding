@@ -1,5 +1,5 @@
 
-export * from './use-educators-list';
-export * from './use-educator-details';
-export * from './use-educator-videos';
-export * from './types';
+// Placeholder file to maintain folder structure
+// The education-related hooks are temporarily removed
+// to resolve build errors
+export {};

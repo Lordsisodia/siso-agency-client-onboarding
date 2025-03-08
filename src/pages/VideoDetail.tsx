@@ -1,49 +1,32 @@
 
-import { useParams } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
-import { useVideoDetail } from '@/hooks/useVideoDetail';
-import { LoadingState } from '@/components/education/video-detail/LoadingState';
-import { ErrorState } from '@/components/education/video-detail/ErrorState';
-import { VideoBreadcrumbs } from '@/components/education/video-detail/VideoBreadcrumbs';
-import { VideoDetailLayout } from '@/components/education/video-detail/VideoDetailLayout';
+import { MainLayout } from '@/components/assistants/layout/MainLayout';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { ChevronLeft } from 'lucide-react';
 
 export default function VideoDetail() {
-  const { id } = useParams();
-  console.log('[VideoDetail] Processing video ID:', id);
-
-  const { data: videoData, isLoading, error } = useVideoDetail(id || '');
-
-  if (isLoading) {
-    return <LoadingState />;
-  }
-
-  if (error || !videoData) {
-    return <ErrorState />;
-  }
-
-  const videoDescription = '';  // We can get this from video_summaries table later
+  const navigate = useNavigate();
 
   return (
-    <>
-      <Helmet>
-        <title>{`${videoData.title || 'Video'} | ${videoData.educator.name} | SISO Education`}</title>
-        <meta name="description" content={videoDescription} />
-        <meta property="og:title" content={videoData.title || ''} />
-        <meta property="og:description" content={videoDescription} />
-        <meta property="og:image" content={videoData.thumbnail_url} />
-        <meta property="og:type" content="video.other" />
-      </Helmet>
+    <MainLayout>
+      <div className="container mx-auto px-4 py-16">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="mb-6"
+          onClick={() => navigate(-1)}
+        >
+          <ChevronLeft className="w-5 h-5 mr-2" />
+          Back
+        </Button>
 
-      <div className="min-h-screen bg-black">
-        <div className="max-w-[1800px] mx-auto px-4 py-4">
-          <VideoBreadcrumbs title={videoData.title} />
+        <div className="p-8 rounded-xl border border-siso-orange/20 bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-sm text-center">
+          <h1 className="text-3xl font-bold mb-4">Video Viewer</h1>
+          <p className="text-siso-text/70 mb-6">
+            This feature is currently being updated. Please check back later.
+          </p>
         </div>
-
-        <VideoDetailLayout 
-          video={videoData}
-          activeTab="analysis"
-        />
       </div>
-    </>
+    </MainLayout>
   );
 }
