@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SidebarLogo } from './sidebar/SidebarLogo';
@@ -69,7 +70,6 @@ export const Sidebar = () => {
     }
   };
 
-  // [Analysis] Keep sidebar expanded when profile is open
   const handleMouseEnter = () => {
     if (!isMobile && !isProfileOpen) {
       setIsExpanded(true);
@@ -155,32 +155,19 @@ export const Sidebar = () => {
         />
       </motion.div>
 
-      {/* Main Content Wrapper with smooth margin transition */}
-      <motion.div 
-        className="min-h-screen"
-        animate={{
-          marginLeft: !isMobile ? (isExpanded ? '16rem' : '4rem') : 0
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 200,
-          damping: 25
-        }}
-      >
-        {/* Mobile Overlay with improved backdrop blur */}
-        <AnimatePresence>
-          {isMobile && isMobileMenuOpen && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30"
-              onClick={() => setIsMobileMenuOpen(false)}
-            />
-          )}
-        </AnimatePresence>
-      </motion.div>
+      {/* Mobile Overlay with improved backdrop blur */}
+      <AnimatePresence>
+        {isMobile && isMobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 };

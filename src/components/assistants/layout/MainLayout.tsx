@@ -11,7 +11,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
   
   return (
-    <div className="min-h-screen flex bg-gradient-to-b from-siso-bg to-siso-bg/95">
+    <div className="flex min-h-screen bg-gradient-to-b from-siso-bg to-siso-bg/95">
       <Sidebar />
       <div className="flex-1 w-full">
         {children}
