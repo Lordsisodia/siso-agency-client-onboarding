@@ -37,7 +37,7 @@ async function getOrCreateThread(projectId: string) {
       .from('project_threads')
       .select('*')
       .eq('project_id', projectId)
-      .single();
+      .maybeSingle();
     
     if (existingThread?.thread_id) {
       console.log("Found existing thread:", existingThread.thread_id);
