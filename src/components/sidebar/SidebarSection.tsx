@@ -67,6 +67,7 @@ export const SidebarSection = ({
             collapsed={collapsed}
             onClick={onItemClick}
             isActive={isItemActive(item.href)}
+            isExternal={item.isExternal}
           />
         ))}
       </motion.div>

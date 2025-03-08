@@ -14,6 +14,7 @@ export interface MenuItem {
   href: string;
   icon: LucideIcon;
   label: string;
+  isExternal?: boolean;
 }
 
 export interface NavigationProps {
