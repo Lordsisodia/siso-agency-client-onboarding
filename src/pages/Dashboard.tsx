@@ -129,25 +129,29 @@ export default function Dashboard() {
             upcomingEvents={3} 
           />
           
-          {/* Main Content with different grid layout */}
+          {/* Main Content with modified layout - primary focus on project card */}
           <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-            {/* Projects Overview (Takes 3/4 of the width on extra large screens) */}
-            <div className="xl:col-span-3">
+            {/* Project Overview (Takes full width) */}
+            <div className="xl:col-span-4">
               <ProjectsOverview />
             </div>
             
-            {/* Sidebar (Takes 1/4 of the width on extra large screens) */}
-            <div className="space-y-6">
+            {/* Secondary Content (below the project) */}
+            <div className="xl:col-span-2">
               {/* Notifications Panel */}
               <NotificationsPanel 
                 notifications={notifications}
                 onMarkAsRead={handleMarkAsRead}
                 onViewAll={handleViewAllNotifications}
               />
-              
+            </div>
+            
+            <div className="xl:col-span-1">
               {/* Quick Actions Panel */}
               <QuickActionsPanel />
-              
+            </div>
+            
+            <div className="xl:col-span-1">
               {/* Upcoming Events */}
               <UpcomingEvents 
                 events={events}

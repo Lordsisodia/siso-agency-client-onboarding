@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { ProjectCard } from './ProjectCard';
-import { Plus, Filter, Search } from 'lucide-react';
+import { Plus, Filter, Search, ArrowLeft, ArrowRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
-// This would come from your API with enhanced mock data
+// Enhanced mock data with additional project metrics
 const mockProjects = [
   { 
     id: '1', 
@@ -21,7 +22,27 @@ const mockProjects = [
     priority: 'high' as const,
     tasks: { total: 18, completed: 12 },
     lastUpdated: '2023-11-15T10:30:00',
-    team: ['John Doe', 'Sarah Smith', 'Mike Johnson']
+    team: ['John Doe', 'Sarah Smith', 'Mike Johnson'],
+    // New fields for enhanced project card
+    phases: [
+      { name: 'Planning', status: 'completed', progress: 100 },
+      { name: 'Design', status: 'completed', progress: 100 },
+      { name: 'Development', status: 'in-progress', progress: 45 },
+      { name: 'Testing', status: 'pending', progress: 0 },
+      { name: 'Deployment', status: 'pending', progress: 0 }
+    ],
+    codeMetrics: {
+      linesOfCode: 8450,
+      commits: 72,
+      files: 34,
+      quality: 92
+    },
+    financialMetrics: {
+      marketValue: 48000,
+      costSavings: 12500,
+      developmentCost: 35500,
+      roi: 35
+    }
   },
   { 
     id: '2', 
@@ -34,7 +55,26 @@ const mockProjects = [
     priority: 'medium' as const,
     tasks: { total: 24, completed: 5 },
     lastUpdated: '2023-11-10T14:15:00',
-    team: ['Lisa Wong', 'James Taylor']
+    team: ['Lisa Wong', 'James Taylor'],
+    phases: [
+      { name: 'Planning', status: 'in-progress', progress: 60 },
+      { name: 'Design', status: 'pending', progress: 0 },
+      { name: 'Development', status: 'pending', progress: 0 },
+      { name: 'Testing', status: 'pending', progress: 0 },
+      { name: 'Deployment', status: 'pending', progress: 0 }
+    ],
+    codeMetrics: {
+      linesOfCode: 2120,
+      commits: 28,
+      files: 15,
+      quality: 88
+    },
+    financialMetrics: {
+      marketValue: 35000,
+      costSavings: 8000,
+      developmentCost: 27000,
+      roi: 29
+    }
   },
   { 
     id: '3', 
@@ -47,7 +87,26 @@ const mockProjects = [
     priority: 'high' as const,
     tasks: { total: 32, completed: 26 },
     lastUpdated: '2023-11-18T09:45:00',
-    team: ['Chris Lee', 'Amanda Park', 'David Miller', 'Emma White']
+    team: ['Chris Lee', 'Amanda Park', 'David Miller', 'Emma White'],
+    phases: [
+      { name: 'Planning', status: 'completed', progress: 100 },
+      { name: 'Design', status: 'completed', progress: 100 },
+      { name: 'Development', status: 'completed', progress: 100 },
+      { name: 'Testing', status: 'in-progress', progress: 75 },
+      { name: 'Deployment', status: 'pending', progress: 0 }
+    ],
+    codeMetrics: {
+      linesOfCode: 15320,
+      commits: 142,
+      files: 78,
+      quality: 95
+    },
+    financialMetrics: {
+      marketValue: 95000,
+      costSavings: 22000,
+      developmentCost: 73000,
+      roi: 30
+    }
   },
   { 
     id: '4', 
@@ -59,7 +118,26 @@ const mockProjects = [
     priority: 'low' as const,
     tasks: { total: 15, completed: 15 },
     lastUpdated: '2023-11-05T16:20:00',
-    team: ['Jennifer Garcia', 'Robert Chen']
+    team: ['Jennifer Garcia', 'Robert Chen'],
+    phases: [
+      { name: 'Planning', status: 'completed', progress: 100 },
+      { name: 'Research', status: 'completed', progress: 100 },
+      { name: 'Concept Development', status: 'completed', progress: 100 },
+      { name: 'Refinement', status: 'completed', progress: 100 },
+      { name: 'Delivery', status: 'completed', progress: 100 }
+    ],
+    codeMetrics: {
+      linesOfCode: 0,
+      commits: 0,
+      files: 12,
+      quality: 98
+    },
+    financialMetrics: {
+      marketValue: 22000,
+      costSavings: 5500,
+      developmentCost: 16500,
+      roi: 33
+    }
   }
 ];
 
@@ -69,6 +147,7 @@ type ProjectPriority = 'low' | 'medium' | 'high' | 'all';
 export const ProjectsOverview = () => {
   const navigate = useNavigate();
   const [projects] = useState(mockProjects);
+  const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeStatusFilter, setActiveStatusFilter] = useState<ProjectStatus>('all');
   const [activePriorityFilter, setActivePriorityFilter] = useState<ProjectPriority>('all');
@@ -103,6 +182,24 @@ export const ProjectsOverview = () => {
     return true;
   });
 
+  const currentProject = filteredProjects[currentProjectIndex] || null;
+
+  const nextProject = () => {
+    if (currentProjectIndex < filteredProjects.length - 1) {
+      setCurrentProjectIndex(currentProjectIndex + 1);
+    } else {
+      setCurrentProjectIndex(0); // Loop back to the first project
+    }
+  };
+
+  const prevProject = () => {
+    if (currentProjectIndex > 0) {
+      setCurrentProjectIndex(currentProjectIndex - 1);
+    } else {
+      setCurrentProjectIndex(filteredProjects.length - 1); // Loop to the last project
+    }
+  };
+
   const statusFilterOptions: { value: ProjectStatus; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'planning', label: 'Planning' },
@@ -126,7 +223,7 @@ export const ProjectsOverview = () => {
       className="mb-10"
     >
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h2 className="text-xl font-bold text-siso-text-bold">Recent Projects</h2>
+        <h2 className="text-xl font-bold text-siso-text-bold">Projects Overview</h2>
         
         <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
           <div className="relative">
@@ -214,16 +311,56 @@ export const ProjectsOverview = () => {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredProjects.map((project, index) => (
-            <ProjectCard
-              key={project.id}
-              {...project}
-              onViewDetails={handleViewDetails}
-              onEdit={handleEdit}
-              delay={index * 0.05}
-            />
-          ))}
+        <div className="relative">
+          {/* Project navigation controls */}
+          {filteredProjects.length > 1 && (
+            <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between pointer-events-none z-10 px-2">
+              <Button 
+                onClick={prevProject} 
+                variant="secondary" 
+                size="icon" 
+                className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg pointer-events-auto"
+              >
+                <ArrowLeft size={18} />
+              </Button>
+              <Button 
+                onClick={nextProject} 
+                variant="secondary" 
+                size="icon" 
+                className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg pointer-events-auto"
+              >
+                <ArrowRight size={18} />
+              </Button>
+            </div>
+          )}
+          
+          {/* Current project card */}
+          {currentProject && (
+            <div className="w-full mb-4">
+              <ProjectCard
+                key={currentProject.id}
+                {...currentProject}
+                onViewDetails={handleViewDetails}
+                onEdit={handleEdit}
+                isFullWidth={true}
+              />
+            </div>
+          )}
+          
+          {/* Project pagination indicator */}
+          {filteredProjects.length > 1 && (
+            <div className="flex justify-center gap-2 mt-4">
+              {filteredProjects.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentProjectIndex(index)}
+                  className={`h-2.5 rounded-full transition-all 
+                    ${index === currentProjectIndex ? 'w-8 bg-siso-orange' : 'w-2.5 bg-siso-border hover:bg-siso-orange/50'}`}
+                  aria-label={`Go to project ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
       
