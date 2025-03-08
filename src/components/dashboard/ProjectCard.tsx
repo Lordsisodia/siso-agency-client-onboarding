@@ -28,6 +28,8 @@ import { motion } from 'framer-motion';
 import { formatDate, formatCurrency, formatPercentage, formatNumber } from '@/lib/formatters';
 import { useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Phase {
   name: string;
@@ -95,13 +97,13 @@ export const ProjectCard = ({
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'planning':
-        return { bg: 'bg-blue-500', text: 'Planning', icon: <Calendar size={12} className="mr-1" /> };
+        return { bg: 'bg-blue-500', text: 'Planning', icon: <Calendar size={10} className="mr-1" /> };
       case 'in-progress':
-        return { bg: 'bg-amber-500', text: 'In Progress', icon: <Clock size={12} className="mr-1" /> };
+        return { bg: 'bg-amber-500', text: 'In Progress', icon: <Clock size={10} className="mr-1" /> };
       case 'reviewing':
-        return { bg: 'bg-purple-500', text: 'Reviewing', icon: <CheckSquare size={12} className="mr-1" /> };
+        return { bg: 'bg-purple-500', text: 'Reviewing', icon: <CheckSquare size={10} className="mr-1" /> };
       case 'completed':
-        return { bg: 'bg-green-500', text: 'Completed', icon: <CheckSquare size={12} className="mr-1" /> };
+        return { bg: 'bg-green-500', text: 'Completed', icon: <CheckSquare size={10} className="mr-1" /> };
       default:
         return { bg: 'bg-gray-500', text: 'Unknown', icon: null };
     }
@@ -140,6 +142,11 @@ export const ProjectCard = ({
     setExpanded(!expanded);
   };
 
+  // Generate initials for team members
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -149,67 +156,68 @@ export const ProjectCard = ({
       className="h-full"
     >
       <Card className={`h-full border border-siso-border hover:border-siso-orange/30 hover:shadow-lg hover:shadow-siso-orange/5 transition-all overflow-hidden ${isFullWidth ? 'flex flex-col' : ''}`}>
-        {/* Optimized Card Header - reduced vertical padding */}
-        <CardHeader className="px-5 py-4 pb-2">
-          <div className="flex justify-between items-start mb-2">
-            {/* Compact badges */}
-            <Badge className={`${statusConfig.bg} flex items-center px-2 py-0.5 text-xs`}>
+        {/* More compact Card Header with reduced padding */}
+        <CardHeader className="px-4 py-3 pb-1">
+          <div className="flex justify-between items-start">
+            {/* Smaller badges with less internal padding */}
+            <Badge className={`${statusConfig.bg} flex items-center px-1.5 py-0.5 text-[10px] leading-none h-4`}>
               {statusConfig.icon}
               {statusConfig.text}
             </Badge>
             
-            <Badge className={`${priorityConfig.bg} ${priorityConfig.textColor} flex items-center px-2 py-0.5 text-xs`}>
-              {priority === 'high' && <AlertTriangle size={12} className="mr-1" />}
+            <Badge className={`${priorityConfig.bg} ${priorityConfig.textColor} flex items-center px-1.5 py-0.5 text-[10px] leading-none h-4`}>
+              {priority === 'high' && <AlertTriangle size={10} className="mr-1" />}
               {priorityConfig.text}
             </Badge>
           </div>
           
-          <CardTitle className="text-xl font-bold text-siso-text-bold mb-1">{title}</CardTitle>
+          <CardTitle className="text-base font-bold text-siso-text-bold mt-1.5 mb-0.5">{title}</CardTitle>
           
           {client && (
-            <div className="flex items-center mt-1 text-xs text-siso-text/80">
-              <Building size={14} className="mr-1.5 text-siso-orange/70" />
+            <div className="flex items-center text-[10px] text-siso-text/80">
+              <Building size={10} className="mr-1 text-siso-orange/70" />
               {client}
             </div>
           )}
         </CardHeader>
         
-        <CardContent className={`px-5 py-3 pt-0 flex-1 ${isFullWidth ? 'grid grid-cols-1 lg:grid-cols-3 gap-4' : ''}`}>
+        <CardContent className={`px-4 py-2 flex-1 ${isFullWidth ? 'grid grid-cols-1 lg:grid-cols-3 gap-3' : ''}`}>
           <div className={isFullWidth ? "lg:col-span-1" : ""}>
-            <h4 className="text-xs font-semibold text-siso-text-bold mb-1.5">Overview</h4>
+            {/* Reduced label size */}
+            <h4 className="text-[10px] font-semibold text-siso-text-bold mb-1">Overview</h4>
             
             {/* Reduced height textarea */}
-            <div className="mb-3">
+            <div className="mb-2">
               <Textarea 
                 value={description} 
                 readOnly 
-                className="resize-none h-20 bg-siso-bg/30 border-siso-border text-xs text-siso-text/80 py-2"
+                className="resize-none h-16 bg-siso-bg/30 border-siso-border text-xs text-siso-text/80 py-1.5 px-2"
               />
             </div>
             
-            {/* Optimized progress section */}
-            <div className="mt-3 mb-3">
-              <div className="flex justify-between mb-1 text-xs">
+            {/* More compact progress section */}
+            <div className="mb-2">
+              <div className="flex justify-between mb-0.5 text-[10px]">
                 <span className="text-siso-text/80">Progress</span>
                 <span className="text-siso-text-bold">{progress}%</span>
               </div>
               <Progress 
                 value={progress} 
-                className="h-1.5 bg-siso-bg/50" 
+                className="h-1 bg-siso-bg/50" 
                 indicatorClassName="bg-gradient-to-r from-siso-red to-siso-orange rounded-full"
               />
             </div>
             
-            {/* Optimized grid layout for project metadata */}
-            <div className="grid grid-cols-2 gap-2">
+            {/* More compact grid for metadata */}
+            <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-[10px]">
               {deadline && (
                 <div className="flex flex-col">
-                  <span className="text-xs text-siso-text/70">Deadline</span>
-                  <div className="flex items-center text-xs">
-                    <Clock size={12} className="mr-1 text-siso-orange" />
+                  <span className="text-siso-text/70 text-[9px]">Deadline</span>
+                  <div className="flex items-center">
+                    <Clock size={10} className="mr-1 text-siso-orange" />
                     <span>{formatDate(new Date(deadline))}</span>
                     {daysRemaining !== null && daysRemaining <= 7 && (
-                      <Badge variant="warning" className="ml-1 text-xs py-0 px-1 h-4">
+                      <Badge variant="warning" className="ml-1 text-[8px] py-0 px-1 h-3">
                         {daysRemaining}d
                       </Badge>
                     )}
@@ -219,9 +227,9 @@ export const ProjectCard = ({
               
               {tasks.total > 0 && (
                 <div className="flex flex-col">
-                  <span className="text-xs text-siso-text/70">Tasks</span>
-                  <div className="flex items-center text-xs">
-                    <CheckSquare size={12} className="mr-1 text-siso-orange" />
+                  <span className="text-siso-text/70 text-[9px]">Tasks</span>
+                  <div className="flex items-center">
+                    <CheckSquare size={10} className="mr-1 text-siso-orange" />
                     <span>
                       {tasks.completed}/{tasks.total}
                     </span>
@@ -230,42 +238,78 @@ export const ProjectCard = ({
               )}
               
               <div className="flex flex-col">
-                <span className="text-xs text-siso-text/70">Updated</span>
-                <div className="text-xs text-siso-text/90">
+                <span className="text-siso-text/70 text-[9px]">Updated</span>
+                <div className="text-siso-text/90">
                   {formatDate(new Date(lastUpdated))}
                 </div>
               </div>
               
               {team.length > 0 && (
                 <div className="flex flex-col">
-                  <span className="text-xs text-siso-text/70">Team</span>
+                  <span className="text-siso-text/70 text-[9px]">Team</span>
                   <div className="flex items-center">
-                    <Users size={12} className="mr-1 text-siso-orange" />
-                    <span className="text-xs text-siso-text/90">
-                      {team.length} members
+                    <Users size={10} className="mr-1 text-siso-orange" />
+                    <span className="text-siso-text/90">
+                      {team.length} member{team.length !== 1 ? 's' : ''}
                     </span>
                   </div>
                 </div>
               )}
             </div>
+            
+            {/* Team members avatars */}
+            {team.length > 0 && (
+              <div className="mt-2">
+                <div className="flex -space-x-1.5 overflow-hidden">
+                  <TooltipProvider>
+                    {team.slice(0, 5).map((member, index) => (
+                      <Tooltip key={index}>
+                        <TooltipTrigger asChild>
+                          <Avatar className="w-5 h-5 border border-siso-border text-[8px]">
+                            <AvatarFallback className="bg-gradient-to-r from-siso-red/20 to-siso-orange/20 text-siso-orange">
+                              {getInitials(member)}
+                            </AvatarFallback>
+                          </Avatar>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="text-xs py-1 px-2">
+                          {member}
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
+                    {team.length > 5 && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Avatar className="w-5 h-5 border border-siso-border bg-siso-bg/50 text-[8px]">
+                            <AvatarFallback>+{team.length - 5}</AvatarFallback>
+                          </Avatar>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="text-xs py-1 px-2">
+                          {team.slice(5).join(', ')}
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </TooltipProvider>
+                </div>
+              </div>
+            )}
           </div>
 
           {isFullWidth && (
             <div className="lg:col-span-1">
-              <h4 className="text-xs font-semibold text-siso-text-bold mb-1.5">Project Phases</h4>
+              <h4 className="text-[10px] font-semibold text-siso-text-bold mb-1">Project Phases</h4>
               
-              {/* Optimized project phases - horizontal layout */}
-              <div className="grid grid-cols-2 gap-2">
+              {/* Optimized phases layout - smaller, more compact */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                 {phases.map((phase, index) => (
-                  <div key={index} className="bg-siso-bg/30 border border-siso-border rounded-md p-2">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-xs font-medium">{phase.name}</span>
-                      <Badge className={`${getPhaseStatusColor(phase.status)} text-[10px] py-0 px-1.5 h-4`}>
+                  <div key={index} className="bg-siso-bg/30 border border-siso-border rounded p-1.5">
+                    <div className="flex justify-between items-center mb-0.5">
+                      <span className="text-[10px] font-medium">{phase.name}</span>
+                      <Badge className={`${getPhaseStatusColor(phase.status)} text-[8px] py-0 px-1 h-3 leading-none`}>
                         {phase.status === 'completed' ? 'Done' : 
                          phase.status === 'in-progress' ? 'Active' : 'Pending'}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1">
                       <Progress 
                         value={phase.progress} 
                         className="h-1 flex-1 bg-siso-bg/50" 
@@ -275,54 +319,54 @@ export const ProjectCard = ({
                           'bg-gray-400/40'
                         } rounded-full`}
                       />
-                      <span className="text-[10px] text-siso-text/80">{phase.progress}%</span>
+                      <span className="text-[8px] text-siso-text/80">{phase.progress}%</span>
                     </div>
                   </div>
                 ))}
               </div>
               
-              {/* Optimized code metrics section */}
+              {/* Optimized code metrics - compact grid */}
               {codeMetrics && (
-                <div className="mt-3">
-                  <h4 className="text-xs font-semibold text-siso-text-bold mb-1.5">Code Metrics</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-siso-bg/30 border border-siso-border rounded-md p-2">
+                <div className="mt-2">
+                  <h4 className="text-[10px] font-semibold text-siso-text-bold mb-1">Code Metrics</h4>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <div className="bg-siso-bg/30 border border-siso-border rounded p-1.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                          <Code size={12} className="mr-1 text-siso-orange" />
-                          <span className="text-[10px] text-siso-text/70">Lines of Code</span>
+                          <Code size={10} className="mr-1 text-siso-orange" />
+                          <span className="text-[8px] text-siso-text/70">Lines of Code</span>
                         </div>
-                        <span className="text-xs font-medium">{formatNumber(codeMetrics.linesOfCode)}</span>
+                        <span className="text-[10px] font-medium">{formatNumber(codeMetrics.linesOfCode)}</span>
                       </div>
                     </div>
                     
-                    <div className="bg-siso-bg/30 border border-siso-border rounded-md p-2">
+                    <div className="bg-siso-bg/30 border border-siso-border rounded p-1.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                          <GitBranch size={12} className="mr-1 text-siso-orange" />
-                          <span className="text-[10px] text-siso-text/70">Commits</span>
+                          <GitBranch size={10} className="mr-1 text-siso-orange" />
+                          <span className="text-[8px] text-siso-text/70">Commits</span>
                         </div>
-                        <span className="text-xs font-medium">{formatNumber(codeMetrics.commits)}</span>
+                        <span className="text-[10px] font-medium">{formatNumber(codeMetrics.commits)}</span>
                       </div>
                     </div>
                     
-                    <div className="bg-siso-bg/30 border border-siso-border rounded-md p-2">
+                    <div className="bg-siso-bg/30 border border-siso-border rounded p-1.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                          <FileText size={12} className="mr-1 text-siso-orange" />
-                          <span className="text-[10px] text-siso-text/70">Files</span>
+                          <FileText size={10} className="mr-1 text-siso-orange" />
+                          <span className="text-[8px] text-siso-text/70">Files</span>
                         </div>
-                        <span className="text-xs font-medium">{formatNumber(codeMetrics.files)}</span>
+                        <span className="text-[10px] font-medium">{formatNumber(codeMetrics.files)}</span>
                       </div>
                     </div>
                     
-                    <div className="bg-siso-bg/30 border border-siso-border rounded-md p-2">
+                    <div className="bg-siso-bg/30 border border-siso-border rounded p-1.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                          <BarChart2 size={12} className="mr-1 text-siso-orange" />
-                          <span className="text-[10px] text-siso-text/70">Quality</span>
+                          <BarChart2 size={10} className="mr-1 text-siso-orange" />
+                          <span className="text-[8px] text-siso-text/70">Quality</span>
                         </div>
-                        <span className="text-xs font-medium">{codeMetrics.quality}/100</span>
+                        <span className="text-[10px] font-medium">{codeMetrics.quality}/100</span>
                       </div>
                     </div>
                   </div>
@@ -333,72 +377,74 @@ export const ProjectCard = ({
 
           {isFullWidth && financialMetrics && (
             <div className="lg:col-span-1">
-              <h4 className="text-xs font-semibold text-siso-text-bold mb-1.5">Financial Metrics</h4>
+              <h4 className="text-[10px] font-semibold text-siso-text-bold mb-1">Financial Metrics</h4>
               
-              {/* Optimized financial metrics layout */}
-              <div className="grid grid-cols-2 gap-2">
-                <div className="bg-gradient-to-r from-siso-bg/40 to-siso-bg/20 border border-siso-border rounded-md p-2 col-span-2">
+              {/* Optimized financial metrics - more compact grid */}
+              <div className="grid grid-cols-2 gap-1.5">
+                <div className="bg-gradient-to-r from-siso-bg/40 to-siso-bg/20 border border-siso-border rounded-md p-1.5 col-span-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <DollarSign size={12} className="mr-1 text-siso-orange" />
-                      <span className="text-xs font-medium">Market Value</span>
+                      <DollarSign size={10} className="mr-1 text-siso-orange" />
+                      <span className="text-[10px] font-medium">Market Value</span>
                     </div>
-                    <span className="text-sm font-bold text-siso-text-bold">
+                    <span className="text-xs font-bold text-siso-text-bold">
                       {formatCurrency(financialMetrics.marketValue)}
                     </span>
                   </div>
-                  <p className="text-[10px] text-siso-text/60 mt-0.5">Estimated value in current market</p>
+                  <p className="text-[8px] text-siso-text/60 mt-0.5">Estimated value in current market</p>
                 </div>
                 
-                <div className="bg-gradient-to-r from-siso-bg/40 to-siso-bg/20 border border-siso-border rounded-md p-2 col-span-2">
+                <div className="bg-gradient-to-r from-siso-bg/40 to-siso-bg/20 border border-siso-border rounded-md p-1.5 col-span-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <TrendingUp size={12} className="mr-1 text-green-500" />
-                      <span className="text-xs font-medium">Cost Savings</span>
+                      <TrendingUp size={10} className="mr-1 text-green-500" />
+                      <span className="text-[10px] font-medium">Cost Savings</span>
                     </div>
-                    <span className="text-sm font-bold text-green-500">
+                    <span className="text-xs font-bold text-green-500">
                       {formatCurrency(financialMetrics.costSavings)}
                     </span>
                   </div>
-                  <p className="text-[10px] text-siso-text/60 mt-0.5">vs. traditional development</p>
+                  <p className="text-[8px] text-siso-text/60 mt-0.5">vs. traditional development</p>
                 </div>
                 
-                <div className="bg-siso-bg/30 border border-siso-border rounded-md p-2">
+                <div className="bg-siso-bg/30 border border-siso-border rounded-md p-1.5">
                   <div className="flex items-center mb-0.5">
-                    <Layers size={12} className="mr-1 text-siso-orange" />
-                    <span className="text-[10px] text-siso-text/70">Development</span>
+                    <Layers size={10} className="mr-1 text-siso-orange" />
+                    <span className="text-[8px] text-siso-text/70">Development</span>
                   </div>
-                  <span className="text-xs font-medium">
+                  <span className="text-[10px] font-medium">
                     {formatCurrency(financialMetrics.developmentCost)}
                   </span>
                 </div>
                 
-                <div className="bg-siso-bg/30 border border-siso-border rounded-md p-2">
+                <div className="bg-siso-bg/30 border border-siso-border rounded-md p-1.5">
                   <div className="flex items-center mb-0.5">
-                    <GitPullRequest size={12} className="mr-1 text-siso-orange" />
-                    <span className="text-[10px] text-siso-text/70">ROI</span>
+                    <GitPullRequest size={10} className="mr-1 text-siso-orange" />
+                    <span className="text-[8px] text-siso-text/70">ROI</span>
                   </div>
-                  <span className="text-xs font-medium">
+                  <span className="text-[10px] font-medium">
                     {formatPercentage(financialMetrics.roi)}
                   </span>
                 </div>
                 
-                {/* Optimized team members section with horizontal display */}
-                <div className="mt-2 col-span-2">
-                  <h4 className="text-xs font-semibold text-siso-text-bold mb-1.5">Team</h4>
-                  <ScrollArea className="h-[70px]">
-                    <div className="flex flex-wrap gap-1">
-                      {team.map((member, index) => (
-                        <div key={index} className="flex items-center gap-1.5 py-1 px-2 rounded-md hover:bg-siso-bg/50 bg-siso-bg/30 border border-siso-border/50">
-                          <div className="w-5 h-5 rounded-full bg-gradient-to-r from-siso-red/20 to-siso-orange/20 flex items-center justify-center text-[10px] font-medium text-siso-orange">
-                            {member.split(' ').map(n => n[0]).join('')}
+                {/* Team members with horizontal scroll */}
+                {team.length > 0 && (
+                  <div className="mt-1 col-span-2">
+                    <h4 className="text-[10px] font-semibold text-siso-text-bold mb-1">Team</h4>
+                    <ScrollArea className="h-[42px]">
+                      <div className="flex flex-wrap gap-1">
+                        {team.map((member, index) => (
+                          <div key={index} className="flex items-center gap-1 py-0.5 px-1.5 rounded-md hover:bg-siso-bg/50 bg-siso-bg/30 border border-siso-border/50">
+                            <div className="w-4 h-4 rounded-full bg-gradient-to-r from-siso-red/20 to-siso-orange/20 flex items-center justify-center text-[8px] font-medium text-siso-orange">
+                              {getInitials(member)}
+                            </div>
+                            <span className="text-[9px]">{member}</span>
                           </div>
-                          <span className="text-xs">{member}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -410,39 +456,62 @@ export const ProjectCard = ({
               exit={{ opacity: 0, height: 0 }}
               className="mt-2 pt-2 border-t border-siso-border/30"
             >
-              <div className="grid grid-cols-2 gap-2">
-                <div className="flex flex-col">
-                  <span className="text-xs text-siso-text/70">Updated</span>
-                  <div className="text-xs text-siso-text/90">
-                    {formatDate(new Date(lastUpdated))}
+              {/* Team members with horizontal scroll for collapsed view */}
+              {team.length > 0 && (
+                <div>
+                  <h4 className="text-[10px] font-semibold text-siso-text-bold mb-1">Team</h4>
+                  <ScrollArea className="h-[42px]">
+                    <div className="flex flex-wrap gap-1">
+                      {team.map((member, index) => (
+                        <div key={index} className="flex items-center gap-1 py-0.5 px-1.5 rounded-md hover:bg-siso-bg/50 bg-siso-bg/30 border border-siso-border/50">
+                          <div className="w-4 h-4 rounded-full bg-gradient-to-r from-siso-red/20 to-siso-orange/20 flex items-center justify-center text-[8px] font-medium text-siso-orange">
+                            {getInitials(member)}
+                          </div>
+                          <span className="text-[9px]">{member}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              )}
+              
+              {/* Add phases in collapsed view if available */}
+              {phases.length > 0 && (
+                <div className="mt-2">
+                  <h4 className="text-[10px] font-semibold text-siso-text-bold mb-1">Phases</h4>
+                  <div className="grid grid-cols-1 gap-1">
+                    {phases.map((phase, index) => (
+                      <div key={index} className="flex items-center gap-1.5">
+                        <Badge className={`${getPhaseStatusColor(phase.status)} w-1.5 h-1.5 p-0 rounded-full`} />
+                        <span className="text-[9px] font-medium flex-1">{phase.name}</span>
+                        <Progress 
+                          value={phase.progress} 
+                          className="h-1 w-16 bg-siso-bg/50" 
+                          indicatorClassName={`${
+                            phase.status === 'completed' ? 'bg-green-500' : 
+                            phase.status === 'in-progress' ? 'bg-amber-500' : 
+                            'bg-gray-400/40'
+                          } rounded-full`}
+                        />
+                        <span className="text-[8px] text-siso-text/80 w-6 text-right">{phase.progress}%</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                
-                {team.length > 0 && (
-                  <div className="flex flex-col">
-                    <span className="text-xs text-siso-text/70">Team</span>
-                    <div className="flex items-center">
-                      <Users size={12} className="mr-1 text-siso-orange" />
-                      <span className="text-xs text-siso-text/90">
-                        {team.length} members
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
+              )}
             </motion.div>
           )}
         </CardContent>
         
         {/* Optimized card footer */}
-        <CardFooter className="px-5 py-2 flex justify-between items-center border-t border-siso-border/20 mt-auto">
+        <CardFooter className="px-4 py-1.5 flex justify-between items-center border-t border-siso-border/20 mt-auto">
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={() => onViewDetails(id)}
-            className="text-xs text-siso-orange hover:text-siso-red hover:bg-siso-orange/5 h-8 px-2"
+            className="text-[10px] text-siso-orange hover:text-siso-red hover:bg-siso-orange/5 h-6 px-1.5"
           >
-            View Details
+            Details
             <ExternalLink size={10} className="ml-1" />
           </Button>
           
@@ -452,12 +521,12 @@ export const ProjectCard = ({
                 variant="ghost"
                 size="sm"
                 onClick={toggleExpand}
-                className="text-xs hover:bg-siso-orange/5 mr-1 h-7 w-7 p-0"
+                className="text-[10px] hover:bg-siso-orange/5 mr-1 h-6 w-6 p-0"
               >
                 {expanded ? (
-                  <ChevronUp size={14} />
+                  <ChevronUp size={12} />
                 ) : (
-                  <ChevronDown size={14} />
+                  <ChevronDown size={12} />
                 )}
               </Button>
             )}
@@ -466,9 +535,9 @@ export const ProjectCard = ({
               variant="ghost"
               size="sm"
               onClick={() => onEdit(id)}
-              className="text-xs hover:bg-siso-orange/5 h-7 w-7 p-0"
+              className="text-[10px] hover:bg-siso-orange/5 h-6 w-6 p-0"
             >
-              <MoreHorizontal size={14} />
+              <MoreHorizontal size={12} />
             </Button>
           </div>
         </CardFooter>
