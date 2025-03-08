@@ -4,8 +4,15 @@ import { Waves } from '@/components/ui/waves-background';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Projects() {
+  const navigate = useNavigate();
+
+  const handleCreateNewProject = () => {
+    navigate('/plan-builder');
+  };
+
   return (
     <MainLayout>
       <div className="relative min-h-screen">
@@ -44,7 +51,9 @@ export default function Projects() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <Button className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90">
+              <Button 
+                onClick={handleCreateNewProject}
+                className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90">
                 <Plus className="mr-2 h-4 w-4" />
                 New Project
               </Button>
@@ -62,7 +71,9 @@ export default function Projects() {
               <p className="mb-6 text-siso-text/70">
                 Start your app development journey by creating your first project. We'll guide you through the process step by step.
               </p>
-              <Button className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90">
+              <Button 
+                onClick={handleCreateNewProject}
+                className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90">
                 <Plus className="mr-2 h-4 w-4" />
                 Create Your First Project
               </Button>

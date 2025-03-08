@@ -1,18 +1,78 @@
 
+import { useState } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Waves } from '@/components/ui/waves-background';
 import { motion } from 'framer-motion';
-import { FileText, Package, Code, Server, Cpu, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { PlanBuilderSteps } from '@/components/plan-builder/PlanBuilderSteps';
+import { BasicInfoForm, BasicInfoData } from '@/components/plan-builder/BasicInfoForm';
+import { RequirementsForm, RequirementsData } from '@/components/plan-builder/RequirementsForm';
+import { FeaturesForm, FeaturesData } from '@/components/plan-builder/FeaturesForm';
+import { SpecificationsForm, SpecificationsData } from '@/components/plan-builder/SpecificationsForm';
+import { SummaryView } from '@/components/plan-builder/SummaryView';
 
 export default function PlanBuilder() {
-  const stages = [
-    { icon: FileText, title: "Requirements", description: "Define your app requirements and objectives" },
-    { icon: Package, title: "Features", description: "Select the features and functionality you need" },
-    { icon: Code, title: "Interface", description: "Choose your preferred UI/UX approach" },
-    { icon: Server, title: "Backend", description: "Configure your app's server and database needs" },
-    { icon: Cpu, title: "Integrations", description: "Select third-party services and APIs" },
-    { icon: Zap, title: "Maintenance", description: "Define ongoing support and maintenance needs" }
-  ];
+  const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [basicInfo, setBasicInfo] = useState<BasicInfoData>({
+    projectName: '',
+    companyName: '',
+    contactName: '',
+    contactEmail: '',
+    website: '',
+    overview: '',
+  });
+  const [requirements, setRequirements] = useState<RequirementsData>({
+    goals: [''],
+    requirements: [''],
+    targetAudience: '',
+    targetLaunchDate: '',
+  });
+  const [features, setFeatures] = useState<FeaturesData>({
+    selectedFeatures: [],
+    totalCost: 0,
+  });
+  const [specifications, setSpecifications] = useState<SpecificationsData>({
+    detailedSpecifications: '',
+    designNotes: '',
+    integrationNotes: '',
+  });
+
+  const stepTitles = ["Basic Info", "Requirements", "Features", "Specifications", "Summary"];
+  
+  const handleBasicInfoNext = (data: BasicInfoData) => {
+    setBasicInfo(data);
+    setCurrentStep(1);
+  };
+  
+  const handleRequirementsNext = (data: RequirementsData) => {
+    setRequirements(data);
+    setCurrentStep(2);
+  };
+  
+  const handleFeaturesNext = (data: FeaturesData) => {
+    setFeatures(data);
+    setCurrentStep(3);
+  };
+  
+  const handleSpecificationsNext = (data: SpecificationsData) => {
+    setSpecifications(data);
+    setCurrentStep(4);
+  };
+  
+  const handleBack = () => {
+    setCurrentStep(prev => Math.max(0, prev - 1));
+  };
+  
+  const handleComplete = () => {
+    // Here you would typically save the plan to the database
+    // For now, we'll just navigate back to projects page
+    navigate('/projects');
+  };
+  
+  const handleEdit = (step: number) => {
+    setCurrentStep(step);
+  };
 
   return (
     <MainLayout>
@@ -32,12 +92,12 @@ export default function PlanBuilder() {
           />
         </div>
         
-        <div className="relative z-10 container px-4 py-16 mx-auto">
+        <div className="relative z-10 container px-4 py-10 mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="mb-8 text-center"
+            className="mb-6 text-center"
           >
             <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-siso-red to-siso-orange text-transparent bg-clip-text">
               Plan Builder
@@ -47,43 +107,58 @@ export default function PlanBuilder() {
             </p>
           </motion.div>
           
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"
-          >
-            {stages.map((stage, index) => (
-              <motion.div
-                key={stage.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 * index }}
-                className="p-6 rounded-xl border border-siso-orange/20 bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-sm hover:border-siso-orange/40 transition-all cursor-pointer"
-              >
-                <div className="bg-gradient-to-br from-siso-red/20 to-siso-orange/20 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
-                  <stage.icon className="text-siso-orange w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-semibold mb-2 text-siso-text-bold">{stage.title}</h3>
-                <p className="text-siso-text/70">{stage.description}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="p-8 rounded-xl border border-siso-orange/20 bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-sm text-center"
-          >
-            <h3 className="text-xl font-semibold mb-4 text-siso-text-bold">Ready to Start Building Your Plan?</h3>
-            <p className="text-siso-text/70 mb-6 max-w-2xl mx-auto">
-              Click the button below to begin the interactive planning process. You can save your progress and return at any time.
-            </p>
-            <button className="px-6 py-3 rounded-lg bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90 text-white font-medium transition-all">
-              Start Building Your Plan
-            </button>
-          </motion.div>
+          <div className="max-w-6xl mx-auto">
+            <PlanBuilderSteps 
+              currentStep={currentStep}
+              totalSteps={stepTitles.length}
+              stepTitles={stepTitles}
+            />
+            
+            <div className="bg-black/20 border border-siso-orange/20 rounded-xl p-6 backdrop-blur-sm">
+              {currentStep === 0 && (
+                <BasicInfoForm 
+                  onNext={handleBasicInfoNext}
+                  initialData={basicInfo}
+                />
+              )}
+              
+              {currentStep === 1 && (
+                <RequirementsForm 
+                  onNext={handleRequirementsNext}
+                  onBack={handleBack}
+                  initialData={requirements}
+                />
+              )}
+              
+              {currentStep === 2 && (
+                <FeaturesForm 
+                  onNext={handleFeaturesNext}
+                  onBack={handleBack}
+                  initialData={features}
+                />
+              )}
+              
+              {currentStep === 3 && (
+                <SpecificationsForm 
+                  onNext={handleSpecificationsNext}
+                  onBack={handleBack}
+                  initialData={specifications}
+                />
+              )}
+              
+              {currentStep === 4 && (
+                <SummaryView 
+                  basicInfo={basicInfo}
+                  requirements={requirements}
+                  features={features}
+                  specifications={specifications}
+                  onBack={handleBack}
+                  onSubmit={handleComplete}
+                  onEdit={handleEdit}
+                />
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </MainLayout>
