@@ -7,7 +7,10 @@ export interface Category {
   image_url?: string;
 }
 
-// [Framework] ContentCategory type was moved to complexity.ts for better organization
-// This is kept for reference
-import { ContentCategory } from './complexity';
-export type { ContentCategory };
+export type ContentCategory = 
+  | 'ai_research'
+  | 'breakthrough_technologies'
+  | 'industry_applications'
+  | 'policy_ethics'
+  | 'products_launches'
+  | 'tutorial_guides';
