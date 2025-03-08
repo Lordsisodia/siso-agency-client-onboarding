@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useLocation } from 'react-router-dom';
@@ -32,6 +31,16 @@ import DailyNews from '@/pages/DailyNews';
 import Index from '@/pages/Index';
 import Terms from '@/pages/Terms';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
+
+// New page imports
+import Dashboard from '@/pages/Dashboard';
+import Projects from '@/pages/Projects';
+import PlanBuilder from '@/pages/PlanBuilder';
+import CompanyProfile from '@/pages/CompanyProfile';
+import ResourceHub from '@/pages/ResourceHub';
+import Portfolio from '@/pages/Portfolio';
+import CompetitiveAnalysis from '@/pages/CompetitiveAnalysis';
+import Notifications from '@/pages/Notifications';
 
 import { Toaster } from '@/components/ui/toaster';
 import { useAuthSession } from '@/hooks/useAuthSession';
@@ -76,6 +85,50 @@ function App() {
             <Home />
           </ProtectedRoute>
         } />
+        
+        {/* New primary routes */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/projects" element={
+          <ProtectedRoute>
+            <Projects />
+          </ProtectedRoute>
+        } />
+        <Route path="/plan-builder" element={
+          <ProtectedRoute>
+            <PlanBuilder />
+          </ProtectedRoute>
+        } />
+        <Route path="/company-profile" element={
+          <ProtectedRoute>
+            <CompanyProfile />
+          </ProtectedRoute>
+        } />
+        <Route path="/resource-hub" element={
+          <ProtectedRoute>
+            <ResourceHub />
+          </ProtectedRoute>
+        } />
+        <Route path="/portfolio" element={
+          <ProtectedRoute>
+            <Portfolio />
+          </ProtectedRoute>
+        } />
+        <Route path="/competitive-analysis" element={
+          <ProtectedRoute>
+            <CompetitiveAnalysis />
+          </ProtectedRoute>
+        } />
+        <Route path="/notifications" element={
+          <ProtectedRoute>
+            <Notifications />
+          </ProtectedRoute>
+        } />
+        
+        {/* Existing protected routes */}
         <Route path="/profile" element={
           <ProtectedRoute>
             <Profile />
@@ -177,7 +230,7 @@ function App() {
 
         {/* Modified fallback route with more specific handling */}
         <Route path="/economy/*" element={<Navigate to="/economy" replace />} />
-        <Route path="*" element={<Navigate to="/ai-news" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
 
       <Toaster />
