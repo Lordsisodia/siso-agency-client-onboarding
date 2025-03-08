@@ -25,6 +25,13 @@ export default function VideoDetail() {
           <p className="text-siso-text/70 mb-6">
             This feature is currently being updated. Please check back later.
           </p>
+          <Button 
+            variant="default" 
+            onClick={() => navigate('/dashboard')}
+            className="bg-gradient-to-r from-siso-red to-siso-orange"
+          >
+            Return to Dashboard
+          </Button>
         </div>
       </div>
     </MainLayout>
