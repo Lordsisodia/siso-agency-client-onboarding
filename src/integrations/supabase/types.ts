@@ -133,6 +133,36 @@ export type Database = {
           },
         ]
       }
+      assistant_metadata: {
+        Row: {
+          assistant_id: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          model: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          assistant_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          model: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          assistant_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          model?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chat_users: {
         Row: {
           airtable_id: string | null
@@ -761,6 +791,38 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      project_threads: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string
+          thread_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id: string
+          thread_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string
+          thread_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_threads_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "project_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       resource_categories: {
         Row: {
