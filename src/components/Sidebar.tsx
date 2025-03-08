@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SidebarLogo } from './sidebar/SidebarLogo';
@@ -70,6 +69,7 @@ export const Sidebar = () => {
     }
   };
 
+  // [Analysis] Keep sidebar expanded when profile is open
   const handleMouseEnter = () => {
     if (!isMobile && !isProfileOpen) {
       setIsExpanded(true);
@@ -84,18 +84,17 @@ export const Sidebar = () => {
 
   return (
     <>
-      {/* Mobile Menu Button */}
+      {/* Mobile Menu Button with smooth icon transition */}
       {isMobile && (
         <motion.div
           initial={false}
           animate={{ scale: 1 }}
           whileTap={{ scale: 0.95 }}
-          className="fixed top-4 left-4 z-50"
         >
           <Button
             variant="ghost"
             size="icon"
-            className="bg-siso-bg/80 backdrop-blur-sm"
+            className="fixed top-4 right-4 z-50 bg-siso-bg/80 backdrop-blur-sm"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             <AnimatePresence mode="wait" initial={false}>
@@ -117,7 +116,7 @@ export const Sidebar = () => {
         </motion.div>
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar with improved animations */}
       <motion.div 
         initial={false}
         animate={
@@ -127,10 +126,10 @@ export const Sidebar = () => {
         }
         variants={sidebarVariants}
         className={`
-          h-screen min-h-screen overflow-y-auto z-40
+          fixed top-0 h-screen overflow-y-auto
           bg-gradient-to-b from-siso-bg to-siso-bg/95 
           border-r border-siso-text/10 shadow-lg
-          ${isMobile ? 'fixed left-0 top-0' : 'relative'}
+          ${isMobile ? 'left-0 z-40' : ''}
         `}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -156,19 +155,32 @@ export const Sidebar = () => {
         />
       </motion.div>
 
-      {/* Mobile Overlay */}
-      <AnimatePresence>
-        {isMobile && isMobileMenuOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-        )}
-      </AnimatePresence>
+      {/* Main Content Wrapper with smooth margin transition */}
+      <motion.div 
+        className="min-h-screen"
+        animate={{
+          marginLeft: !isMobile ? (isExpanded ? '16rem' : '4rem') : 0
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 200,
+          damping: 25
+        }}
+      >
+        {/* Mobile Overlay with improved backdrop blur */}
+        <AnimatePresence>
+          {isMobile && isMobileMenuOpen && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+          )}
+        </AnimatePresence>
+      </motion.div>
     </>
   );
 };

@@ -1,20 +1,21 @@
 
-import React from 'react';
 import { Sidebar } from '@/components/Sidebar';
+import { ReactNode } from 'react';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 interface MainLayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+export function MainLayout({ children }: MainLayoutProps) {
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-gradient-to-b from-siso-bg to-siso-bg/95">
-      <Sidebar />
-      <main className="flex-1 flex flex-col relative pl-16 md:pl-0 w-full overflow-auto">
-        <div className="flex-grow w-full p-4 md:p-6">
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-background">
+        <Sidebar />
+        <main className="flex-1 overflow-y-auto">
           {children}
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </SidebarProvider>
   );
-};
+}

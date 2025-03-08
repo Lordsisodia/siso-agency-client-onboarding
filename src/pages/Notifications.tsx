@@ -1,3 +1,4 @@
+
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Waves } from '@/components/ui/waves-background';
 import { motion } from 'framer-motion';
@@ -122,54 +123,55 @@ export default function Notifications() {
   };
 
   return (
-    <div className="relative min-h-screen">
-      <div className="absolute inset-0 z-0">
-        <Waves 
-          lineColor="rgba(255, 87, 34, 0.2)"
-          waveSpeedX={0.02}
-          waveSpeedY={0.01}
-          waveAmpX={40}
-          waveAmpY={20}
-          friction={0.9}
-          tension={0.01}
-          maxCursorMove={120}
-          xGap={12}
-          yGap={36}
-        />
-      </div>
-      
-      <div className="relative z-10 container px-4 py-16 mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-siso-red to-siso-orange text-transparent bg-clip-text">
-              Notifications
-            </h1>
-            <p className="mt-2 text-lg text-siso-text/80">
-              Stay updated with your project activity and communications
-            </p>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex gap-3"
-          >
-            <button className="p-2 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text/70 hover:bg-black/30 transition-colors">
-              <Bell className="w-5 h-5" />
-            </button>
-            <button className="p-2 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text/70 hover:bg-black/30 transition-colors">
-              <Settings className="w-5 h-5" />
-            </button>
-          </motion.div>
+    <MainLayout>
+      <div className="relative min-h-screen">
+        <div className="absolute inset-0 z-0">
+          <Waves 
+            lineColor="rgba(255, 87, 34, 0.2)"
+            waveSpeedX={0.02}
+            waveSpeedY={0.01}
+            waveAmpX={40}
+            waveAmpY={20}
+            friction={0.9}
+            tension={0.01}
+            maxCursorMove={120}
+            xGap={12}
+            yGap={36}
+          />
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <motion.div
+        <div className="relative z-10 container px-4 py-16 mx-auto">
+          <div className="flex justify-between items-center mb-8">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-siso-red to-siso-orange text-transparent bg-clip-text">
+                Notifications
+              </h1>
+              <p className="mt-2 text-lg text-siso-text/80">
+                Stay updated with your project activity and communications
+              </p>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex gap-3"
+            >
+              <button className="p-2 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text/70 hover:bg-black/30 transition-colors">
+                <Bell className="w-5 h-5" />
+              </button>
+              <button className="p-2 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text/70 hover:bg-black/30 transition-colors">
+                <Settings className="w-5 h-5" />
+              </button>
+            </motion.div>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
@@ -322,8 +324,9 @@ export default function Notifications() {
                 </div>
               </div>
             </motion.div>
+          </div>
         </div>
       </div>
-    </div>
+    </MainLayout>
   );
 }
