@@ -25,6 +25,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
+import { Sidebar } from '@/components/Sidebar';
 
 function App() {
   const location = useLocation();
@@ -41,6 +42,8 @@ function App() {
         <title>SISO - Your one-stop AI Knowledge source</title>
         <meta name="description" content="SISO is the premier platform for AI learning, resources, and community." />
       </Helmet>
+
+      <Sidebar />
       
       <Routes>
         <Route path="/" element={<Index />} />
