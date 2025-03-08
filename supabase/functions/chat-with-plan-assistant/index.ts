@@ -8,9 +8,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Initialize OpenAI client
+// Initialize OpenAI client with the v2 beta header
 const openai = new OpenAI({
-  apiKey: Deno.env.get('OPENAI_API_KEY')
+  apiKey: Deno.env.get('OPENAI_API_KEY'),
+  defaultHeaders: {
+    'OpenAI-Beta': 'assistants=v2',  // Add v2 beta header
+  }
 });
 
 // Initialize Supabase client
@@ -77,7 +80,7 @@ async function getOrCreateThread(projectId: string) {
         await openai.beta.threads.retrieve(existingThread.thread_id);
         return existingThread.thread_id;
       } catch (err) {
-        console.log("Thread no longer exists in OpenAI, creating a new one");
+        console.log("Thread no longer exists in OpenAI, creating a new one:", err.message);
         // Continue to create a new thread
       }
     }
@@ -319,7 +322,7 @@ async function handleRegularChat(req: Request) {
       );
     }
     
-    const { messages, projectId, formData } = body;
+    const { messages, projectId, formData, threadId: existingThreadId } = body;
     
     // Validate request data
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -358,7 +361,27 @@ async function handleRegularChat(req: Request) {
     // Get or create thread
     let threadId;
     try {
-      threadId = projectId ? await getOrCreateThread(projectId) : await openai.beta.threads.create().then(t => t.id);
+      if (existingThreadId) {
+        // Use the provided thread ID if it exists
+        console.log('Using provided thread ID:', existingThreadId);
+        threadId = existingThreadId;
+        
+        try {
+          // Verify thread still exists in OpenAI
+          await openai.beta.threads.retrieve(threadId);
+        } catch (err) {
+          console.log('Thread no longer exists in OpenAI, creating a new one:', err.message);
+          threadId = projectId 
+            ? await getOrCreateThread(projectId) 
+            : await openai.beta.threads.create().then(t => t.id);
+        }
+      } else {
+        // Get or create a new thread
+        threadId = projectId 
+          ? await getOrCreateThread(projectId) 
+          : await openai.beta.threads.create().then(t => t.id);
+      }
+      
       console.log('Using thread ID:', threadId);
     } catch (err) {
       console.error('Error getting or creating thread:', err);
