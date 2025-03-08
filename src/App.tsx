@@ -7,11 +7,6 @@ import { useEffect } from 'react';
 import Home from '@/pages/Home';
 import Auth from '@/pages/Auth';
 import Profile from '@/pages/Profile';
-import SisoEducation from '@/pages/SisoEducation';
-import VideoDetail from '@/pages/VideoDetail';
-import EducatorDetail from '@/pages/EducatorDetail';
-import SocialOnboarding from '@/pages/onboarding/social';
-import OnboardingCongratulations from '@/pages/onboarding/congratulations';
 import ThankYou from '@/pages/ThankYou';
 import Index from '@/pages/Index';
 import Terms from '@/pages/Terms';
@@ -24,7 +19,6 @@ import PlanBuilder from '@/pages/PlanBuilder';
 import CompanyProfile from '@/pages/CompanyProfile';
 import ResourceHub from '@/pages/ResourceHub';
 import Portfolio from '@/pages/Portfolio';
-import CompetitiveAnalysis from '@/pages/CompetitiveAnalysis';
 import Notifications from '@/pages/Notifications';
 
 import { Toaster } from '@/components/ui/toaster';
@@ -92,11 +86,6 @@ function App() {
             <Portfolio />
           </ProtectedRoute>
         } />
-        <Route path="/competitive-analysis" element={
-          <ProtectedRoute>
-            <CompetitiveAnalysis />
-          </ProtectedRoute>
-        } />
         <Route path="/notifications" element={
           <ProtectedRoute>
             <Notifications />
@@ -107,35 +96,6 @@ function App() {
         <Route path="/profile" element={
           <ProtectedRoute>
             <Profile />
-          </ProtectedRoute>
-        } />
-        
-        {/* Education routes (simplified) */}
-        <Route path="/education" element={
-          <ProtectedRoute>
-            <SisoEducation />
-          </ProtectedRoute>
-        } />
-        <Route path="/education/video/:videoId" element={
-          <ProtectedRoute>
-            <VideoDetail />
-          </ProtectedRoute>
-        } />
-        <Route path="/education/educator/:slug" element={
-          <ProtectedRoute>
-            <EducatorDetail />
-          </ProtectedRoute>
-        } />
-        
-        {/* Onboarding routes */}
-        <Route path="/onboarding/social" element={
-          <ProtectedRoute>
-            <SocialOnboarding />
-          </ProtectedRoute>
-        } />
-        <Route path="/onboarding/congratulations" element={
-          <ProtectedRoute>
-            <OnboardingCongratulations />
           </ProtectedRoute>
         } />
 
