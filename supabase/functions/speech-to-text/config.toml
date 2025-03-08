@@ -1,0 +1,4 @@
+
+project_id = "your-project-id"
+name = "speech-to-text"
+no_public_access = false
