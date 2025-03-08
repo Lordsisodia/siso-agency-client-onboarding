@@ -14,7 +14,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { usePoints } from '@/hooks/usePoints';
 import { useBasicUserData } from '@/hooks/useBasicUserData';
-import { useAuthSession } from '@/hooks/useAuthSession';
 
 interface ProfileSectionProps {
   collapsed: boolean;
@@ -25,10 +24,8 @@ export const ProfileSection = ({ collapsed, onOpenChange }: ProfileSectionProps)
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { userData, loading: userDataLoading } = useBasicUserData();
-  const { handleSignOut } = useAuthSession();
-  const userId = userData?.id || '';
-  const { points, rank } = usePoints(userId);
+  const { userData, loading } = useBasicUserData();
+  const { points, rank } = usePoints(userData.id || '');
 
   // [Analysis] Handle navigation with proper state updates
   const handleItemClick = (path: string) => {
@@ -43,10 +40,17 @@ export const ProfileSection = ({ collapsed, onOpenChange }: ProfileSectionProps)
     onOpenChange(false);
   };
 
-  const onSignOut = async () => {
+  const handleSignOut = async () => {
     try {
       setIsLoading(true);
-      await handleSignOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      navigate('/', { replace: true });
+      toast({
+        title: "Signed out successfully",
+        description: "Come back soon!",
+      });
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -59,13 +63,13 @@ export const ProfileSection = ({ collapsed, onOpenChange }: ProfileSectionProps)
     }
   };
 
-  if (userDataLoading) {
+  if (loading) {
     return (
       <div className="w-full h-12 animate-pulse bg-siso-text/5 rounded-lg" />
     );
   }
 
-  if (!userId) return null;
+  if (!userData.id) return null;
 
   const displayName = userData.fullName || userData.email?.split('@')[0] || 'User';
 
@@ -186,7 +190,7 @@ export const ProfileSection = ({ collapsed, onOpenChange }: ProfileSectionProps)
             className="text-red-500 hover:text-red-400 hover:bg-red-500/5 cursor-pointer"
             onSelect={(e) => {
               e.preventDefault();
-              onSignOut();
+              handleSignOut();
             }}
             disabled={isLoading}
           >
@@ -197,4 +201,4 @@ export const ProfileSection = ({ collapsed, onOpenChange }: ProfileSectionProps)
       </DropdownMenu>
     </div>
   );
-}
+};

@@ -3,84 +3,126 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-export interface UserProfile {
-  id: string;
-  full_name: string | null;
-  phone_number: string | null;
-  created_at: string;
-  updated_at: string | null;
+// [Analysis] Separated profile data concerns from auth logic
+export interface ProfileFormData {
+  fullName: string;
+  businessName: string;
+  businessType: string;
+  industry: string;
+  interests: string;
+  bio: string;
+  linkedinUrl: string;
+  websiteUrl: string;
+  youtubeUrl: string;
+  instagramUrl: string;
+  twitterUrl: string;
+  professionalRole: string;
 }
 
-export const useProfileData = (userId: string | undefined) => {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+export const useProfileData = () => {
+  const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
 
+  const [formData, setFormData] = useState<ProfileFormData>({
+    fullName: '',
+    businessName: '',
+    businessType: '',
+    industry: '',
+    interests: '',
+    bio: '',
+    linkedinUrl: '',
+    websiteUrl: '',
+    youtubeUrl: '',
+    instagramUrl: '',
+    twitterUrl: '',
+    professionalRole: '',
+  });
+
   useEffect(() => {
-    const fetchProfileData = async () => {
-      if (!userId) {
-        setLoading(false);
-        return;
-      }
+    let isSubscribed = true;
 
-      setLoading(true);
+    const getProfile = async () => {
       try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .single();
-
-        if (error) throw error;
+        // [Analysis] Only fetch profile if we have a session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        setProfile(data);
+        if (sessionError) {
+          console.error('[Profile] Session error:', sessionError);
+          return;
+        }
+        
+        if (session?.user && isSubscribed) {
+          console.log('[Profile] Session found:', session.user.id);
+          setUser(session.user);
+
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profileError) {
+            console.error('[Profile] Profile fetch error:', profileError);
+            return;
+          }
+
+          if (profileData && isSubscribed) {
+            console.log('[Profile] Profile data found:', profileData);
+            setProfile(profileData);
+            setFormData({
+              fullName: profileData.full_name || '',
+              businessName: profileData.business_name || '',
+              businessType: profileData.business_type || '',
+              industry: profileData.industry || '',
+              interests: Array.isArray(profileData.interests) ? profileData.interests.join(', ') : '',
+              bio: profileData.bio || '',
+              linkedinUrl: profileData.linkedin_url || '',
+              websiteUrl: profileData.website_url || '',
+              youtubeUrl: profileData.youtube_url || '',
+              instagramUrl: profileData.instagram_url || '',
+              twitterUrl: profileData.twitter_url || '',
+              professionalRole: profileData.professional_role || '',
+            });
+          }
+        }
       } catch (error: any) {
-        console.error('Error fetching profile:', error);
-        setError(error.message);
+        console.error('[Profile] Error in getProfile:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load profile data",
+        });
       } finally {
-        setLoading(false);
+        if (isSubscribed) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchProfileData();
-  }, [userId]);
+    getProfile();
 
-  const updateProfileData = async (updatedProfile: Partial<UserProfile>) => {
-    if (!userId) return;
+    return () => {
+      isSubscribed = false;
+    };
+  }, []);
 
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update(updatedProfile)
-        .eq('id', userId);
-
-      if (error) throw error;
-
-      // Update local state
-      setProfile(prev => prev ? { ...prev, ...updatedProfile } : null);
-      
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
-      });
-      
-      return true;
-    } catch (error: any) {
-      console.error('Error updating profile:', error);
-      toast({
-        variant: "destructive",
-        title: "Update failed",
-        description: error.message,
-      });
-      return false;
-    }
+  const handleFormChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   return {
+    user,
     profile,
     loading,
-    error,
-    updateProfileData,
+    isEditing,
+    formData,
+    handleFormChange,
+    setIsEditing
   };
 };

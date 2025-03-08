@@ -10,11 +10,8 @@ export default function Index() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('Index: auth state', { user: !!user, loading });
-    
     if (user && !loading) {
-      console.log('Index: user is authenticated, redirecting to home');
-      navigate('/home', { replace: true });
+      navigate('/home');
     }
   }, [user, loading, navigate]);
 
