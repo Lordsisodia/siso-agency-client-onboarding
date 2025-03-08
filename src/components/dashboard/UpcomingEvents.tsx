@@ -1,5 +1,5 @@
 
-import { Calendar, ArrowRight } from 'lucide-react';
+import { Calendar, ArrowRight, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/formatters';
@@ -19,17 +19,40 @@ interface UpcomingEventsProps {
 }
 
 export const UpcomingEvents = ({ events = [], onViewAll }: UpcomingEventsProps) => {
-  const getEventTypeColor = (type: string) => {
+  const getEventTypeConfig = (type: string) => {
     switch(type) {
       case 'meeting':
-        return 'bg-blue-500';
+        return { 
+          color: 'bg-blue-500',
+          label: 'Meeting'
+        };
       case 'deadline':
-        return 'bg-red-500';
+        return { 
+          color: 'bg-red-500',
+          label: 'Deadline'
+        };
       case 'reminder':
-        return 'bg-amber-500';
+        return { 
+          color: 'bg-amber-500',
+          label: 'Reminder'
+        };
       default:
-        return 'bg-gray-500';
+        return { 
+          color: 'bg-gray-500',
+          label: 'Event'
+        };
     }
+  };
+
+  const cardVariants = {
+    initial: { opacity: 0, scale: 0.95 },
+    animate: { opacity: 1, scale: 1 },
+    hover: { 
+      scale: 1.02,
+      backgroundColor: 'rgba(42, 42, 42, 0.1)',
+      transition: { duration: 0.2 }
+    },
+    tap: { scale: 0.98 }
   };
 
   return (
@@ -38,8 +61,8 @@ export const UpcomingEvents = ({ events = [], onViewAll }: UpcomingEventsProps) 
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, delay: 0.4 }}
     >
-      <Card className="border border-siso-border mt-4">
-        <CardHeader className="flex flex-row items-center justify-between py-4 px-6">
+      <Card className="border border-siso-border hover:shadow-md hover:shadow-siso-border/10 transition-all duration-300">
+        <CardHeader className="flex flex-row items-center justify-between py-4 px-6 bg-gradient-to-r from-siso-bg to-siso-bg/95">
           <CardTitle className="text-md font-semibold flex items-center">
             <Calendar size={16} className="mr-2 text-siso-orange" />
             Upcoming Events
@@ -52,41 +75,61 @@ export const UpcomingEvents = ({ events = [], onViewAll }: UpcomingEventsProps) 
             </div>
           ) : (
             <div className="space-y-3">
-              {events.slice(0, 3).map((event) => (
-                <motion.div
-                  key={event.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex items-center p-2 rounded-md hover:bg-siso-border/10 cursor-pointer"
-                >
-                  <div className="relative mr-3">
-                    <div className="w-10 h-10 bg-siso-bg/80 border border-siso-border rounded-md flex flex-col items-center justify-center">
-                      <span className="text-xs font-medium">{new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}</span>
-                      <span className="text-sm font-bold">{new Date(event.date).getDate()}</span>
+              {events.slice(0, 3).map((event, index) => {
+                const eventType = getEventTypeConfig(event.type);
+                
+                return (
+                  <motion.div
+                    key={event.id}
+                    initial="initial"
+                    animate="animate"
+                    whileHover="hover"
+                    whileTap="tap"
+                    variants={cardVariants}
+                    transition={{ duration: 0.2, delay: 0.1 + index * 0.05 }}
+                    className="flex items-center p-2 rounded-md cursor-pointer"
+                  >
+                    <div className="relative mr-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-siso-bg to-siso-bg/80 border border-siso-border rounded-md flex flex-col items-center justify-center">
+                        <span className="text-xs font-medium text-siso-text/70">{new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}</span>
+                        <span className="text-sm font-bold text-siso-text-bold">{new Date(event.date).getDate()}</span>
+                      </div>
+                      <motion.div 
+                        className={`absolute -top-1 -right-1 rounded-full ${eventType.color} px-1 py-0.5 text-[8px] text-white whitespace-nowrap`}
+                        whileHover={{ scale: 1.1 }}
+                      >
+                        {eventType.label}
+                      </motion.div>
                     </div>
-                    <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${getEventTypeColor(event.type)}`} />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-sm font-medium text-siso-text-bold">{event.title}</h3>
-                    <p className="text-xs text-siso-text/70">{event.time}</p>
-                  </div>
-                  <ArrowRight size={16} className="text-siso-text/40" />
-                </motion.div>
-              ))}
+                    <div className="flex-1">
+                      <motion.h3 
+                        className="text-sm font-medium text-siso-text-bold"
+                        whileHover={{ color: '#FF5722' }}
+                      >
+                        {event.title}
+                      </motion.h3>
+                      <p className="text-xs text-siso-text/70">{event.time}</p>
+                    </div>
+                    <ChevronRight size={16} className="text-siso-text/40" />
+                  </motion.div>
+                );
+              })}
             </div>
           )}
           
-          <div className="py-2 text-center mt-2">
+          <motion.div 
+            className="py-2 text-center mt-2"
+            whileHover={{ scale: 1.02 }}
+          >
             <Button 
-              variant="link" 
+              variant="outline" 
               size="sm" 
               onClick={onViewAll}
-              className="text-siso-orange hover:text-siso-red text-xs"
+              className="text-siso-orange hover:text-siso-red hover:border-siso-orange/30 text-xs bg-transparent"
             >
               View calendar
             </Button>
-          </div>
+          </motion.div>
         </CardContent>
       </Card>
     </motion.div>

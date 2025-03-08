@@ -2,7 +2,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MoreHorizontal, Clock } from 'lucide-react';
+import { ExternalLink, MoreHorizontal, Clock, Building } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { formatDate } from '@/lib/formatters';
 
@@ -12,8 +12,10 @@ interface ProjectCardProps {
   status: 'planning' | 'in-progress' | 'reviewing' | 'completed';
   progress: number;
   deadline?: string;
+  client?: string;
   onViewDetails: (id: string) => void;
   onEdit: (id: string) => void;
+  delay?: number;
 }
 
 export const ProjectCard = ({
@@ -22,8 +24,10 @@ export const ProjectCard = ({
   status,
   progress,
   deadline,
+  client,
   onViewDetails,
-  onEdit
+  onEdit,
+  delay = 0
 }: ProjectCardProps) => {
   const getStatusConfig = (status: string) => {
     switch (status) {
@@ -46,10 +50,10 @@ export const ProjectCard = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      whileHover={{ y: -4 }}
+      transition={{ duration: 0.3, delay }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
     >
-      <Card className="h-full border border-siso-border hover:border-siso-orange/30 transition-all overflow-hidden">
+      <Card className="h-full border border-siso-border hover:border-siso-orange/30 hover:shadow-lg hover:shadow-siso-orange/5 transition-all overflow-hidden">
         <CardContent className="p-4 pt-6 relative">
           <Badge className={`absolute top-0 right-4 -translate-y-1/2 ${statusConfig.bg}`}>
             {statusConfig.text}
@@ -57,15 +61,24 @@ export const ProjectCard = ({
           
           <h3 className="text-lg font-semibold text-siso-text-bold mb-3 line-clamp-2">{title}</h3>
           
+          {client && (
+            <div className="flex items-center mt-2 mb-3 text-sm text-siso-text/80">
+              <Building size={15} className="mr-2 text-siso-orange/70" />
+              {client}
+            </div>
+          )}
+          
           <div className="mt-4">
             <div className="flex justify-between mb-1.5 text-xs">
               <span className="text-siso-text/80">Progress</span>
               <span className="text-siso-text-bold">{progress}%</span>
             </div>
             <div className="w-full h-2 bg-siso-bg/50 rounded-full overflow-hidden">
-              <div 
+              <motion.div 
                 className="h-full bg-gradient-to-r from-siso-red to-siso-orange rounded-full" 
-                style={{ width: `${progress}%` }}
+                initial={{ width: "0%" }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.5, delay: delay + 0.2 }}
               />
             </div>
           </div>
@@ -83,7 +96,7 @@ export const ProjectCard = ({
             variant="ghost" 
             size="sm" 
             onClick={() => onViewDetails(id)}
-            className="text-xs text-siso-orange hover:text-siso-red"
+            className="text-xs text-siso-orange hover:text-siso-red hover:bg-siso-orange/5"
           >
             View Details
             <ExternalLink size={12} className="ml-1" />
@@ -93,7 +106,7 @@ export const ProjectCard = ({
             variant="ghost"
             size="sm"
             onClick={() => onEdit(id)}
-            className="text-xs"
+            className="text-xs hover:bg-siso-orange/5"
           >
             <MoreHorizontal size={16} />
           </Button>
