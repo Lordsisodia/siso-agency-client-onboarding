@@ -95,7 +95,7 @@ export const Sidebar = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="fixed top-4 right-4 z-50 bg-siso-bg/80 backdrop-blur-sm"
+            className="fixed top-4 left-4 z-50 bg-siso-bg/80 backdrop-blur-sm"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             <AnimatePresence mode="wait" initial={false}>
