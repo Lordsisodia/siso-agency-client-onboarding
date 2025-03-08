@@ -79,12 +79,10 @@ function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/thank-you" element={<ThankYou />} />
 
+        {/* Home route - redirect to plan-builder */}
+        <Route path="/home" element={<Navigate to="/plan-builder" replace />} />
+        
         {/* Protected routes */}
-        <Route path="/home" element={
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        } />
         
         {/* New primary routes */}
         <Route path="/dashboard" element={

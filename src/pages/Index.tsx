@@ -11,7 +11,7 @@ export default function Index() {
 
   useEffect(() => {
     if (user && !loading) {
-      navigate('/home');
+      navigate('/plan-builder');
     }
   }, [user, loading, navigate]);
 

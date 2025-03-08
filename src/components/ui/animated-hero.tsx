@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { PhoneCall, MoveRight } from "lucide-react";
@@ -34,9 +35,9 @@ function Hero() {
   };
 
   const handleTryAI = () => {
-    console.log('Try AI clicked - navigating to /home');
+    console.log('Try AI clicked - navigating to /plan-builder');
     try {
-      navigate('/home');
+      navigate('/plan-builder');
     } catch (error) {
       console.error('Navigation error:', error);
     }
