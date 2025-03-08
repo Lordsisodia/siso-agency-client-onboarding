@@ -51,14 +51,14 @@ export const menuSections: MenuSection[] = [
     icon: BookOpen,
     items: [
       {
-        href: '/resource-hub',
-        icon: BookOpen,
-        label: 'Resource Hub',
-      },
-      {
         href: '/portfolio',
         icon: Briefcase,
         label: 'Portfolio',
+      },
+      {
+        href: '/resource-hub',
+        icon: BookOpen,
+        label: 'Resource Hub',
       },
       {
         href: '/competitive-analysis',
