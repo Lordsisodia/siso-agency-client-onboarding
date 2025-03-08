@@ -7,7 +7,7 @@ import { useChatAssistant, ChatMessage as ChatMessageType } from '@/hooks/use-ch
 import { Button } from '@/components/ui/button';
 import { Trash2, AlertCircle, RefreshCw, Sparkles } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ChatInterfaceProps {
   title?: string;
@@ -54,13 +54,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className={`flex flex-col h-full bg-siso-bg-card/30 backdrop-blur-md border border-siso-border rounded-xl overflow-hidden shadow-xl ${className}`}
+      className={`flex flex-col h-full bg-siso-bg-card/20 backdrop-blur-md border border-siso-border rounded-xl overflow-hidden shadow-xl ${className}`}
     >
       {title && (
-        <div className="p-4 border-b border-siso-border flex items-center justify-between bg-gradient-to-r from-siso-red/10 to-siso-orange/10">
+        <div className="p-4 border-b border-siso-border bg-gradient-to-r from-siso-red/10 to-siso-orange/10 backdrop-blur-md flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-r from-siso-red to-siso-orange flex items-center justify-center">
-              <Sparkles className="w-3 h-3 text-white" />
+            <div className="w-7 h-7 rounded-full bg-gradient-to-r from-siso-red to-siso-orange flex items-center justify-center animate-glow">
+              <Sparkles className="w-4 h-4 text-white" />
             </div>
             <h2 className="text-lg font-semibold text-siso-text">{title}</h2>
           </div>
@@ -71,7 +71,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             onClick={clearMessages}
             disabled={isLoading || messages.length === 0}
             title="Clear conversation"
-            className="text-siso-text-muted hover:text-siso-red"
+            className="text-siso-text-muted hover:text-siso-red transition-colors"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -80,18 +80,31 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       
       <ScrollArea className="flex-1 px-4 py-6">
         <div className="space-y-6 max-w-3xl mx-auto">
-          {messages.map((message, index) => (
-            <ChatMessage
-              key={index}
-              role={message.role}
-              content={message.content}
-              isLoading={isLoading && index === messages.length - 1 && message.role === 'assistant'}
-              timestamp={message.timestamp}
-            />
-          ))}
+          <AnimatePresence>
+            {messages.map((message, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ 
+                  duration: 0.3, 
+                  delay: 0.1 * Math.min(index, 5),
+                  ease: "easeOut" 
+                }}
+              >
+                <ChatMessage
+                  role={message.role}
+                  content={message.content}
+                  isLoading={isLoading && index === messages.length - 1 && message.role === 'assistant'}
+                  timestamp={message.timestamp}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
           
           {error && (
-            <Alert variant="destructive" className="mb-4">
+            <Alert variant="destructive" className="mb-4 animate-fade-in">
               <AlertCircle className="h-4 w-4 mr-2" />
               <AlertDescription className="flex items-center justify-between">
                 <span>{error}</span>
@@ -110,11 +123,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           )}
           
           {isLoading && messages.length > 0 && messages[messages.length - 1].role === 'user' && (
-            <ChatMessage
-              role="assistant"
-              content=""
-              isLoading={true}
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ChatMessage
+                role="assistant"
+                content=""
+                isLoading={true}
+              />
+            </motion.div>
           )}
           
           <div ref={messagesEndRef} />

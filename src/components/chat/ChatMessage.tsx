@@ -47,11 +47,11 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     >
       <div className="flex-shrink-0 mt-1">
         <div className={cn(
-          "w-10 h-10 rounded-full flex items-center justify-center relative",
+          "w-10 h-10 rounded-full flex items-center justify-center relative overflow-hidden",
           isAssistant ? "bg-gradient-to-r from-siso-red to-siso-orange" : "bg-siso-bg-card border border-siso-border"
         )}>
           {isAssistant ? (
-            <Bot className="w-5 h-5 text-white" />
+            <Bot className="w-5 h-5 text-white relative z-10" />
           ) : (
             <User className="w-5 h-5 text-siso-text" />
           )}
@@ -69,7 +69,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
       
       <div className="flex-1 space-y-1">
         <div className="flex items-center justify-between">
-          <div className="text-sm text-siso-text-muted">
+          <div className="text-sm font-medium text-siso-text-muted">
             {isAssistant ? assistantType : 'You'}
           </div>
           
@@ -88,14 +88,14 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               <motion.button
                 initial={{ opacity: 0 }}
                 whileHover={{ opacity: 1 }}
-                className="absolute right-1 top-1 p-1.5 text-siso-text-muted hover:text-siso-text bg-siso-bg/80 hover:bg-siso-bg rounded-md cursor-pointer"
+                className="absolute right-1 top-1 p-1.5 text-siso-text-muted hover:text-siso-text bg-siso-bg/80 hover:bg-siso-bg rounded-md cursor-pointer z-10"
                 onClick={handleCopyContent}
                 title="Copy to clipboard"
               >
                 <Copy className="w-4 h-4" />
               </motion.button>
             )}
-            <div className="prose prose-invert prose-sm max-w-none">
+            <div className="prose prose-invert prose-sm max-w-none relative z-0">
               <ReactMarkdown>{content}</ReactMarkdown>
             </div>
           </div>
