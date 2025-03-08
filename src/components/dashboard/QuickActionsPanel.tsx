@@ -3,6 +3,7 @@ import { FileText, Briefcase, BookOpen, TrendingUp, BarChart3, ArrowRight } from
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export const QuickActionsPanel = () => {
   const navigate = useNavigate();
@@ -14,7 +15,8 @@ export const QuickActionsPanel = () => {
       icon: FileText,
       path: '/plan-builder',
       color: 'text-blue-500',
-      bgColor: 'bg-blue-500/10'
+      bgColor: 'bg-blue-500/10',
+      borderColor: 'border-blue-500/20'
     },
     {
       title: 'Portfolio',
@@ -22,7 +24,8 @@ export const QuickActionsPanel = () => {
       icon: Briefcase,
       path: '/portfolio',
       color: 'text-purple-500',
-      bgColor: 'bg-purple-500/10'
+      bgColor: 'bg-purple-500/10',
+      borderColor: 'border-purple-500/20'
     },
     {
       title: 'Resource Hub',
@@ -30,7 +33,8 @@ export const QuickActionsPanel = () => {
       icon: BookOpen,
       path: '/resource-hub',
       color: 'text-green-500',
-      bgColor: 'bg-green-500/10'
+      bgColor: 'bg-green-500/10',
+      borderColor: 'border-green-500/20'
     },
     {
       title: 'Competitive Analysis',
@@ -38,7 +42,8 @@ export const QuickActionsPanel = () => {
       icon: TrendingUp,
       path: '/competitive-analysis',
       color: 'text-amber-500',
-      bgColor: 'bg-amber-500/10'
+      bgColor: 'bg-amber-500/10',
+      borderColor: 'border-amber-500/20'
     }
   ];
 
@@ -57,40 +62,42 @@ export const QuickActionsPanel = () => {
     <motion.div
       initial={{ opacity: 0, x: 10 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3, delay: 0.2 }}
+      transition={{ duration: 0.3, delay: 0.3 }}
     >
-      <Card className="border border-siso-border hover:shadow-md hover:shadow-siso-border/10 transition-all duration-300">
-        <CardHeader className="py-4 px-6 bg-gradient-to-r from-siso-bg to-siso-bg/95">
+      <Card className="border border-siso-border/50 hover:border-siso-border hover:shadow-md hover:shadow-siso-border/10 transition-all duration-300 overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between py-4 px-6 bg-gradient-to-r from-siso-bg/90 to-siso-bg/70">
           <CardTitle className="text-md font-semibold flex items-center">
             <BarChart3 size={16} className="mr-2 text-siso-orange" />
             Quick Actions
           </CardTitle>
         </CardHeader>
-        <CardContent className="px-4 pb-4 pt-2">
-          <div className="grid grid-cols-1 gap-3">
-            {actions.map((action, index) => (
-              <motion.div
-                key={action.title}
-                initial="initial"
-                animate="animate"
-                whileHover="hover"
-                whileTap="tap"
-                variants={cardVariants}
-                transition={{ duration: 0.2, delay: 0.1 + index * 0.05 }}
-                onClick={() => navigate(action.path)}
-                className="flex items-center p-3 rounded-md cursor-pointer bg-gradient-to-r from-siso-bg to-transparent border border-transparent hover:border-siso-border/30"
-              >
-                <div className={`p-2 rounded-md ${action.bgColor} ${action.color} mr-3`}>
-                  <action.icon size={18} />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-sm font-medium text-siso-text-bold">{action.title}</h3>
-                  <p className="text-xs text-siso-text/70">{action.description}</p>
-                </div>
-                <ArrowRight size={16} className="text-siso-text/40 group-hover:text-siso-orange transition-colors" />
-              </motion.div>
-            ))}
-          </div>
+        <CardContent className="p-0">
+          <ScrollArea className="h-[300px]">
+            <div className="p-3 space-y-2">
+              {actions.map((action, index) => (
+                <motion.div
+                  key={action.title}
+                  initial="initial"
+                  animate="animate"
+                  whileHover="hover"
+                  whileTap="tap"
+                  variants={cardVariants}
+                  transition={{ duration: 0.2, delay: 0.1 + index * 0.05 }}
+                  onClick={() => navigate(action.path)}
+                  className={`flex items-center p-3 rounded-md cursor-pointer bg-gradient-to-r from-siso-bg/70 to-transparent border ${action.borderColor} hover:border-siso-border/30`}
+                >
+                  <div className={`p-2 rounded-md ${action.bgColor} ${action.color} mr-3 shadow-sm`}>
+                    <action.icon size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-medium text-siso-text-bold">{action.title}</h3>
+                    <p className="text-xs text-siso-text/70">{action.description}</p>
+                  </div>
+                  <ArrowRight size={16} className="text-siso-text/40 group-hover:text-siso-orange transition-colors" />
+                </motion.div>
+              ))}
+            </div>
+          </ScrollArea>
         </CardContent>
       </Card>
     </motion.div>

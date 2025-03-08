@@ -9,6 +9,7 @@ import { NotificationsPanel } from '@/components/dashboard/NotificationsPanel';
 import { QuickActionsPanel } from '@/components/dashboard/QuickActionsPanel';
 import { UpcomingEvents } from '@/components/dashboard/UpcomingEvents';
 import { toast } from '@/hooks/use-toast';
+import { motion } from 'framer-motion';
 
 // Sample data for the notifications panel
 const mockNotifications = [
@@ -102,9 +103,9 @@ export default function Dashboard() {
   return (
     <MainLayout>
       <div className="relative min-h-screen">
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 opacity-60">
           <Waves 
-            lineColor="rgba(255, 87, 34, 0.1)"
+            lineColor="rgba(255, 87, 34, 0.08)"
             waveSpeedX={0.01}
             waveSpeedY={0.005}
             waveAmpX={30}
@@ -118,42 +119,57 @@ export default function Dashboard() {
         </div>
         
         <div className="relative z-10 container px-4 py-8 mx-auto">
-          {/* Header Section */}
-          <DashboardHeader />
-          
-          {/* Quick Stats Panel */}
-          <QuickStatsPanel 
-            activeProjects={4} 
-            pendingTasks={7} 
-            upcomingEvents={3} 
-          />
-          
-          {/* Main Content with modified layout - 3/4 for project card, 1/4 for sidebar */}
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-            {/* Project Overview (Takes 3/4 width) */}
-            <div className="xl:col-span-3">
-              <ProjectsOverview />
-            </div>
+          {/* Dashboard Content */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-6"
+          >
+            {/* Header Section */}
+            <DashboardHeader />
             
-            {/* Secondary Content (Takes 1/4 width) */}
-            <div className="xl:col-span-1 space-y-6">
-              {/* Notifications Panel */}
-              <NotificationsPanel 
-                notifications={notifications}
-                onMarkAsRead={handleMarkAsRead}
-                onViewAll={handleViewAllNotifications}
-              />
+            {/* Quick Stats Panel */}
+            <QuickStatsPanel 
+              activeProjects={4} 
+              pendingTasks={7} 
+              upcomingEvents={3} 
+            />
+            
+            {/* Main Content with layout - 3/4 for project card, 1/4 for sidebar */}
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+              {/* Project Overview (Takes 3/4 width) */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+                className="xl:col-span-3 bg-gradient-to-br from-siso-bg/40 to-transparent p-0.5 rounded-xl shadow-xl"
+              >
+                <div className="bg-siso-bg/60 backdrop-blur-sm rounded-xl border border-siso-border/30">
+                  <ProjectsOverview />
+                </div>
+              </motion.div>
               
-              {/* Quick Actions Panel */}
-              <QuickActionsPanel />
-              
-              {/* Upcoming Events */}
-              <UpcomingEvents 
-                events={events}
-                onViewAll={handleViewCalendar}
-              />
+              {/* Secondary Content (Takes 1/4 width) */}
+              <div className="xl:col-span-1 space-y-6">
+                {/* Notifications Panel */}
+                <NotificationsPanel 
+                  notifications={notifications}
+                  onMarkAsRead={handleMarkAsRead}
+                  onViewAll={handleViewAllNotifications}
+                />
+                
+                {/* Quick Actions Panel */}
+                <QuickActionsPanel />
+                
+                {/* Upcoming Events */}
+                <UpcomingEvents 
+                  events={events}
+                  onViewAll={handleViewCalendar}
+                />
+              </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </MainLayout>

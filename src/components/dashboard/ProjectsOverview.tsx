@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { ProjectCard } from './ProjectCard';
-import { Plus, Filter, Search, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Plus, Search, ArrowLeft, ArrowRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -220,10 +220,10 @@ export const ProjectsOverview = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3, delay: 0.2 }}
-      className="mb-10"
+      className="p-6"
     >
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h2 className="text-xl font-bold text-siso-text-bold">Projects Overview</h2>
+        <h2 className="text-xl font-bold text-siso-text-bold bg-gradient-to-r from-siso-red to-siso-orange bg-clip-text text-transparent">Projects Overview</h2>
         
         <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
           <div className="relative">
@@ -232,13 +232,13 @@ export const ProjectsOverview = () => {
               placeholder="Search projects..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 w-full sm:w-[200px] bg-siso-bg/60 border-siso-border"
+              className="pl-9 w-full sm:w-[200px] bg-siso-bg/80 border-siso-border/50 focus:border-siso-orange/60"
             />
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-siso-text/50" />
           </div>
           
           <div className="flex gap-2 flex-wrap">
-            <div className="flex rounded-md border border-siso-border overflow-hidden">
+            <div className="flex rounded-md border border-siso-border/50 overflow-hidden shadow-sm">
               {statusFilterOptions.map((option, index) => (
                 <Button
                   key={option.value}
@@ -246,11 +246,11 @@ export const ProjectsOverview = () => {
                   size="sm"
                   onClick={() => setActiveStatusFilter(option.value)}
                   className={`
-                    ${activeStatusFilter === option.value ? 'bg-siso-orange text-white' : 'text-siso-text hover:text-siso-text-bold'}
+                    ${activeStatusFilter === option.value ? 'bg-gradient-to-r from-siso-red to-siso-orange text-white shadow-inner' : 'text-siso-text hover:text-siso-text-bold bg-transparent'}
                     rounded-none
                     ${index === 0 ? 'rounded-l-md' : ''}
                     ${index === statusFilterOptions.length - 1 ? 'rounded-r-md' : ''}
-                    px-2 py-1 h-9 text-xs
+                    px-2 py-1 h-9 text-xs font-medium
                   `}
                 >
                   {option.label}
@@ -258,7 +258,7 @@ export const ProjectsOverview = () => {
               ))}
             </div>
             
-            <div className="flex rounded-md border border-siso-border overflow-hidden">
+            <div className="flex rounded-md border border-siso-border/50 overflow-hidden shadow-sm">
               {priorityFilterOptions.map((option, index) => (
                 <Button
                   key={option.value}
@@ -266,11 +266,11 @@ export const ProjectsOverview = () => {
                   size="sm"
                   onClick={() => setActivePriorityFilter(option.value)}
                   className={`
-                    ${activePriorityFilter === option.value ? 'bg-siso-orange text-white' : 'text-siso-text hover:text-siso-text-bold'}
+                    ${activePriorityFilter === option.value ? 'bg-gradient-to-r from-siso-red to-siso-orange text-white shadow-inner' : 'text-siso-text hover:text-siso-text-bold bg-transparent'}
                     rounded-none
                     ${index === 0 ? 'rounded-l-md' : ''}
                     ${index === priorityFilterOptions.length - 1 ? 'rounded-r-md' : ''}
-                    px-2 py-1 h-9 text-xs
+                    px-2 py-1 h-9 text-xs font-medium
                   `}
                 >
                   {option.label}
@@ -278,11 +278,11 @@ export const ProjectsOverview = () => {
               ))}
             </div>
             
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
               <Button 
                 onClick={handleCreateProject}
                 size="sm" 
-                className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90"
+                className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90 shadow-md shadow-siso-orange/10"
               >
                 <Plus size={14} className="mr-1" />
                 New Project
@@ -293,44 +293,52 @@ export const ProjectsOverview = () => {
       </div>
       
       {filteredProjects.length === 0 ? (
-        <div className="text-center py-10 border border-dashed border-siso-border rounded-lg bg-siso-bg/30">
-          <p className="text-siso-text/70 mb-4">
-            {searchTerm || activeStatusFilter !== 'all' || activePriorityFilter !== 'all'
-              ? "No projects match your filters."
-              : "You don't have any projects yet."}
-          </p>
-          {!searchTerm && activeStatusFilter === 'all' && activePriorityFilter === 'all' && (
-            <Button 
-              onClick={handleCreateProject}
-              size="sm" 
-              className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90"
-            >
-              <Plus size={14} className="mr-1" />
-              Create your first project
-            </Button>
-          )}
+        <div className="text-center py-16 border border-dashed border-siso-border rounded-lg bg-siso-bg/30 backdrop-blur-sm">
+          <div className="max-w-md mx-auto">
+            <p className="text-siso-text/70 mb-4">
+              {searchTerm || activeStatusFilter !== 'all' || activePriorityFilter !== 'all'
+                ? "No projects match your filters."
+                : "You don't have any projects yet."}
+            </p>
+            {!searchTerm && activeStatusFilter === 'all' && activePriorityFilter === 'all' && (
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                <Button 
+                  onClick={handleCreateProject}
+                  size="sm" 
+                  className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90"
+                >
+                  <Plus size={14} className="mr-1" />
+                  Create your first project
+                </Button>
+              </motion.div>
+            )}
+          </div>
         </div>
       ) : (
-        <div className="relative">
+        <div className="relative rounded-xl overflow-hidden bg-siso-bg/30 p-6 border border-siso-border/30 shadow-lg">
           {/* Project navigation controls */}
           {filteredProjects.length > 1 && (
             <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between pointer-events-none z-10 px-2">
-              <Button 
-                onClick={prevProject} 
-                variant="secondary" 
-                size="icon" 
-                className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg pointer-events-auto"
-              >
-                <ArrowLeft size={18} />
-              </Button>
-              <Button 
-                onClick={nextProject} 
-                variant="secondary" 
-                size="icon" 
-                className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg pointer-events-auto"
-              >
-                <ArrowRight size={18} />
-              </Button>
+              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                <Button 
+                  onClick={prevProject} 
+                  variant="secondary" 
+                  size="icon" 
+                  className="h-10 w-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg pointer-events-auto"
+                >
+                  <ArrowLeft size={20} />
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                <Button 
+                  onClick={nextProject} 
+                  variant="secondary" 
+                  size="icon" 
+                  className="h-10 w-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg pointer-events-auto"
+                >
+                  <ArrowRight size={20} />
+                </Button>
+              </motion.div>
             </div>
           )}
           
@@ -355,7 +363,9 @@ export const ProjectsOverview = () => {
                   key={index}
                   onClick={() => setCurrentProjectIndex(index)}
                   className={`h-2.5 rounded-full transition-all 
-                    ${index === currentProjectIndex ? 'w-8 bg-siso-orange' : 'w-2.5 bg-siso-border hover:bg-siso-orange/50'}`}
+                    ${index === currentProjectIndex 
+                      ? 'w-8 bg-gradient-to-r from-siso-red to-siso-orange' 
+                      : 'w-2.5 bg-siso-border hover:bg-siso-orange/50'}`}
                   aria-label={`Go to project ${index + 1}`}
                 />
               ))}
@@ -369,7 +379,7 @@ export const ProjectsOverview = () => {
           <Button 
             variant="link" 
             onClick={() => navigate('/projects')}
-            className="text-siso-orange hover:text-siso-red"
+            className="text-siso-orange hover:text-siso-red font-medium"
           >
             View all projects
           </Button>

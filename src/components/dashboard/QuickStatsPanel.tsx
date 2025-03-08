@@ -90,7 +90,7 @@ export const QuickStatsPanel = ({
                     )}
                     
                     {stat.prevValue !== null && stat.value !== null && (
-                      <span className={`text-xs px-1.5 py-0.5 rounded ${getPercentChange(stat.value, stat.prevValue) >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                      <span className={`text-xs px-1.5 py-0.5 rounded-full ${getPercentChange(stat.value, stat.prevValue) >= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
                         {getPercentChange(stat.value, stat.prevValue) >= 0 ? (
                           <TrendingUp className="inline h-3 w-3 mr-0.5" />
                         ) : (
@@ -101,7 +101,7 @@ export const QuickStatsPanel = ({
                     )}
                   </div>
                 </div>
-                <div className={`p-3 rounded-full bg-black/10 ${stat.iconColor}`}>
+                <div className={`p-3 rounded-full bg-black/10 ${stat.iconColor} shadow-inner`}>
                   <stat.icon size={20} />
                 </div>
               </div>

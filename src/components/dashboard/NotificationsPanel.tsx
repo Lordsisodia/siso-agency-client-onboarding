@@ -3,6 +3,7 @@ import { Bell, XCircle, AlertTriangle, CheckCircle2, InfoIcon, X } from 'lucide-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Notification {
   id: string;
@@ -46,8 +47,8 @@ export const NotificationsPanel = ({
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, delay: 0.3 }}
     >
-      <Card className="border border-siso-border hover:shadow-md hover:shadow-siso-border/10 transition-all duration-300">
-        <CardHeader className="flex flex-row items-center justify-between py-4 px-6 bg-gradient-to-r from-siso-bg to-siso-bg/95">
+      <Card className="border border-siso-border/50 hover:border-siso-border hover:shadow-md hover:shadow-siso-border/10 transition-all duration-300 overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between py-4 px-6 bg-gradient-to-r from-siso-bg/90 to-siso-bg/70">
           <CardTitle className="text-md font-semibold flex items-center">
             <motion.div
               animate={{
@@ -58,8 +59,9 @@ export const NotificationsPanel = ({
                 repeat: unreadCount > 0 ? Infinity : 0,
                 repeatDelay: 2
               }}
+              className="text-siso-orange mr-2"
             >
-              <Bell size={16} className="mr-2 text-siso-orange" />
+              <Bell size={16} />
             </motion.div>
             Notifications
             {unreadCount > 0 && (
@@ -73,52 +75,54 @@ export const NotificationsPanel = ({
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent className="px-6 py-2 max-h-[350px] overflow-y-auto scrollbar-thin">
-          {notifications.length === 0 ? (
-            <div className="text-center py-6 text-siso-text/70">
-              No notifications to display.
-            </div>
-          ) : (
-            <div className="divide-y divide-siso-border/30">
-              <AnimatePresence initial={false}>
-                {notifications.slice(0, 5).map((notification) => (
-                  <motion.div
-                    key={notification.id}
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className={`py-3 flex items-start ${!notification.read ? 'bg-gradient-to-r from-siso-orange/5 to-transparent' : ''}`}
-                  >
-                    <div className="mt-0.5 mr-3">
-                      {getNotificationIcon(notification.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start">
-                        <p className="font-medium text-sm text-siso-text-bold">{notification.title}</p>
-                        <span className="text-xs text-siso-text/60 ml-2 whitespace-nowrap">{notification.time}</span>
+        <CardContent className="p-0">
+          <ScrollArea className="h-[300px]">
+            {notifications.length === 0 ? (
+              <div className="text-center py-6 text-siso-text/70">
+                No notifications to display.
+              </div>
+            ) : (
+              <div className="divide-y divide-siso-border/30">
+                <AnimatePresence initial={false}>
+                  {notifications.slice(0, 5).map((notification) => (
+                    <motion.div
+                      key={notification.id}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className={`py-3 px-6 flex items-start ${!notification.read ? 'bg-gradient-to-r from-siso-orange/5 to-transparent' : ''}`}
+                    >
+                      <div className="mt-0.5 mr-3">
+                        {getNotificationIcon(notification.type)}
                       </div>
-                      <p className="text-xs text-siso-text/80 mt-1">{notification.message}</p>
-                    </div>
-                    {!notification.read && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onMarkAsRead(notification.id)}
-                        className="ml-2 text-xs h-auto py-1 hover:bg-siso-orange/10 hover:text-siso-orange"
-                      >
-                        <X size={14} className="mr-1" />
-                        Dismiss
-                      </Button>
-                    )}
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start">
+                          <p className="font-medium text-sm text-siso-text-bold">{notification.title}</p>
+                          <span className="text-xs text-siso-text/60 ml-2 whitespace-nowrap">{notification.time}</span>
+                        </div>
+                        <p className="text-xs text-siso-text/80 mt-1">{notification.message}</p>
+                      </div>
+                      {!notification.read && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onMarkAsRead(notification.id)}
+                          className="ml-2 text-xs h-auto py-1 hover:bg-siso-orange/10 hover:text-siso-orange"
+                        >
+                          <X size={14} className="mr-1" />
+                          Dismiss
+                        </Button>
+                      )}
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
+          </ScrollArea>
           
           <motion.div 
-            className="py-4 text-center"
+            className="py-4 text-center border-t border-siso-border/30"
             whileHover={{ scale: 1.02 }}
           >
             <Button 

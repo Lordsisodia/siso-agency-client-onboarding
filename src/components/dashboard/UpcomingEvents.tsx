@@ -1,9 +1,10 @@
 
-import { Calendar, ArrowRight, ChevronRight } from 'lucide-react';
+import { Calendar, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/formatters';
 import { motion } from 'framer-motion';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Event {
   id: string;
@@ -61,64 +62,70 @@ export const UpcomingEvents = ({ events = [], onViewAll }: UpcomingEventsProps) 
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, delay: 0.4 }}
     >
-      <Card className="border border-siso-border hover:shadow-md hover:shadow-siso-border/10 transition-all duration-300">
-        <CardHeader className="flex flex-row items-center justify-between py-4 px-6 bg-gradient-to-r from-siso-bg to-siso-bg/95">
+      <Card className="border border-siso-border/50 hover:border-siso-border hover:shadow-md hover:shadow-siso-border/10 transition-all duration-300 overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between py-4 px-6 bg-gradient-to-r from-siso-bg/90 to-siso-bg/70">
           <CardTitle className="text-md font-semibold flex items-center">
             <Calendar size={16} className="mr-2 text-siso-orange" />
             Upcoming Events
           </CardTitle>
         </CardHeader>
-        <CardContent className="px-6 py-2">
-          {events.length === 0 ? (
-            <div className="text-center py-4 text-siso-text/70">
-              No upcoming events to display.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {events.slice(0, 3).map((event, index) => {
-                const eventType = getEventTypeConfig(event.type);
-                
-                return (
-                  <motion.div
-                    key={event.id}
-                    initial="initial"
-                    animate="animate"
-                    whileHover="hover"
-                    whileTap="tap"
-                    variants={cardVariants}
-                    transition={{ duration: 0.2, delay: 0.1 + index * 0.05 }}
-                    className="flex items-center p-2 rounded-md cursor-pointer"
-                  >
-                    <div className="relative mr-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-siso-bg to-siso-bg/80 border border-siso-border rounded-md flex flex-col items-center justify-center">
-                        <span className="text-xs font-medium text-siso-text/70">{new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}</span>
-                        <span className="text-sm font-bold text-siso-text-bold">{new Date(event.date).getDate()}</span>
+        <CardContent className="p-0">
+          <ScrollArea className="h-[300px]">
+            {events.length === 0 ? (
+              <div className="text-center py-6 text-siso-text/70 px-6">
+                No upcoming events to display.
+              </div>
+            ) : (
+              <div className="space-y-1 p-2">
+                {events.map((event, index) => {
+                  const eventType = getEventTypeConfig(event.type);
+                  const isToday = new Date(event.date).toDateString() === new Date().toDateString();
+                  
+                  return (
+                    <motion.div
+                      key={event.id}
+                      initial="initial"
+                      animate="animate"
+                      whileHover="hover"
+                      whileTap="tap"
+                      variants={cardVariants}
+                      transition={{ duration: 0.2, delay: 0.1 + index * 0.05 }}
+                      className="flex items-center p-3 rounded-md cursor-pointer mx-2"
+                    >
+                      <div className="relative mr-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-siso-bg/90 to-siso-bg/60 border border-siso-border/50 rounded-md flex flex-col items-center justify-center shadow-sm">
+                          <span className="text-xs font-medium text-siso-text/70">{new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}</span>
+                          <span className="text-sm font-bold text-siso-text-bold">{new Date(event.date).getDate()}</span>
+                        </div>
+                        <motion.div 
+                          className={`absolute -top-1 -right-1 rounded-full ${eventType.color} px-1 py-0.5 text-[8px] text-white whitespace-nowrap shadow-sm`}
+                          whileHover={{ scale: 1.1 }}
+                        >
+                          {eventType.label}
+                        </motion.div>
+                        {isToday && (
+                          <div className="absolute -bottom-1 -right-1 rounded-full bg-green-500 w-2 h-2 animate-pulse"></div>
+                        )}
                       </div>
-                      <motion.div 
-                        className={`absolute -top-1 -right-1 rounded-full ${eventType.color} px-1 py-0.5 text-[8px] text-white whitespace-nowrap`}
-                        whileHover={{ scale: 1.1 }}
-                      >
-                        {eventType.label}
-                      </motion.div>
-                    </div>
-                    <div className="flex-1">
-                      <motion.h3 
-                        className="text-sm font-medium text-siso-text-bold"
-                        whileHover={{ color: '#FF5722' }}
-                      >
-                        {event.title}
-                      </motion.h3>
-                      <p className="text-xs text-siso-text/70">{event.time}</p>
-                    </div>
-                    <ChevronRight size={16} className="text-siso-text/40" />
-                  </motion.div>
-                );
-              })}
-            </div>
-          )}
+                      <div className="flex-1">
+                        <motion.h3 
+                          className="text-sm font-medium text-siso-text-bold line-clamp-1"
+                          whileHover={{ color: '#FF5722' }}
+                        >
+                          {event.title}
+                        </motion.h3>
+                        <p className="text-xs text-siso-text/70">{event.time}</p>
+                      </div>
+                      <ChevronRight size={16} className="text-siso-text/40" />
+                    </motion.div>
+                  );
+                })}
+              </div>
+            )}
+          </ScrollArea>
           
           <motion.div 
-            className="py-2 text-center mt-2"
+            className="py-4 text-center border-t border-siso-border/30"
             whileHover={{ scale: 1.02 }}
           >
             <Button 
