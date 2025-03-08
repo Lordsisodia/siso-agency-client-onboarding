@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { supabaseClient } from "../_shared/supabase-client.ts";
@@ -8,40 +7,331 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Constants for the OpenAI API
+// OpenAI API key from environment variables
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-const OPENAI_MODEL = 'gpt-4o-mini';
+const OPENAI_API_URL = "https://api.openai.com/v1";
 
-// System prompt for plan creation with web search capabilities
+// Define our function calling definitions
+const functionDefinitions = [
+  {
+    name: "define_project_requirements",
+    description: "Define or update project requirements based on user input",
+    parameters: {
+      type: "object",
+      properties: {
+        business_type: {
+          type: "string",
+          description: "The type of business or organization the app is for"
+        },
+        target_audience: {
+          type: "string",
+          description: "The target audience or users of the application"
+        },
+        key_problems: {
+          type: "array",
+          items: { type: "string" },
+          description: "The key problems the app should solve"
+        },
+        must_have_features: {
+          type: "array",
+          items: { type: "string" },
+          description: "Essential features the app must include"
+        },
+        nice_to_have_features: {
+          type: "array",
+          items: { type: "string" },
+          description: "Optional features that would be nice to include"
+        },
+      },
+      required: ["key_problems"]
+    }
+  },
+  {
+    name: "estimate_budget",
+    description: "Estimate the budget range for a project based on requirements and features",
+    parameters: {
+      type: "object",
+      properties: {
+        min_budget: {
+          type: "number",
+          description: "The minimum estimated budget in USD"
+        },
+        max_budget: {
+          type: "number",
+          description: "The maximum estimated budget in USD"
+        },
+        breakdown: {
+          type: "object",
+          description: "Breakdown of costs by category",
+          properties: {
+            development: { type: "number" },
+            design: { type: "number" },
+            testing: { type: "number" },
+            deployment: { type: "number" },
+            maintenance: { type: "number" }
+          }
+        },
+        notes: {
+          type: "string",
+          description: "Additional notes about the budget estimate"
+        }
+      },
+      required: ["min_budget", "max_budget"]
+    }
+  },
+  {
+    name: "plan_timeline",
+    description: "Plan the project timeline with phases and milestones",
+    parameters: {
+      type: "object",
+      properties: {
+        total_weeks: {
+          type: "number",
+          description: "Total estimated project duration in weeks"
+        },
+        phases: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+              duration_weeks: { type: "number" },
+              description: { type: "string" },
+              deliverables: { 
+                type: "array",
+                items: { type: "string" }
+              }
+            }
+          }
+        }
+      },
+      required: ["total_weeks", "phases"]
+    }
+  },
+  {
+    name: "select_tech_stack",
+    description: "Recommend a technology stack for the project",
+    parameters: {
+      type: "object",
+      properties: {
+        frontend: {
+          type: "array",
+          items: { type: "string" },
+          description: "Frontend technologies and frameworks"
+        },
+        backend: {
+          type: "array",
+          items: { type: "string" },
+          description: "Backend technologies and frameworks"
+        },
+        database: {
+          type: "array",
+          items: { type: "string" },
+          description: "Database technologies"
+        },
+        devops: {
+          type: "array",
+          items: { type: "string" },
+          description: "DevOps and deployment technologies"
+        },
+        third_party_services: {
+          type: "array",
+          items: { type: "string" },
+          description: "Third-party services and APIs"
+        },
+        rationale: {
+          type: "string",
+          description: "Explanation for the technology choices"
+        }
+      },
+      required: ["frontend", "backend", "database"]
+    }
+  }
+];
+
+// System prompt for the AI assistant
 const SYSTEM_PROMPT = `You are an AI assistant specializing in app development project planning. 
 Your goal is to help users define their project requirements, suggest features, and create a comprehensive plan.
-You have access to web search to provide up-to-date information on technologies, frameworks, and industry standards.
 You should:
 1. Extract key project details like business type, goals, features, platforms, timeline, and budget
 2. Provide tailored recommendations based on industry best practices
 3. Help estimate reasonable timelines and costs based on project scope
 4. Break complex features into manageable components
 5. Suggest technology stacks appropriate for the project's needs
-6. Use web search when you need current information about frameworks, libraries, or technologies
-7. Be conversational but focused on gathering practical information for app development
+6. Be conversational but focused on gathering practical information for app development
 Be concise but thorough, and prioritize understanding user requirements before suggesting solutions.`;
 
-// Helper function to handle web search
-async function performWebSearch(query: string): Promise<string> {
+async function getOrCreateAssistant(): Promise<string> {
+  // First, check if we have an existing assistant ID in the database
   try {
-    console.log(`Performing web search for: ${query}`);
+    const { data, error } = await supabaseClient
+      .from('assistant_metadata')
+      .select('assistant_id')
+      .eq('name', 'plan_builder')
+      .single();
     
-    // Implement basic web search functionality (placeholder)
-    // In a production environment, you would integrate with a search API like Bing, Google, or Serper
-    const searchResults = `Search results for "${query}" (placeholder): 
-    - Found information about latest frameworks and libraries
-    - Current best practices for app development
-    - Recent case studies and examples`;
+    if (!error && data?.assistant_id) {
+      console.log("Using existing assistant ID:", data.assistant_id);
+      return data.assistant_id;
+    }
+  } catch (err) {
+    console.error("Error checking for existing assistant:", err);
+  }
+  
+  // If no assistant exists, create a new one
+  try {
+    const response = await fetch(`${OPENAI_API_URL}/assistants`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+        'OpenAI-Beta': 'assistants=v2'
+      },
+      body: JSON.stringify({
+        name: "App Development Planner",
+        description: "An assistant that helps create detailed app development plans",
+        instructions: SYSTEM_PROMPT,
+        model: "gpt-4o-mini",
+        tools: [
+          { "type": "code_interpreter" },
+          { 
+            "type": "function",
+            "function": functionDefinitions[0]
+          },
+          { 
+            "type": "function",
+            "function": functionDefinitions[1]
+          },
+          { 
+            "type": "function",
+            "function": functionDefinitions[2]
+          },
+          { 
+            "type": "function",
+            "function": functionDefinitions[3]
+          }
+        ]
+      })
+    });
     
-    return searchResults;
-  } catch (error) {
-    console.error('Error performing web search:', error);
-    return `Unable to perform web search: ${error.message}`;
+    if (!response.ok) {
+      throw new Error(`Error creating assistant: ${response.status} ${response.statusText}`);
+    }
+    
+    const assistant = await response.json();
+    console.log("Created new assistant:", assistant.id);
+    
+    // Store the assistant ID in the database
+    const { error } = await supabaseClient
+      .from('assistant_metadata')
+      .insert({
+        name: 'plan_builder',
+        assistant_id: assistant.id,
+        model: 'gpt-4o-mini',
+        metadata: { created_at: new Date().toISOString() }
+      });
+    
+    if (error) {
+      console.error("Error storing assistant ID:", error);
+    }
+    
+    return assistant.id;
+  } catch (err) {
+    console.error("Error creating assistant:", err);
+    throw err;
+  }
+}
+
+async function getOrCreateThread(projectId?: string): Promise<string> {
+  if (!projectId) {
+    // Create a new thread if no project ID is provided
+    const response = await fetch(`${OPENAI_API_URL}/threads`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+        'OpenAI-Beta': 'assistants=v2'
+      },
+      body: JSON.stringify({})
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error creating thread: ${response.status} ${response.statusText}`);
+    }
+    
+    const thread = await response.json();
+    return thread.id;
+  }
+  
+  // Check if we have an existing thread ID for this project
+  try {
+    const { data, error } = await supabaseClient
+      .from('project_threads')
+      .select('thread_id')
+      .eq('project_id', projectId)
+      .single();
+    
+    if (!error && data?.thread_id) {
+      console.log("Using existing thread ID for project:", data.thread_id);
+      return data.thread_id;
+    }
+    
+    // Create a new thread if none exists
+    const response = await fetch(`${OPENAI_API_URL}/threads`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+        'OpenAI-Beta': 'assistants=v2'
+      },
+      body: JSON.stringify({})
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error creating thread: ${response.status} ${response.statusText}`);
+    }
+    
+    const thread = await response.json();
+    
+    // Store the thread ID in the database
+    const { error: insertError } = await supabaseClient
+      .from('project_threads')
+      .insert({
+        project_id: projectId,
+        thread_id: thread.id
+      });
+    
+    if (insertError) {
+      console.error("Error storing thread ID:", insertError);
+    }
+    
+    return thread.id;
+  } catch (err) {
+    console.error("Error handling thread:", err);
+    throw err;
+  }
+}
+
+async function retrieveAssistantMessages(threadId: string): Promise<any[]> {
+  try {
+    const response = await fetch(`${OPENAI_API_URL}/threads/${threadId}/messages`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+        'OpenAI-Beta': 'assistants=v2'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error retrieving messages: ${response.status} ${response.statusText}`);
+    }
+    
+    const messages = await response.json();
+    return messages.data || [];
+  } catch (err) {
+    console.error("Error retrieving messages:", err);
+    throw err;
   }
 }
 
@@ -68,198 +358,463 @@ serve(async (req) => {
       throw new Error('Invalid request: messages array is required');
     }
 
-    console.log(`Processing request with ${messages.length} messages`);
+    console.log(`Processing request with ${messages.length} messages for project ${projectId || 'new'}`);
     
-    // Extract the latest user message for potential search
+    // Get or create an assistant
+    const assistantId = await getOrCreateAssistant();
+    
+    // Get or create a thread for this project
+    const threadId = await getOrCreateThread(projectId);
+    
+    // Get the latest user message
     const latestUserMessage = messages[messages.length - 1].content;
-    let webSearchResults = '';
-    
-    // Determine if we need to perform a web search based on message content
-    if (latestUserMessage.includes('latest') || 
-        latestUserMessage.includes('current trends') || 
-        latestUserMessage.includes('best framework') ||
-        latestUserMessage.includes('search for')) {
-      const searchQuery = latestUserMessage;
-      webSearchResults = await performWebSearch(searchQuery);
-    }
-    
-    // Prepare messages array with system prompt and potential search results
-    const openaiMessages = [
-      { role: 'system', content: SYSTEM_PROMPT },
-      ...messages
-    ];
-    
-    // Add web search results if available
-    if (webSearchResults) {
-      openaiMessages.push({
-        role: 'system',
-        content: `Web search results: ${webSearchResults}`
-      });
-    }
     
     // Check if request wants streaming
     const streamRequested = req.headers.get('accept') === 'text/event-stream';
     
+    // Add the message to the thread
+    const messageResponse = await fetch(`${OPENAI_API_URL}/threads/${threadId}/messages`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+        'OpenAI-Beta': 'assistants=v2'
+      },
+      body: JSON.stringify({
+        role: 'user',
+        content: latestUserMessage,
+        metadata: {
+          form_data: formData ? JSON.stringify(formData) : null
+        }
+      })
+    });
+    
+    if (!messageResponse.ok) {
+      throw new Error(`Error adding message: ${messageResponse.status} ${messageResponse.statusText}`);
+    }
+    
+    // Run the assistant on the thread
+    const runResponse = await fetch(`${OPENAI_API_URL}/threads/${threadId}/runs`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+        'OpenAI-Beta': 'assistants=v2'
+      },
+      body: JSON.stringify({
+        assistant_id: assistantId,
+        instructions: formData ? 
+          `The user has provided structured form data: ${JSON.stringify(formData)}. Use this to provide more specific guidance.` : 
+          undefined
+      })
+    });
+    
+    if (!runResponse.ok) {
+      throw new Error(`Error creating run: ${runResponse.status} ${runResponse.statusText}`);
+    }
+    
+    const run = await runResponse.json();
+    const runId = run.id;
+    
     if (streamRequested) {
-      // Stream response
+      // Set up streaming
       const encoder = new TextEncoder();
       const decoder = new TextDecoder();
       
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: OPENAI_MODEL,
-          messages: openaiMessages,
-          temperature: 0.7,
-          stream: true,
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('OpenAI API error:', errorData);
-        throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
-      }
-      
-      let fullResponse = '';
-      
-      // Create a TransformStream to process the streaming response
+      // Create a TransformStream for the response
       const stream = new TransformStream({
-        async transform(chunk, controller) {
-          const decoded = decoder.decode(chunk);
+        async start(controller) {
+          let runStatus = run.status;
+          let pollInterval = 500; // Start with 500ms polling
           
-          // Process SSE format
-          const lines = decoded.split('\n').filter(line => line.trim() !== '');
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6);
-              if (data === '[DONE]') {
-                continue;
+          // Poll until the run is completed
+          while (runStatus !== 'completed' && 
+                 runStatus !== 'failed' && 
+                 runStatus !== 'cancelled' && 
+                 runStatus !== 'expired') {
+            
+            // Wait before polling again
+            await new Promise(resolve => setTimeout(resolve, pollInterval));
+            
+            // Increase poll interval gradually, max 3s
+            pollInterval = Math.min(pollInterval * 1.5, 3000);
+            
+            // Check run status
+            const statusResponse = await fetch(`${OPENAI_API_URL}/threads/${threadId}/runs/${runId}`, {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${OPENAI_API_KEY}`,
+                'Content-Type': 'application/json',
+                'OpenAI-Beta': 'assistants=v2'
               }
-              
-              try {
-                const json = JSON.parse(data);
-                const content = json.choices[0]?.delta?.content || '';
-                if (content) {
-                  fullResponse += content;
-                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
-                }
-              } catch (e) {
-                console.error('Error parsing SSE data:', e);
-              }
+            });
+            
+            if (!statusResponse.ok) {
+              throw new Error(`Error checking run status: ${statusResponse.status} ${statusResponse.statusText}`);
             }
-          }
-        },
-        async flush(controller) {
-          // Store chat history in database if projectId provided
-          if (projectId) {
-            try {
-              const userMessage = messages[messages.length - 1].content;
+            
+            const runData = await statusResponse.json();
+            runStatus = runData.status;
+            
+            // If the run requires action (function calling)
+            if (runStatus === 'requires_action') {
+              const toolCalls = runData.required_action.submit_tool_outputs.tool_calls;
+              const toolOutputs = [];
               
-              // Store in plan_chat_history table
-              const { error: chatError } = await supabaseClient
-                .from('plan_chat_history')
-                .insert({
-                  plan_id: projectId,
-                  user_message: userMessage,
-                  ai_response: fullResponse,
-                  form_data: formData || null,
-                  metadata: { 
-                    model: OPENAI_MODEL,
-                    streaming: true,
-                    web_search_used: !!webSearchResults 
-                  }
-                });
+              for (const toolCall of toolCalls) {
+                const functionName = toolCall.function.name;
+                const functionArgs = JSON.parse(toolCall.function.arguments);
                 
-              if (chatError) {
-                console.error('Error storing chat history:', chatError);
+                console.log(`Function call: ${functionName}`, functionArgs);
+                
+                // Process functions - in a real implementation, these might perform
+                // actual operations, but here we're just echoing back the inputs
+                let result;
+                if (functionName === 'define_project_requirements') {
+                  result = {
+                    success: true,
+                    requirements: functionArgs
+                  };
+                  
+                  // Update the project requirements in the database if project ID exists
+                  if (projectId) {
+                    await supabaseClient
+                      .from('project_plans')
+                      .update({
+                        requirements: functionArgs
+                      })
+                      .eq('id', projectId);
+                  }
+                } 
+                else if (functionName === 'estimate_budget') {
+                  result = {
+                    success: true,
+                    budget_details: functionArgs
+                  };
+                  
+                  // Update the project budget in the database if project ID exists
+                  if (projectId) {
+                    await supabaseClient
+                      .from('project_plans')
+                      .update({
+                        budget: `$${functionArgs.min_budget} - $${functionArgs.max_budget}`
+                      })
+                      .eq('id', projectId);
+                  }
+                }
+                else if (functionName === 'plan_timeline') {
+                  result = {
+                    success: true,
+                    timeline: functionArgs
+                  };
+                  
+                  // Update the project timeline in the database if project ID exists
+                  if (projectId) {
+                    await supabaseClient
+                      .from('project_plans')
+                      .update({
+                        timeline: functionArgs
+                      })
+                      .eq('id', projectId);
+                  }
+                }
+                else if (functionName === 'select_tech_stack') {
+                  result = {
+                    success: true,
+                    selected_stack: functionArgs
+                  };
+                  
+                  // Update the project technical specs in the database if project ID exists
+                  if (projectId) {
+                    await supabaseClient
+                      .from('project_plans')
+                      .update({
+                        technical_specs: {
+                          ...functionArgs,
+                          last_updated: new Date().toISOString()
+                        }
+                      })
+                      .eq('id', projectId);
+                  }
+                }
+                
+                toolOutputs.push({
+                  tool_call_id: toolCall.id,
+                  output: JSON.stringify(result)
+                });
               }
               
-            } catch (dbError) {
-              console.error('Database error:', dbError);
+              // Submit the tool outputs back to the run
+              const submitResponse = await fetch(`${OPENAI_API_URL}/threads/${threadId}/runs/${runId}/submit_tool_outputs`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${OPENAI_API_KEY}`,
+                  'Content-Type': 'application/json',
+                  'OpenAI-Beta': 'assistants=v2'
+                },
+                body: JSON.stringify({
+                  tool_outputs: toolOutputs
+                })
+              });
+              
+              if (!submitResponse.ok) {
+                throw new Error(`Error submitting tool outputs: ${submitResponse.status} ${submitResponse.statusText}`);
+              }
             }
+            
+            // Stream a heartbeat to keep the connection alive
+            controller.enqueue(encoder.encode('data: {"type":"heartbeat"}\n\n'));
           }
           
+          if (runStatus === 'completed') {
+            // Retrieve the messages from the thread
+            const messages = await retrieveAssistantMessages(threadId);
+            
+            // Get the latest assistant message
+            const assistantMessages = messages.filter(msg => msg.role === 'assistant');
+            if (assistantMessages.length > 0) {
+              const latestMessage = assistantMessages[0]; // Messages are sorted by recency
+              
+              // Extract the content
+              let messageContent = '';
+              for (const contentItem of latestMessage.content) {
+                if (contentItem.type === 'text') {
+                  messageContent = contentItem.text.value;
+                  break;
+                }
+              }
+              
+              // Store the conversation in the database if projectId is provided
+              if (projectId) {
+                await supabaseClient
+                  .from('plan_chat_history')
+                  .insert({
+                    plan_id: projectId,
+                    user_message: latestUserMessage,
+                    ai_response: messageContent,
+                    form_data: formData || null,
+                    metadata: { 
+                      assistant_id: assistantId,
+                      thread_id: threadId,
+                      run_id: runId,
+                      streaming: true
+                    }
+                  });
+              }
+              
+              // Stream the full message at once since we're simulating streaming
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: messageContent })}\n\n`));
+            }
+          } else if (runStatus === 'failed' || runStatus === 'expired') {
+            // Handle failure
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+              error: `Run ${runStatus}: ${run.last_error?.message || 'Unknown error'}` 
+            })}\n\n`));
+          }
+          
+          // End the stream
           controller.enqueue(encoder.encode('data: [DONE]\n\n'));
         }
       });
       
-      // Stream the response to the client
-      return new Response(response.body?.pipeThrough(stream), {
+      // Return the streaming response
+      return new Response(stream.readable, {
         headers: {
           ...corsHeaders,
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
-        },
+          'Connection': 'keep-alive'
+        }
       });
     } else {
-      // Non-streaming response (backward compatible)
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: OPENAI_MODEL,
-          messages: openaiMessages,
-          temperature: 0.7,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('OpenAI API error:', errorData);
-        throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log("OpenAI response received");
+      // Non-streaming approach
+      let runStatus = run.status;
+      let runId = run.id;
       
-      const aiResponse = data.choices[0].message.content;
-      
-      // Store chat history in database if projectId provided
-      if (projectId) {
-        try {
-          const userMessage = messages[messages.length - 1].content;
+      // Poll until the run is completed
+      while (runStatus !== 'completed' && 
+             runStatus !== 'failed' && 
+             runStatus !== 'cancelled' && 
+             runStatus !== 'expired') {
+        
+        // Wait before polling again
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Check run status
+        const statusResponse = await fetch(`${OPENAI_API_URL}/threads/${threadId}/runs/${runId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+            'OpenAI-Beta': 'assistants=v2'
+          }
+        });
+        
+        if (!statusResponse.ok) {
+          throw new Error(`Error checking run status: ${statusResponse.status} ${statusResponse.statusText}`);
+        }
+        
+        const runData = await statusResponse.json();
+        runStatus = runData.status;
+        
+        // If the run requires action (function calling)
+        if (runStatus === 'requires_action') {
+          const toolCalls = runData.required_action.submit_tool_outputs.tool_calls;
+          const toolOutputs = [];
           
-          // Store in plan_chat_history table
-          const { error: chatError } = await supabaseClient
-            .from('plan_chat_history')
-            .insert({
-              plan_id: projectId,
-              user_message: userMessage,
-              ai_response: aiResponse,
-              form_data: formData || null,
-              metadata: { 
-                model: OPENAI_MODEL,
-                web_search_used: !!webSearchResults,
-                tokens: data.usage 
-              }
-            });
+          for (const toolCall of toolCalls) {
+            const functionName = toolCall.function.name;
+            const functionArgs = JSON.parse(toolCall.function.arguments);
             
-          if (chatError) {
-            console.error('Error storing chat history:', chatError);
+            console.log(`Function call: ${functionName}`, functionArgs);
+            
+            // Process functions
+            let result;
+            if (functionName === 'define_project_requirements') {
+              result = {
+                success: true,
+                requirements: functionArgs
+              };
+              
+              // Update the project requirements in the database if project ID exists
+              if (projectId) {
+                await supabaseClient
+                  .from('project_plans')
+                  .update({
+                    requirements: functionArgs
+                  })
+                  .eq('id', projectId);
+              }
+            } 
+            else if (functionName === 'estimate_budget') {
+              result = {
+                success: true,
+                budget_details: functionArgs
+              };
+              
+              // Update the project budget in the database if project ID exists
+              if (projectId) {
+                await supabaseClient
+                  .from('project_plans')
+                  .update({
+                    budget: `$${functionArgs.min_budget} - $${functionArgs.max_budget}`
+                  })
+                  .eq('id', projectId);
+              }
+            }
+            else if (functionName === 'plan_timeline') {
+              result = {
+                success: true,
+                timeline: functionArgs
+              };
+              
+              // Update the project timeline in the database if project ID exists
+              if (projectId) {
+                await supabaseClient
+                  .from('project_plans')
+                  .update({
+                    timeline: functionArgs
+                  })
+                  .eq('id', projectId);
+              }
+            }
+            else if (functionName === 'select_tech_stack') {
+              result = {
+                success: true,
+                selected_stack: functionArgs
+              };
+              
+              // Update the project technical specs in the database if project ID exists
+              if (projectId) {
+                await supabaseClient
+                  .from('project_plans')
+                  .update({
+                    technical_specs: {
+                      ...functionArgs,
+                      last_updated: new Date().toISOString()
+                    }
+                  })
+                  .eq('id', projectId);
+              }
+            }
+            
+            toolOutputs.push({
+              tool_call_id: toolCall.id,
+              output: JSON.stringify(result)
+            });
           }
           
-        } catch (dbError) {
-          console.error('Database error:', dbError);
-          // Don't fail the request if DB storage fails
+          // Submit the tool outputs back to the run
+          const submitResponse = await fetch(`${OPENAI_API_URL}/threads/${threadId}/runs/${runId}/submit_tool_outputs`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${OPENAI_API_KEY}`,
+              'Content-Type': 'application/json',
+              'OpenAI-Beta': 'assistants=v2'
+            },
+            body: JSON.stringify({
+              tool_outputs: toolOutputs
+            })
+          });
+          
+          if (!submitResponse.ok) {
+            throw new Error(`Error submitting tool outputs: ${submitResponse.status} ${submitResponse.statusText}`);
+          }
         }
       }
-
-      return new Response(JSON.stringify({ 
-        message: aiResponse,
-        usage: data.usage
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      
+      if (runStatus === 'completed') {
+        // Retrieve the messages from the thread
+        const messages = await retrieveAssistantMessages(threadId);
+        
+        // Get the latest assistant message
+        const assistantMessages = messages.filter(msg => msg.role === 'assistant');
+        if (assistantMessages.length > 0) {
+          const latestMessage = assistantMessages[0]; // Messages are sorted by recency
+          
+          // Extract the content
+          let messageContent = '';
+          for (const contentItem of latestMessage.content) {
+            if (contentItem.type === 'text') {
+              messageContent = contentItem.text.value;
+              break;
+            }
+          }
+          
+          // Store the conversation in the database if projectId is provided
+          if (projectId) {
+            await supabaseClient
+              .from('plan_chat_history')
+              .insert({
+                plan_id: projectId,
+                user_message: latestUserMessage,
+                ai_response: messageContent,
+                form_data: formData || null,
+                metadata: { 
+                  assistant_id: assistantId,
+                  thread_id: threadId,
+                  run_id: runId
+                }
+              });
+          }
+          
+          return new Response(JSON.stringify({ 
+            message: messageContent,
+            metadata: {
+              assistant_id: assistantId,
+              thread_id: threadId,
+              run_id: runId
+            }
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      } else {
+        throw new Error(`Run failed with status: ${runStatus}`);
+      }
     }
+    
+    throw new Error('Failed to process the request');
   } catch (error) {
     console.error('Error in chat-with-plan-assistant function:', error);
     return new Response(JSON.stringify({ 
