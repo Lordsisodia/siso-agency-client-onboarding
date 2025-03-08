@@ -3,36 +3,35 @@ import { GradientHeading } from '@/components/ui/gradient-heading';
 import { Bot, Users, Zap, Globe } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-// Adding default export to fix import issues
-const WhyChooseSection = () => {
+export const WhyChooseSection = () => {
   const features = [
     {
       icon: Bot,
-      title: "Intelligent Coding Assistant",
-      description: "Experience seamless development with our AI that understands your code, suggests optimizations, and helps solve complex programming challenges in real-time.",
-      stats: "98% accuracy rate",
-      highlight: "Contextual understanding"
+      title: "AI Development Assistant",
+      description: "Work with our AI assistant that understands your project needs, suggests optimal architectures, and provides real-time development guidance.",
+      stats: "95% accuracy in recommendations",
+      highlight: "Powered by GPT-4"
     },
     {
       icon: Users,
-      title: "Vibrant Developer Community",
-      description: "Connect with thousands of developers worldwide. Share code snippets, discuss best practices, and collaborate on innovative solutions to common problems.",
-      stats: "10,000+ active members",
-      highlight: "Peer-to-peer learning"
+      title: "Developer Community",
+      description: "Join a community of innovative developers. Access proven patterns, share insights, and get help from experienced app builders.",
+      stats: "1,000+ active developers",
+      highlight: "Real-world solutions"
     },
     {
       icon: Zap,
-      title: "Rapid Prototyping Tools",
-      description: "Transform ideas into working prototypes in minutes with our advanced AI-powered tools that generate clean, production-ready code from simple prompts.",
-      stats: "60% faster development",
-      highlight: "Customizable templates"
+      title: "Smart Project Planning",
+      description: "Get instant project estimates, automated task breakdowns, and intelligent resource allocation powered by AI analysis.",
+      stats: "24/7 assistance",
+      highlight: "Always optimizing"
     },
     {
       icon: Globe,
-      title: "Enterprise-grade Solutions",
-      description: "Build scalable applications with our comprehensive toolkit that includes performance monitoring, security scanning, and automated deployment pipelines.",
-      stats: "99.9% uptime guarantee",
-      highlight: "End-to-end support"
+      title: "Complete Dev Toolkit",
+      description: "Access everything you need: from project templates and component libraries to deployment pipelines and testing tools.",
+      stats: "500+ dev resources",
+      highlight: "Full-stack solution"
     }
   ];
 
@@ -93,7 +92,7 @@ const WhyChooseSection = () => {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-gradient-to-r from-siso-red/5 to-siso-orange/5 rounded-full filter blur-[50px]" />
           
           <GradientHeading variant="secondary" className="text-4xl md:text-5xl font-bold mb-6 relative">
-            Why Choose Our Development Platform
+            Why Build With Our AI Platform
           </GradientHeading>
 
           {/* Enhanced separator with animation */}
@@ -103,7 +102,7 @@ const WhyChooseSection = () => {
           </div>
           
           <p className="text-lg text-siso-text-muted max-w-2xl mx-auto relative">
-            Accelerate your development workflow with cutting-edge AI tools and a supportive community of professionals
+            Experience the future of app development with AI-powered tools and battle-tested development workflows
           </p>
         </motion.div>
 
@@ -174,5 +173,5 @@ const WhyChooseSection = () => {
   );
 };
 
-export { WhyChooseSection };
-export default WhyChooseSection; // Adding default export
+// Add default export
+export default WhyChooseSection;
