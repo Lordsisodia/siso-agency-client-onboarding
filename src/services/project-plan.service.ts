@@ -150,12 +150,16 @@ export function streamChatWithPlanAssistant(
         content: msg.content
       }));
       
+      // Get the session token if available
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token || '';
+      
       // Call the edge function with streaming enabled
       const response = await fetch(`${supabase.functions.url}/chat-with-plan-assistant`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.auth.session()?.access_token || ''}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Accept': 'text/event-stream',
         },
         body: JSON.stringify({ 

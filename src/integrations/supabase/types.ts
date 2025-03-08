@@ -217,6 +217,81 @@ export type Database = {
         }
         Relationships: []
       }
+      company_profiles: {
+        Row: {
+          accent_color: string | null
+          banner_url: string | null
+          company_name: string | null
+          company_type: string | null
+          created_at: string | null
+          description: string | null
+          email: string | null
+          employee_count: number | null
+          id: string
+          industry: string | null
+          location: string | null
+          logo_url: string | null
+          mission: string | null
+          phone: string | null
+          primary_color: string | null
+          secondary_color: string | null
+          social_links: Json | null
+          updated_at: string | null
+          user_id: string
+          vision: string | null
+          website: string | null
+          year_founded: number | null
+        }
+        Insert: {
+          accent_color?: string | null
+          banner_url?: string | null
+          company_name?: string | null
+          company_type?: string | null
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          employee_count?: number | null
+          id?: string
+          industry?: string | null
+          location?: string | null
+          logo_url?: string | null
+          mission?: string | null
+          phone?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          social_links?: Json | null
+          updated_at?: string | null
+          user_id: string
+          vision?: string | null
+          website?: string | null
+          year_founded?: number | null
+        }
+        Update: {
+          accent_color?: string | null
+          banner_url?: string | null
+          company_name?: string | null
+          company_type?: string | null
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          employee_count?: number | null
+          id?: string
+          industry?: string | null
+          location?: string | null
+          logo_url?: string | null
+          mission?: string | null
+          phone?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          social_links?: Json | null
+          updated_at?: string | null
+          user_id?: string
+          vision?: string | null
+          website?: string | null
+          year_founded?: number | null
+        }
+        Relationships: []
+      }
       connection_list: {
         Row: {
           airtable_id: string | null
@@ -1193,6 +1268,10 @@ export type Database = {
             }
             Returns: unknown
           }
+      create_user_threads_table_if_not_exists: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       halfvec_avg: {
         Args: {
           "": number[]
