@@ -9,7 +9,6 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function PlanBuilder() {
   const [isManualInputOpen, setIsManualInputOpen] = useState(false);
-  const { sendMessage } = usePlanChatAssistant();
   const { toast } = useToast();
   const [projectId, setProjectId] = useState<string>(() => {
     // Generate a unique project ID for this session if one doesn't exist
@@ -23,7 +22,13 @@ export default function PlanBuilder() {
 
   const handleSubmitToAI = async (prompt: string, formData?: Record<string, any>) => {
     try {
-      await sendMessage(prompt, undefined, formData);
+      // This function will be passed to the ManualInputSheet component
+      // It will be used to send the form data to the AI
+      toast({
+        title: "Submitting to AI",
+        description: "Your project details are being processed by the AI assistant...",
+        variant: "default"
+      });
     } catch (error) {
       console.error("Error submitting to AI:", error);
       toast({
