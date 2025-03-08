@@ -3,13 +3,11 @@ import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
-import { Sidebar } from "@/components/Sidebar";
 import { Waves } from '@/components/ui/waves-background';
 import { PreChatState } from '@/components/home/PreChatState';
 import { EnhancedChatState } from '@/components/home/EnhancedChatState';
 import { ChatMessage, ProcessingStage, AgentCategory } from '@/types/chat';
 
-// [Analysis] Separated concerns for better maintainability
 export default function Home() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -159,7 +157,6 @@ export default function Home() {
         />
       </div>
 
-      <Sidebar />
       <div className="relative z-10 flex-1 p-4 md:p-8">
         <div className="h-[calc(100vh-4rem)]">
           <AnimatePresence mode="wait">
