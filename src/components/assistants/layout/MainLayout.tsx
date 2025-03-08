@@ -1,20 +1,27 @@
 
 import React from 'react';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
+import { useLocation } from 'react-router-dom';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarProvider,
+  SidebarInset
+} from '@/components/ui/sidebar';
 
 interface MainLayoutProps {
   children: React.ReactNode;
 }
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  const location = useLocation();
+  
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full bg-gradient-to-b from-siso-bg to-siso-bg/95">
-        <AppSidebar />
-        <div className="flex-1 p-6">
+      <div className="min-h-screen flex flex-col bg-gradient-to-b from-siso-bg to-siso-bg/95">
+        <Sidebar />
+        <SidebarInset className="flex-1 md:ml-0">
           {children}
-        </div>
+        </SidebarInset>
       </div>
     </SidebarProvider>
   );

@@ -30,7 +30,7 @@ function App() {
   const location = useLocation();
   const { user } = useAuthSession();
 
-  // Enhanced logging to debug route matching issues
+  // [Analysis] Enhanced logging to debug route matching issues
   useEffect(() => {
     console.info('Current pathname:', location.pathname);
   }, [location]);
