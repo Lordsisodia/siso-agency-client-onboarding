@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 
 interface MainLayoutProps {
@@ -12,9 +12,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full bg-gradient-to-b from-siso-bg to-siso-bg/95">
         <AppSidebar />
-        <SidebarInset className="flex-1">
+        <div className="flex-1 p-6">
           {children}
-        </SidebarInset>
+        </div>
       </div>
     </SidebarProvider>
   );
