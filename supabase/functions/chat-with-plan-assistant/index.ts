@@ -16,13 +16,7 @@ const SYSTEM_PROMPTS = {
   initial: `You are an AI assistant helping a user create a project specification for a custom app development project.
 Your goal is to gather essential information with minimal user input.
 Be friendly, efficient, and focused on getting the key details needed to pre-fill the project specification form.
-When you identify a company name or website, suggest extracting information automatically.
-
-Start by introducing yourself briefly, then ask for either:
-1. Company name or website (preferred for faster onboarding)
-2. Or what type of project they're interested in
-
-Keep responses concise and move the conversation forward efficiently.`,
+When you identify a company name or website, suggest extracting information automatically.`,
 
   companyResearch: `Based on the company name or website provided, you need to help identify:
 1. The industry and business category
@@ -38,13 +32,6 @@ Be concise and focus on practical insights that help build a better project spec
 3. Technical considerations that might be important
 4. Potential integration needs
 Keep suggestions practical and aligned with the user's business type and goals.`,
-
-  projectSummary: `Create a concise summary of the project specification so far, highlighting:
-1. Business type and core needs
-2. Primary goals for the digital solution
-3. Key features that would deliver the most value
-4. Potential technologies or approaches that might be suitable
-Present this in a way that confirms understanding and invites corrections or additions.`,
 };
 
 // Extraction functions for the AI to use
@@ -150,7 +137,7 @@ serve(async (req) => {
 
   try {
     // Parse the request
-    const { messages, stage, previousData, audioTranscript, format } = await req.json();
+    const { messages, stage, previousData } = await req.json();
     
     if (!messages || !Array.isArray(messages)) {
       throw new Error('Invalid request: messages array is required');
@@ -158,22 +145,12 @@ serve(async (req) => {
 
     console.log(`Processing request in stage: ${stage}`);
     
-    // If audio transcript is provided, add it as a user message
-    if (audioTranscript) {
-      messages.push({
-        role: 'user',
-        content: `Transcribed audio: ${audioTranscript}`
-      });
-    }
-    
     // Select appropriate system prompt based on conversation stage
     let systemPrompt = SYSTEM_PROMPTS.initial;
     if (stage === 'companyResearch') {
       systemPrompt = SYSTEM_PROMPTS.companyResearch;
     } else if (stage === 'requirementGeneration') {
       systemPrompt = SYSTEM_PROMPTS.requirementGeneration;
-    } else if (stage === 'projectSummary') {
-      systemPrompt = SYSTEM_PROMPTS.projectSummary;
     }
     
     // Prepare messages array with system prompt
@@ -248,12 +225,6 @@ serve(async (req) => {
       }
     }
 
-    // Format response for speech synthesis if requested
-    if (format === 'speech') {
-      // Simplify and shorten the response for better speech synthesis
-      result.speechText = simplifyForSpeech(result.message);
-    }
-
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -268,25 +239,3 @@ serve(async (req) => {
     });
   }
 });
-
-// Helper function to simplify text for speech synthesis
-function simplifyForSpeech(text) {
-  // Remove markdown formatting
-  let speechText = text
-    .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
-    .replace(/\*(.*?)\*/g, '$1')     // Remove italics
-    .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove links
-    .replace(/#{1,6}\s?(.*?)(?:\n|$)/g, '$1. ') // Convert headers to sentences
-    .replace(/```(?:.*?)\n([\s\S]*?)```/g, '') // Remove code blocks
-    .replace(/\n\n/g, '. ')          // Convert double newlines to periods
-    .replace(/\n/g, '. ')            // Convert single newlines to periods
-    .replace(/\. \. /g, '. ')        // Clean up double periods
-    .replace(/\s+/g, ' ');           // Clean up excessive whitespace
-
-  // Limit length for faster synthesis
-  if (speechText.length > 500) {
-    speechText = speechText.substring(0, 497) + '...';
-  }
-
-  return speechText;
-}
