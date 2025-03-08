@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { PhoneCall, MoveRight } from "lucide-react";
@@ -10,7 +9,7 @@ function Hero() {
   const navigate = useNavigate();
   
   const titles = useMemo(
-    () => ["Build, Launch, Scale", "Tailored Apps for Agencies", "Streamlined Development"],
+    () => ["Innovate, Scale, Succeed", "Collaborate with 1M+ Agencies", "Future-Proof Your Agency"],
     []
   );
 
@@ -49,7 +48,7 @@ function Hero() {
         <div className="flex gap-8 py-20 lg:py-40 items-center justify-center flex-col">
           <div className="flex gap-4 flex-col items-center">
             <h1 className="text-6xl md:text-8xl max-w-5xl tracking-tighter text-center font-regular">
-              <span className="text-siso-text-bold whitespace-nowrap">Custom App Development for</span>
+              <span className="text-siso-text-bold whitespace-nowrap">Built for Agencies to</span>
               <div className="relative h-[150px] md:h-[200px] flex w-full justify-center overflow-hidden text-center">
                 {titles.map((title, index) => (
                   <motion.span
@@ -76,9 +75,9 @@ function Hero() {
             </h1>
 
             <p className="text-lg md:text-xl leading-relaxed tracking-tight text-siso-text max-w-2xl text-center mx-auto">
-              Your partner for building powerful, custom applications that help your agency 
-              deliver exceptional client results. From interactive onboarding to seamless 
-              project management—we streamline the entire development process.
+              Your gateway to tools, education, networking, and AI-powered innovation—crafted 
+              to help your agency thrive in the digital age. Access our curated collection 
+              of resources designed for modern business growth.
             </p>
           </div>
           <div className="flex flex-row gap-3">
@@ -88,14 +87,14 @@ function Hero() {
               variant="outline"
               onClick={handleTryAI}
             >
-              View Our Portfolio <PhoneCall className="w-4 h-4" />
+              Try SISO AI Now <PhoneCall className="w-4 h-4" />
             </Button>
             <Button 
               size="lg" 
               className="gap-4 bg-gradient-to-r from-siso-red to-siso-orange hover:opacity-90"
               onClick={handleGetStarted}
             >
-              Start Your Project <MoveRight className="w-4 h-4" />
+              Get Started <MoveRight className="w-4 h-4" />
             </Button>
           </div>
         </div>
