@@ -24,6 +24,7 @@ import Notifications from '@/pages/Notifications';
 import { Toaster } from '@/components/ui/toaster';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { MainLayout } from '@/components/assistants/layout/MainLayout';
 
 function App() {
   const location = useLocation();
@@ -33,6 +34,15 @@ function App() {
   useEffect(() => {
     console.info('Current pathname:', location.pathname);
   }, [location]);
+
+  // Wrap protected content with MainLayout
+  const protectedContent = (component: React.ReactNode) => (
+    <ProtectedRoute>
+      <MainLayout>
+        {component}
+      </MainLayout>
+    </ProtectedRoute>
+  );
 
   return (
     <>
@@ -48,56 +58,20 @@ function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/thank-you" element={<ThankYou />} />
 
-        {/* Protected routes */}
-        <Route path="/home" element={
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        } />
+        {/* Protected routes - all using protectedContent wrapper */}
+        <Route path="/home" element={protectedContent(<Home />)} />
         
         {/* Primary routes */}
-        <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/projects" element={
-          <ProtectedRoute>
-            <Projects />
-          </ProtectedRoute>
-        } />
-        <Route path="/plan-builder" element={
-          <ProtectedRoute>
-            <PlanBuilder />
-          </ProtectedRoute>
-        } />
-        <Route path="/company-profile" element={
-          <ProtectedRoute>
-            <CompanyProfile />
-          </ProtectedRoute>
-        } />
-        <Route path="/resource-hub" element={
-          <ProtectedRoute>
-            <ResourceHub />
-          </ProtectedRoute>
-        } />
-        <Route path="/portfolio" element={
-          <ProtectedRoute>
-            <Portfolio />
-          </ProtectedRoute>
-        } />
-        <Route path="/notifications" element={
-          <ProtectedRoute>
-            <Notifications />
-          </ProtectedRoute>
-        } />
+        <Route path="/dashboard" element={protectedContent(<Dashboard />)} />
+        <Route path="/projects" element={protectedContent(<Projects />)} />
+        <Route path="/plan-builder" element={protectedContent(<PlanBuilder />)} />
+        <Route path="/company-profile" element={protectedContent(<CompanyProfile />)} />
+        <Route path="/resource-hub" element={protectedContent(<ResourceHub />)} />
+        <Route path="/portfolio" element={protectedContent(<Portfolio />)} />
+        <Route path="/notifications" element={protectedContent(<Notifications />)} />
         
         {/* Profile route */}
-        <Route path="/profile" element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        } />
+        <Route path="/profile" element={protectedContent(<Profile />)} />
 
         {/* Fallback route */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
