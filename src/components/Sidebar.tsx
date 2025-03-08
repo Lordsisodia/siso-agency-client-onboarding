@@ -84,18 +84,18 @@ export const Sidebar = () => {
 
   return (
     <>
-      {/* Mobile Menu Button with smooth icon transition - higher z-index */}
+      {/* Mobile Menu Button */}
       {isMobile && (
         <motion.div
           initial={false}
           animate={{ scale: 1 }}
           whileTap={{ scale: 0.95 }}
-          className="z-50"
+          className="fixed top-4 left-4 z-50"
         >
           <Button
             variant="ghost"
             size="icon"
-            className="fixed top-4 left-4 z-50 bg-siso-bg/80 backdrop-blur-sm"
+            className="bg-siso-bg/80 backdrop-blur-sm"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             <AnimatePresence mode="wait" initial={false}>
@@ -117,7 +117,7 @@ export const Sidebar = () => {
         </motion.div>
       )}
 
-      {/* Sidebar with improved z-index and animations */}
+      {/* Sidebar */}
       <motion.div 
         initial={false}
         animate={
@@ -127,10 +127,10 @@ export const Sidebar = () => {
         }
         variants={sidebarVariants}
         className={`
-          fixed top-0 h-screen overflow-y-auto z-40
+          h-screen min-h-screen overflow-y-auto z-40
           bg-gradient-to-b from-siso-bg to-siso-bg/95 
           border-r border-siso-text/10 shadow-lg
-          ${isMobile ? 'left-0' : ''}
+          ${isMobile ? 'fixed left-0 top-0' : 'relative'}
         `}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -156,7 +156,7 @@ export const Sidebar = () => {
         />
       </motion.div>
 
-      {/* Mobile Overlay with improved backdrop blur and proper z-index */}
+      {/* Mobile Overlay */}
       <AnimatePresence>
         {isMobile && isMobileMenuOpen && (
           <motion.div 
