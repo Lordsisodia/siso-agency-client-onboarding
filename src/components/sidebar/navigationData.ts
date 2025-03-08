@@ -59,6 +59,11 @@ export const menuSections: MenuSection[] = [
         href: '/resource-hub',
         icon: BookOpen,
         label: 'Resource Hub',
+      },
+      {
+        href: '/competitive-analysis',
+        icon: TrendingUp,
+        label: 'Competitive Analysis',
       }
     ]
   },

@@ -24,8 +24,6 @@ import Notifications from '@/pages/Notifications';
 import { Toaster } from '@/components/ui/toaster';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { MainLayout } from '@/components/assistants/layout/MainLayout';
-import { Sidebar } from '@/components/Sidebar';
 
 function App() {
   const location = useLocation();
@@ -43,8 +41,6 @@ function App() {
         <meta name="description" content="SISO is the premier platform for AI learning, resources, and community." />
       </Helmet>
 
-      <Sidebar />
-      
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/auth" element={<Auth />} />
@@ -55,69 +51,51 @@ function App() {
         {/* Protected routes */}
         <Route path="/home" element={
           <ProtectedRoute>
-            <MainLayout>
-              <Home />
-            </MainLayout>
+            <Home />
           </ProtectedRoute>
         } />
         
         {/* Primary routes */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
-            <MainLayout>
-              <Dashboard />
-            </MainLayout>
+            <Dashboard />
           </ProtectedRoute>
         } />
         <Route path="/projects" element={
           <ProtectedRoute>
-            <MainLayout>
-              <Projects />
-            </MainLayout>
+            <Projects />
           </ProtectedRoute>
         } />
         <Route path="/plan-builder" element={
           <ProtectedRoute>
-            <MainLayout>
-              <PlanBuilder />
-            </MainLayout>
+            <PlanBuilder />
           </ProtectedRoute>
         } />
         <Route path="/company-profile" element={
           <ProtectedRoute>
-            <MainLayout>
-              <CompanyProfile />
-            </MainLayout>
+            <CompanyProfile />
           </ProtectedRoute>
         } />
         <Route path="/resource-hub" element={
           <ProtectedRoute>
-            <MainLayout>
-              <ResourceHub />
-            </MainLayout>
+            <ResourceHub />
           </ProtectedRoute>
         } />
         <Route path="/portfolio" element={
           <ProtectedRoute>
-            <MainLayout>
-              <Portfolio />
-            </MainLayout>
+            <Portfolio />
           </ProtectedRoute>
         } />
         <Route path="/notifications" element={
           <ProtectedRoute>
-            <MainLayout>
-              <Notifications />
-            </MainLayout>
+            <Notifications />
           </ProtectedRoute>
         } />
         
         {/* Profile route */}
         <Route path="/profile" element={
           <ProtectedRoute>
-            <MainLayout>
-              <Profile />
-            </MainLayout>
+            <Profile />
           </ProtectedRoute>
         } />
 
