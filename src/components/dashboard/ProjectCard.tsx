@@ -95,13 +95,13 @@ export const ProjectCard = ({
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'planning':
-        return { bg: 'bg-blue-500', text: 'Planning', icon: <Calendar size={14} className="mr-1" /> };
+        return { bg: 'bg-blue-500', text: 'Planning', icon: <Calendar size={12} className="mr-1" /> };
       case 'in-progress':
-        return { bg: 'bg-amber-500', text: 'In Progress', icon: <Clock size={14} className="mr-1" /> };
+        return { bg: 'bg-amber-500', text: 'In Progress', icon: <Clock size={12} className="mr-1" /> };
       case 'reviewing':
-        return { bg: 'bg-purple-500', text: 'Reviewing', icon: <CheckSquare size={14} className="mr-1" /> };
+        return { bg: 'bg-purple-500', text: 'Reviewing', icon: <CheckSquare size={12} className="mr-1" /> };
       case 'completed':
-        return { bg: 'bg-green-500', text: 'Completed', icon: <CheckSquare size={14} className="mr-1" /> };
+        return { bg: 'bg-green-500', text: 'Completed', icon: <CheckSquare size={12} className="mr-1" /> };
       default:
         return { bg: 'bg-gray-500', text: 'Unknown', icon: null };
     }
@@ -149,63 +149,68 @@ export const ProjectCard = ({
       className="h-full"
     >
       <Card className={`h-full border border-siso-border hover:border-siso-orange/30 hover:shadow-lg hover:shadow-siso-orange/5 transition-all overflow-hidden ${isFullWidth ? 'flex flex-col' : ''}`}>
-        <CardHeader className="p-6 pb-4">
-          <div className="flex justify-between items-start mb-4">
-            <Badge className={`${statusConfig.bg} flex items-center px-3 py-1`}>
+        {/* Optimized Card Header - reduced vertical padding */}
+        <CardHeader className="px-5 py-4 pb-2">
+          <div className="flex justify-between items-start mb-2">
+            {/* Compact badges */}
+            <Badge className={`${statusConfig.bg} flex items-center px-2 py-0.5 text-xs`}>
               {statusConfig.icon}
               {statusConfig.text}
             </Badge>
             
-            <Badge className={`${priorityConfig.bg} ${priorityConfig.textColor} flex items-center px-3 py-1`}>
-              {priority === 'high' && <AlertTriangle size={14} className="mr-1" />}
-              {priorityConfig.text} Priority
+            <Badge className={`${priorityConfig.bg} ${priorityConfig.textColor} flex items-center px-2 py-0.5 text-xs`}>
+              {priority === 'high' && <AlertTriangle size={12} className="mr-1" />}
+              {priorityConfig.text}
             </Badge>
           </div>
           
-          <CardTitle className="text-2xl font-bold text-siso-text-bold mb-3">{title}</CardTitle>
+          <CardTitle className="text-xl font-bold text-siso-text-bold mb-1">{title}</CardTitle>
           
           {client && (
-            <div className="flex items-center mt-2 mb-3 text-sm text-siso-text/80">
-              <Building size={15} className="mr-2 text-siso-orange/70" />
+            <div className="flex items-center mt-1 text-xs text-siso-text/80">
+              <Building size={14} className="mr-1.5 text-siso-orange/70" />
               {client}
             </div>
           )}
         </CardHeader>
         
-        <CardContent className={`p-6 pt-0 flex-1 ${isFullWidth ? 'grid grid-cols-1 lg:grid-cols-3 gap-6' : ''}`}>
+        <CardContent className={`px-5 py-3 pt-0 flex-1 ${isFullWidth ? 'grid grid-cols-1 lg:grid-cols-3 gap-4' : ''}`}>
           <div className={isFullWidth ? "lg:col-span-1" : ""}>
-            <h4 className="text-sm font-semibold text-siso-text-bold mb-2">Overview</h4>
+            <h4 className="text-xs font-semibold text-siso-text-bold mb-1.5">Overview</h4>
             
-            <div className="mb-4">
+            {/* Reduced height textarea */}
+            <div className="mb-3">
               <Textarea 
                 value={description} 
                 readOnly 
-                className="resize-none h-24 bg-siso-bg/30 border-siso-border text-sm text-siso-text/80"
+                className="resize-none h-20 bg-siso-bg/30 border-siso-border text-xs text-siso-text/80 py-2"
               />
             </div>
             
-            <div className="mt-4 mb-6">
-              <div className="flex justify-between mb-1.5 text-xs">
+            {/* Optimized progress section */}
+            <div className="mt-3 mb-3">
+              <div className="flex justify-between mb-1 text-xs">
                 <span className="text-siso-text/80">Progress</span>
                 <span className="text-siso-text-bold">{progress}%</span>
               </div>
               <Progress 
                 value={progress} 
-                className="h-2 bg-siso-bg/50" 
+                className="h-1.5 bg-siso-bg/50" 
                 indicatorClassName="bg-gradient-to-r from-siso-red to-siso-orange rounded-full"
               />
             </div>
             
-            <div className="grid grid-cols-2 gap-3">
+            {/* Optimized grid layout for project metadata */}
+            <div className="grid grid-cols-2 gap-2">
               {deadline && (
                 <div className="flex flex-col">
-                  <span className="text-xs text-siso-text/70 mb-1">Deadline</span>
-                  <div className="flex items-center text-sm">
-                    <Clock size={14} className="mr-1 text-siso-orange" />
+                  <span className="text-xs text-siso-text/70">Deadline</span>
+                  <div className="flex items-center text-xs">
+                    <Clock size={12} className="mr-1 text-siso-orange" />
                     <span>{formatDate(new Date(deadline))}</span>
                     {daysRemaining !== null && daysRemaining <= 7 && (
-                      <Badge variant="warning" className="ml-2 text-xs">
-                        {daysRemaining} days left
+                      <Badge variant="warning" className="ml-1 text-xs py-0 px-1 h-4">
+                        {daysRemaining}d
                       </Badge>
                     )}
                   </div>
@@ -214,31 +219,29 @@ export const ProjectCard = ({
               
               {tasks.total > 0 && (
                 <div className="flex flex-col">
-                  <span className="text-xs text-siso-text/70 mb-1">Tasks</span>
-                  <div className="flex items-center text-sm">
-                    <CheckSquare size={14} className="mr-1 text-siso-orange" />
+                  <span className="text-xs text-siso-text/70">Tasks</span>
+                  <div className="flex items-center text-xs">
+                    <CheckSquare size={12} className="mr-1 text-siso-orange" />
                     <span>
-                      {tasks.completed}/{tasks.total} complete
+                      {tasks.completed}/{tasks.total}
                     </span>
                   </div>
                 </div>
               )}
-            </div>
-            
-            <div className="mt-3">
+              
               <div className="flex flex-col">
-                <span className="text-xs text-siso-text/70 mb-1">Last Updated</span>
-                <div className="text-sm text-siso-text/90">
+                <span className="text-xs text-siso-text/70">Updated</span>
+                <div className="text-xs text-siso-text/90">
                   {formatDate(new Date(lastUpdated))}
                 </div>
               </div>
               
               {team.length > 0 && (
-                <div className="flex flex-col mt-3">
-                  <span className="text-xs text-siso-text/70 mb-1">Team</span>
+                <div className="flex flex-col">
+                  <span className="text-xs text-siso-text/70">Team</span>
                   <div className="flex items-center">
-                    <Users size={14} className="mr-1 text-siso-orange" />
-                    <span className="text-sm text-siso-text/90">
+                    <Users size={12} className="mr-1 text-siso-orange" />
+                    <span className="text-xs text-siso-text/90">
                       {team.length} members
                     </span>
                   </div>
@@ -249,75 +252,77 @@ export const ProjectCard = ({
 
           {isFullWidth && (
             <div className="lg:col-span-1">
-              <h4 className="text-sm font-semibold text-siso-text-bold mb-2">Project Phases</h4>
+              <h4 className="text-xs font-semibold text-siso-text-bold mb-1.5">Project Phases</h4>
               
-              <div className="space-y-3">
+              {/* Optimized project phases - horizontal layout */}
+              <div className="grid grid-cols-2 gap-2">
                 {phases.map((phase, index) => (
-                  <div key={index} className="bg-siso-bg/30 border border-siso-border rounded-md p-3">
-                    <div className="flex justify-between items-center mb-1.5">
-                      <span className="text-sm font-medium">{phase.name}</span>
-                      <Badge className={`${getPhaseStatusColor(phase.status)} text-xs py-0.5`}>
-                        {phase.status === 'completed' ? 'Completed' : 
-                         phase.status === 'in-progress' ? 'In Progress' : 'Pending'}
+                  <div key={index} className="bg-siso-bg/30 border border-siso-border rounded-md p-2">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs font-medium">{phase.name}</span>
+                      <Badge className={`${getPhaseStatusColor(phase.status)} text-[10px] py-0 px-1.5 h-4`}>
+                        {phase.status === 'completed' ? 'Done' : 
+                         phase.status === 'in-progress' ? 'Active' : 'Pending'}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <Progress 
                         value={phase.progress} 
-                        className="h-1.5 flex-1 bg-siso-bg/50" 
+                        className="h-1 flex-1 bg-siso-bg/50" 
                         indicatorClassName={`${
                           phase.status === 'completed' ? 'bg-green-500' : 
                           phase.status === 'in-progress' ? 'bg-amber-500' : 
                           'bg-gray-400/40'
                         } rounded-full`}
                       />
-                      <span className="text-xs text-siso-text/80">{phase.progress}%</span>
+                      <span className="text-[10px] text-siso-text/80">{phase.progress}%</span>
                     </div>
                   </div>
                 ))}
               </div>
               
+              {/* Optimized code metrics section */}
               {codeMetrics && (
-                <div className="mt-6">
-                  <h4 className="text-sm font-semibold text-siso-text-bold mb-2">Code Metrics</h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-siso-bg/30 border border-siso-border rounded-md p-3">
+                <div className="mt-3">
+                  <h4 className="text-xs font-semibold text-siso-text-bold mb-1.5">Code Metrics</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-siso-bg/30 border border-siso-border rounded-md p-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                          <Code size={14} className="mr-1.5 text-siso-orange" />
-                          <span className="text-xs text-siso-text/70">Lines of Code</span>
+                          <Code size={12} className="mr-1 text-siso-orange" />
+                          <span className="text-[10px] text-siso-text/70">Lines of Code</span>
                         </div>
-                        <span className="text-sm font-medium">{formatNumber(codeMetrics.linesOfCode)}</span>
+                        <span className="text-xs font-medium">{formatNumber(codeMetrics.linesOfCode)}</span>
                       </div>
                     </div>
                     
-                    <div className="bg-siso-bg/30 border border-siso-border rounded-md p-3">
+                    <div className="bg-siso-bg/30 border border-siso-border rounded-md p-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                          <GitBranch size={14} className="mr-1.5 text-siso-orange" />
-                          <span className="text-xs text-siso-text/70">Commits</span>
+                          <GitBranch size={12} className="mr-1 text-siso-orange" />
+                          <span className="text-[10px] text-siso-text/70">Commits</span>
                         </div>
-                        <span className="text-sm font-medium">{formatNumber(codeMetrics.commits)}</span>
+                        <span className="text-xs font-medium">{formatNumber(codeMetrics.commits)}</span>
                       </div>
                     </div>
                     
-                    <div className="bg-siso-bg/30 border border-siso-border rounded-md p-3">
+                    <div className="bg-siso-bg/30 border border-siso-border rounded-md p-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                          <FileText size={14} className="mr-1.5 text-siso-orange" />
-                          <span className="text-xs text-siso-text/70">Files</span>
+                          <FileText size={12} className="mr-1 text-siso-orange" />
+                          <span className="text-[10px] text-siso-text/70">Files</span>
                         </div>
-                        <span className="text-sm font-medium">{formatNumber(codeMetrics.files)}</span>
+                        <span className="text-xs font-medium">{formatNumber(codeMetrics.files)}</span>
                       </div>
                     </div>
                     
-                    <div className="bg-siso-bg/30 border border-siso-border rounded-md p-3">
+                    <div className="bg-siso-bg/30 border border-siso-border rounded-md p-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                          <BarChart2 size={14} className="mr-1.5 text-siso-orange" />
-                          <span className="text-xs text-siso-text/70">Quality Score</span>
+                          <BarChart2 size={12} className="mr-1 text-siso-orange" />
+                          <span className="text-[10px] text-siso-text/70">Quality</span>
                         </div>
-                        <span className="text-sm font-medium">{codeMetrics.quality}/100</span>
+                        <span className="text-xs font-medium">{codeMetrics.quality}/100</span>
                       </div>
                     </div>
                   </div>
@@ -328,67 +333,67 @@ export const ProjectCard = ({
 
           {isFullWidth && financialMetrics && (
             <div className="lg:col-span-1">
-              <h4 className="text-sm font-semibold text-siso-text-bold mb-2">Financial Metrics</h4>
+              <h4 className="text-xs font-semibold text-siso-text-bold mb-1.5">Financial Metrics</h4>
               
-              <div className="space-y-4">
-                <div className="bg-gradient-to-r from-siso-bg/40 to-siso-bg/20 border border-siso-border rounded-md p-4">
-                  <div className="flex items-center justify-between mb-1">
+              {/* Optimized financial metrics layout */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-gradient-to-r from-siso-bg/40 to-siso-bg/20 border border-siso-border rounded-md p-2 col-span-2">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <DollarSign size={16} className="mr-1.5 text-siso-orange" />
-                      <span className="text-sm font-medium">Market Value</span>
+                      <DollarSign size={12} className="mr-1 text-siso-orange" />
+                      <span className="text-xs font-medium">Market Value</span>
                     </div>
-                    <span className="text-lg font-bold text-siso-text-bold">
+                    <span className="text-sm font-bold text-siso-text-bold">
                       {formatCurrency(financialMetrics.marketValue)}
                     </span>
                   </div>
-                  <p className="text-xs text-siso-text/60">Estimated value of the project in the current market</p>
+                  <p className="text-[10px] text-siso-text/60 mt-0.5">Estimated value in current market</p>
                 </div>
                 
-                <div className="bg-gradient-to-r from-siso-bg/40 to-siso-bg/20 border border-siso-border rounded-md p-4">
-                  <div className="flex items-center justify-between mb-1">
+                <div className="bg-gradient-to-r from-siso-bg/40 to-siso-bg/20 border border-siso-border rounded-md p-2 col-span-2">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <TrendingUp size={16} className="mr-1.5 text-green-500" />
-                      <span className="text-sm font-medium">Cost Savings</span>
+                      <TrendingUp size={12} className="mr-1 text-green-500" />
+                      <span className="text-xs font-medium">Cost Savings</span>
                     </div>
-                    <span className="text-lg font-bold text-green-500">
+                    <span className="text-sm font-bold text-green-500">
                       {formatCurrency(financialMetrics.costSavings)}
                     </span>
                   </div>
-                  <p className="text-xs text-siso-text/60">Savings compared to traditional development approaches</p>
+                  <p className="text-[10px] text-siso-text/60 mt-0.5">vs. traditional development</p>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-siso-bg/30 border border-siso-border rounded-md p-3">
-                    <div className="flex items-center mb-1">
-                      <Layers size={14} className="mr-1.5 text-siso-orange" />
-                      <span className="text-xs text-siso-text/70">Development Cost</span>
-                    </div>
-                    <span className="text-sm font-medium">
-                      {formatCurrency(financialMetrics.developmentCost)}
-                    </span>
+                <div className="bg-siso-bg/30 border border-siso-border rounded-md p-2">
+                  <div className="flex items-center mb-0.5">
+                    <Layers size={12} className="mr-1 text-siso-orange" />
+                    <span className="text-[10px] text-siso-text/70">Development</span>
                   </div>
-                  
-                  <div className="bg-siso-bg/30 border border-siso-border rounded-md p-3">
-                    <div className="flex items-center mb-1">
-                      <GitPullRequest size={14} className="mr-1.5 text-siso-orange" />
-                      <span className="text-xs text-siso-text/70">ROI</span>
-                    </div>
-                    <span className="text-sm font-medium">
-                      {formatPercentage(financialMetrics.roi)}
-                    </span>
-                  </div>
+                  <span className="text-xs font-medium">
+                    {formatCurrency(financialMetrics.developmentCost)}
+                  </span>
                 </div>
                 
-                <div className="mt-4">
-                  <h4 className="text-sm font-semibold text-siso-text-bold mb-3">Team Members</h4>
-                  <ScrollArea className="h-[100px]">
-                    <div className="space-y-2">
+                <div className="bg-siso-bg/30 border border-siso-border rounded-md p-2">
+                  <div className="flex items-center mb-0.5">
+                    <GitPullRequest size={12} className="mr-1 text-siso-orange" />
+                    <span className="text-[10px] text-siso-text/70">ROI</span>
+                  </div>
+                  <span className="text-xs font-medium">
+                    {formatPercentage(financialMetrics.roi)}
+                  </span>
+                </div>
+                
+                {/* Optimized team members section with horizontal display */}
+                <div className="mt-2 col-span-2">
+                  <h4 className="text-xs font-semibold text-siso-text-bold mb-1.5">Team</h4>
+                  <ScrollArea className="h-[70px]">
+                    <div className="flex flex-wrap gap-1">
                       {team.map((member, index) => (
-                        <div key={index} className="flex items-center gap-2 py-1.5 px-2 rounded-md hover:bg-siso-bg/50">
-                          <div className="w-7 h-7 rounded-full bg-gradient-to-r from-siso-red/20 to-siso-orange/20 flex items-center justify-center text-xs font-medium text-siso-orange">
+                        <div key={index} className="flex items-center gap-1.5 py-1 px-2 rounded-md hover:bg-siso-bg/50 bg-siso-bg/30 border border-siso-border/50">
+                          <div className="w-5 h-5 rounded-full bg-gradient-to-r from-siso-red/20 to-siso-orange/20 flex items-center justify-center text-[10px] font-medium text-siso-orange">
                             {member.split(' ').map(n => n[0]).join('')}
                           </div>
-                          <span className="text-sm">{member}</span>
+                          <span className="text-xs">{member}</span>
                         </div>
                       ))}
                     </div>
@@ -403,22 +408,22 @@ export const ProjectCard = ({
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mt-3 pt-3 border-t border-siso-border/30"
+              className="mt-2 pt-2 border-t border-siso-border/30"
             >
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <div className="flex flex-col">
-                  <span className="text-xs text-siso-text/70 mb-1">Last Updated</span>
-                  <div className="text-sm text-siso-text/90">
+                  <span className="text-xs text-siso-text/70">Updated</span>
+                  <div className="text-xs text-siso-text/90">
                     {formatDate(new Date(lastUpdated))}
                   </div>
                 </div>
                 
                 {team.length > 0 && (
                   <div className="flex flex-col">
-                    <span className="text-xs text-siso-text/70 mb-1">Team</span>
+                    <span className="text-xs text-siso-text/70">Team</span>
                     <div className="flex items-center">
-                      <Users size={14} className="mr-1 text-siso-orange" />
-                      <span className="text-sm text-siso-text/90">
+                      <Users size={12} className="mr-1 text-siso-orange" />
+                      <span className="text-xs text-siso-text/90">
                         {team.length} members
                       </span>
                     </div>
@@ -429,15 +434,16 @@ export const ProjectCard = ({
           )}
         </CardContent>
         
-        <CardFooter className="p-4 pt-0 flex justify-between items-center border-t border-siso-border/20 mt-auto">
+        {/* Optimized card footer */}
+        <CardFooter className="px-5 py-2 flex justify-between items-center border-t border-siso-border/20 mt-auto">
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={() => onViewDetails(id)}
-            className="text-xs text-siso-orange hover:text-siso-red hover:bg-siso-orange/5"
+            className="text-xs text-siso-orange hover:text-siso-red hover:bg-siso-orange/5 h-8 px-2"
           >
             View Details
-            <ExternalLink size={12} className="ml-1" />
+            <ExternalLink size={10} className="ml-1" />
           </Button>
           
           <div className="flex items-center">
@@ -446,12 +452,12 @@ export const ProjectCard = ({
                 variant="ghost"
                 size="sm"
                 onClick={toggleExpand}
-                className="text-xs hover:bg-siso-orange/5 mr-1"
+                className="text-xs hover:bg-siso-orange/5 mr-1 h-7 w-7 p-0"
               >
                 {expanded ? (
-                  <ChevronUp size={16} />
+                  <ChevronUp size={14} />
                 ) : (
-                  <ChevronDown size={16} />
+                  <ChevronDown size={14} />
                 )}
               </Button>
             )}
@@ -460,9 +466,9 @@ export const ProjectCard = ({
               variant="ghost"
               size="sm"
               onClick={() => onEdit(id)}
-              className="text-xs hover:bg-siso-orange/5"
+              className="text-xs hover:bg-siso-orange/5 h-7 w-7 p-0"
             >
-              <MoreHorizontal size={16} />
+              <MoreHorizontal size={14} />
             </Button>
           </div>
         </CardFooter>

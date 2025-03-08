@@ -35,13 +35,14 @@ export const ProfileCard = ({
           className
         )}
       >
-        <CardHeader className="pb-3">
-          <CardTitle className="text-siso-text-bold flex items-center gap-2.5 text-lg tracking-tight">
-            <Icon className="w-5 h-5 text-siso-orange" />
+        {/* Optimized card header with reduced padding */}
+        <CardHeader className="pb-2 px-5 py-4">
+          <CardTitle className="text-siso-text-bold flex items-center gap-2 text-base tracking-tight">
+            <Icon className="w-4 h-4 text-siso-orange" />
             {title}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-5 pb-4 pt-0">
           <motion.div
             initial={false}
             animate={isEditing ? { scale: 1.01 } : { scale: 1 }}
