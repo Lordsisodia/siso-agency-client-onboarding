@@ -2,81 +2,168 @@
 import { useState } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Waves } from '@/components/ui/waves-background';
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { PlanBuilderSteps } from '@/components/plan-builder/PlanBuilderSteps';
-import { BasicInfoForm, BasicInfoData } from '@/components/plan-builder/BasicInfoForm';
-import { RequirementsForm, RequirementsData } from '@/components/plan-builder/RequirementsForm';
-import { FeaturesForm, FeaturesData } from '@/components/plan-builder/FeaturesForm';
-import { SpecificationsForm, SpecificationsData } from '@/components/plan-builder/SpecificationsForm';
-import { SummaryView } from '@/components/plan-builder/SummaryView';
+import { AnimatePresence } from 'framer-motion';
+import { PreChatState } from '@/components/home/PreChatState';
+import { EnhancedChatState } from '@/components/home/EnhancedChatState';
+import { ChatMessage, ProcessingStage, AgentCategory } from '@/types/chat';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from "@/hooks/use-toast";
 
 export default function PlanBuilder() {
-  const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [basicInfo, setBasicInfo] = useState<BasicInfoData>({
-    projectName: '',
-    companyName: '',
-    contactName: '',
-    contactEmail: '',
-    website: '',
-    overview: '',
-  });
-  const [requirements, setRequirements] = useState<RequirementsData>({
-    goals: [''],
-    requirements: [''],
-    targetAudience: '',
-    targetLaunchDate: '',
-  });
-  const [features, setFeatures] = useState<FeaturesData>({
-    selectedFeatures: [],
-    totalCost: 0,
-  });
-  const [specifications, setSpecifications] = useState<SpecificationsData>({
-    detailedSpecifications: '',
-    designNotes: '',
-    integrationNotes: '',
-  });
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const { toast } = useToast();
 
-  const stepTitles = ["Basic Info", "Requirements", "Features", "Specifications", "Summary"];
-  
-  const handleBasicInfoNext = (data: BasicInfoData) => {
-    setBasicInfo(data);
-    setCurrentStep(1);
+  const handleSubmit = async (message: string) => {
+    if (!message.trim() || isLoading) return;
+
+    if (!isExpanded) {
+      setIsExpanded(true);
+    }
+
+    // Add user message
+    setMessages(prev => [...prev, { role: 'user', content: message }]);
+    
+    // Initialize assistant message with first stage
+    setMessages(prev => [...prev, { 
+      role: 'assistant', 
+      content: '',
+      loading: true,
+      processingStage: {
+        current: 'initial',
+        progress: 0
+      },
+      agentResponses: {
+        'ai-tools': { category: 'ai-tools', content: '', status: 'pending', relevance: 0 },
+        'videos': { category: 'videos', content: '', status: 'pending', relevance: 0 },
+        'networking': { category: 'networking', content: '', status: 'pending', relevance: 0 },
+        'assistants': { category: 'assistants', content: '', status: 'pending', relevance: 0 },
+        'educators': { category: 'educators', content: '', status: 'pending', relevance: 0 },
+        'news': { category: 'news', content: '', status: 'pending', relevance: 0 }
+      }
+    }]);
+    
+    setIsLoading(true);
+
+    try {
+      // Simulate the multi-stage processing
+      const stages: ProcessingStage[] = ['initial', 'context', 'agents', 'synthesis'];
+      const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+      // Initial understanding stage
+      await delay(1000);
+      updateProcessingStage('initial');
+
+      // Company context stage
+      await delay(1000);
+      updateProcessingStage('context');
+
+      // Agent processing stage
+      await delay(1000);
+      updateProcessingStage('agents');
+
+      // Simulate individual agent processing
+      const agentCategories: AgentCategory[] = ['ai-tools', 'videos', 'networking', 'assistants', 'educators', 'news'];
+      for (const category of agentCategories) {
+        await delay(800);
+        updateAgentStatus(category, 'processing');
+        await delay(1200);
+        updateAgentStatus(category, 'complete');
+      }
+
+      // Final synthesis stage
+      await delay(1000);
+      updateProcessingStage('synthesis');
+
+      // Get the final response from the edge function
+      const { data, error } = await supabase.functions.invoke('chat-with-plan-assistant', {
+        body: { messages: formatMessagesForAPI(messages, message) }
+      });
+
+      if (error) throw error;
+
+      // Update with final response
+      setMessages(prev => {
+        const newMessages = [...prev.slice(0, -1)];
+        newMessages.push({ 
+          role: 'assistant', 
+          content: data.message || "I've analyzed your project needs. How would you like to proceed with your app planning?",
+          loading: false
+        });
+        return newMessages;
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to get response. Please try again.",
+        variant: "destructive"
+      });
+      setMessages(prev => prev.slice(0, -1));
+    } finally {
+      setIsLoading(false);
+    }
   };
-  
-  const handleRequirementsNext = (data: RequirementsData) => {
-    setRequirements(data);
-    setCurrentStep(2);
+
+  const formatMessagesForAPI = (currentMessages: ChatMessage[], latestMessage: string) => {
+    // Format messages for the API - include only content and role
+    const formattedMessages = currentMessages
+      .filter(msg => !msg.loading)
+      .map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+    
+    // Add the latest message if it's not already included
+    if (!formattedMessages.some(msg => msg.role === 'user' && msg.content === latestMessage)) {
+      formattedMessages.push({
+        role: 'user',
+        content: latestMessage
+      });
+    }
+    
+    return formattedMessages;
   };
-  
-  const handleFeaturesNext = (data: FeaturesData) => {
-    setFeatures(data);
-    setCurrentStep(3);
+
+  const updateProcessingStage = (stage: ProcessingStage) => {
+    setMessages(prev => {
+      const lastMessage = prev[prev.length - 1];
+      if (lastMessage.role === 'assistant') {
+        return [...prev.slice(0, -1), {
+          ...lastMessage,
+          processingStage: {
+            ...lastMessage.processingStage!,
+            current: stage
+          }
+        }];
+      }
+      return prev;
+    });
   };
-  
-  const handleSpecificationsNext = (data: SpecificationsData) => {
-    setSpecifications(data);
-    setCurrentStep(4);
-  };
-  
-  const handleBack = () => {
-    setCurrentStep(prev => Math.max(0, prev - 1));
-  };
-  
-  const handleComplete = () => {
-    // Here you would typically save the plan to the database
-    // For now, we'll just navigate back to projects page
-    navigate('/projects');
-  };
-  
-  const handleEdit = (step: number) => {
-    setCurrentStep(step);
+
+  const updateAgentStatus = (category: AgentCategory, status: 'pending' | 'processing' | 'complete') => {
+    setMessages(prev => {
+      const lastMessage = prev[prev.length - 1];
+      if (lastMessage.role === 'assistant' && lastMessage.agentResponses) {
+        return [...prev.slice(0, -1), {
+          ...lastMessage,
+          agentResponses: {
+            ...lastMessage.agentResponses,
+            [category]: {
+              ...lastMessage.agentResponses[category],
+              status
+            }
+          }
+        }];
+      }
+      return prev;
+    });
   };
 
   return (
     <MainLayout>
-      <div className="relative min-h-screen">
+      <div className="relative min-h-screen w-full bg-gradient-to-b from-siso-bg to-siso-bg/95 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Waves 
             lineColor="rgba(255, 87, 34, 0.2)"
@@ -92,72 +179,31 @@ export default function PlanBuilder() {
           />
         </div>
         
-        <div className="relative z-10 container px-4 py-10 mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-6 text-center"
-          >
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-siso-red to-siso-orange text-transparent bg-clip-text">
-              Plan Builder
-            </h1>
-            <p className="mt-4 text-lg text-siso-text/80 max-w-2xl mx-auto">
-              Create detailed specifications for your custom app. Our interactive builder helps you define requirements and generate accurate estimates.
-            </p>
-          </motion.div>
-          
-          <div className="max-w-6xl mx-auto">
-            <PlanBuilderSteps 
-              currentStep={currentStep}
-              totalSteps={stepTitles.length}
-              stepTitles={stepTitles}
-            />
-            
-            <div className="bg-black/20 border border-siso-orange/20 rounded-xl p-6 backdrop-blur-sm">
-              {currentStep === 0 && (
-                <BasicInfoForm 
-                  onNext={handleBasicInfoNext}
-                  initialData={basicInfo}
+        <div className="relative z-10 flex-1 p-4 md:p-8">
+          <div className="h-[calc(100vh-8rem)]">
+            <AnimatePresence mode="wait">
+              {!isExpanded ? (
+                <PreChatState 
+                  handleSubmit={handleSubmit} 
+                  isLoading={isLoading} 
+                  searchPlaceholders={[
+                    "What type of app do you want to build?",
+                    "What are the main features you need?",
+                    "What's your budget range for this project?",
+                    "When do you need this project completed?",
+                    "Tell me about your business requirements...",
+                  ]}
+                  titleText="Plan Builder"
+                  subtitleText="Create detailed specifications for your custom app. Our interactive builder helps you define requirements and generate accurate estimates."
+                />
+              ) : (
+                <EnhancedChatState 
+                  messages={messages} 
+                  handleSubmit={handleSubmit} 
+                  isLoading={isLoading} 
                 />
               )}
-              
-              {currentStep === 1 && (
-                <RequirementsForm 
-                  onNext={handleRequirementsNext}
-                  onBack={handleBack}
-                  initialData={requirements}
-                />
-              )}
-              
-              {currentStep === 2 && (
-                <FeaturesForm 
-                  onNext={handleFeaturesNext}
-                  onBack={handleBack}
-                  initialData={features}
-                />
-              )}
-              
-              {currentStep === 3 && (
-                <SpecificationsForm 
-                  onNext={handleSpecificationsNext}
-                  onBack={handleBack}
-                  initialData={specifications}
-                />
-              )}
-              
-              {currentStep === 4 && (
-                <SummaryView 
-                  basicInfo={basicInfo}
-                  requirements={requirements}
-                  features={features}
-                  specifications={specifications}
-                  onBack={handleBack}
-                  onSubmit={handleComplete}
-                  onEdit={handleEdit}
-                />
-              )}
-            </div>
+            </AnimatePresence>
           </div>
         </div>
       </div>

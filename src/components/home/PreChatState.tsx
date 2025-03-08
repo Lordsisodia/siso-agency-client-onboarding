@@ -1,19 +1,28 @@
+
 import { motion } from 'framer-motion';
 import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input';
 
 interface PreChatStateProps {
   handleSubmit: (message: string) => Promise<void>;
   isLoading: boolean;
+  searchPlaceholders?: string[];
+  titleText?: string;
+  subtitleText?: string;
 }
 
-export const PreChatState = ({ handleSubmit, isLoading }: PreChatStateProps) => {
-  const searchPlaceholders = [
+export const PreChatState = ({ 
+  handleSubmit, 
+  isLoading, 
+  searchPlaceholders = [
     "How can AI help my business grow?",
     "What tools do you recommend for automation?",
     "How to implement AI in my workflow?",
     "Best practices for agency scaling",
     "Latest AI trends for agencies",
-  ];
+  ],
+  titleText = "Welcome to SISO Resources",
+  subtitleText = "Ask questions about tools, strategies, and resources to grow your agency business with AI."
+}: PreChatStateProps) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log('Search input changed:', e.target.value);
@@ -49,15 +58,24 @@ export const PreChatState = ({ handleSubmit, isLoading }: PreChatStateProps) => 
       </motion.div>
 
       <motion.h1
-        className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8 text-center"
+        className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-center"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
         <span className="bg-gradient-to-r from-siso-red to-siso-orange bg-clip-text text-transparent">
-          Welcome to SISO Resources
+          {titleText}
         </span>
       </motion.h1>
+
+      <motion.p
+        className="text-center text-siso-text/80 mb-8 max-w-2xl"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        {subtitleText}
+      </motion.p>
 
       <motion.div
         className="w-full"
