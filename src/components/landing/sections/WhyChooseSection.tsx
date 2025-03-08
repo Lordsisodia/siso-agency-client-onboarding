@@ -172,6 +172,3 @@ export const WhyChooseSection = () => {
     </section>
   );
 };
-
-// Add default export
-export default WhyChooseSection;
