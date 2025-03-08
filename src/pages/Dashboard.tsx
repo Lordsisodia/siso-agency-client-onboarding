@@ -129,14 +129,14 @@ export default function Dashboard() {
             upcomingEvents={3} 
           />
           
-          {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Projects Overview (Takes 2/3 of the width on large screens) */}
-            <div className="lg:col-span-2">
+          {/* Main Content with different grid layout */}
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+            {/* Projects Overview (Takes 3/4 of the width on extra large screens) */}
+            <div className="xl:col-span-3">
               <ProjectsOverview />
             </div>
             
-            {/* Sidebar (Takes 1/3 of the width on large screens) */}
+            {/* Sidebar (Takes 1/4 of the width on extra large screens) */}
             <div className="space-y-6">
               {/* Notifications Panel */}
               <NotificationsPanel 

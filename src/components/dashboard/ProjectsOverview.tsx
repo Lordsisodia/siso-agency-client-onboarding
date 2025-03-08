@@ -8,7 +8,7 @@ import { Plus, Filter, Search } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 
-// This would come from your API
+// This would come from your API with enhanced mock data
 const mockProjects = [
   { 
     id: '1', 
@@ -16,7 +16,12 @@ const mockProjects = [
     status: 'in-progress' as const, 
     progress: 65,
     deadline: '2023-12-24',
-    client: 'TechCorp'
+    client: 'TechCorp',
+    description: 'Complete redesign of the mobile app interface with focus on improved user experience and performance optimization.',
+    priority: 'high' as const,
+    tasks: { total: 18, completed: 12 },
+    lastUpdated: '2023-11-15T10:30:00',
+    team: ['John Doe', 'Sarah Smith', 'Mike Johnson']
   },
   { 
     id: '2', 
@@ -24,7 +29,12 @@ const mockProjects = [
     status: 'planning' as const, 
     progress: 20,
     deadline: '2024-01-15',
-    client: 'Design Studio'
+    client: 'Design Studio',
+    description: 'Build a responsive website with modern design patterns, optimized for all devices and screen sizes.',
+    priority: 'medium' as const,
+    tasks: { total: 24, completed: 5 },
+    lastUpdated: '2023-11-10T14:15:00',
+    team: ['Lisa Wong', 'James Taylor']
   },
   { 
     id: '3', 
@@ -32,24 +42,36 @@ const mockProjects = [
     status: 'reviewing' as const, 
     progress: 80,
     deadline: '2023-11-30',
-    client: 'RetailFusion'
+    client: 'RetailFusion',
+    description: 'Develop a custom e-commerce platform with payment integration, inventory management and analytics dashboard.',
+    priority: 'high' as const,
+    tasks: { total: 32, completed: 26 },
+    lastUpdated: '2023-11-18T09:45:00',
+    team: ['Chris Lee', 'Amanda Park', 'David Miller', 'Emma White']
   },
   { 
     id: '4', 
     title: 'Brand Identity Design',
     status: 'completed' as const, 
     progress: 100,
-    client: 'StartupX'
+    client: 'StartupX',
+    description: 'Create a comprehensive brand identity including logo, color palette, typography and brand guidelines document.',
+    priority: 'low' as const,
+    tasks: { total: 15, completed: 15 },
+    lastUpdated: '2023-11-05T16:20:00',
+    team: ['Jennifer Garcia', 'Robert Chen']
   }
 ];
 
 type ProjectStatus = 'planning' | 'in-progress' | 'reviewing' | 'completed' | 'all';
+type ProjectPriority = 'low' | 'medium' | 'high' | 'all';
 
 export const ProjectsOverview = () => {
   const navigate = useNavigate();
   const [projects] = useState(mockProjects);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeFilter, setActiveFilter] = useState<ProjectStatus>('all');
+  const [activeStatusFilter, setActiveStatusFilter] = useState<ProjectStatus>('all');
+  const [activePriorityFilter, setActivePriorityFilter] = useState<ProjectPriority>('all');
   
   const handleViewDetails = (id: string) => {
     navigate(`/projects/${id}`);
@@ -65,23 +87,35 @@ export const ProjectsOverview = () => {
 
   const filteredProjects = projects.filter(project => {
     // First apply status filter
-    if (activeFilter !== 'all' && project.status !== activeFilter) return false;
+    if (activeStatusFilter !== 'all' && project.status !== activeStatusFilter) return false;
+    
+    // Then apply priority filter
+    if (activePriorityFilter !== 'all' && project.priority !== activePriorityFilter) return false;
     
     // Then apply search term filter
-    if (searchTerm && !project.title.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !project.client.toLowerCase().includes(searchTerm.toLowerCase())) {
+    if (searchTerm && 
+        !project.title.toLowerCase().includes(searchTerm.toLowerCase()) && 
+        !project.client?.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        !project.description?.toLowerCase().includes(searchTerm.toLowerCase())) {
       return false;
     }
     
     return true;
   });
 
-  const filterOptions: { value: ProjectStatus; label: string }[] = [
+  const statusFilterOptions: { value: ProjectStatus; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'planning', label: 'Planning' },
     { value: 'in-progress', label: 'In Progress' },
     { value: 'reviewing', label: 'Reviewing' },
     { value: 'completed', label: 'Completed' }
+  ];
+
+  const priorityFilterOptions: { value: ProjectPriority; label: string }[] = [
+    { value: 'all', label: 'All' },
+    { value: 'high', label: 'High' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'low', label: 'Low' }
   ];
 
   return (
@@ -106,19 +140,39 @@ export const ProjectsOverview = () => {
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-siso-text/50" />
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <div className="flex rounded-md border border-siso-border overflow-hidden">
-              {filterOptions.map((option, index) => (
+              {statusFilterOptions.map((option, index) => (
                 <Button
                   key={option.value}
-                  variant={activeFilter === option.value ? "default" : "ghost"}
+                  variant={activeStatusFilter === option.value ? "default" : "ghost"}
                   size="sm"
-                  onClick={() => setActiveFilter(option.value)}
+                  onClick={() => setActiveStatusFilter(option.value)}
                   className={`
-                    ${activeFilter === option.value ? 'bg-siso-orange text-white' : 'text-siso-text hover:text-siso-text-bold'}
+                    ${activeStatusFilter === option.value ? 'bg-siso-orange text-white' : 'text-siso-text hover:text-siso-text-bold'}
                     rounded-none
                     ${index === 0 ? 'rounded-l-md' : ''}
-                    ${index === filterOptions.length - 1 ? 'rounded-r-md' : ''}
+                    ${index === statusFilterOptions.length - 1 ? 'rounded-r-md' : ''}
+                    px-2 py-1 h-9 text-xs
+                  `}
+                >
+                  {option.label}
+                </Button>
+              ))}
+            </div>
+            
+            <div className="flex rounded-md border border-siso-border overflow-hidden">
+              {priorityFilterOptions.map((option, index) => (
+                <Button
+                  key={option.value}
+                  variant={activePriorityFilter === option.value ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setActivePriorityFilter(option.value)}
+                  className={`
+                    ${activePriorityFilter === option.value ? 'bg-siso-orange text-white' : 'text-siso-text hover:text-siso-text-bold'}
+                    rounded-none
+                    ${index === 0 ? 'rounded-l-md' : ''}
+                    ${index === priorityFilterOptions.length - 1 ? 'rounded-r-md' : ''}
                     px-2 py-1 h-9 text-xs
                   `}
                 >
@@ -144,11 +198,11 @@ export const ProjectsOverview = () => {
       {filteredProjects.length === 0 ? (
         <div className="text-center py-10 border border-dashed border-siso-border rounded-lg bg-siso-bg/30">
           <p className="text-siso-text/70 mb-4">
-            {searchTerm || activeFilter !== 'all'
+            {searchTerm || activeStatusFilter !== 'all' || activePriorityFilter !== 'all'
               ? "No projects match your filters."
               : "You don't have any projects yet."}
           </p>
-          {!searchTerm && activeFilter === 'all' && (
+          {!searchTerm && activeStatusFilter === 'all' && activePriorityFilter === 'all' && (
             <Button 
               onClick={handleCreateProject}
               size="sm" 
@@ -160,7 +214,7 @@ export const ProjectsOverview = () => {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredProjects.map((project, index) => (
             <ProjectCard
               key={project.id}
@@ -174,7 +228,7 @@ export const ProjectsOverview = () => {
       )}
       
       {filteredProjects.length > 0 && (
-        <div className="mt-4 text-center">
+        <div className="mt-6 text-center">
           <Button 
             variant="link" 
             onClick={() => navigate('/projects')}
