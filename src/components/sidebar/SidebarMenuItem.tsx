@@ -35,7 +35,7 @@ export const SidebarMenuItem = ({
   const menuItemVariants = {
     initial: { 
       opacity: 0, 
-      x: -10 
+      x: -5 
     },
     animate: { 
       opacity: 1, 
@@ -48,7 +48,7 @@ export const SidebarMenuItem = ({
     },
     exit: { 
       opacity: 0, 
-      x: -10,
+      x: -5,
       transition: {
         duration: 0.15,
       }

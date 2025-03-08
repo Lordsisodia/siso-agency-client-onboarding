@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { SidebarLogo } from './sidebar/SidebarLogo';
@@ -13,32 +14,43 @@ export const Sidebar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNavigation, setShowNavigation] = useState(true);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
   const hoverTimeoutRef = useRef<number | null>(null);
+  const navigationTimeoutRef = useRef<number | null>(null);
   
-  // Keep track of whether we're currently navigating to prevent sidebar collapse
-  const [isNavigating, setIsNavigating] = useState(false);
-
+  // Handle navigation with intent tracking
   const handleItemClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     const href = e.currentTarget.getAttribute('href');
     
     if (!href) return;
 
-    // Set navigating flag to prevent sidebar from collapsing
+    // Mark as navigating to prevent sidebar collapse
     setIsNavigating(true);
     
-    // Clear any pending hover timeout to prevent unwanted collapse
+    // Clear any pending timers
     if (hoverTimeoutRef.current) {
       window.clearTimeout(hoverTimeoutRef.current);
       hoverTimeoutRef.current = null;
     }
+    
+    if (navigationTimeoutRef.current) {
+      window.clearTimeout(navigationTimeoutRef.current);
+    }
+    
+    // Set a longer timeout for navigation to finish
+    navigationTimeoutRef.current = window.setTimeout(() => {
+      setIsNavigating(false);
+      navigationTimeoutRef.current = null;
+    }, 1000); // Longer timeout to ensure navigation is complete
 
     if (href.startsWith('/')) {
       navigate(href);
+      
       if (isMobile) {
         setIsMobileMenuOpen(false);
       }
@@ -57,16 +69,24 @@ export const Sidebar = () => {
     }
   };
 
-  // Reset navigating state when route changes
-  useEffect(() => {
-    setIsNavigating(false);
-  }, [location.pathname]);
-
+  // Location change listener (doesn't reset navigation state)
   useEffect(() => {
     if (isMobile) {
       setIsMobileMenuOpen(false);
     }
   }, [location.pathname, isMobile]);
+
+  useEffect(() => {
+    return () => {
+      // Clean up all timeouts on unmount
+      if (hoverTimeoutRef.current) {
+        window.clearTimeout(hoverTimeoutRef.current);
+      }
+      if (navigationTimeoutRef.current) {
+        window.clearTimeout(navigationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Handle outside clicks to close the sidebar on mobile
   useEffect(() => {
@@ -116,24 +136,15 @@ export const Sidebar = () => {
   }, [isMobile, isProfileOpen]);
 
   const handleMouseLeave = useCallback(() => {
-    // Only collapse if we're not currently navigating
-    if (!isMobile && !isProfileOpen && !isNavigating) {
-      // Add a small delay before collapsing to make it feel smoother
-      hoverTimeoutRef.current = window.setTimeout(() => {
-        setIsExpanded(false);
-        hoverTimeoutRef.current = null;
-      }, 300); // 300ms delay before collapsing
-    }
+    // Don't collapse if navigating or profile is open
+    if (isMobile || isProfileOpen || isNavigating) return;
+    
+    // Add a delay before collapsing to make it feel smoother
+    hoverTimeoutRef.current = window.setTimeout(() => {
+      setIsExpanded(false);
+      hoverTimeoutRef.current = null;
+    }, 500); // Increased delay for better user experience
   }, [isMobile, isProfileOpen, isNavigating]);
-
-  // Clean up timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (hoverTimeoutRef.current) {
-        window.clearTimeout(hoverTimeoutRef.current);
-      }
-    };
-  }, []);
 
   return (
     <>
