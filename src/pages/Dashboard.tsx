@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
@@ -101,22 +100,6 @@ export default function Dashboard() {
     });
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
-  };
-
   return (
     <MainLayout>
       <div className="relative min-h-screen">
@@ -138,33 +121,31 @@ export default function Dashboard() {
         <div className="relative z-10 container px-4 py-8 mx-auto">
           {/* Dashboard Content */}
           <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
             className="space-y-6"
           >
             {/* Header Section */}
-            <motion.div variants={itemVariants}>
-              <DashboardHeader />
-            </motion.div>
+            <DashboardHeader />
             
             {/* Quick Stats Panel */}
-            <motion.div variants={itemVariants}>
-              <QuickStatsPanel 
-                activeProjects={4} 
-                pendingTasks={7} 
-                upcomingEvents={3} 
-              />
-            </motion.div>
+            <QuickStatsPanel 
+              activeProjects={4} 
+              pendingTasks={7} 
+              upcomingEvents={3} 
+            />
             
             {/* Main Content with layout - 3/4 for project card, 1/4 for sidebar */}
             <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
               {/* Project Overview (Takes 3/4 width) */}
               <motion.div 
-                variants={itemVariants}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
                 className="xl:col-span-3 bg-gradient-to-br from-siso-bg/40 to-transparent p-0.5 rounded-xl shadow-xl"
               >
-                <div className="bg-siso-bg/60 backdrop-blur-sm rounded-xl border border-siso-border/30 hover:border-siso-border/50 transition-colors duration-300">
+                <div className="bg-siso-bg/60 backdrop-blur-sm rounded-xl border border-siso-border/30">
                   <ProjectsOverview />
                 </div>
               </motion.div>
@@ -172,26 +153,20 @@ export default function Dashboard() {
               {/* Secondary Content (Takes 1/4 width) */}
               <div className="xl:col-span-1 space-y-6">
                 {/* Notifications Panel */}
-                <motion.div variants={itemVariants} custom={1}>
-                  <NotificationsPanel 
-                    notifications={notifications}
-                    onMarkAsRead={handleMarkAsRead}
-                    onViewAll={handleViewAllNotifications}
-                  />
-                </motion.div>
+                <NotificationsPanel 
+                  notifications={notifications}
+                  onMarkAsRead={handleMarkAsRead}
+                  onViewAll={handleViewAllNotifications}
+                />
                 
                 {/* Quick Actions Panel */}
-                <motion.div variants={itemVariants} custom={2}>
-                  <QuickActionsPanel />
-                </motion.div>
+                <QuickActionsPanel />
                 
                 {/* Upcoming Events */}
-                <motion.div variants={itemVariants} custom={3}>
-                  <UpcomingEvents 
-                    events={events}
-                    onViewAll={handleViewCalendar}
-                  />
-                </motion.div>
+                <UpcomingEvents 
+                  events={events}
+                  onViewAll={handleViewCalendar}
+                />
               </div>
             </div>
           </motion.div>
