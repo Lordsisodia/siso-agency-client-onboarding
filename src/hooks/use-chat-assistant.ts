@@ -93,8 +93,9 @@ export function useChatAssistant() {
     }
   }, [isLoading, toast]);
 
-  const clearMessages = useCallback(() => {
-    setMessages([]);
+  // Modified to accept initial messages
+  const clearMessages = useCallback((initialMessages: ChatMessage[] = []) => {
+    setMessages(initialMessages);
     setError(null);
   }, []);
 

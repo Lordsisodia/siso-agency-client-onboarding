@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
@@ -28,13 +27,22 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Add welcome message on mount
+  // Add welcome message on mount, but only if there are no existing messages
   useEffect(() => {
     if (!isInitialized && messages.length === 0) {
-      sendMessage(welcomeMessage, systemPrompt);
+      // Create a welcome message directly instead of sending it through the API
+      const welcomeMsg: ChatMessageType = {
+        role: 'assistant',
+        content: welcomeMessage,
+        timestamp: new Date()
+      };
+      
+      // Add the welcome message to messages state through the clear function
+      // which will reset messages and add our welcome message
+      clearMessages([welcomeMsg]);
       setIsInitialized(true);
     }
-  }, [isInitialized, messages.length, sendMessage, systemPrompt, welcomeMessage]);
+  }, [isInitialized, messages.length, clearMessages, welcomeMessage]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -68,7 +76,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={clearMessages}
+            onClick={() => clearMessages()}
             disabled={isLoading || messages.length === 0}
             title="Clear conversation"
             className="text-siso-text-muted hover:text-siso-red transition-colors"
