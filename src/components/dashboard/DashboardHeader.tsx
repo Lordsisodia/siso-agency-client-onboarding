@@ -67,9 +67,9 @@ export const DashboardHeader = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleProfileClick}
-                className="will-change-transform"
+                className="will-change-transform cursor-pointer"
               >
-                <Card className="flex items-center p-2 bg-gradient-to-r from-siso-bg to-siso-bg/95 border border-siso-border cursor-pointer hover:border-siso-orange/40 transition-colors">
+                <Card className="flex items-center p-2 bg-gradient-to-r from-siso-bg to-siso-bg/95 border border-siso-border hover:border-siso-orange/40 transition-colors">
                   {userData.avatarUrl ? (
                     <img 
                       src={supabase.storage.from('avatars').getPublicUrl(userData.avatarUrl).data.publicUrl}

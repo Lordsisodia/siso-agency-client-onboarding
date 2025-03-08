@@ -17,5 +17,13 @@ BEGIN
       '(bucket_id = ''avatars''::text AND auth.role() = ''authenticated''::text)',
       'avatars'
     );
+    
+    -- Add a policy to allow public access to avatars for viewing
+    INSERT INTO storage.policies (name, definition, bucket_id)
+    VALUES (
+      'Avatar Public Access Policy',
+      '(bucket_id = ''avatars''::text)',
+      'avatars'
+    );
   END IF;
 END $$;

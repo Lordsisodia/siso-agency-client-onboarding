@@ -609,25 +609,73 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
+          banner_url: string | null
+          bio: string | null
+          business_name: string | null
+          business_type: string | null
           created_at: string
           full_name: string | null
           id: string
+          industry: string | null
+          instagram_url: string | null
+          interests: string[] | null
+          linkedin_url: string | null
           phone_number: string | null
+          points: number | null
+          professional_role: string | null
+          rank: string | null
+          solana_wallet_address: string | null
+          twitter_url: string | null
           updated_at: string | null
+          website_url: string | null
+          youtube_url: string | null
         }
         Insert: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          bio?: string | null
+          business_name?: string | null
+          business_type?: string | null
           created_at?: string
           full_name?: string | null
           id: string
+          industry?: string | null
+          instagram_url?: string | null
+          interests?: string[] | null
+          linkedin_url?: string | null
           phone_number?: string | null
+          points?: number | null
+          professional_role?: string | null
+          rank?: string | null
+          solana_wallet_address?: string | null
+          twitter_url?: string | null
           updated_at?: string | null
+          website_url?: string | null
+          youtube_url?: string | null
         }
         Update: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          bio?: string | null
+          business_name?: string | null
+          business_type?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          industry?: string | null
+          instagram_url?: string | null
+          interests?: string[] | null
+          linkedin_url?: string | null
           phone_number?: string | null
+          points?: number | null
+          professional_role?: string | null
+          rank?: string | null
+          solana_wallet_address?: string | null
+          twitter_url?: string | null
           updated_at?: string | null
+          website_url?: string | null
+          youtube_url?: string | null
         }
         Relationships: []
       }
