@@ -17,7 +17,7 @@ export default function Home() {
         
         <ChatInterface 
           title="AI Assistant"
-          systemPrompt="You are a helpful assistant for SISO. You provide information about AI tools, education resources, and help users with their projects. Be friendly, concise, and accurate."
+          systemPrompt="You are a helpful assistant for SISO. You provide information about AI tools, education resources, and help users with their projects. Be friendly, concise, and accurate. Respond in a conversational style, using markdown formatting where appropriate to improve readability."
           welcomeMessage="Hi there! I'm your SISO AI assistant. How can I help you today? You can ask me about AI tools, educational resources, or get guidance on your projects."
           inputPlaceholder="Ask me anything..."
           className="h-[calc(100vh-12rem)]"

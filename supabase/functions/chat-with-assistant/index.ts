@@ -66,6 +66,49 @@ async function saveChatHistory(userId: string | null, userMessage: string, aiRes
   }
 }
 
+// Function to get or create the appropriate assistant
+async function getOrCreateAssistant(systemPrompt: string) {
+  // Generate a consistent name based on the system prompt
+  const assistantName = systemPrompt ? 
+    `Assistant for: ${systemPrompt.substring(0, 50)}...` : 
+    "General Assistant";
+  
+  // Try to find an existing assistant with this name
+  const { data: assistantData, error } = await supabase
+    .from('assistant_metadata')
+    .select('assistant_id')
+    .eq('name', assistantName)
+    .single();
+
+  if (assistantData?.assistant_id) {
+    console.log("Using existing assistant:", assistantName);
+    return assistantData.assistant_id;
+  }
+
+  // Create a new assistant
+  const assistant = await openai.beta.assistants.create({
+    name: assistantName,
+    instructions: systemPrompt || "You are a helpful assistant that provides accurate and concise information.",
+    model: "gpt-4o-mini-2024-07-18", // Using the specified model
+    tools: [{ type: "retrieval" }]
+  });
+  
+  // Store the assistant ID
+  await supabase
+    .from('assistant_metadata')
+    .insert({
+      name: assistantName,
+      assistant_id: assistant.id,
+      model: assistant.model,
+      metadata: {
+        description: assistantName,
+        created: new Date().toISOString()
+      }
+    });
+  
+  return assistant.id;
+}
+
 // Main function to handle requests
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -94,68 +137,66 @@ serve(async (req) => {
     // Get or create a thread for this user
     const thread = await getOrCreateThread(userId);
     
+    // Get or create the appropriate assistant
+    const assistantId = await getOrCreateAssistant(systemPrompt);
+    
     // Add user message to thread
     await openai.beta.threads.messages.create(thread.id, {
       role: 'user',
       content: message
     });
     
-    // Set the assistant ID based on the system prompt, defaulting to a general assistant
-    let assistantId = "asst_general_assistant";
-    
-    // Create or retrieve the assistant based on the system prompt
-    const { data: assistantData, error } = await supabase
-      .from('assistant_metadata')
-      .select('assistant_id')
-      .eq('name', 'general_assistant')
-      .single();
-    
-    if (assistantData?.assistant_id) {
-      assistantId = assistantData.assistant_id;
-    } else {
-      // Create a new general assistant
-      const assistant = await openai.beta.assistants.create({
-        name: "General Assistant",
-        instructions: systemPrompt || "You are a helpful assistant that provides accurate and concise information.",
-        model: "gpt-4o-mini",
-      });
-      
-      // Store the assistant ID
-      await supabase
-        .from('assistant_metadata')
-        .insert({
-          name: 'general_assistant',
-          assistant_id: assistant.id,
-          model: assistant.model,
-          metadata: {
-            description: "General purpose assistant",
-            created: new Date().toISOString()
-          }
-        });
-      
-      assistantId = assistant.id;
-    }
-    
-    // Run the assistant on the thread
+    // Run the assistant on the thread with custom configuration
     const run = await openai.beta.threads.runs.create(thread.id, {
       assistant_id: assistantId,
-      instructions: systemPrompt
+      instructions: systemPrompt || undefined,
+      model: "gpt-4o-mini-2024-07-18", // Using the specified model
+      temperature: 0.7,
+      max_tokens: 1000, // Setting a reasonable limit for responses
+      max_prompt_tokens: 4000 // Setting context window limit
     });
     
-    // Poll for completion
+    // Poll for completion with progressive timeout
     let runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+    let pollCount = 0;
+    const maxPolls = 60; // Set a maximum number of polls (10 minutes)
     
     // Wait for the run to complete
-    while (runStatus.status !== 'completed' && runStatus.status !== 'failed') {
-      // Wait a bit before polling again
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    while (runStatus.status !== 'completed' && 
+           runStatus.status !== 'failed' && 
+           runStatus.status !== 'expired' &&
+           runStatus.status !== 'cancelled' && 
+           pollCount < maxPolls) {
+      
+      // Wait before polling again, with progressive backoff
+      const delay = Math.min(1000 * (1 + Math.floor(pollCount / 5)), 5000);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      
       runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+      pollCount++;
       
       // Handle function calls if needed
       if (runStatus.status === 'requires_action') {
         // This will be implemented in a future update
         console.log("Function calling support will be implemented soon");
       }
+    }
+    
+    if (runStatus.status !== 'completed') {
+      console.error(`Run ended with status: ${runStatus.status}`);
+      return new Response(
+        JSON.stringify({ 
+          error: `Assistant processing ended with status: ${runStatus.status}`,
+          details: runStatus
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
     }
     
     // Get the assistant's response
