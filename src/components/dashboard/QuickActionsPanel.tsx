@@ -64,14 +64,14 @@ export const QuickActionsPanel = () => {
     >
       <Card className="border border-siso-border/50 hover:border-siso-border hover:shadow-md hover:shadow-siso-border/10 transition-all duration-300 overflow-hidden">
         <CardHeader className="flex flex-row items-center justify-between py-4 px-6 bg-gradient-to-r from-siso-bg/90 to-siso-bg/70">
-          <CardTitle className="text-md font-semibold flex items-center">
+          <CardTitle className="text-base font-semibold flex items-center tracking-tight">
             <BarChart3 size={16} className="mr-2 text-siso-orange" />
             Quick Actions
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <ScrollArea className="h-[300px]">
-            <div className="p-3 space-y-2">
+            <div className="p-4 space-y-3">
               {actions.map((action, index) => (
                 <TooltipProvider key={action.title}>
                   <Tooltip delayDuration={300}>
@@ -84,20 +84,20 @@ export const QuickActionsPanel = () => {
                         variants={cardVariants}
                         transition={{ duration: 0.2, delay: 0.1 + index * 0.05 }}
                         onClick={() => navigate(action.path)}
-                        className="flex items-center p-3 rounded-md cursor-pointer bg-gradient-to-r from-siso-bg/70 to-transparent border border-siso-border/20 hover:border-siso-orange/30"
+                        className="flex items-center p-3.5 rounded-md cursor-pointer bg-gradient-to-r from-siso-bg/70 to-transparent border border-siso-border/20 hover:border-siso-orange/30"
                       >
-                        <div className="p-2 rounded-md bg-siso-orange/10 text-siso-orange mr-3 shadow-sm">
+                        <div className="p-2.5 rounded-md bg-siso-orange/10 text-siso-orange mr-4 shadow-sm">
                           <action.icon size={18} />
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-sm font-medium text-siso-text-bold">{action.title}</h3>
-                          <p className="text-xs text-siso-text/70">{action.description}</p>
+                          <h3 className="text-sm font-semibold text-siso-text-bold tracking-tight">{action.title}</h3>
+                          <p className="text-xs text-siso-text/70 mt-0.5 font-medium">{action.description}</p>
                         </div>
                         <ArrowRight size={16} className="text-siso-text/40 group-hover:text-siso-orange transition-colors" />
                       </motion.div>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="bg-siso-bg-alt border border-siso-border/60 text-xs px-3 py-1.5 rounded-md shadow-md">
-                      <p>{action.tooltip}</p>
+                      <p className="font-medium">{action.tooltip}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>

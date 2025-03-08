@@ -69,7 +69,7 @@ export const QuickStatsPanel = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.1 }}
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8"
     >
       {stats.map((stat, index) => (
         <TooltipProvider key={stat.title}>
@@ -87,13 +87,13 @@ export const QuickStatsPanel = ({
                 whileTap={{ scale: 0.98 }}
               >
                 <Card className="bg-gradient-to-br from-siso-bg/80 to-siso-bg/60 backdrop-blur-sm border border-siso-border/40 hover:border-siso-orange/30 h-full cursor-pointer transition-all hover:shadow-lg hover:shadow-siso-orange/5">
-                  <CardContent className="p-4 flex flex-col">
-                    <div className="flex justify-between items-start mb-3">
+                  <CardContent className="p-5 flex flex-col">
+                    <div className="flex justify-between items-start mb-4">
                       <div>
-                        <p className="text-siso-text/70 text-sm font-medium">{stat.title}</p>
+                        <p className="text-siso-text/70 text-sm font-medium tracking-wide mb-1">{stat.title}</p>
                         <div className="flex items-center gap-2">
                           {stat.value !== null ? (
-                            <p className="text-2xl font-bold text-siso-text-bold">{formatNumber(stat.value)}</p>
+                            <p className="text-2xl font-bold text-siso-text-bold tracking-tight">{formatNumber(stat.value)}</p>
                           ) : (
                             <p className="text-sm text-siso-orange mt-1 font-medium">View Report</p>
                           )}
@@ -116,10 +116,10 @@ export const QuickStatsPanel = ({
                     </div>
                     
                     {stat.progress !== null && (
-                      <div className="mt-1">
-                        <div className="flex justify-between items-center text-xs text-siso-text/70 mb-1">
+                      <div className="mt-2">
+                        <div className="flex justify-between items-center text-xs text-siso-text/70 mb-1.5 font-medium">
                           <span>Progress</span>
-                          <span>{stat.progress}%</span>
+                          <span className="font-semibold">{stat.progress}%</span>
                         </div>
                         <Progress 
                           value={stat.progress} 
@@ -135,7 +135,7 @@ export const QuickStatsPanel = ({
             <TooltipContent side="bottom" className="bg-siso-bg-alt border border-siso-border/60 text-xs px-3 py-1.5 rounded-md shadow-md">
               <div className="flex items-center gap-1.5">
                 <Info size={12} className="text-siso-orange" />
-                <p>{stat.tooltip}</p>
+                <p className="font-medium">{stat.tooltip}</p>
               </div>
             </TooltipContent>
           </Tooltip>

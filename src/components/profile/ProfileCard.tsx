@@ -35,8 +35,8 @@ export const ProfileCard = ({
           className
         )}
       >
-        <CardHeader>
-          <CardTitle className="text-siso-text-bold flex items-center gap-2 text-lg">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-siso-text-bold flex items-center gap-2.5 text-lg tracking-tight">
             <Icon className="w-5 h-5 text-siso-orange" />
             {title}
           </CardTitle>
@@ -46,6 +46,7 @@ export const ProfileCard = ({
             initial={false}
             animate={isEditing ? { scale: 1.01 } : { scale: 1 }}
             transition={{ duration: 0.2 }}
+            className="space-y-1"
           >
             {children}
           </motion.div>
