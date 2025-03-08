@@ -52,8 +52,7 @@ export const CompanyImageUpload = ({ userId, type, currentUrl, onUploadComplete 
 
       // Upload file to Supabase storage
       const fileExt = file.name.split('.').pop();
-      const fileName = `${type}-${userId}-${Date.now()}.${fileExt}`;
-      const filePath = `company-profiles/${fileName}`;
+      const filePath = `company-profiles/${type}-${userId}-${Date.now()}.${fileExt}`;
 
       // Upload the file
       const { error: uploadError } = await supabase.storage
@@ -117,7 +116,7 @@ export const CompanyImageUpload = ({ userId, type, currentUrl, onUploadComplete 
           <img 
             src={previewUrl} 
             alt={type === 'logo' ? 'Company Logo' : 'Company Banner'} 
-            className={`w-full h-full object-contain rounded-lg ${type === 'logo' ? 'object-contain bg-black/40 p-4' : 'object-cover'}`} 
+            className={`w-full h-full ${type === 'logo' ? 'object-contain bg-black/40 p-4' : 'object-cover'} rounded-lg`} 
           />
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-lg">
             <p className="text-white text-sm">Click button below to change</p>
