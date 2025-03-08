@@ -21,61 +21,15 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // In-memory cache to avoid creating new assistants repeatedly during development
 const assistantCache = new Map();
 
-// Function to get or create a thread for the user
-async function getOrCreateThread(userId?: string) {
-  if (!userId) {
-    // Create a temporary thread if no user ID
-    return await openai.beta.threads.create();
+// Function to get thread messages
+async function getThreadMessages(threadId: string) {
+  try {
+    const messages = await openai.beta.threads.messages.list(threadId);
+    return messages.data;
+  } catch (err) {
+    console.error("Error getting thread messages:", err);
+    throw err;
   }
-
-  // Check if user already has a thread
-  const { data: threadData, error } = await supabase
-    .from('user_threads')
-    .select('thread_id')
-    .eq('user_id', userId)
-    .single();
-  
-  if (threadData?.thread_id) {
-    try {
-      // Verify the thread still exists in OpenAI
-      await openai.beta.threads.retrieve(threadData.thread_id);
-      console.log("Using existing thread for user:", userId);
-      return { id: threadData.thread_id };
-    } catch (err) {
-      console.log("Thread no longer exists in OpenAI, creating a new one");
-      // Thread doesn't exist anymore, create a new one
-    }
-  }
-  
-  // Create a new thread for this user
-  console.log("Creating new thread for user:", userId);
-  const thread = await openai.beta.threads.create();
-  
-  // Store the thread ID for future use
-  if (userId) {
-    try {
-      if (threadData?.thread_id) {
-        // Update existing record
-        await supabase
-          .from('user_threads')
-          .update({ thread_id: thread.id })
-          .eq('user_id', userId);
-      } else {
-        // Insert new record
-        await supabase
-          .from('user_threads')
-          .insert({
-            user_id: userId,
-            thread_id: thread.id
-          });
-      }
-    } catch (storeErr) {
-      console.error("Error storing thread ID:", storeErr);
-      // Continue anyway, as the thread was created successfully
-    }
-  }
-  
-  return thread;
 }
 
 // Function to save chat history
@@ -96,19 +50,31 @@ async function saveChatHistory(userId: string | null, userMessage: string, aiRes
 }
 
 // Function to get or create the appropriate assistant
-async function getOrCreateAssistant(systemPrompt: string) {
-  // Generate a consistent cache key based on the system prompt
-  const cacheKey = systemPrompt ? `assistant_${systemPrompt.substring(0, 50)}` : 'general_assistant';
+async function getOrCreateAssistant(assistantId: string, systemPrompt: string) {
+  // If assistantId is provided and not "onboarding", use that directly
+  if (assistantId && assistantId !== 'onboarding') {
+    try {
+      return await openai.beta.assistants.retrieve(assistantId);
+    } catch (err) {
+      console.error(`Error retrieving assistant ${assistantId}:`, err);
+      // Fall back to creating a new assistant
+    }
+  }
+  
+  // For onboarding or fallback
+  const cacheKey = assistantId || `assistant_${systemPrompt?.substring(0, 50)}` || 'general_assistant';
   
   // Check in-memory cache first
   if (assistantCache.has(cacheKey)) {
     return assistantCache.get(cacheKey);
   }
   
-  // Generate a consistent name based on the system prompt
-  const assistantName = systemPrompt ? 
-    `Assistant for: ${systemPrompt.substring(0, 50)}...` : 
-    "General Assistant";
+  // Generate a consistent name based on purpose
+  const assistantName = assistantId === 'onboarding' 
+    ? "SISO Onboarding Assistant"
+    : systemPrompt 
+      ? `Assistant for: ${systemPrompt.substring(0, 50)}...` 
+      : "General Assistant";
   
   // Try to find an existing assistant in the database
   const { data: assistantData, error } = await supabase
@@ -117,42 +83,40 @@ async function getOrCreateAssistant(systemPrompt: string) {
     .eq('name', assistantName)
     .single();
 
-  let assistantId;
+  let assistantObj;
   
   if (assistantData?.assistant_id) {
     console.log("Using existing assistant from DB:", assistantName);
-    assistantId = assistantData.assistant_id;
     
     // Verify assistant still exists in OpenAI
     try {
-      await openai.beta.assistants.retrieve(assistantId);
+      assistantObj = await openai.beta.assistants.retrieve(assistantData.assistant_id);
     } catch (err) {
       console.log("Assistant no longer exists in OpenAI, creating a new one");
-      assistantId = null; // Force creation of a new assistant
+      assistantObj = null; // Force creation of a new assistant
     }
   }
   
   // Create a new assistant if needed
-  if (!assistantId) {
+  if (!assistantObj) {
     console.log("Creating new assistant:", assistantName);
     try {
-      const assistant = await openai.beta.assistants.create({
+      assistantObj = await openai.beta.assistants.create({
         name: assistantName,
         instructions: systemPrompt || "You are a helpful assistant that provides accurate and concise information.",
-        model: "gpt-4o-mini", // Updated to use the correct model name
+        model: "gpt-4o-mini", // Using a fast model for responsiveness
         tools: [{ type: "retrieval" }]
       });
       
-      assistantId = assistant.id;
-      
-      // Store the assistant ID
+      // Store the assistant info
       if (assistantData?.assistant_id) {
         // Update existing record
         await supabase
           .from('assistant_metadata')
           .update({
-            assistant_id: assistantId,
-            model: assistant.model,
+            assistant_id: assistantObj.id,
+            model: assistantObj.model,
+            instructions: systemPrompt,
             metadata: {
               description: assistantName,
               updated: new Date().toISOString()
@@ -165,8 +129,9 @@ async function getOrCreateAssistant(systemPrompt: string) {
           .from('assistant_metadata')
           .insert({
             name: assistantName,
-            assistant_id: assistantId,
-            model: assistant.model,
+            assistant_id: assistantObj.id,
+            model: assistantObj.model,
+            instructions: systemPrompt,
             metadata: {
               description: assistantName,
               created: new Date().toISOString()
@@ -180,9 +145,27 @@ async function getOrCreateAssistant(systemPrompt: string) {
   }
   
   // Add to in-memory cache
-  assistantCache.set(cacheKey, assistantId);
+  assistantCache.set(cacheKey, assistantObj);
   
-  return assistantId;
+  return assistantObj;
+}
+
+// Update thread metadata for user threads
+async function updateThreadMetadata(userId: string, threadId: string) {
+  try {
+    // Update last message timestamp and increment message count
+    await supabase
+      .from('user_threads')
+      .update({
+        updated_at: new Date().toISOString(),
+        last_message_at: new Date().toISOString(),
+        message_count: supabase.sql`message_count + 1`
+      })
+      .eq('user_id', userId)
+      .eq('thread_id', threadId);
+  } catch (err) {
+    console.error("Error updating thread metadata:", err);
+  }
 }
 
 // Main function to handle requests
@@ -195,9 +178,43 @@ serve(async (req) => {
   }
   
   try {
-    const { message, systemPrompt, userId } = await req.json();
+    const { 
+      message, 
+      systemPrompt, 
+      userId, 
+      threadId, 
+      assistantId,
+      getMessages
+    } = await req.json();
     
-    if (!message) {
+    // If getting messages only, return them
+    if (getMessages && threadId) {
+      try {
+        const messages = await getThreadMessages(threadId);
+        return new Response(
+          JSON.stringify({ success: true, data: { messages } }),
+          {
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+      } catch (msgErr) {
+        return new Response(
+          JSON.stringify({ error: 'Failed to retrieve messages', details: msgErr.message }),
+          {
+            status: 500,
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+      }
+    }
+    
+    if (!message && !getMessages) {
       return new Response(
         JSON.stringify({ error: 'No message provided' }),
         {
@@ -210,33 +227,12 @@ serve(async (req) => {
       );
     }
     
-    // Get or create a thread for this user
-    let thread;
+    // Get appropriate assistant
+    let assistant;
     try {
-      thread = await getOrCreateThread(userId);
-    } catch (threadErr) {
-      console.error("Error getting or creating thread:", threadErr);
-      return new Response(
-        JSON.stringify({ 
-          error: 'Failed to create or retrieve conversation thread',
-          details: threadErr.message 
-        }),
-        {
-          status: 500,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-    }
-    
-    // Get or create the appropriate assistant
-    let assistantId;
-    try {
-      assistantId = await getOrCreateAssistant(systemPrompt);
+      assistant = await getOrCreateAssistant(assistantId, systemPrompt);
     } catch (assistantErr) {
-      console.error("Error getting or creating assistant:", assistantErr);
+      console.error("Error getting assistant:", assistantErr);
       return new Response(
         JSON.stringify({ 
           error: 'Failed to create or retrieve assistant',
@@ -252,12 +248,31 @@ serve(async (req) => {
       );
     }
     
+    // Require thread ID
+    if (!threadId) {
+      return new Response(
+        JSON.stringify({ error: 'Thread ID is required' }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
+    
     // Add user message to thread
     try {
-      await openai.beta.threads.messages.create(thread.id, {
+      await openai.beta.threads.messages.create(threadId, {
         role: 'user',
         content: message
       });
+      
+      // Update thread metadata if user ID provided
+      if (userId) {
+        await updateThreadMetadata(userId, threadId);
+      }
     } catch (messageErr) {
       console.error("Error adding message to thread:", messageErr);
       return new Response(
@@ -278,10 +293,10 @@ serve(async (req) => {
     // Run the assistant on the thread with custom configuration
     let run;
     try {
-      run = await openai.beta.threads.runs.create(thread.id, {
-        assistant_id: assistantId,
+      run = await openai.beta.threads.runs.create(threadId, {
+        assistant_id: assistant.id,
         instructions: systemPrompt || undefined,
-        model: "gpt-4o-mini", // Using the correct model name
+        model: "gpt-4o-mini", // Using a fast model for responsiveness
         temperature: 0.7,
         max_tokens: 1000, // Setting a reasonable limit for responses
         max_prompt_tokens: 4000 // Setting context window limit
@@ -306,7 +321,7 @@ serve(async (req) => {
     // Poll for completion with progressive timeout
     let runStatus;
     try {
-      runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+      runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
     } catch (retrieveErr) {
       console.error("Error retrieving run status:", retrieveErr);
       return new Response(
@@ -339,7 +354,7 @@ serve(async (req) => {
       await new Promise(resolve => setTimeout(resolve, delay));
       
       try {
-        runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+        runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
       } catch (pollErr) {
         console.error("Error polling run status:", pollErr);
         return new Response(
@@ -358,12 +373,6 @@ serve(async (req) => {
       }
       
       pollCount++;
-      
-      // Handle function calls if needed
-      if (runStatus.status === 'requires_action') {
-        // This will be implemented in a future update
-        console.log("Function calling support will be implemented soon");
-      }
     }
     
     if (runStatus.status !== 'completed') {
@@ -386,7 +395,7 @@ serve(async (req) => {
     // Get the assistant's response
     let messages;
     try {
-      messages = await openai.beta.threads.messages.list(thread.id);
+      messages = await openai.beta.threads.messages.list(threadId);
     } catch (listErr) {
       console.error("Error listing messages:", listErr);
       return new Response(
@@ -440,7 +449,7 @@ serve(async (req) => {
     
     // Return the assistant's response
     return new Response(
-      JSON.stringify({ response: responseContent }),
+      JSON.stringify({ success: true, response: responseContent }),
       {
         headers: {
           ...corsHeaders,

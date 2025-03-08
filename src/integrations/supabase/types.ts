@@ -138,30 +138,74 @@ export type Database = {
           assistant_id: string
           created_at: string
           id: string
+          instructions: string | null
           metadata: Json | null
           model: string
           name: string
+          tools: Json | null
           updated_at: string
         }
         Insert: {
           assistant_id: string
           created_at?: string
           id?: string
+          instructions?: string | null
           metadata?: Json | null
           model: string
           name: string
+          tools?: Json | null
           updated_at?: string
         }
         Update: {
           assistant_id?: string
           created_at?: string
           id?: string
+          instructions?: string | null
           metadata?: Json | null
           model?: string
           name?: string
+          tools?: Json | null
           updated_at?: string
         }
         Relationships: []
+      }
+      assistant_versions: {
+        Row: {
+          assistant_id: string
+          configuration: Json
+          created_at: string
+          id: string
+          is_active: boolean
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          assistant_id: string
+          configuration?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          assistant_id?: string
+          configuration?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assistant_versions_assistant_id_fkey"
+            columns: ["assistant_id"]
+            isOneToOne: false
+            referencedRelation: "assistant_metadata"
+            referencedColumns: ["assistant_id"]
+          },
+        ]
       }
       chat_users: {
         Row: {
@@ -925,22 +969,28 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          metadata: Json | null
           project_id: string
           thread_id: string
+          thread_status: string
           updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
+          metadata?: Json | null
           project_id: string
           thread_id: string
+          thread_status?: string
           updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
+          metadata?: Json | null
           project_id?: string
           thread_id?: string
+          thread_status?: string
           updated_at?: string
         }
         Relationships: [
@@ -1113,6 +1163,51 @@ export type Database = {
           query?: string
           result_type?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_threads: {
+        Row: {
+          assistant_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          last_message_at: string | null
+          message_count: number | null
+          metadata: Json | null
+          status: string | null
+          thread_id: string
+          title: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          assistant_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          last_message_at?: string | null
+          message_count?: number | null
+          metadata?: Json | null
+          status?: string | null
+          thread_id: string
+          title?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          assistant_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          last_message_at?: string | null
+          message_count?: number | null
+          metadata?: Json | null
+          status?: string | null
+          thread_id?: string
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }

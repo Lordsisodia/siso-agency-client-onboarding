@@ -37,6 +37,90 @@ async function listProjectThreads(projectId: string) {
 }
 
 /**
+ * Get or create a thread for a user or project
+ */
+async function getOrCreateThread(userId: string, projectId?: string, metadata?: any) {
+  try {
+    let threadQuery;
+    let existingThread;
+    
+    // Check if there's an existing thread for this project or user
+    if (projectId) {
+      const { data, error } = await supabase
+        .from('project_threads')
+        .select('*')
+        .eq('project_id', projectId)
+        .eq('thread_status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      
+      if (error) throw error;
+      existingThread = data?.[0];
+    } else {
+      // For user onboarding threads
+      const { data, error } = await supabase
+        .from('user_threads')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('status', 'onboarding')
+        .eq('assistant_id', 'onboarding')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      
+      if (error) throw error;
+      existingThread = data?.[0];
+    }
+    
+    // If thread exists, return it
+    if (existingThread) {
+      return { 
+        id: existingThread.thread_id,
+        isNew: false 
+      };
+    }
+    
+    // Create a new thread
+    console.log(`Creating new thread for ${projectId ? 'project' : 'user'}: ${projectId || userId}`);
+    const thread = await openai.beta.threads.create();
+    
+    // Save the thread reference
+    if (projectId) {
+      const { error } = await supabase
+        .from('project_threads')
+        .insert({
+          project_id: projectId,
+          thread_id: thread.id,
+          metadata: metadata || {}
+        });
+      
+      if (error) throw error;
+    } else {
+      // For user onboarding
+      const { error } = await supabase
+        .from('user_threads')
+        .insert({
+          user_id: userId,
+          thread_id: thread.id,
+          assistant_id: 'onboarding',
+          title: 'User Onboarding',
+          status: 'onboarding',
+          metadata: metadata || {}
+        });
+      
+      if (error) throw error;
+    }
+    
+    return { 
+      id: thread.id,
+      isNew: true 
+    };
+  } catch (err) {
+    console.error("Error in getOrCreateThread:", err);
+    throw new Error(`Failed to get or create thread: ${err.message}`);
+  }
+}
+
+/**
  * Delete a thread both from OpenAI and our database
  */
 async function deleteThread(threadId: string, projectId?: string) {
@@ -67,6 +151,31 @@ async function deleteThread(threadId: string, projectId?: string) {
   } catch (err) {
     console.error(`Error deleting thread ${threadId}:`, err);
     throw new Error(`Failed to delete thread: ${err.message}`);
+  }
+}
+
+/**
+ * Update onboarding progress for a user
+ */
+async function updateOnboardingProgress(userId: string, threadId: string, progress: any) {
+  try {
+    const { error } = await supabase
+      .from('user_threads')
+      .update({
+        metadata: { 
+          ...progress,
+          last_updated: new Date().toISOString()
+        }
+      })
+      .eq('user_id', userId)
+      .eq('thread_id', threadId)
+      .eq('status', 'onboarding');
+      
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error("Error updating onboarding progress:", err);
+    throw new Error(`Failed to update onboarding progress: ${err.message}`);
   }
 }
 
@@ -129,7 +238,8 @@ serve(async (req) => {
   try {
     const url = new URL(req.url);
     const action = url.searchParams.get('action');
-    const { projectId, threadId, olderThanDays } = await req.json();
+    const requestData = await req.json();
+    const { userId, projectId, threadId, progress, olderThanDays, metadata } = requestData;
     
     // Require authentication for all actions
     const authHeader = req.headers.get('Authorization');
@@ -186,6 +296,22 @@ serve(async (req) => {
         result = await listProjectThreads(projectId);
         break;
         
+      case 'get-or-create':
+        if (!userId) {
+          return new Response(
+            JSON.stringify({ error: 'User ID is required' }),
+            {
+              status: 400,
+              headers: {
+                ...corsHeaders,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+        }
+        result = await getOrCreateThread(userId, projectId, metadata);
+        break;
+        
       case 'delete':
         if (!threadId) {
           return new Response(
@@ -200,6 +326,22 @@ serve(async (req) => {
           );
         }
         result = await deleteThread(threadId, projectId);
+        break;
+        
+      case 'update-onboarding':
+        if (!userId || !threadId || !progress) {
+          return new Response(
+            JSON.stringify({ error: 'User ID, Thread ID, and progress are required for updating onboarding' }),
+            {
+              status: 400,
+              headers: {
+                ...corsHeaders,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+        }
+        result = await updateOnboardingProgress(userId, threadId, progress);
         break;
         
       case 'cleanup':
