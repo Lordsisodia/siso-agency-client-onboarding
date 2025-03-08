@@ -22,6 +22,36 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const PLAN_BUILDER_ASSISTANT_ID = "asst_VMa6tFDDh65o0R0VEhuzzdSA";
 
 /**
+ * Validates environment variables and configuration
+ * @returns {string|null} Error message or null if valid
+ */
+function validateConfiguration() {
+  const missingVars = [];
+  
+  if (!Deno.env.get('OPENAI_API_KEY')) {
+    missingVars.push('OPENAI_API_KEY');
+  }
+  
+  if (!Deno.env.get('SUPABASE_URL')) {
+    missingVars.push('SUPABASE_URL');
+  }
+  
+  if (!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')) {
+    missingVars.push('SUPABASE_SERVICE_ROLE_KEY');
+  }
+  
+  if (!PLAN_BUILDER_ASSISTANT_ID) {
+    missingVars.push('PLAN_BUILDER_ASSISTANT_ID');
+  }
+  
+  if (missingVars.length > 0) {
+    return `Missing required configuration: ${missingVars.join(', ')}`;
+  }
+  
+  return null;
+}
+
+/**
  * Gets or creates a thread for a project with better error handling
  * @param projectId The project ID
  * @returns Promise<string> The thread ID
@@ -191,7 +221,7 @@ async function pollForCompletion(threadId: string, runId: string, maxPolls = 60,
       }
       
       if (runStatus.status === 'failed' || runStatus.status === 'expired' || runStatus.status === 'cancelled') {
-        throw new Error(`Run ended with status: ${runStatus.status}`);
+        throw new Error(`Run ended with status: ${runStatus.status}, reason: ${runStatus.last_error?.message || 'unknown'}`);
       }
       
       if (runStatus.status === 'requires_action') {
@@ -221,9 +251,56 @@ async function pollForCompletion(threadId: string, runId: string, maxPolls = 60,
   throw new Error(`Run timed out after ${maxPolls} polls`);
 }
 
+/**
+ * Verify that the assistant exists and is configured correctly
+ */
+async function verifyAssistant() {
+  try {
+    const assistant = await openai.beta.assistants.retrieve(PLAN_BUILDER_ASSISTANT_ID);
+    console.log(`Assistant verified: ${assistant.name}, model: ${assistant.model}`);
+    return assistant;
+  } catch (err) {
+    console.error(`Error verifying assistant: ${err.message}`);
+    throw new Error(`Invalid assistant ID or OpenAI API key: ${err.message}`);
+  }
+}
+
 // Non-streaming chat handler
 async function handleRegularChat(req: Request) {
   try {
+    // Validate configuration
+    const configError = validateConfiguration();
+    if (configError) {
+      console.error('Configuration error:', configError);
+      return new Response(
+        JSON.stringify({ error: configError }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
+    
+    // Verify assistant exists
+    try {
+      await verifyAssistant();
+    } catch (err) {
+      console.error('Assistant verification failed:', err);
+      return new Response(
+        JSON.stringify({ error: `Assistant verification failed: ${err.message}` }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
+    
     // Parse request body
     let body;
     try {

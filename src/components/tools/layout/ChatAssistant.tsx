@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Bot, Send, Paperclip, Mic } from 'lucide-react';
 import {
   ExpandableChat,
@@ -11,6 +11,7 @@ import { ChatMessageList } from '@/components/ui/chat-message-list';
 import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage } from '@/components/ui/chat-bubble';
 import { ChatInput } from '@/components/ui/chat-input';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 // [Analysis] Define message interface for better type safety
 interface ChatMessage {
@@ -32,7 +33,17 @@ export function ChatAssistant() {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [threadId, setThreadId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Load thread ID from localStorage on component mount
+  useEffect(() => {
+    const savedThreadId = localStorage.getItem('tools_assistant_thread_id');
+    if (savedThreadId) {
+      setThreadId(savedThreadId);
+      console.log('Loaded existing thread ID:', savedThreadId);
+    }
+  }, []);
 
   // [Framework] Using callback pattern for better component memoization
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
@@ -53,33 +64,60 @@ export function ChatAssistant() {
     setIsSubmitting(true);
     
     try {
-      // [Analysis] Simple response generation logic for now; can be expanded later
+      // Try using the Supabase edge function for AI responses
+      const { data, error } = await supabase.functions.invoke('chat-with-plan-assistant', {
+        body: { 
+          messages: [{ role: 'user', content: userMessage.content }],
+          threadId: threadId
+        },
+      });
+      
+      if (error) {
+        console.error('Error calling AI assistant:', error);
+        throw new Error(`Failed to get AI response: ${error.message}`);
+      }
+      
+      if (data?.threadId && threadId !== data.threadId) {
+        // Save the thread ID for future conversations
+        setThreadId(data.threadId);
+        localStorage.setItem('tools_assistant_thread_id', data.threadId);
+        console.log('Saved new thread ID:', data.threadId);
+      }
+      
+      // Add AI response
       const botResponse: ChatMessage = {
         id: `assistant-${Date.now()}`,
-        content: generateAssistantResponse(inputValue.trim()),
+        content: data?.response || generateFallbackResponse(inputValue.trim()),
         sender: 'assistant',
         timestamp: new Date(),
       };
       
-      // Simulate a delay to make it feel more natural
-      setTimeout(() => {
-        setMessages(prev => [...prev, botResponse]);
-        setIsSubmitting(false);
-      }, 1000);
-      
+      setMessages(prev => [...prev, botResponse]);
     } catch (error) {
       console.error('Error generating response:', error);
+      
+      // Fallback to local response generation if the edge function fails
+      const fallbackResponse: ChatMessage = {
+        id: `assistant-fallback-${Date.now()}`,
+        content: generateFallbackResponse(inputValue.trim()),
+        sender: 'assistant',
+        timestamp: new Date(),
+      };
+      
+      setMessages(prev => [...prev, fallbackResponse]);
+      
       toast({
-        title: 'Error',
-        description: 'Failed to generate a response. Please try again.',
+        title: 'Connection Issue',
+        description: 'Using offline mode. Some features may be limited.',
         variant: 'destructive',
       });
+    } finally {
       setIsSubmitting(false);
     }
-  }, [inputValue, isSubmitting, toast]);
+  }, [inputValue, isSubmitting, threadId, toast]);
   
-  // [Analysis] Simple response generation based on keywords
-  function generateAssistantResponse(userInput: string): string {
+  // [Analysis] Simple response generation based on keywords for offline fallback
+  function generateFallbackResponse(userInput: string): string {
     const lowerCaseInput = userInput.toLowerCase();
     
     if (lowerCaseInput.includes('daily summary') || lowerCaseInput.includes('news summary')) {
