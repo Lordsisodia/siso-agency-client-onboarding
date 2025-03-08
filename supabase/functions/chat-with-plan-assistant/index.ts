@@ -8,12 +8,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Initialize OpenAI client with the v2 beta header
+// Initialize OpenAI client
 const openai = new OpenAI({
-  apiKey: Deno.env.get('OPENAI_API_KEY'),
-  defaultHeaders: {
-    'OpenAI-Beta': 'assistants=v2',  // Add v2 beta header
-  }
+  apiKey: Deno.env.get('OPENAI_API_KEY')
 });
 
 // Initialize Supabase client

@@ -40,7 +40,8 @@ export function usePlanChatAssistant(projectId?: string) {
       console.log('Request payload:', {
         messages: [...messages, userMessage],
         projectId,
-        formData
+        formData,
+        threadId
       });
       
       // Call the plan assistant edge function with improved error handling
@@ -48,7 +49,8 @@ export function usePlanChatAssistant(projectId?: string) {
         body: { 
           messages: [...messages, userMessage],
           projectId,
-          formData 
+          formData,
+          threadId
         },
       });
 
@@ -63,7 +65,7 @@ export function usePlanChatAssistant(projectId?: string) {
       
       console.log('Success! Response from assistant:', data);
       
-      if (data.threadId && !threadId) {
+      if (data.threadId) {
         setThreadId(data.threadId);
       }
 
