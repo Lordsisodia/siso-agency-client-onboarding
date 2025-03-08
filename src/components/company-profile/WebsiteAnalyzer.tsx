@@ -2,18 +2,21 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Globe, ArrowRight, AlertCircle, ExternalLink } from 'lucide-react';
+import { Loader2, Globe, ArrowRight, AlertCircle, ExternalLink, LogIn } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { extractDomain } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 interface WebsiteAnalyzerProps {
   onAnalysisComplete: (data: any) => void;
+  isAuthenticated: boolean;
 }
 
-export const WebsiteAnalyzer = ({ onAnalysisComplete }: WebsiteAnalyzerProps) => {
+export const WebsiteAnalyzer = ({ onAnalysisComplete, isAuthenticated }: WebsiteAnalyzerProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [url, setUrl] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisSuccess, setAnalysisSuccess] = useState(false);
@@ -21,6 +24,16 @@ export const WebsiteAnalyzer = ({ onAnalysisComplete }: WebsiteAnalyzerProps) =>
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to analyze your website",
+        variant: "destructive"
+      });
+      navigate('/auth');
+      return;
+    }
     
     if (!url) {
       toast({
@@ -87,7 +100,9 @@ export const WebsiteAnalyzer = ({ onAnalysisComplete }: WebsiteAnalyzerProps) =>
       </div>
       
       <p className="text-siso-text/70 mb-4">
-        Enter your company website URL and we'll automatically extract information to help complete your profile.
+        {isAuthenticated 
+          ? "Enter your company website URL and we'll automatically extract information to help complete your profile." 
+          : "Sign in to analyze your company website and automatically extract information for your profile."}
       </p>
       
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -98,25 +113,35 @@ export const WebsiteAnalyzer = ({ onAnalysisComplete }: WebsiteAnalyzerProps) =>
             onChange={(e) => setUrl(e.target.value)}
             placeholder="www.yourcompany.com"
             className="flex-grow p-3 rounded-lg bg-black/20 border border-siso-orange/20 text-siso-text focus:border-siso-orange/50 focus:outline-none"
-            disabled={isAnalyzing}
+            disabled={isAnalyzing || !isAuthenticated}
           />
-          <Button
-            type="submit"
-            disabled={isAnalyzing}
-            className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90 text-white"
-          >
-            {isAnalyzing ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analyzing...
-              </>
-            ) : (
-              <>
-                Analyze Website
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </>
-            )}
-          </Button>
+          {isAuthenticated ? (
+            <Button
+              type="submit"
+              disabled={isAnalyzing}
+              className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90 text-white"
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  Analyze Website
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </Button>
+          ) : (
+            <Button
+              onClick={() => navigate('/auth')}
+              className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90 text-white"
+            >
+              <LogIn className="mr-2 h-4 w-4" />
+              Sign In to Analyze
+            </Button>
+          )}
         </div>
       </form>
       

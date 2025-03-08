@@ -78,6 +78,9 @@ function App() {
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/thank-you" element={<ThankYou />} />
+        
+        {/* Company Profile route - accessible to all users */}
+        <Route path="/company-profile" element={<CompanyProfile />} />
 
         {/* Home route - redirect to plan-builder */}
         <Route path="/home" element={<Navigate to="/plan-builder" replace />} />
@@ -98,11 +101,6 @@ function App() {
         <Route path="/plan-builder" element={
           <ProtectedRoute>
             <PlanBuilder />
-          </ProtectedRoute>
-        } />
-        <Route path="/company-profile" element={
-          <ProtectedRoute>
-            <CompanyProfile />
           </ProtectedRoute>
         } />
         <Route path="/resource-hub" element={

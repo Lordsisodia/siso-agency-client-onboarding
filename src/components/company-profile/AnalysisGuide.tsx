@@ -1,15 +1,19 @@
 
 import { motion } from 'framer-motion';
-import { Edit, Info } from 'lucide-react';
+import { Edit, Info, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface AnalysisGuideProps {
   isEditing: boolean;
   hasAnalysisData: boolean;
   onStartEditing: () => void;
+  isAuthenticated: boolean;
 }
 
-export const AnalysisGuide = ({ isEditing, hasAnalysisData, onStartEditing }: AnalysisGuideProps) => {
+export const AnalysisGuide = ({ isEditing, hasAnalysisData, onStartEditing, isAuthenticated }: AnalysisGuideProps) => {
+  const navigate = useNavigate();
+  
   if (isEditing) return null;
   
   return (
@@ -25,22 +29,34 @@ export const AnalysisGuide = ({ isEditing, hasAnalysisData, onStartEditing }: An
         </div>
         <div>
           <h3 className="text-xl font-semibold text-siso-text-bold mb-2">
-            {hasAnalysisData 
-              ? "Website information detected" 
-              : "Complete your company profile"}
+            {isAuthenticated 
+              ? (hasAnalysisData ? "Website information detected" : "Complete your company profile")
+              : "Sign in to create your company profile"}
           </h3>
           <p className="text-siso-text/70 mb-4">
-            {hasAnalysisData 
-              ? "We've analyzed your website and prepared information for your profile. Click 'Edit Profile' to review and save these details." 
-              : "Click 'Edit Profile' to add your company information, upload logo and banner images, and customize your brand colors."}
+            {isAuthenticated 
+              ? (hasAnalysisData 
+                ? "We've analyzed your website and prepared information for your profile. Click 'Edit Profile' to review and save these details." 
+                : "Click 'Edit Profile' to add your company information, upload logo and banner images, and customize your brand colors.")
+              : "Create a free account to set up your company profile, analyze your website, and customize your brand colors."}
           </p>
-          <Button
-            onClick={onStartEditing}
-            className="bg-gradient-to-r from-siso-red to-siso-orange text-white hover:from-siso-red/90 hover:to-siso-orange/90"
-          >
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Profile
-          </Button>
+          {isAuthenticated ? (
+            <Button
+              onClick={onStartEditing}
+              className="bg-gradient-to-r from-siso-red to-siso-orange text-white hover:from-siso-red/90 hover:to-siso-orange/90"
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Profile
+            </Button>
+          ) : (
+            <Button
+              onClick={() => navigate('/auth')}
+              className="bg-gradient-to-r from-siso-red to-siso-orange text-white hover:from-siso-red/90 hover:to-siso-orange/90"
+            >
+              <LogIn className="mr-2 h-4 w-4" />
+              Sign In to Continue
+            </Button>
+          )}
         </div>
       </div>
     </motion.div>

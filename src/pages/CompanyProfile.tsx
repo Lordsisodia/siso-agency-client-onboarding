@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Waves } from '@/components/ui/waves-background';
 import { motion } from 'framer-motion';
-import { Building, Edit, ArrowLeft } from 'lucide-react';
+import { Building, Edit, ArrowLeft, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CompanyProfileForm } from '@/components/company-profile/CompanyProfileForm';
 import { CompanyImageUpload } from '@/components/company-profile/CompanyImageUpload';
@@ -12,14 +12,18 @@ import { WebsiteAnalyzer } from '@/components/company-profile/WebsiteAnalyzer';
 import { AnalysisGuide } from '@/components/company-profile/AnalysisGuide';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 export default function CompanyProfile() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [companyProfile, setCompanyProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [analysisData, setAnalysisData] = useState<any>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
 
   useEffect(() => {
     const fetchUserAndProfile = async () => {
@@ -30,14 +34,14 @@ export default function CompanyProfile() {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session?.user) {
-          toast({
-            variant: "destructive",
-            title: "Authentication required",
-            description: "Please sign in to access your company profile",
-          });
+          setIsAuthenticated(false);
+          setUserId(null);
+          setCompanyProfile(null);
+          setIsLoading(false);
           return;
         }
         
+        setIsAuthenticated(true);
         setUserId(session.user.id);
         
         // Fetch company profile
@@ -59,8 +63,11 @@ export default function CompanyProfile() {
         setCompanyProfile(profile || null);
         
         // If no profile exists yet, start in edit mode
-        if (!profile) {
+        if (!profile && isAuthenticated) {
           setIsEditing(true);
+          setShowPreview(false);
+        } else {
+          setShowPreview(true);
         }
       } catch (error) {
         console.error('Error in fetchUserAndProfile:', error);
@@ -86,6 +93,7 @@ export default function CompanyProfile() {
       
       setCompanyProfile(profile);
       setIsEditing(false);
+      setShowPreview(true);
     } catch (error) {
       console.error('Error refreshing profile:', error);
     }
@@ -105,7 +113,17 @@ export default function CompanyProfile() {
     // If we're not in editing mode, switch to editing mode to show the form
     if (!isEditing) {
       setIsEditing(true);
+      setShowPreview(false);
     }
+  };
+
+  const handleStartEditing = () => {
+    if (!isAuthenticated) {
+      navigate('/auth');
+      return;
+    }
+    setIsEditing(true);
+    setShowPreview(false);
   };
 
   return (
@@ -138,15 +156,20 @@ export default function CompanyProfile() {
                 Company Profile
               </h1>
               <p className="mt-4 text-lg text-siso-text/80">
-                {isEditing 
-                  ? "Update your company information and branding" 
-                  : "Manage your company information and branding preferences"}
+                {isAuthenticated 
+                  ? (isEditing 
+                    ? "Update your company information and branding" 
+                    : "Manage your company information and branding preferences")
+                  : "Create an account to set up your company profile"}
               </p>
             </div>
             
-            {!isLoading && companyProfile && (
+            {!isLoading && isAuthenticated && (
               <Button
-                onClick={() => setIsEditing(!isEditing)}
+                onClick={() => {
+                  setIsEditing(!isEditing);
+                  setShowPreview(!showPreview);
+                }}
                 className={`mt-4 sm:mt-0 ${isEditing 
                   ? "bg-siso-text/10 text-siso-text hover:bg-siso-text/20" 
                   : "bg-gradient-to-r from-siso-red to-siso-orange text-white hover:from-siso-red/90 hover:to-siso-orange/90"}`}
@@ -164,6 +187,16 @@ export default function CompanyProfile() {
                 )}
               </Button>
             )}
+            
+            {!isLoading && !isAuthenticated && (
+              <Button
+                onClick={() => navigate('/auth')}
+                className="mt-4 sm:mt-0 bg-gradient-to-r from-siso-red to-siso-orange text-white hover:from-siso-red/90 hover:to-siso-orange/90"
+              >
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign In
+              </Button>
+            )}
           </motion.div>
           
           {isLoading ? (
@@ -172,16 +205,20 @@ export default function CompanyProfile() {
             </div>
           ) : (
             <>
-              {!companyProfile && !isEditing && (
+              {(!companyProfile || (!isAuthenticated && !showPreview)) && (
                 <AnalysisGuide 
                   isEditing={isEditing} 
                   hasAnalysisData={!!analysisData}
-                  onStartEditing={() => setIsEditing(true)} 
+                  onStartEditing={handleStartEditing}
+                  isAuthenticated={isAuthenticated}
                 />
               )}
               
               {(!companyProfile || isEditing) && (
-                <WebsiteAnalyzer onAnalysisComplete={handleAnalysisComplete} />
+                <WebsiteAnalyzer 
+                  onAnalysisComplete={handleAnalysisComplete}
+                  isAuthenticated={isAuthenticated}
+                />
               )}
               
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -195,7 +232,7 @@ export default function CompanyProfile() {
                       companyType={companyProfile?.company_type}
                     />
                     
-                    {isEditing && userId && (
+                    {isEditing && userId && isAuthenticated && (
                       <>
                         <CompanyImageUpload 
                           userId={userId}
@@ -216,7 +253,7 @@ export default function CompanyProfile() {
                 </div>
                 
                 <div className="lg:col-span-2">
-                  {isEditing && userId ? (
+                  {isEditing && userId && isAuthenticated ? (
                     <CompanyProfileForm 
                       initialData={companyProfile} 
                       analysisData={analysisData}
@@ -224,7 +261,11 @@ export default function CompanyProfile() {
                       userId={userId}
                     />
                   ) : (
-                    <CompanyProfilePreview profile={companyProfile} />
+                    showPreview && <CompanyProfilePreview 
+                      profile={companyProfile} 
+                      isAuthenticated={isAuthenticated}
+                      onEditClick={handleStartEditing}
+                    />
                   )}
                 </div>
               </div>
@@ -238,9 +279,11 @@ export default function CompanyProfile() {
 
 interface CompanyProfilePreviewProps {
   profile: any;
+  isAuthenticated: boolean;
+  onEditClick: () => void;
 }
 
-const CompanyProfilePreview = ({ profile }: CompanyProfilePreviewProps) => {
+const CompanyProfilePreview = ({ profile, isAuthenticated, onEditClick }: CompanyProfilePreviewProps) => {
   if (!profile) {
     return (
       <motion.div 
@@ -251,8 +294,26 @@ const CompanyProfilePreview = ({ profile }: CompanyProfilePreviewProps) => {
         <Building className="w-16 h-16 mx-auto mb-4 text-siso-orange/70" />
         <h3 className="text-2xl font-semibold text-siso-text-bold mb-2">No Company Profile Yet</h3>
         <p className="text-siso-text/70 mb-6">
-          Click the "Edit Profile" button to create your company profile and customize your brand identity.
+          {isAuthenticated 
+            ? "Click the 'Edit Profile' button to create your company profile and customize your brand identity."
+            : "Sign in to create your company profile and customize your brand identity."}
         </p>
+        <Button
+          onClick={onEditClick}
+          className="bg-gradient-to-r from-siso-red to-siso-orange text-white hover:from-siso-red/90 hover:to-siso-orange/90"
+        >
+          {isAuthenticated ? (
+            <>
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Profile
+            </>
+          ) : (
+            <>
+              <LogIn className="mr-2 h-4 w-4" />
+              Sign In to Continue
+            </>
+          )}
+        </Button>
       </motion.div>
     );
   }
