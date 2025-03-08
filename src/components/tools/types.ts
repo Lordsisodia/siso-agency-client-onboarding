@@ -1,3 +1,4 @@
+
 export interface Tool {
   id: string;
   name: string;
@@ -13,7 +14,7 @@ export interface Tool {
   icon_url: string | null;
   created_at: string;
   updated_at: string;
-  // Adding back fields needed by components
+  // Optional fields
   member_type?: string | null;
   youtube_url?: string | null;
   youtube_videos?: Array<{ title: string; url: string; }> | null;

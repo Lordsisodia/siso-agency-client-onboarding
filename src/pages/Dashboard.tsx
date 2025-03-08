@@ -1,177 +1,135 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { MainLayout } from '@/components/assistants/layout/MainLayout';
-import { Waves } from '@/components/ui/waves-background';
+
+import { useEffect, useState } from 'react';
+import { Sidebar } from '@/components/Sidebar';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { QuickStatsPanel } from '@/components/dashboard/QuickStatsPanel';
 import { ProjectsOverview } from '@/components/dashboard/ProjectsOverview';
-import { NotificationsPanel } from '@/components/dashboard/NotificationsPanel';
 import { QuickActionsPanel } from '@/components/dashboard/QuickActionsPanel';
+import { NotificationsPanel } from '@/components/dashboard/NotificationsPanel';
 import { UpcomingEvents } from '@/components/dashboard/UpcomingEvents';
-import { toast } from '@/hooks/use-toast';
-import { motion } from 'framer-motion';
+import { useAuthSession } from '@/hooks/useAuthSession';
+import { useNavigate } from 'react-router-dom';
 
-// Sample data for the notifications panel
-const mockNotifications = [
-  {
-    id: '1',
-    title: 'Project Updated',
-    message: 'Mobile App Redesign project status changed to In Progress',
-    time: '2h ago',
-    type: 'info',
-    read: false
-  },
-  {
-    id: '2',
-    title: 'New Comment',
-    message: 'John Doe commented on Website Development project',
-    time: '5h ago',
-    type: 'info',
-    read: false
-  },
-  {
-    id: '3',
-    title: 'Deadline Approaching',
-    message: 'E-commerce Platform project deadline in 3 days',
-    time: '1d ago',
-    type: 'warning',
-    read: true
-  },
-  {
-    id: '4',
-    title: 'Project Completed',
-    message: 'Brand Identity Design project marked as completed',
-    time: '2d ago',
-    type: 'success',
-    read: true
-  }
-];
+// Define correct types for notifications and events
+export type NotificationType = 'alert' | 'success' | 'warning' | 'info';
+export type EventType = 'deadline' | 'meeting' | 'reminder';
 
-// Sample data for upcoming events
-const mockEvents = [
-  {
-    id: '1',
-    title: 'Client Meeting - ABC Corp',
-    date: '2023-11-28',
-    time: '10:00 AM - 11:00 AM',
-    type: 'meeting'
-  },
-  {
-    id: '2',
-    title: 'E-commerce Platform Deadline',
-    date: '2023-11-30',
-    time: 'End of day',
-    type: 'deadline'
-  },
-  {
-    id: '3',
-    title: 'Submit Website Design',
-    date: '2023-12-05',
-    time: '12:00 PM',
-    type: 'reminder'
-  }
-];
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  time: string;
+  type: NotificationType;
+  read: boolean;
+}
+
+export interface Event {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  type: EventType;
+}
 
 export default function Dashboard() {
+  const { user, loading } = useAuthSession();
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState(mockNotifications);
-  const [events] = useState(mockEvents);
+  const [stats, setStats] = useState({
+    activeProjects: 0,
+    tasksCompleted: 0,
+    upcomingDeadlines: 0,
+    resources: 0
+  });
 
-  const handleMarkAsRead = (id: string) => {
-    setNotifications(notifications.map(n => 
-      n.id === id ? { ...n, read: true } : n
-    ));
-    toast({
-      title: "Notification marked as read",
-      duration: 3000,
+  // Demo data for notifications
+  const notifications: Notification[] = [
+    {
+      id: '1',
+      title: 'New Message',
+      message: 'You have a new message from Alex Smith',
+      time: '5 min ago',
+      type: 'info',
+      read: false
+    },
+    {
+      id: '2',
+      title: 'Project Update',
+      message: 'Your project "Website Redesign" has been updated',
+      time: '2 hours ago',
+      type: 'success',
+      read: false
+    },
+    {
+      id: '3',
+      title: 'Deadline Approaching',
+      message: 'Project "Marketing Plan" deadline is tomorrow',
+      time: '1 day ago',
+      type: 'warning',
+      read: true
+    }
+  ];
+
+  // Demo data for events
+  const events: Event[] = [
+    {
+      id: '1',
+      title: 'Client Meeting',
+      date: 'Today',
+      time: '2:00 PM',
+      type: 'meeting'
+    },
+    {
+      id: '2',
+      title: 'Project Deadline',
+      date: 'Tomorrow',
+      time: '11:59 PM',
+      type: 'deadline'
+    },
+    {
+      id: '3',
+      title: 'Team Standup',
+      date: 'Wed, Sep 28',
+      time: '10:00 AM',
+      type: 'meeting'
+    }
+  ];
+
+  useEffect(() => {
+    // Fetch dashboard stats
+    // This is a mock implementation
+    setStats({
+      activeProjects: 5,
+      tasksCompleted: 12,
+      upcomingDeadlines: 3,
+      resources: 8
     });
-  };
-
-  const handleViewAllNotifications = () => {
-    navigate('/notifications');
-  };
-
-  const handleViewCalendar = () => {
-    // This would navigate to a calendar page if you have one
-    toast({
-      title: "Calendar feature coming soon!",
-      description: "This feature is under development.",
-      duration: 3000,
-    });
-  };
+  }, []);
 
   return (
-    <MainLayout>
-      <div className="relative min-h-screen">
-        <div className="absolute inset-0 z-0 opacity-60">
-          <Waves 
-            lineColor="rgba(255, 87, 34, 0.08)"
-            waveSpeedX={0.01}
-            waveSpeedY={0.005}
-            waveAmpX={30}
-            waveAmpY={15}
-            friction={0.95}
-            tension={0.01}
-            maxCursorMove={80}
-            xGap={14}
-            yGap={40}
-          />
+    <div className="flex min-h-screen bg-gradient-to-b from-[#0A0A0A] to-[#121212]">
+      <Sidebar />
+      <div className="flex-1 p-8">
+        <DashboardHeader userName={user?.user_metadata?.full_name || 'User'} />
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          <div className="md:col-span-2">
+            <QuickStatsPanel stats={stats} />
+          </div>
+          <div>
+            <QuickActionsPanel />
+          </div>
         </div>
         
-        <div className="relative z-10 container px-4 py-8 mx-auto">
-          {/* Dashboard Content */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="space-y-6"
-          >
-            {/* Header Section */}
-            <DashboardHeader />
-            
-            {/* Quick Stats Panel */}
-            <QuickStatsPanel 
-              activeProjects={4} 
-              pendingTasks={7} 
-              upcomingEvents={3} 
-            />
-            
-            {/* Main Content with layout - 3/4 for project card, 1/4 for sidebar */}
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-              {/* Project Overview (Takes 3/4 width) */}
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.1 }}
-                className="xl:col-span-3 bg-gradient-to-br from-siso-bg/40 to-transparent p-0.5 rounded-xl shadow-xl"
-              >
-                <div className="bg-siso-bg/60 backdrop-blur-sm rounded-xl border border-siso-border/30">
-                  <ProjectsOverview />
-                </div>
-              </motion.div>
-              
-              {/* Secondary Content (Takes 1/4 width) */}
-              <div className="xl:col-span-1 space-y-6">
-                {/* Notifications Panel */}
-                <NotificationsPanel 
-                  notifications={notifications}
-                  onMarkAsRead={handleMarkAsRead}
-                  onViewAll={handleViewAllNotifications}
-                />
-                
-                {/* Quick Actions Panel */}
-                <QuickActionsPanel />
-                
-                {/* Upcoming Events */}
-                <UpcomingEvents 
-                  events={events}
-                  onViewAll={handleViewCalendar}
-                />
-              </div>
-            </div>
-          </motion.div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:col-span-2">
+            <ProjectsOverview />
+          </div>
+          <div className="space-y-8">
+            <NotificationsPanel notifications={notifications} />
+            <UpcomingEvents events={events} />
+          </div>
         </div>
       </div>
-    </MainLayout>
+    </div>
   );
 }
