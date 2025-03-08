@@ -1,0 +1,4 @@
+
+project_id = "your-project-id"
+name = "chat-with-plan-assistant"
+no_public_access = false
