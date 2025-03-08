@@ -11,11 +11,11 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
   
   return (
-    <div className="relative flex min-h-screen bg-gradient-to-b from-siso-bg to-siso-bg/95">
+    <div className="flex h-screen w-full overflow-hidden bg-gradient-to-b from-siso-bg to-siso-bg/95">
       <Sidebar />
-      <div className="flex-1 w-full z-0 relative">
+      <main className="flex-1 flex flex-col relative z-0 w-full overflow-auto">
         {children}
-      </div>
+      </main>
     </div>
   );
 };
