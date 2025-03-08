@@ -20,13 +20,21 @@ export const Sidebar = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   
-  // Handle navigation directly without timeouts
+  // Handle navigation with improved external link support
   const handleItemClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
     const href = e.currentTarget.getAttribute('href');
     
     if (!href) return;
-
+    
+    // Check if the link is external (starts with http or https)
+    if (href.startsWith('http://') || href.startsWith('https://')) {
+      // Allow default browser behavior for external links
+      return;
+    }
+    
+    // For internal links, prevent default and handle with React Router
+    e.preventDefault();
+    
     // Set navigating state to true - this prevents sidebar collapse
     setIsNavigating(true);
     
