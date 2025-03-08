@@ -4,6 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export const QuickActionsPanel = () => {
   const navigate = useNavigate();
@@ -14,36 +20,28 @@ export const QuickActionsPanel = () => {
       description: 'Create new app plans',
       icon: FileText,
       path: '/plan-builder',
-      color: 'text-blue-500',
-      bgColor: 'bg-blue-500/10',
-      borderColor: 'border-blue-500/20'
+      tooltip: 'Start creating new application plans'
     },
     {
       title: 'Portfolio',
       description: 'View portfolio projects',
       icon: Briefcase,
       path: '/portfolio',
-      color: 'text-purple-500',
-      bgColor: 'bg-purple-500/10',
-      borderColor: 'border-purple-500/20'
+      tooltip: 'Access your portfolio of projects'
     },
     {
       title: 'Resource Hub',
       description: 'Browse resources',
       icon: BookOpen,
       path: '/resource-hub',
-      color: 'text-green-500',
-      bgColor: 'bg-green-500/10',
-      borderColor: 'border-green-500/20'
+      tooltip: 'Find resources, tutorials and guides'
     },
     {
       title: 'Competitive Analysis',
       description: 'Analyze competitors',
       icon: TrendingUp,
       path: '/competitive-analysis',
-      color: 'text-amber-500',
-      bgColor: 'bg-amber-500/10',
-      borderColor: 'border-amber-500/20'
+      tooltip: 'Research and analyze your competitors'
     }
   ];
 
@@ -75,26 +73,34 @@ export const QuickActionsPanel = () => {
           <ScrollArea className="h-[300px]">
             <div className="p-3 space-y-2">
               {actions.map((action, index) => (
-                <motion.div
-                  key={action.title}
-                  initial="initial"
-                  animate="animate"
-                  whileHover="hover"
-                  whileTap="tap"
-                  variants={cardVariants}
-                  transition={{ duration: 0.2, delay: 0.1 + index * 0.05 }}
-                  onClick={() => navigate(action.path)}
-                  className={`flex items-center p-3 rounded-md cursor-pointer bg-gradient-to-r from-siso-bg/70 to-transparent border ${action.borderColor} hover:border-siso-border/30`}
-                >
-                  <div className={`p-2 rounded-md ${action.bgColor} ${action.color} mr-3 shadow-sm`}>
-                    <action.icon size={18} />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-sm font-medium text-siso-text-bold">{action.title}</h3>
-                    <p className="text-xs text-siso-text/70">{action.description}</p>
-                  </div>
-                  <ArrowRight size={16} className="text-siso-text/40 group-hover:text-siso-orange transition-colors" />
-                </motion.div>
+                <TooltipProvider key={action.title}>
+                  <Tooltip delayDuration={300}>
+                    <TooltipTrigger asChild>
+                      <motion.div
+                        initial="initial"
+                        animate="animate"
+                        whileHover="hover"
+                        whileTap="tap"
+                        variants={cardVariants}
+                        transition={{ duration: 0.2, delay: 0.1 + index * 0.05 }}
+                        onClick={() => navigate(action.path)}
+                        className="flex items-center p-3 rounded-md cursor-pointer bg-gradient-to-r from-siso-bg/70 to-transparent border border-siso-border/20 hover:border-siso-orange/30"
+                      >
+                        <div className="p-2 rounded-md bg-siso-orange/10 text-siso-orange mr-3 shadow-sm">
+                          <action.icon size={18} />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-sm font-medium text-siso-text-bold">{action.title}</h3>
+                          <p className="text-xs text-siso-text/70">{action.description}</p>
+                        </div>
+                        <ArrowRight size={16} className="text-siso-text/40 group-hover:text-siso-orange transition-colors" />
+                      </motion.div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-siso-bg-alt border border-siso-border/60 text-xs px-3 py-1.5 rounded-md shadow-md">
+                      <p>{action.tooltip}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               ))}
             </div>
           </ScrollArea>
