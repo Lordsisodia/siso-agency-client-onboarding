@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
   allowUnauth?: boolean;
 }
 
-export const ProtectedRoute = ({ children, allowUnauth = true }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({ children, allowUnauth = false }: ProtectedRouteProps) => {
   const { user, loading } = useAuthSession();
   const navigate = useNavigate();
 
@@ -21,6 +21,10 @@ export const ProtectedRoute = ({ children, allowUnauth = true }: ProtectedRouteP
 
   if (loading) {
     return <ProfileSkeleton />;
+  }
+
+  if (!user && !allowUnauth) {
+    return null; // Return null to prevent flash of content before redirect
   }
 
   return <>{children}</>;

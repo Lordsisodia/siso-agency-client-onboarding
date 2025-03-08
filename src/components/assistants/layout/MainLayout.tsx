@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { useLocation } from 'react-router-dom';
 import { Sidebar } from '@/components/Sidebar';
 
 interface MainLayoutProps {
@@ -8,8 +7,6 @@ interface MainLayoutProps {
 }
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-  const location = useLocation();
-  
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gradient-to-b from-siso-bg to-siso-bg/95">
       <Sidebar />
