@@ -5,10 +5,10 @@ import { useToast } from '@/hooks/use-toast';
 
 export interface UserProfile {
   id: string;
-  full_name: string;
-  phone_number: string;
+  full_name: string | null;
+  phone_number: string | null;
   created_at: string;
-  updated_at: string;
+  updated_at: string | null;
 }
 
 export const useProfileData = (userId: string | undefined) => {
