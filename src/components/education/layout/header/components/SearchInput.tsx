@@ -1,245 +1,266 @@
 
-import { Search, Command, Mic, X, Clock, History } from 'lucide-react';
-import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Card } from '@/components/ui/card';
-import { SearchHistory } from './SearchHistory';
-import { SearchResults } from './SearchResults';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { useOnClickOutside } from '@/hooks/use-click-outside';
+import { useAuthSession } from '@/hooks/useAuthSession';
 
-interface SearchInputProps {
-  searchQuery: string;
-  onSearchChange: (value: string) => void;
-  onFocus: () => void;
-  onBlur: () => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-  placeholders: string[];
+// Defined types for search results
+interface VideoResult {
+  id: string;
+  title: string;
+  thumbnailUrl: string;
+  full_description?: string;
+  type: 'video';
 }
 
-export const SearchInput = ({ 
-  searchQuery, 
-  onSearchChange, 
-  onFocus, 
-  onBlur, 
-  onSubmit,
-  placeholders 
-}: SearchInputProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+interface EducatorResult {
+  id: string;
+  name: string;
+  channel_avatar_url?: string;
+  description?: string;
+  slug: string;
+  type: 'educator';
+}
+
+interface SearchHistoryItem {
+  id: string;
+  query: string;
+  created_at: string;
+  result_type: string;
+}
+
+type SearchResult = VideoResult | EducatorResult;
+
+export const SearchInput = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { session } = useAuthSession();
+  
+  useOnClickOutside(searchRef, () => setShowResults(false));
 
-  // [Analysis] Fetch search results from both videos and educators
-  const { data: searchResults, isLoading } = useQuery({
-    queryKey: ['search-results', searchQuery],
-    queryFn: async () => {
-      if (!searchQuery.trim()) return [];
-
+  // Fetch search history for logged-in users
+  useEffect(() => {
+    if (!session?.user) return;
+    
+    const fetchSearchHistory = async () => {
       try {
-        const [videosResponse, educatorsResponse] = await Promise.all([
-          supabase
-            .from('youtube_videos')
-            .select(`
-              id,
-              title,
-              thumbnailUrl,
-              full_description
-            `)
-            .ilike('title', `%${searchQuery}%`)
-            .limit(5),
-
-          supabase
-            .from('education_creators')
-            .select(`
-              id,
-              name,
-              channel_avatar_url,
-              description,
-              slug
-            `)
-            .ilike('name', `%${searchQuery}%`)
-            .limit(5)
-        ]);
-
-        if (videosResponse.error) throw videosResponse.error;
-        if (educatorsResponse.error) throw educatorsResponse.error;
-
-        const videos = (videosResponse.data || []).map(video => ({
-          id: video.id,
-          type: 'video' as const,
-          title: video.title,
-          thumbnailUrl: video.thumbnailUrl,
-          description: video.full_description
-        }));
-
-        const educators = (educatorsResponse.data || []).map(educator => ({
-          id: educator.id,
-          type: 'educator' as const,
-          title: educator.name,
-          channel_avatar_url: educator.channel_avatar_url,
-          description: educator.description,
-          slug: educator.slug
-        }));
-
-        return [...videos, ...educators];
+        const { data, error } = await supabase
+          .from('user_search_history')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(5);
+        
+        if (error) {
+          console.error('Error fetching search history:', error);
+          return;
+        }
+        
+        if (data) {
+          setSearchHistory(data as SearchHistoryItem[]);
+        }
       } catch (error) {
-        console.error('Search error:', error);
-        return [];
+        console.error('Error in search history fetch:', error);
       }
-    },
-    enabled: !!searchQuery.trim()
-  });
+    };
 
-  // [Analysis] Fetch search history for the user
-  const { data: searchHistory, refetch: refetchHistory } = useQuery({
-    queryKey: ['search-history'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('user_search_history')
+    fetchSearchHistory();
+  }, [session]);
+
+  // Handle search
+  const handleSearch = async (value: string) => {
+    if (!value.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      // Search videos
+      const { data: videoData, error: videoError } = await supabase
+        .from('youtube_videos')
         .select('*')
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: isExpanded
-  });
-
-  const handleFocus = () => {
-    setIsExpanded(true);
-    onFocus();
-  };
-
-  const handleBlur = () => {
-    setTimeout(() => {
-      setIsExpanded(false);
-      onBlur();
-    }, 200);
-  };
-
-  const clearSearch = () => {
-    onSearchChange('');
-  };
-
-  // [Analysis] Simplified navigation logic - direct path approach
-  const handleSearchResultClick = async (result: any) => {
-    try {
-      // Save to search history first
-      const { error: historyError } = await supabase.from('user_search_history').insert({
-        query: result.title,
-        result_type: result.type,
-        result_id: result.id
-      });
-
-      if (historyError) {
-        console.error('Error saving search history:', historyError);
+        .ilike('title', `%${value}%`)
+        .limit(3);
+        
+      if (videoError) {
+        console.error('Error searching videos:', videoError);
       }
 
-      // [Analysis] Direct navigation using full paths
-      const path = result.type === 'video' 
-        ? `/education/video/${result.id}`
-        : `/education/educators/${result.slug}`;
+      // Search educators
+      const { data: educatorData, error: educatorError } = await supabase
+        .from('education_creators')
+        .select('*')
+        .ilike('name', `%${value}%`)
+        .limit(3);
+        
+      if (educatorError) {
+        console.error('Error searching educators:', educatorError);
+      }
 
-      console.log('Navigating to:', path);
-      navigate(path, { replace: true }); // Using replace to prevent back button issues
+      // Format results
+      const videos = videoData ? videoData.map(video => ({
+        id: video.id,
+        title: video.title,
+        thumbnailUrl: video.thumbnail_url,
+        type: 'video' as const
+      })) : [];
+      
+      const educators = educatorData ? educatorData.map(educator => ({
+        id: educator.id,
+        name: educator.name,
+        channel_avatar_url: educator.channel_avatar_url,
+        description: educator.description,
+        slug: educator.slug,
+        type: 'educator' as const
+      })) : [];
 
-      // Close search panel and blur
-      setIsExpanded(false);
-      onBlur();
+      setSearchResults([...videos, ...educators]);
 
+      // Save search to history if user is logged in
+      if (session?.user && value.trim().length > 2) {
+        await supabase
+          .from('user_search_history')
+          .insert({
+            user_id: session.user.id,
+            query: value,
+            result_type: 'search'
+          });
+      }
     } catch (error) {
-      console.error('Navigation error:', error);
-      toast.error('Failed to navigate. Please try again.');
+      console.error('Search error:', error);
+    } finally {
+      setIsSearching(false);
     }
   };
 
-  // [Analysis] Wrap refetchHistory in a function that returns Promise<void>
-  const handleHistoryCleared = async () => {
-    try {
-      await refetchHistory();
-    } catch (error) {
-      console.error('Error refetching history:', error);
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery) {
+        handleSearch(searchQuery);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setShowResults(true);
+  };
+
+  const handleSearchHistoryClick = (query: string) => {
+    setSearchQuery(query);
+    handleSearch(query);
+    setShowResults(true);
+  };
+
+  const handleResultClick = (result: SearchResult) => {
+    if (result.type === 'video') {
+      navigate(`/video/${result.id}`);
+    } else if (result.type === 'educator') {
+      navigate(`/educator/${result.slug}`);
     }
+    setShowResults(false);
   };
 
   return (
-    <div className="relative w-full">
-      <div className="relative group">
-        <PlaceholdersAndVanishInput
-          placeholders={placeholders}
+    <div className="relative w-full" ref={searchRef}>
+      <div className="relative">
+        <input
+          type="text"
+          placeholder="Search videos and educators..."
+          className="w-full pl-10 pr-4 py-2 rounded-full bg-gray-800 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-siso-orange/50"
           value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          onSubmit={onSubmit}
-          className="w-full h-14 pl-12 pr-24 bg-black/20 backdrop-blur-sm
-            border border-[#FF5722]/20 rounded-xl text-lg text-white placeholder-white/60
-            focus:ring-2 focus:ring-[#FF5722]/30 focus:border-[#FF5722]/40
-            hover:bg-black/30 hover:border-[#FF5722]/30 relative z-[102]
-            transition-all duration-300"
+          onChange={handleSearchInputChange}
+          onFocus={() => setShowResults(true)}
         />
-        
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#FF5722]/70 
-          group-hover:text-[#FF5722] transition-colors z-[102]" />
-        
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 text-white/70 z-[102]">
-          {searchQuery && (
-            <button
-              onClick={clearSearch}
-              className="p-1 hover:bg-white/10 rounded-full transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-          <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border 
-            border-[#FF5722]/20 bg-black/20 px-1.5 font-mono text-[10px] font-medium text-white/80">
-            <span className="text-xs"><Command className="h-3 w-3" /></span>K
-          </kbd>
-          <Mic className="w-5 h-5 cursor-pointer hover:text-[#FF5722] transition-colors" />
-        </div>
+        <Search className="absolute left-3 top-2.5 text-gray-400 h-5 w-5" />
       </div>
-
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-[101]"
-          >
-            <Card className="p-4 border-siso-border bg-black/90 backdrop-blur-sm">
-              {searchQuery ? (
-                <SearchResults
-                  results={searchResults || []}
-                  isLoading={isLoading}
-                  onResultClick={handleSearchResultClick}
-                />
-              ) : (
-                <>
-                  <div className="flex items-center gap-2 mb-4 text-siso-text/70">
-                    <History className="w-4 h-4" />
-                    <span className="text-sm font-medium">Recent Searches</span>
-                  </div>
-                  
-                  <SearchHistory
-                    history={searchHistory || []}
-                    onHistoryCleared={handleHistoryCleared}
-                    onSearchSelect={(query) => {
-                      onSearchChange(query);
-                      setIsExpanded(false);
-                    }}
-                  />
-                </>
+      
+      {showResults && (searchResults.length > 0 || searchHistory.length > 0 || isSearching) && (
+        <div className="absolute w-full mt-2 bg-gray-800 border border-gray-700 rounded-md shadow-lg z-50 max-h-96 overflow-y-auto">
+          {isSearching ? (
+            <div className="p-4 text-gray-400 text-center">Searching...</div>
+          ) : (
+            <>
+              {/* Search Results */}
+              {searchResults.length > 0 && (
+                <div className="p-2">
+                  <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 px-2">Results</h3>
+                  {searchResults.map(result => (
+                    <div 
+                      key={`${result.type}-${result.id}`}
+                      className="p-2 hover:bg-gray-700 rounded cursor-pointer"
+                      onClick={() => handleResultClick(result)}
+                    >
+                      <div className="flex items-center space-x-3">
+                        {result.type === 'video' ? (
+                          <img 
+                            src={result.thumbnailUrl || '/placeholder.svg'} 
+                            alt={result.title}
+                            className="w-12 h-8 object-cover rounded"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center overflow-hidden">
+                            {result.channel_avatar_url ? (
+                              <img 
+                                src={result.channel_avatar_url} 
+                                alt={result.name}
+                                className="w-full h-full object-cover" 
+                              />
+                            ) : (
+                              <span className="text-lg font-bold text-white">
+                                {result.name?.charAt(0)}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-sm font-medium text-white">
+                            {result.type === 'video' ? result.title : result.name}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {result.type === 'video' ? 'Video' : 'Educator'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              
+              {/* Search History */}
+              {searchHistory.length > 0 && !searchQuery && (
+                <div className="p-2">
+                  <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 px-2">Recent Searches</h3>
+                  {searchHistory.map(item => (
+                    <div 
+                      key={item.id}
+                      className="p-2 hover:bg-gray-700 rounded cursor-pointer flex items-center"
+                      onClick={() => handleSearchHistoryClick(item.query)}
+                    >
+                      <Search className="h-4 w-4 text-gray-400 mr-2" />
+                      <span className="text-sm text-gray-300">{item.query}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {searchQuery && searchResults.length === 0 && (
+                <div className="p-4 text-gray-400 text-center">No results found</div>
+              )}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };
-

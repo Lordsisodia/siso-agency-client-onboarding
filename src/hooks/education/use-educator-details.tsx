@@ -1,70 +1,56 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { Educator } from './use-educators-list';
 
-export const useEducatorDetails = (slug: string) => {
-  return useQuery({
-    queryKey: ['educator', slug],
-    queryFn: async () => {
-      console.log('[useEducatorDetails] Fetching educator details for slug:', slug);
+export function useEducatorDetails(slug: string) {
+  const [educator, setEducator] = useState<Educator | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    async function fetchEducatorDetails() {
+      if (!slug) return;
       
-      // [Analysis] Try exact match first
-      const { data: educator, error: exactMatchError } = await supabase
-        .from('education_creators')
-        .select(`
-          id,
-          name,
-          description,
-          channel_description,
-          channel_avatar_url,
-          channel_banner_url,
-          profile_image_url,
-          number_of_subscribers,
-          channel_total_videos,
-          channel_total_views,
-          channel_location,
-          channel_joined_date,
-          social_links,
-          youtube_url,
-          website_url,
-          featured_videos,
-          channel_id,
-          slug
-        `)
-        .eq('slug', slug)
-        .maybeSingle();
+      try {
+        setLoading(true);
+        
+        // Fetch educator details
+        const { data, error } = await supabase
+          .from('education_creators')
+          .select('*')
+          .eq('slug', slug)
+          .single();
+        
+        if (error) {
+          throw error;
+        }
 
-      // If exact match found, return it
-      if (educator) {
-        console.log('[useEducatorDetails] Found educator with exact match:', educator);
-        return educator;
+        if (!data) {
+          throw new Error('Educator not found');
+        }
+
+        // Get video count
+        const { count, error: countError } = await supabase
+          .from('youtube_videos')
+          .select('*', { count: 'exact', head: true })
+          .eq('channel_id', data.channel_id);
+        
+        if (countError) {
+          console.error('Error getting video count:', countError);
+        }
+
+        setEducator({ ...data, videos_count: count || 0 });
+      } catch (err) {
+        console.error('Error fetching educator details:', err);
+        setError(err instanceof Error ? err : new Error('Unknown error fetching educator details'));
+      } finally {
+        setLoading(false);
       }
+    }
 
-      // [Analysis] If not found, try finding by name part of the slug
-      const baseName = slug.split('-')[0]; // Get first part of the slug
-      console.log('[useEducatorDetails] Trying to find by base name:', baseName);
-      
-      const { data: fuzzyMatchEducator, error: fuzzyMatchError } = await supabase
-        .from('education_creators')
-        .select()
-        .ilike('slug', `${baseName}%`)
-        .maybeSingle();
+    fetchEducatorDetails();
+  }, [slug]);
 
-      if (fuzzyMatchError) {
-        console.error('[useEducatorDetails] Error in fuzzy match:', fuzzyMatchError);
-        throw fuzzyMatchError;
-      }
-
-      if (!fuzzyMatchEducator) {
-        console.error('[useEducatorDetails] No educator found for slug:', slug);
-        throw new Error('Educator not found');
-      }
-
-      console.log('[useEducatorDetails] Found educator with fuzzy match:', fuzzyMatchEducator);
-      return fuzzyMatchEducator;
-    },
-    enabled: !!slug,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-  });
-};
+  return { educator, loading, error };
+}

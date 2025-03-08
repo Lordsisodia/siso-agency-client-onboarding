@@ -442,6 +442,60 @@ export type Database = {
         }
         Relationships: []
       }
+      education_creators: {
+        Row: {
+          channel_avatar_url: string | null
+          channel_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          last_sync_error: string | null
+          last_synced_at: string | null
+          name: string
+          number_of_subscribers: number | null
+          slug: string
+          specialization: string[] | null
+          sync_completed_at: string | null
+          sync_started_at: string | null
+          sync_status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          channel_avatar_url?: string | null
+          channel_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          last_sync_error?: string | null
+          last_synced_at?: string | null
+          name: string
+          number_of_subscribers?: number | null
+          slug: string
+          specialization?: string[] | null
+          sync_completed_at?: string | null
+          sync_started_at?: string | null
+          sync_status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          channel_avatar_url?: string | null
+          channel_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          last_sync_error?: string | null
+          last_synced_at?: string | null
+          name?: string
+          number_of_subscribers?: number | null
+          slug?: string
+          specialization?: string[] | null
+          sync_completed_at?: string | null
+          sync_started_at?: string | null
+          sync_status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       features: {
         Row: {
           base_cost: number
@@ -963,6 +1017,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_search_history: {
+        Row: {
+          created_at: string | null
+          id: string
+          query: string
+          result_type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          query: string
+          result_type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          query?: string
+          result_type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           avatar_url: string | null
@@ -1014,6 +1092,86 @@ export type Database = {
           embedding?: string | null
           id?: string
           metadata?: Json | null
+        }
+        Relationships: []
+      }
+      video_sync_history: {
+        Row: {
+          api_quota_used: number | null
+          completed_at: string | null
+          creator_id: string | null
+          error_message: string | null
+          id: string
+          started_at: string | null
+          status: string
+          videos_synced: number | null
+        }
+        Insert: {
+          api_quota_used?: number | null
+          completed_at?: string | null
+          creator_id?: string | null
+          error_message?: string | null
+          id?: string
+          started_at?: string | null
+          status?: string
+          videos_synced?: number | null
+        }
+        Update: {
+          api_quota_used?: number | null
+          completed_at?: string | null
+          creator_id?: string | null
+          error_message?: string | null
+          id?: string
+          started_at?: string | null
+          status?: string
+          videos_synced?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_sync_history_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "education_creators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      youtube_videos: {
+        Row: {
+          channel_id: string
+          created_at: string | null
+          date: string | null
+          duration: string | null
+          id: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+          url: string
+          viewcount: number | null
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string | null
+          date?: string | null
+          duration?: string | null
+          id: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+          url: string
+          viewcount?: number | null
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string | null
+          date?: string | null
+          duration?: string | null
+          id?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+          url?: string
+          viewcount?: number | null
         }
         Relationships: []
       }

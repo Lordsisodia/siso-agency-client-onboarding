@@ -1,46 +1,44 @@
 
-import { useState } from 'react';
-import { VideoLibrary } from '../VideoLibrary';
-import { EducatorsDirectory } from '../EducatorsDirectory';
-import { AnimatePresence } from 'framer-motion';
+import React from 'react';
 import { useEducatorsList } from '@/hooks/education';
+import { EducatorCard } from '../EducatorCard';
+import { LearningProgress } from './LearningProgress';
+import { Skeleton } from '@/components/ui/skeleton';
 
-interface LearningContentProps {
-  activeSection: 'videos' | 'educators';
-  searchQuery: string;
-}
+export const LearningContent = () => {
+  const { educators, loading } = useEducatorsList();
 
-export const LearningContent = ({ activeSection, searchQuery }: LearningContentProps) => {
-  const { 
-    data: educatorData,
-    isLoading: isEducatorsLoading,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage
-  } = useEducatorsList(searchQuery);
-
-  const members = educatorData?.pages.flatMap(page => page.educators) || [];
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <LearningProgress />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array(6).fill(0).map((_, i) => (
+            <Skeleton key={i} className="h-64 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <AnimatePresence mode="wait">
-      {activeSection === 'videos' ? (
-        <VideoLibrary
-          key="video-library"
-          isLoading={false}
-          selectedEducator={null}
-          searchQuery={searchQuery}
-        />
+    <div className="space-y-8">
+      <LearningProgress />
+      
+      <h2 className="text-2xl font-bold text-white">Top Educators</h2>
+      
+      {educators && educators.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {educators.map((educator) => (
+            <EducatorCard key={educator.id} educator={educator} />
+          ))}
+        </div>
       ) : (
-        <EducatorsDirectory
-          key="educators-directory"
-          members={members}
-          isLoading={isEducatorsLoading}
-          searchQuery={searchQuery}
-          hasNextPage={hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={isFetchingNextPage}
-        />
+        <div className="p-8 text-center bg-gray-800/30 rounded-xl border border-gray-700">
+          <h3 className="text-xl font-semibold text-gray-200">No educators found</h3>
+          <p className="text-gray-400 mt-2">Check back later for educational content.</p>
+        </div>
       )}
-    </AnimatePresence>
+    </div>
   );
 };
