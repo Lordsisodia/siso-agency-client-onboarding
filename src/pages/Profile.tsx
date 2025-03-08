@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -18,9 +17,46 @@ const Profile = () => {
     profile,
     loading,
     isEditing,
+    isSaving,
     formData,
-    handleFormChange
+    handleFormChange,
+    setIsEditing,
+    saveProfile,
+    handleAvatarUpload,
+    handleBannerUpload
   } = useProfileData();
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate('/');
+      toast({
+        title: "Signed out successfully",
+        description: "Come back soon!",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error signing out",
+        description: error.message,
+      });
+    }
+  };
+
+  const handleBackToHome = () => {
+    navigate('/dashboard');
+  };
+
+  const toggleEditing = () => {
+    if (isEditing) {
+      // If we're currently editing, save changes
+      saveProfile();
+    } else {
+      // Otherwise, enter edit mode
+      setIsEditing(true);
+    }
+  };
 
   if (loading) {
     return <ProfileSkeleton />;
@@ -47,24 +83,16 @@ const Profile = () => {
           rank={profile?.rank || 'Bronze'}
           avatarUrl={profile?.avatar_url}
           bannerUrl={profile?.banner_url}
-          onLogout={async () => {
-            try {
-              const { error } = await supabase.auth.signOut();
-              if (error) throw error;
-              navigate('/');
-            } catch (error: any) {
-              toast({
-                variant: "destructive",
-                title: "Error signing out",
-                description: error.message,
-              });
-            }
-          }}
-          onBackToHome={() => navigate('/')}
+          onLogout={handleLogout}
+          onBackToHome={handleBackToHome}
+          onUploadAvatar={handleAvatarUpload}
+          onUploadBanner={handleBannerUpload}
+          isEditing={isEditing}
+          onEditToggle={toggleEditing}
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
         <ProfileMetrics 
           userId={user.id}
           solanaWalletAddress={profile?.solana_wallet_address}
@@ -88,8 +116,10 @@ const Profile = () => {
             twitterUrl={profile?.twitter_url}
             professionalRole={profile?.professional_role}
             isEditing={isEditing}
+            isSaving={isSaving}
             formData={formData}
             onFormChange={handleFormChange}
+            onSave={saveProfile}
           />
         </div>
         
