@@ -5,7 +5,7 @@ import { ManualInputForm } from "./ManualInputForm";
 interface ManualInputSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmitToAI: (prompt: string) => Promise<void>;
+  onSubmitToAI: (prompt: string, formData?: Record<string, any>) => Promise<void>;
 }
 
 export function ManualInputSheet({ isOpen, onClose, onSubmitToAI }: ManualInputSheetProps) {

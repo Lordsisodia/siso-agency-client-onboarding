@@ -1,19 +1,35 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Waves } from '@/components/ui/waves-background';
 import { AnimatePresence } from 'framer-motion';
 import { PreChatState } from '@/components/home/PreChatState';
 import { EnhancedChatState } from '@/components/home/EnhancedChatState';
-import { ChatMessage, ProcessingStage, AgentCategory } from '@/types/chat';
-import { supabase } from '@/integrations/supabase/client';
+import { ChatMessage } from '@/types/chat';
+import { useProjectPlanning } from '@/hooks/use-project-planning';
 import { useToast } from "@/hooks/use-toast";
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function PlanBuilder() {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const { toast } = useToast();
+  
+  const { 
+    messages, 
+    isLoading, 
+    sendMessage, 
+    startNewProject,
+    isAuthenticated,
+    currentProjectId
+  } = useProjectPlanning();
+
+  // Start a new project if none exists
+  useEffect(() => {
+    if (isAuthenticated && !currentProjectId) {
+      startNewProject("New App Project");
+    }
+  }, [isAuthenticated, currentProjectId]);
 
   const handleSubmit = async (message: string) => {
     if (!message.trim() || isLoading) return;
@@ -21,144 +37,34 @@ export default function PlanBuilder() {
     if (!isExpanded) {
       setIsExpanded(true);
     }
-
-    // Add user message
-    setMessages(prev => [...prev, { role: 'user', content: message }]);
     
-    // Initialize assistant message with first stage
-    setMessages(prev => [...prev, { 
-      role: 'assistant', 
-      content: '',
-      loading: true,
-      processingStage: {
-        current: 'initial',
-        progress: 0
-      },
-      agentResponses: {
-        'ai-tools': { category: 'ai-tools', content: '', status: 'pending', relevance: 0 },
-        'videos': { category: 'videos', content: '', status: 'pending', relevance: 0 },
-        'networking': { category: 'networking', content: '', status: 'pending', relevance: 0 },
-        'assistants': { category: 'assistants', content: '', status: 'pending', relevance: 0 },
-        'educators': { category: 'educators', content: '', status: 'pending', relevance: 0 },
-        'news': { category: 'news', content: '', status: 'pending', relevance: 0 }
-      }
-    }]);
-    
-    setIsLoading(true);
-
-    try {
-      // Simulate the multi-stage processing
-      const stages: ProcessingStage[] = ['initial', 'context', 'agents', 'synthesis'];
-      const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-      // Initial understanding stage
-      await delay(1000);
-      updateProcessingStage('initial');
-
-      // Company context stage
-      await delay(1000);
-      updateProcessingStage('context');
-
-      // Agent processing stage
-      await delay(1000);
-      updateProcessingStage('agents');
-
-      // Simulate individual agent processing
-      const agentCategories: AgentCategory[] = ['ai-tools', 'videos', 'networking', 'assistants', 'educators', 'news'];
-      for (const category of agentCategories) {
-        await delay(800);
-        updateAgentStatus(category, 'processing');
-        await delay(1200);
-        updateAgentStatus(category, 'complete');
-      }
-
-      // Final synthesis stage
-      await delay(1000);
-      updateProcessingStage('synthesis');
-
-      // Get the final response from the edge function
-      const { data, error } = await supabase.functions.invoke('chat-with-plan-assistant', {
-        body: { messages: formatMessagesForAPI(messages, message) }
-      });
-
-      if (error) throw error;
-
-      // Update with final response
-      setMessages(prev => {
-        const newMessages = [...prev.slice(0, -1)];
-        newMessages.push({ 
-          role: 'assistant', 
-          content: data.message || "I've analyzed your project needs. How would you like to proceed with your app planning?",
-          loading: false
-        });
-        return newMessages;
-      });
-    } catch (error) {
-      console.error('Error:', error);
+    // If not authenticated, show login prompt
+    if (!isAuthenticated) {
       toast({
-        title: "Error",
-        description: "Failed to get response. Please try again.",
-        variant: "destructive"
-      });
-      setMessages(prev => prev.slice(0, -1));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const formatMessagesForAPI = (currentMessages: ChatMessage[], latestMessage: string) => {
-    // Format messages for the API - include only content and role
-    const formattedMessages = currentMessages
-      .filter(msg => !msg.loading)
-      .map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }));
-    
-    // Add the latest message if it's not already included
-    if (!formattedMessages.some(msg => msg.role === 'user' && msg.content === latestMessage)) {
-      formattedMessages.push({
-        role: 'user',
-        content: latestMessage
+        title: "Sign in required",
+        description: "Please sign in to save your project details",
+        variant: "default",
       });
     }
     
-    return formattedMessages;
+    await sendMessage(message);
   };
 
-  const updateProcessingStage = (stage: ProcessingStage) => {
-    setMessages(prev => {
-      const lastMessage = prev[prev.length - 1];
-      if (lastMessage.role === 'assistant') {
-        return [...prev.slice(0, -1), {
-          ...lastMessage,
-          processingStage: {
-            ...lastMessage.processingStage!,
-            current: stage
-          }
-        }];
-      }
-      return prev;
-    });
-  };
-
-  const updateAgentStatus = (category: AgentCategory, status: 'pending' | 'processing' | 'complete') => {
-    setMessages(prev => {
-      const lastMessage = prev[prev.length - 1];
-      if (lastMessage.role === 'assistant' && lastMessage.agentResponses) {
-        return [...prev.slice(0, -1), {
-          ...lastMessage,
-          agentResponses: {
-            ...lastMessage.agentResponses,
-            [category]: {
-              ...lastMessage.agentResponses[category],
-              status
-            }
-          }
-        }];
-      }
-      return prev;
-    });
+  const handleManualFormSubmit = async (prompt: string, formData: Record<string, any>) => {
+    if (!isExpanded) {
+      setIsExpanded(true);
+    }
+    
+    // If not authenticated, show login prompt
+    if (!isAuthenticated) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save your project details",
+        variant: "default",
+      });
+    }
+    
+    await sendMessage(prompt, formData);
   };
 
   return (
@@ -178,6 +84,18 @@ export default function PlanBuilder() {
             yGap={36}
           />
         </div>
+        
+        {!isAuthenticated && (
+          <div className="absolute top-4 right-4 z-20">
+            <Button 
+              variant="outline" 
+              className="bg-black/40 border-white/20 hover:bg-black/60 text-white"
+              onClick={() => supabase.auth.signIn({ provider: 'google' })}
+            >
+              Sign in to save progress
+            </Button>
+          </div>
+        )}
         
         <div className="relative z-10 flex-1 p-4 md:p-8">
           <div className="h-[calc(100vh-8rem)]">

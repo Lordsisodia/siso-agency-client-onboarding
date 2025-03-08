@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -48,7 +47,7 @@ interface FormData {
 
 interface ManualInputFormProps {
   onClose: () => void;
-  onSubmitToAI: (prompt: string) => Promise<void>;
+  onSubmitToAI: (prompt: string, formData?: Record<string, any>) => Promise<void>;
 }
 
 export function ManualInputForm({ onClose, onSubmitToAI }: ManualInputFormProps) {
@@ -147,7 +146,8 @@ export function ManualInputForm({ onClose, onSubmitToAI }: ManualInputFormProps)
     `;
     
     try {
-      await onSubmitToAI(prompt.trim());
+      // Pass both the prompt and the raw form data
+      await onSubmitToAI(prompt.trim(), formData);
       onClose();
     } catch (error) {
       console.error("Error submitting form data to AI:", error);
@@ -449,17 +449,7 @@ export function ManualInputForm({ onClose, onSubmitToAI }: ManualInputFormProps)
       
       {/* Form content */}
       <div className="p-6">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            {renderStepContent()}
-          </motion.div>
-        </AnimatePresence>
+        {renderStepContent()}
       </div>
       
       {/* Navigation buttons */}

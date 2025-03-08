@@ -1,7 +1,6 @@
 
 import { motion } from 'framer-motion';
 import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input';
-import { RainbowButton } from '@/components/ui/rainbow-button';
 import { Button } from '@/components/ui/button';
 import { FileText, Phone } from 'lucide-react';
 import { useState } from 'react';
@@ -42,57 +41,45 @@ export const PreChatState = ({
     }
   };
 
+  const handleManualSubmit = async (prompt: string, formData?: Record<string, any>) => {
+    await handleSubmit(prompt);
+  };
+
   const openManualInput = () => {
     setIsManualInputOpen(true);
   };
 
   return (
     <>
-      <motion.div
-        key="initial"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
+      <div
         className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto px-4"
       >
-        <motion.div
+        <div
           className="mb-8"
-          initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
         >
           <img 
             src="/lovable-uploads/dee36671-c662-422f-a9a0-deb2eeb03973.png" 
             alt="SISO Lion Logo" 
             className="w-24 h-24 object-contain rounded-full bg-black/40 p-2 border border-white/20 shadow-lg"
           />
-        </motion.div>
+        </div>
 
-        <motion.h1
+        <h1
           className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
         >
           <span className="bg-gradient-to-r from-siso-red to-siso-orange bg-clip-text text-transparent">
             {titleText}
           </span>
-        </motion.h1>
+        </h1>
 
-        <motion.p
+        <p
           className="text-center text-white/80 mb-8 max-w-2xl"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
         >
           {subtitleText}
-        </motion.p>
+        </p>
 
-        <motion.div
+        <div
           className="w-full max-w-xl"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
         >
           <PlaceholdersAndVanishInput 
             placeholders={searchPlaceholders}
@@ -100,14 +87,11 @@ export const PreChatState = ({
             onSubmit={handleInputSubmit}
             className="bg-black/40 border-white/20 focus:border-siso-orange/60 text-white placeholder-gray-400 shadow-lg"
           />
-        </motion.div>
+        </div>
 
         {/* Additional buttons */}
-        <motion.div 
+        <div 
           className="flex gap-3 mt-6 justify-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
         >
           <Button 
             variant="outline" 
@@ -131,14 +115,14 @@ export const PreChatState = ({
               Soon
             </span>
           </Button>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
       {/* Manual Input Sheet */}
       <ManualInputSheet 
         isOpen={isManualInputOpen}
         onClose={() => setIsManualInputOpen(false)}
-        onSubmitToAI={handleSubmit}
+        onSubmitToAI={handleManualSubmit}
       />
     </>
   );

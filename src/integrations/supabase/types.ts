@@ -505,6 +505,44 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_chat_history: {
+        Row: {
+          ai_response: string
+          created_at: string
+          form_data: Json | null
+          id: string
+          metadata: Json | null
+          plan_id: string | null
+          user_message: string
+        }
+        Insert: {
+          ai_response: string
+          created_at?: string
+          form_data?: Json | null
+          id?: string
+          metadata?: Json | null
+          plan_id?: string | null
+          user_message: string
+        }
+        Update: {
+          ai_response?: string
+          created_at?: string
+          form_data?: Json | null
+          id?: string
+          metadata?: Json | null
+          plan_id?: string | null
+          user_message?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_chat_history_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "project_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_interactions: {
         Row: {
           action: string | null
@@ -676,6 +714,51 @@ export type Database = {
           updated_at?: string | null
           website_url?: string | null
           youtube_url?: string | null
+        }
+        Relationships: []
+      }
+      project_plans: {
+        Row: {
+          budget: string | null
+          created_at: string
+          description: string | null
+          features: Json | null
+          id: string
+          requirements: Json | null
+          status: string | null
+          technical_specs: Json | null
+          timeline: Json | null
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          budget?: string | null
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          id?: string
+          requirements?: Json | null
+          status?: string | null
+          technical_specs?: Json | null
+          timeline?: Json | null
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          budget?: string | null
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          id?: string
+          requirements?: Json | null
+          status?: string | null
+          technical_specs?: Json | null
+          timeline?: Json | null
+          title?: string
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
