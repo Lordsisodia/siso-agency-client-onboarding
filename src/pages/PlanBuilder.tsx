@@ -5,14 +5,21 @@ import { Waves } from '@/components/ui/waves-background';
 import { AnimatePresence, motion } from 'framer-motion';
 import { PreChatState } from '@/components/home/PreChatState';
 import { EnhancedChatState } from '@/components/home/EnhancedChatState';
-import { ChatMessage } from '@/types/chat';
 import { useProjectPlanning } from '@/hooks/use-project-planning';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';
-import { PlusSquare, FileText, ToggleRight, ToggleLeft, Globe, Zap } from 'lucide-react';
+import { PlusSquare, FileText, ToggleRight, ToggleLeft, Globe, Zap, FolderOpen } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Skeleton } from '@/components/ui/skeleton';
+import { ChatMessage } from '@/types/chat';
 
 export default function PlanBuilder() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -21,21 +28,32 @@ export default function PlanBuilder() {
   
   const { 
     messages, 
-    isLoading, 
+    isLoading,
+    isLoadingHistory,
     sendMessage, 
     startNewProject,
     isAuthenticated,
     currentProjectId,
+    userProjects,
+    currentProject,
     useStreaming,
-    toggleStreaming
+    toggleStreaming,
+    switchProject
   } = useProjectPlanning();
 
-  // Start a new project if none exists
+  // Start a new project if authenticated but none exists
   useEffect(() => {
-    if (isAuthenticated && !currentProjectId) {
+    if (isAuthenticated && userProjects.length === 0) {
       startNewProject("New App Project");
     }
-  }, [isAuthenticated, currentProjectId]);
+  }, [isAuthenticated, userProjects]);
+
+  // Expand chat view once we have messages
+  useEffect(() => {
+    if (messages.length > 0 && !isExpanded) {
+      setIsExpanded(true);
+    }
+  }, [messages]);
 
   const handleSubmit = async (message: string) => {
     if (!message.trim() || isLoading) return;
@@ -72,6 +90,12 @@ export default function PlanBuilder() {
     
     await sendMessage(prompt, formData);
     setShowManualInput(false);
+  };
+
+  const handleSelectProject = async (projectId: string) => {
+    if (currentProjectId === projectId) return;
+    
+    await switchProject(projectId);
   };
 
   return (
@@ -147,20 +171,81 @@ export default function PlanBuilder() {
                 </TooltipContent>
               </Tooltip>
               
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    className="rounded-full text-white/70 hover:text-white hover:bg-white/10"
-                    onClick={() => startNewProject("New Project")}
-                  >
-                    <PlusSquare className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">Start new project</TooltipContent>
-              </Tooltip>
+              {isAuthenticated && (
+                <>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button 
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full text-white/70 hover:text-white hover:bg-white/10"
+                          >
+                            <FolderOpen className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent 
+                          align="center" 
+                          className="w-60 max-h-[300px] overflow-y-auto bg-black/90 backdrop-blur-lg border border-white/10 text-white"
+                        >
+                          {userProjects.length === 0 ? (
+                            <div className="py-2 px-4 text-center text-sm text-white/60">
+                              No projects found
+                            </div>
+                          ) : (
+                            userProjects.map(project => (
+                              <DropdownMenuItem 
+                                key={project.id}
+                                className={`py-2 px-3 cursor-pointer ${project.id === currentProjectId ? 'bg-siso-orange/20' : 'hover:bg-white/10'}`}
+                                onClick={() => handleSelectProject(project.id)}
+                              >
+                                <div className="flex flex-col w-full">
+                                  <span className="font-medium truncate">
+                                    {project.id === currentProjectId && "• "}{project.title}
+                                  </span>
+                                  <span className="text-xs text-white/50 truncate">
+                                    {new Date(project.updated_at).toLocaleString()}
+                                  </span>
+                                </div>
+                              </DropdownMenuItem>
+                            ))
+                          )}
+                          <DropdownMenuItem 
+                            className="py-2 px-3 border-t border-white/10 text-siso-orange hover:bg-white/10 cursor-pointer"
+                            onClick={() => startNewProject("New Project")}
+                          >
+                            <PlusSquare className="h-4 w-4 mr-2" />
+                            Create New Project
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">Open projects</TooltipContent>
+                  </Tooltip>
+                  
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="rounded-full text-white/70 hover:text-white hover:bg-white/10"
+                        onClick={() => startNewProject("New Project")}
+                      >
+                        <PlusSquare className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">Start new project</TooltipContent>
+                  </Tooltip>
+                </>
+              )}
             </TooltipProvider>
+            
+            {currentProject && (
+              <div className="px-3 py-1 bg-black/40 rounded-full text-sm text-white/70">
+                {currentProject.title}
+              </div>
+            )}
           </motion.div>
         )}
         
@@ -182,11 +267,22 @@ export default function PlanBuilder() {
                   subtitleText="Create detailed specifications for your custom app. Our interactive builder helps you define requirements and generate accurate estimates."
                 />
               ) : (
-                <EnhancedChatState 
-                  messages={messages} 
-                  handleSubmit={handleSubmit} 
-                  isLoading={isLoading} 
-                />
+                <>
+                  {isLoadingHistory ? (
+                    <div className="flex flex-col w-full max-w-4xl mx-auto h-full bg-gradient-to-b from-black/40 to-black/20 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden shadow-2xl p-6 space-y-6">
+                      <Skeleton className="h-12 w-full bg-white/5" />
+                      <Skeleton className="h-24 w-full bg-white/5" />
+                      <Skeleton className="h-24 w-full bg-white/5" />
+                      <Skeleton className="h-24 w-full bg-white/5" />
+                    </div>
+                  ) : (
+                    <EnhancedChatState 
+                      messages={messages} 
+                      handleSubmit={handleSubmit} 
+                      isLoading={isLoading} 
+                    />
+                  )}
+                </>
               )}
             </AnimatePresence>
           </div>

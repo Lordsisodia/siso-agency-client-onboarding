@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ChatMessage } from '@/types/chat';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -8,15 +8,21 @@ import {
   chatWithPlanAssistant,
   streamChatWithPlanAssistant,
   getProjectChatHistory,
-  ProjectChatHistory
+  getAllUserProjects,
+  ProjectChatHistory,
+  ProjectPlan,
+  getProjectPlan
 } from '@/services/project-plan.service';
 
 export function useProjectPlanning() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [chatHistory, setChatHistory] = useState<ProjectChatHistory[]>([]);
+  const [userProjects, setUserProjects] = useState<ProjectPlan[]>([]);
   const [useStreaming, setUseStreaming] = useState(true);
+  const [currentProject, setCurrentProject] = useState<ProjectPlan | null>(null);
   const streamControllerRef = useRef<AbortController | null>(null);
   const { toast } = useToast();
 
@@ -27,13 +33,22 @@ export function useProjectPlanning() {
     // Check auth status
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        setIsAuthenticated(!!session);
+        const newAuthState = !!session;
+        setIsAuthenticated(newAuthState);
+        
+        // If user just logged in, load their projects
+        if (newAuthState && !isAuthenticated) {
+          loadUserProjects();
+        }
       }
     );
     
     // Get current session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsAuthenticated(!!session);
+      if (session) {
+        loadUserProjects();
+      }
     });
     
     return () => {
@@ -46,29 +61,91 @@ export function useProjectPlanning() {
     };
   }, []);
 
-  // Load project history if project ID exists
+  // Load user projects
+  const loadUserProjects = async () => {
+    const projects = await getAllUserProjects();
+    setUserProjects(projects);
+    
+    // If we have projects but no current project selected, select the most recent one
+    if (projects.length > 0 && !currentProjectId) {
+      const mostRecentProject = projects[0]; // Already sorted by updated_at DESC
+      setCurrentProjectId(mostRecentProject.id);
+      setCurrentProject(mostRecentProject);
+    }
+  };
+
+  // Load project chat history if project ID exists or changes
   useEffect(() => {
     if (currentProjectId) {
       loadChatHistory();
+      loadProjectDetails();
+    } else {
+      // Clear messages if no project is selected
+      setMessages([]);
+      setChatHistory([]);
+      setCurrentProject(null);
     }
   }, [currentProjectId]);
+
+  const loadProjectDetails = async () => {
+    if (!currentProjectId) return;
+    
+    const project = await getProjectPlan(currentProjectId);
+    if (project) {
+      setCurrentProject(project);
+    }
+  };
 
   const loadChatHistory = async () => {
     if (!currentProjectId) return;
     
-    const history = await getProjectChatHistory(currentProjectId);
-    setChatHistory(history);
+    setIsLoadingHistory(true);
     
-    // Convert to chat message format
-    const chatMessages: ChatMessage[] = [];
-    history.forEach(item => {
-      chatMessages.push({ role: 'user', content: item.user_message });
-      chatMessages.push({ role: 'assistant', content: item.ai_response });
-    });
-    
-    if (chatMessages.length > 0) {
-      setMessages(chatMessages);
+    try {
+      const history = await getProjectChatHistory(currentProjectId);
+      setChatHistory(history);
+      
+      // Convert to chat message format
+      const chatMessages: ChatMessage[] = [];
+      history.forEach(item => {
+        chatMessages.push({ role: 'user', content: item.user_message });
+        chatMessages.push({ role: 'assistant', content: item.ai_response });
+      });
+      
+      if (chatMessages.length > 0) {
+        setMessages(chatMessages);
+      } else {
+        // Reset messages if no history found
+        setMessages([]);
+      }
+    } catch (error) {
+      console.error("Error loading chat history:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load chat history",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoadingHistory(false);
     }
+  };
+
+  const switchProject = async (projectId: string) => {
+    // Abort any ongoing streaming
+    if (streamControllerRef.current) {
+      streamControllerRef.current.abort();
+      streamControllerRef.current = null;
+    }
+    
+    setCurrentProjectId(projectId);
+    
+    // Find project in cached list
+    const project = userProjects.find(p => p.id === projectId);
+    if (project) {
+      setCurrentProject(project);
+    }
+    
+    return true;
   };
 
   const startNewProject = async (title: string = 'New Project') => {
@@ -85,6 +162,10 @@ export function useProjectPlanning() {
     if (projectId) {
       setCurrentProjectId(projectId);
       setMessages([]);
+      
+      // Refresh projects list
+      loadUserProjects();
+      
       return true;
     }
     
@@ -155,6 +236,9 @@ export function useProjectPlanning() {
           // Complete handler
           (fullResponse) => {
             setIsLoading(false);
+            
+            // After completion, refresh the projects list to get updated metadata
+            loadUserProjects();
           }
         );
       } else {
@@ -171,6 +255,9 @@ export function useProjectPlanning() {
             ...prev,
             { role: 'assistant', content: response }
           ]);
+          
+          // After completion, refresh the projects list to get updated metadata
+          loadUserProjects();
         } else {
           toast({
             title: "Error",
@@ -206,13 +293,17 @@ export function useProjectPlanning() {
   return {
     messages,
     isLoading,
+    isLoadingHistory,
     currentProjectId,
     chatHistory,
     isAuthenticated,
     useStreaming,
+    userProjects,
+    currentProject,
     sendMessage,
     startNewProject,
     loadChatHistory,
-    toggleStreaming
+    toggleStreaming,
+    switchProject
   };
 }

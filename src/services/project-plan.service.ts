@@ -73,12 +73,16 @@ export async function updateProjectPlan(id: string, updates: Partial<ProjectPlan
   return true;
 }
 
-export async function getProjectChatHistory(planId: string): Promise<ProjectChatHistory[]> {
+export async function getProjectChatHistory(planId: string, limit: number = 50, page: number = 0): Promise<ProjectChatHistory[]> {
+  // Calculate offset for pagination
+  const offset = page * limit;
+  
   const { data, error } = await supabase
     .from('plan_chat_history')
     .select('*')
     .eq('plan_id', planId)
-    .order('created_at', { ascending: true });
+    .order('created_at', { ascending: true })
+    .range(offset, offset + limit - 1);
 
   if (error) {
     console.error('Error getting chat history:', error);
@@ -86,6 +90,46 @@ export async function getProjectChatHistory(planId: string): Promise<ProjectChat
   }
 
   return data;
+}
+
+export async function getAllUserProjects(): Promise<ProjectPlan[]> {
+  const { data, error } = await supabase
+    .from('project_plans')
+    .select('*')
+    .order('updated_at', { ascending: false });
+
+  if (error) {
+    console.error('Error getting user projects:', error);
+    return [];
+  }
+
+  return data;
+}
+
+export async function deleteProject(id: string): Promise<boolean> {
+  // First delete all associated chat history
+  const { error: chatError } = await supabase
+    .from('plan_chat_history')
+    .delete()
+    .eq('plan_id', id);
+
+  if (chatError) {
+    console.error('Error deleting chat history:', chatError);
+    return false;
+  }
+
+  // Then delete the project
+  const { error } = await supabase
+    .from('project_plans')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting project plan:', error);
+    return false;
+  }
+
+  return true;
 }
 
 // Streaming response handler for chat function
