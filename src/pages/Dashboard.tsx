@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
@@ -129,29 +128,25 @@ export default function Dashboard() {
             upcomingEvents={3} 
           />
           
-          {/* Main Content with modified layout - primary focus on project card */}
+          {/* Main Content with modified layout - 3/4 for project card, 1/4 for sidebar */}
           <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-            {/* Project Overview (Takes full width) */}
-            <div className="xl:col-span-4">
+            {/* Project Overview (Takes 3/4 width) */}
+            <div className="xl:col-span-3">
               <ProjectsOverview />
             </div>
             
-            {/* Secondary Content (below the project) */}
-            <div className="xl:col-span-2">
+            {/* Secondary Content (Takes 1/4 width) */}
+            <div className="xl:col-span-1 space-y-6">
               {/* Notifications Panel */}
               <NotificationsPanel 
                 notifications={notifications}
                 onMarkAsRead={handleMarkAsRead}
                 onViewAll={handleViewAllNotifications}
               />
-            </div>
-            
-            <div className="xl:col-span-1">
+              
               {/* Quick Actions Panel */}
               <QuickActionsPanel />
-            </div>
-            
-            <div className="xl:col-span-1">
+              
               {/* Upcoming Events */}
               <UpcomingEvents 
                 events={events}
