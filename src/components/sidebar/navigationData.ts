@@ -58,10 +58,9 @@ export const menuSections: MenuSection[] = [
         label: 'Portfolio',
       },
       {
-        href: 'https://www.sisoresourcehub.online/',
+        href: '/resource-hub',
         icon: BookOpen,
         label: 'Resource Hub',
-        isExternal: true,
       },
       {
         href: '/support',

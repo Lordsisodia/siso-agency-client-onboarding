@@ -22,10 +22,10 @@ import ResourceHub from '@/pages/ResourceHub';
 import Portfolio from '@/pages/Portfolio';
 import Support from '@/pages/Support';
 import Notifications from '@/pages/Notifications';
+import VideoDetail from '@/pages/VideoDetail';
 
 import { Toaster } from '@/components/ui/toaster';
 import { useAuthSession } from '@/hooks/useAuthSession';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 function App() {
   const location = useLocation();
@@ -66,6 +66,7 @@ function App() {
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/tools" element={<Tools />} />
+        <Route path="/videos/:id" element={<VideoDetail />} />
         
         <Route path="/onboarding/social" element={<SocialOnboarding />} />
         <Route path="/onboarding/congratulations" element={<OnboardingCongratulations />} />
