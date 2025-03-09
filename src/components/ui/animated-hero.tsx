@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { PhoneCall, MoveRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { OnboardingStyles } from "@/components/plan-builder/components/OnboardingStyles";
 
 function Hero() {
   const [titleNumber, setTitleNumber] = useState(0);
@@ -44,19 +45,21 @@ function Hero() {
   };
 
   return (
-    <div className="w-full">
-      <div className="container mx-auto">
-        <div className="flex gap-8 py-20 lg:py-40 items-center justify-center flex-col">
-          <div className="flex gap-4 flex-col items-center">
-            <h1 className="text-6xl md:text-8xl max-w-5xl tracking-tighter text-center font-regular">
-              <span className="text-siso-text-bold whitespace-nowrap">Build Your App With</span>
-              <div className="relative h-[150px] md:h-[200px] flex w-full justify-center overflow-hidden text-center">
+    <div className="w-full relative z-10">
+      <OnboardingStyles />
+      <div className="container mx-auto px-4">
+        <div className="flex gap-8 py-16 lg:py-28 items-center justify-center flex-col">
+          <div className="flex gap-6 flex-col items-center hero-content">
+            <h1 className="text-5xl md:text-7xl max-w-4xl tracking-tighter text-center font-regular">
+              <span className="text-siso-text-bold whitespace-normal md:whitespace-nowrap">Build Your App With</span>
+              <div className="hero-title-container">
                 {titles.map((title, index) => (
                   <motion.span
                     key={index}
-                    className="absolute font-semibold bg-gradient-to-r from-siso-red to-siso-orange bg-clip-text text-transparent"
-                    initial={{ opacity: 0, y: "-100" }}
-                    transition={{ type: "spring", stiffness: 50 }}
+                    className={`hero-title font-semibold bg-gradient-to-r from-siso-red to-siso-orange bg-clip-text text-transparent ${
+                      titleNumber === index ? "opacity-100" : "opacity-0"
+                    }`}
+                    initial={{ opacity: 0, y: "-30px" }}
                     animate={
                       titleNumber === index
                         ? {
@@ -64,10 +67,11 @@ function Hero() {
                             opacity: 1,
                           }
                         : {
-                            y: titleNumber > index ? -150 : 150,
+                            y: titleNumber > index ? -100 : 100,
                             opacity: 0,
                           }
                     }
+                    transition={{ type: "spring", stiffness: 70, damping: 15 }}
                   >
                     {title}
                   </motion.span>
@@ -81,7 +85,7 @@ function Hero() {
               to your specific requirements - all powered by cutting-edge artificial intelligence.
             </p>
           </div>
-          <div className="flex flex-row gap-3">
+          <div className="flex flex-row gap-4 hero-action-buttons">
             <Button 
               size="lg" 
               className="gap-4" 

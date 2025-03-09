@@ -1,3 +1,4 @@
+
 @keyframes shimmer {
   0% {
     transform: translateX(-100%);
@@ -80,6 +81,26 @@
   }
   100% {
     background-position: 0% 50%;
+  }
+}
+
+@keyframes heroTitleSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroContentFade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }
 
@@ -296,6 +317,15 @@
 
 .card-content-compact {
   padding: 0.5rem;
+}
+
+/* Hero section specific styles */
+.hero-title-animation {
+  animation: heroTitleSlide 0.8s ease-out forwards;
+}
+
+.hero-content-animation {
+  animation: heroContentFade 1s ease-out forwards;
 }
 
 /* Ensure consistent heights for dashboard cards */

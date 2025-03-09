@@ -89,6 +89,63 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_news: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          published_at: string | null
+          source: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          published_at?: string | null
+          source?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          published_at?: string | null
+          source?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      ai_news_video_processing: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          status: string
+          updated_at: string | null
+          video_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          status?: string
+          updated_at?: string | null
+          video_id: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          status?: string
+          updated_at?: string | null
+          video_id?: string
+        }
+        Relationships: []
+      }
       app_plans: {
         Row: {
           agency_id: string
@@ -206,6 +263,45 @@ export type Database = {
             referencedColumns: ["assistant_id"]
           },
         ]
+      }
+      automations: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          difficulty: string
+          id: string
+          name: string
+          platform: string
+          pricing: string | null
+          setup_time: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          difficulty: string
+          id?: string
+          name: string
+          platform: string
+          pricing?: string | null
+          setup_time: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string
+          id?: string
+          name?: string
+          platform?: string
+          pricing?: string | null
+          setup_time?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       banner_templates: {
         Row: {
@@ -495,6 +591,57 @@ export type Database = {
         }
         Relationships: []
       }
+      core_tools: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          downloads_count: number | null
+          icon_url: string | null
+          id: string
+          likes_count: number | null
+          name: string
+          pricing_type: string | null
+          profile_image_url: string | null
+          rating: number | null
+          reviews_count: number | null
+          updated_at: string | null
+          website_url: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          downloads_count?: number | null
+          icon_url?: string | null
+          id?: string
+          likes_count?: number | null
+          name: string
+          pricing_type?: string | null
+          profile_image_url?: string | null
+          rating?: number | null
+          reviews_count?: number | null
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          downloads_count?: number | null
+          icon_url?: string | null
+          id?: string
+          likes_count?: number | null
+          name?: string
+          pricing_type?: string | null
+          profile_image_url?: string | null
+          rating?: number | null
+          reviews_count?: number | null
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       crypto_transactions: {
         Row: {
           created_at: string
@@ -780,6 +927,36 @@ export type Database = {
         }
         Relationships: []
       }
+      login_streaks: {
+        Row: {
+          created_at: string | null
+          current_streak: number | null
+          id: string
+          last_login: string | null
+          longest_streak: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_streak?: number | null
+          id?: string
+          last_login?: string | null
+          longest_streak?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_streak?: number | null
+          id?: string
+          last_login?: string | null
+          longest_streak?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       news_comments: {
         Row: {
           content: string
@@ -804,6 +981,27 @@ export type Database = {
           news_id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      performance_metrics: {
+        Row: {
+          created_at: string | null
+          id: string
+          page_url: string
+          ttfb: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          page_url: string
+          ttfb: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          page_url?: string
+          ttfb?: number
         }
         Relationships: []
       }
@@ -866,6 +1064,30 @@ export type Database = {
           description?: string | null
           id?: string
           points?: number
+        }
+        Relationships: []
+      }
+      points_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          points_earned: number
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          points_earned: number
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          points_earned?: number
+          user_id?: string
         }
         Relationships: []
       }
@@ -1075,6 +1297,7 @@ export type Database = {
           instagram_url: string | null
           interests: string[] | null
           linkedin_url: string | null
+          onboarding_completed: boolean | null
           phone_number: string | null
           points: number | null
           professional_role: string | null
@@ -1099,6 +1322,7 @@ export type Database = {
           instagram_url?: string | null
           interests?: string[] | null
           linkedin_url?: string | null
+          onboarding_completed?: boolean | null
           phone_number?: string | null
           points?: number | null
           professional_role?: string | null
@@ -1123,6 +1347,7 @@ export type Database = {
           instagram_url?: string | null
           interests?: string[] | null
           linkedin_url?: string | null
+          onboarding_completed?: boolean | null
           phone_number?: string | null
           points?: number | null
           professional_role?: string | null
@@ -1133,6 +1358,39 @@ export type Database = {
           updated_at?: string | null
           website_url?: string | null
           youtube_url?: string | null
+        }
+        Relationships: []
+      }
+      project_documentation: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          implementation_status: string
+          priority: string
+          related_components: string[] | null
+          section: string
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          implementation_status: string
+          priority: string
+          related_components?: string[] | null
+          section: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          implementation_status?: string
+          priority?: string
+          related_components?: string[] | null
+          section?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -1293,6 +1551,86 @@ export type Database = {
           },
         ]
       }
+      skill_paths: {
+        Row: {
+          created_at: string | null
+          description: string
+          icon: string | null
+          id: string
+          level: number | null
+          name: string
+          updated_at: string | null
+          xp_required: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          icon?: string | null
+          id?: string
+          level?: number | null
+          name: string
+          updated_at?: string | null
+          xp_required?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          icon?: string | null
+          id?: string
+          level?: number | null
+          name?: string
+          updated_at?: string | null
+          xp_required?: number | null
+        }
+        Relationships: []
+      }
+      skills: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string
+          icon: string | null
+          id: string
+          name: string
+          path_id: string | null
+          skill_id: string
+          updated_at: string | null
+          xp_value: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description: string
+          icon?: string | null
+          id?: string
+          name: string
+          path_id?: string | null
+          skill_id: string
+          updated_at?: string | null
+          xp_value?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          path_id?: string | null
+          skill_id?: string
+          updated_at?: string | null
+          xp_value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skills_path_id_fkey"
+            columns: ["path_id"]
+            isOneToOne: false
+            referencedRelation: "skill_paths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       task_steps: {
         Row: {
           created_at: string
@@ -1444,32 +1782,41 @@ export type Database = {
       }
       user_skill_progress: {
         Row: {
+          completed_at: string | null
           created_at: string | null
           id: string
+          last_completed_at: string | null
           level: number | null
           progress: number | null
           skill_id: string
           skill_name: string
+          times_completed: number | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          completed_at?: string | null
           created_at?: string | null
           id?: string
+          last_completed_at?: string | null
           level?: number | null
           progress?: number | null
           skill_id: string
           skill_name: string
+          times_completed?: number | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          completed_at?: string | null
           created_at?: string | null
           id?: string
+          last_completed_at?: string | null
           level?: number | null
           progress?: number | null
           skill_id?: string
           skill_name?: string
+          times_completed?: number | null
           updated_at?: string | null
           user_id?: string
         }
@@ -2019,6 +2366,17 @@ export type Database = {
       }
     }
     Enums: {
+      point_action_type:
+        | "login"
+        | "complete_task"
+        | "bookmark_article"
+        | "analyze_article"
+        | "daily_login"
+        | "streak_bonus"
+        | "create_project"
+        | "share_content"
+        | "watch_video"
+        | "contribute"
       task_status: "pending" | "in_progress" | "completed" | "failed"
     }
     CompositeTypes: {

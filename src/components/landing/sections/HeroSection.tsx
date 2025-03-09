@@ -9,21 +9,26 @@ export const HeroSection = memo(() => {
   const navigate = useNavigate();
 
   return (
-    <section id="hero" className="min-h-screen">
-      <Hero />
-      <Waves 
-        lineColor="rgba(255, 87, 34, 0.2)"
-        backgroundColor="transparent"
-        waveSpeedX={0.018}
-        waveSpeedY={0.015}
-        waveAmpX={70}
-        waveAmpY={35}
-        friction={0.92}
-        tension={0.012}
-        maxCursorMove={180}
-        xGap={22}
-        yGap={55}
-      />
+    <section id="hero" className="relative min-h-screen overflow-hidden">
+      <div className="absolute inset-0 z-0">
+        <Waves 
+          lineColor="rgba(255, 87, 34, 0.15)"
+          backgroundColor="transparent"
+          waveSpeedX={0.015}
+          waveSpeedY={0.010}
+          waveAmpX={50}
+          waveAmpY={30}
+          friction={0.92}
+          tension={0.01}
+          maxCursorMove={150}
+          xGap={25}
+          yGap={50}
+          className="absolute inset-0"
+        />
+      </div>
+      <div className="relative z-10 flex items-center justify-center h-full pt-16 pb-24">
+        <Hero />
+      </div>
     </section>
   );
 });
