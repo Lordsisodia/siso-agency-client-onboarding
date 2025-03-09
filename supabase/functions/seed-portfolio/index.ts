@@ -10,6 +10,32 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Sample projects data
 const PROJECTS_DATA = [
   {
+    title: "SISO Resource Hub",
+    description: "Centralized knowledge platform for agencies to access tools, templates, and training materials in a single interface.",
+    full_description: "The SISO Resource Hub is a comprehensive knowledge management platform designed specifically for agencies. It provides a centralized location for all agency resources including templates, tools, training materials, and best practices. The system features a smart search, personalized recommendations, and a collaborative workspace where team members can share and update resources. The platform includes role-based access controls, analytics on resource usage, and integration with existing workflow tools.",
+    image: "/lovable-uploads/5ec1265d-9c09-4681-939b-a60fd4d06152.png",
+    gallery: [
+      "/lovable-uploads/5ec1265d-9c09-4681-939b-a60fd4d06152.png",
+      "/lovable-uploads/67e004ed-6861-4d6a-b05e-d885a03e5c1e.png",
+      "/lovable-uploads/10c752e6-33e8-40f9-9076-a5689232e11a.png"
+    ],
+    tags: ["Web Application", "Content Management", "Team Management", "Knowledge Base"],
+    features: ["Smart search functionality", "Personalized resource recommendations", "Role-based access controls", "Usage analytics dashboard", "Collaborative workspaces"],
+    technologies: ["React", "Node.js", "PostgreSQL", "Elasticsearch", "AWS S3", "Redis"],
+    client: "SISO Agency Solutions",
+    date: "2023-08-10",
+    duration: "4 months",
+    challenge: "The client struggled with scattered information across different platforms and tools, leading to inefficiencies, duplicate work, and difficulty finding the most current versions of resources.",
+    solution: "We developed a centralized Resource Hub with intelligent search capabilities, version control, and personalized recommendations based on user roles and history. The system was designed with a focus on user experience and easy knowledge sharing.",
+    results: "45% reduction in time spent searching for resources, 30% increase in resource utilization, and significant improvement in collaboration and knowledge sharing across teams.",
+    testimonial: {
+      text: "The Resource Hub has transformed how our teams access and share knowledge. What used to take hours now takes minutes, and we've seen a notable improvement in work quality as everyone has access to the best resources.",
+      author: "Sarah Johnson, Operations Director",
+      company: "SISO Agency Solutions"
+    },
+    featured: true
+  },
+  {
     title: "Marketing Agency Dashboard",
     description: "Custom analytics dashboard that integrates with multiple ad platforms and provides real-time performance metrics.",
     full_description: "We developed a comprehensive marketing analytics dashboard that integrates data from Google Ads, Facebook Ads, and other marketing platforms. The dashboard provides real-time performance metrics, customizable reporting, and actionable insights to help the agency make data-driven decisions. The system includes automated alerts for campaign performance changes and budget optimization recommendations.",
@@ -232,6 +258,10 @@ const CATEGORIES = [
   {
     name: "Communication",
     description: "Tools for team and client communication"
+  },
+  {
+    name: "Knowledge Base",
+    description: "Centralized systems for organization-wide knowledge management"
   }
 ];
 
