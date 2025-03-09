@@ -2,7 +2,6 @@
 import { Calendar, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { formatDate } from '@/lib/formatters';
 import { motion } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -50,7 +49,7 @@ export const UpcomingEvents = ({ events = [], onViewAll }: UpcomingEventsProps) 
     animate: { opacity: 1, scale: 1 },
     hover: { 
       scale: 1.02,
-      backgroundColor: 'rgba(42, 42, 42, 0.1)',
+      backgroundColor: 'rgba(255,255,255,0.03)',
       transition: { duration: 0.2 }
     },
     tap: { scale: 0.98 }
@@ -58,19 +57,20 @@ export const UpcomingEvents = ({ events = [], onViewAll }: UpcomingEventsProps) 
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 10 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3, delay: 0.4 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: 0.2 }}
+      className="h-full"
     >
-      <Card className="border border-siso-border/50 hover:border-siso-border hover:shadow-md hover:shadow-siso-border/10 transition-all duration-300 overflow-hidden">
+      <Card className="border border-siso-border/50 hover:border-siso-border hover:shadow-md hover:shadow-siso-border/10 transition-all duration-300 overflow-hidden bg-gradient-to-b from-siso-bg/80 to-siso-bg/60 backdrop-blur-sm h-full">
         <CardHeader className="flex flex-row items-center justify-between py-4 px-6 bg-gradient-to-r from-siso-bg/90 to-siso-bg/70">
-          <CardTitle className="text-md font-semibold flex items-center">
+          <CardTitle className="text-base font-semibold flex items-center">
             <Calendar size={16} className="mr-2 text-siso-orange" />
             Upcoming Events
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <ScrollArea className="h-[300px]">
+          <ScrollArea className="h-[260px]">
             {events.length === 0 ? (
               <div className="text-center py-6 text-siso-text/70 px-6">
                 No upcoming events to display.
@@ -79,7 +79,7 @@ export const UpcomingEvents = ({ events = [], onViewAll }: UpcomingEventsProps) 
               <div className="space-y-1 p-2">
                 {events.map((event, index) => {
                   const eventType = getEventTypeConfig(event.type);
-                  const isToday = new Date(event.date).toDateString() === new Date().toDateString();
+                  const isToday = event.date === 'Today';
                   
                   return (
                     <motion.div
@@ -94,8 +94,8 @@ export const UpcomingEvents = ({ events = [], onViewAll }: UpcomingEventsProps) 
                     >
                       <div className="relative mr-3">
                         <div className="w-12 h-12 bg-gradient-to-br from-siso-bg/90 to-siso-bg/60 border border-siso-border/50 rounded-md flex flex-col items-center justify-center shadow-sm">
-                          <span className="text-xs font-medium text-siso-text/70">{new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}</span>
-                          <span className="text-sm font-bold text-siso-text-bold">{new Date(event.date).getDate()}</span>
+                          <span className="text-xs font-medium text-siso-text/70">{event.date !== 'Today' && event.date !== 'Tomorrow' ? new Date(event.date).toLocaleDateString('en-US', { month: 'short' }) : ''}</span>
+                          <span className="text-sm font-bold text-siso-text-bold">{event.date === 'Today' ? 'Today' : event.date === 'Tomorrow' ? 'Tmrw' : new Date(event.date).getDate()}</span>
                         </div>
                         <motion.div 
                           className={`absolute -top-1 -right-1 rounded-full ${eventType.color} px-1 py-0.5 text-[8px] text-white whitespace-nowrap shadow-sm`}
@@ -104,7 +104,11 @@ export const UpcomingEvents = ({ events = [], onViewAll }: UpcomingEventsProps) 
                           {eventType.label}
                         </motion.div>
                         {isToday && (
-                          <div className="absolute -bottom-1 -right-1 rounded-full bg-green-500 w-2 h-2 animate-pulse"></div>
+                          <motion.div 
+                            className="absolute -bottom-1 -right-1 rounded-full bg-green-500 w-2 h-2"
+                            animate={{ scale: [1, 1.2, 1] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                          ></motion.div>
                         )}
                       </div>
                       <div className="flex-1">
@@ -116,7 +120,13 @@ export const UpcomingEvents = ({ events = [], onViewAll }: UpcomingEventsProps) 
                         </motion.h3>
                         <p className="text-xs text-siso-text/70">{event.time}</p>
                       </div>
-                      <ChevronRight size={16} className="text-siso-text/40" />
+                      <motion.div
+                        initial={{ x: 0 }}
+                        whileHover={{ x: 3 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <ChevronRight size={16} className="text-siso-text/40" />
+                      </motion.div>
                     </motion.div>
                   );
                 })}
@@ -125,17 +135,19 @@ export const UpcomingEvents = ({ events = [], onViewAll }: UpcomingEventsProps) 
           </ScrollArea>
           
           <motion.div 
-            className="py-4 text-center border-t border-siso-border/30"
-            whileHover={{ scale: 1.02 }}
+            className="py-3 text-center border-t border-siso-border/30"
+            whileHover={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
           >
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onViewAll}
-              className="text-siso-orange hover:text-siso-red hover:border-siso-orange/30 text-xs bg-transparent"
-            >
-              View calendar
-            </Button>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={onViewAll}
+                className="text-siso-orange hover:text-siso-red hover:border-siso-orange/30 text-xs bg-transparent"
+              >
+                View calendar
+              </Button>
+            </motion.div>
           </motion.div>
         </CardContent>
       </Card>

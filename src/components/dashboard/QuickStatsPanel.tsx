@@ -65,20 +65,15 @@ export const QuickStatsPanel = ({
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.1 }}
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8"
-    >
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
       {stats.map((stat, index) => (
         <TooltipProvider key={stat.title}>
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.1 + index * 0.05 }}
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ delay: 0.05 * index, duration: 0.25 }}
                 whileHover={{ 
                   scale: 1.03, 
                   boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
@@ -110,9 +105,12 @@ export const QuickStatsPanel = ({
                           )}
                         </div>
                       </div>
-                      <div className="p-3 rounded-full bg-siso-orange/10 text-siso-orange shadow-inner">
+                      <motion.div
+                        whileHover={{ rotate: 5, scale: 1.1 }}
+                        className="p-3 rounded-full bg-gradient-to-br from-siso-orange/10 to-siso-red/5 text-siso-orange shadow-inner"
+                      >
                         <stat.icon size={20} />
-                      </div>
+                      </motion.div>
                     </div>
                     
                     {stat.progress !== null && (
@@ -141,6 +139,6 @@ export const QuickStatsPanel = ({
           </Tooltip>
         </TooltipProvider>
       ))}
-    </motion.div>
+    </div>
   );
 };
