@@ -1,25 +1,33 @@
 
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Building, Users, Calendar, DollarSign, BarChart, Check } from 'lucide-react';
-import { OnboardingWelcome } from './onboarding-steps/OnboardingWelcome';
-import { ProjectType } from './onboarding-steps/ProjectType';
-import { FeatureSelection } from './onboarding-steps/FeatureSelection';
-import { BusinessContext } from './onboarding-steps/BusinessContext';
-import { TimelineBudget } from './onboarding-steps/TimelineBudget';
-import { OnboardingSummary } from './onboarding-steps/OnboardingSummary';
+import React, { useState, useCallback } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { motion } from 'framer-motion';
+import { CheckCircle2, PencilLine, BarChart, HelpCircle, WandSparkles } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { ProgressIndicator } from './components/ProgressIndicator';
 import { BackgroundSparkles } from './components/BackgroundSparkles';
 import { OnboardingStyles } from './components/OnboardingStyles';
 import { NavigationButtons } from './components/NavigationButtons';
 
+// Onboarding Steps
+import { OnboardingWelcome } from './onboarding-steps/OnboardingWelcome';
+import { ProjectType } from './onboarding-steps/ProjectType';
+import { BusinessContext } from './onboarding-steps/BusinessContext';
+import { TimelineBudget } from './onboarding-steps/TimelineBudget';
+import { FeatureSelection } from './onboarding-steps/FeatureSelection';
+import { OnboardingSummary } from './onboarding-steps/OnboardingSummary';
+
 interface ProjectOnboardingProps {
-  onComplete: (projectData: any) => void;
+  onComplete: (data: any) => void;
   onSkip: () => void;
 }
 
 export function ProjectOnboarding({ onComplete, onSkip }: ProjectOnboardingProps) {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [step, setStep] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+  
+  // Project data state
   const [projectData, setProjectData] = useState({
     projectType: '',
     projectScale: 'medium',
@@ -29,130 +37,181 @@ export function ProjectOnboarding({ onComplete, onSkip }: ProjectOnboardingProps
       targetAudience: '',
       teamSize: '',
     },
-    features: {} as Record<string, { selected: boolean, priority: string }>,
     timelineBudget: {
-      timeline: '3-6 months',
-      budget: '$10,000 - $50,000',
+      timeline: '',
+      budget: '',
       goals: '',
     },
+    features: {},
   });
-
-  const steps = [
-    { title: "Welcome", icon: <Building className="w-4 h-4" /> },
-    { title: "Project Type", icon: <BarChart className="w-4 h-4" /> },
-    { title: "Features", icon: <Check className="w-4 h-4" /> },
-    { title: "Business", icon: <Users className="w-4 h-4" /> },
-    { title: "Timeline", icon: <Calendar className="w-4 h-4" /> },
-    { title: "Summary", icon: <DollarSign className="w-4 h-4" /> },
-  ];
-
-  const updateProjectData = (key: string, value: any) => {
-    setProjectData(prev => ({
-      ...prev,
-      [key]: value,
+  
+  // Function to update project data
+  const updateProjectData = useCallback((section: string, data: any) => {
+    setProjectData(prev => ({ 
+      ...prev, 
+      [section]: typeof data === 'object' && !Array.isArray(data) && data !== null
+        ? { ...prev[section as keyof typeof prev], ...data }
+        : data
     }));
-  };
-
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
-    } else {
+  }, []);
+  
+  // Steps configuration
+  const steps = [
+    { title: 'Welcome', icon: <WandSparkles className="w-4 h-4" /> },
+    { title: 'Project Type', icon: <PencilLine className="w-4 h-4" /> },
+    { title: 'Business Context', icon: <BarChart className="w-4 h-4" /> },
+    { title: 'Timeline & Budget', icon: <HelpCircle className="w-4 h-4" /> },
+    { title: 'Features', icon: <CheckCircle2 className="w-4 h-4" /> },
+    { title: 'Summary', icon: <CheckCircle2 className="w-4 h-4" /> },
+  ];
+  
+  // Navigation functions
+  const handleNext = useCallback(() => {
+    if (step < steps.length - 1) {
+      setStep(prev => prev + 1);
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [step, steps.length]);
+  
+  const handleBack = useCallback(() => {
+    if (step > 0) {
+      setStep(prev => prev - 1);
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [step]);
+  
+  const handleComplete = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      // Call the onComplete callback with project data
       onComplete(projectData);
+      
+      toast({
+        title: "Onboarding completed!",
+        description: "Your project details have been saved. Let's start planning!",
+      });
+    } catch (error) {
+      console.error("Error completing onboarding:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem completing the onboarding process. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const progressPercentage = (currentStep / (steps.length - 1)) * 100;
-
-  const renderStep = () => {
-    switch (currentStep) {
+  }, [projectData, onComplete, toast]);
+  
+  // Calculate progress percentage
+  const progressPercentage = ((step) / (steps.length - 1)) * 100;
+  
+  // Render current step content
+  const renderStepContent = () => {
+    switch (step) {
       case 0:
-        return <OnboardingWelcome onNext={handleNext} onSkip={onSkip} />;
+        return <OnboardingWelcome onNext={handleNext} />;
       case 1:
         return (
           <ProjectType 
-            projectType={projectData.projectType} 
-            projectScale={projectData.projectScale} 
-            updateProjectData={updateProjectData} 
+            projectType={projectData.projectType}
+            projectScale={projectData.projectScale}
+            updateProjectData={(data) => updateProjectData('projectType', data.projectType)}
+            updateProjectScale={(scale) => updateProjectData('projectScale', scale)}
           />
         );
       case 2:
         return (
-          <FeatureSelection 
-            features={projectData.features} 
-            updateFeatures={(features) => updateProjectData('features', features)}
+          <BusinessContext 
+            businessContext={projectData.businessContext}
+            updateBusinessContext={(data) => updateProjectData('businessContext', data)}
           />
         );
       case 3:
         return (
-          <BusinessContext 
-            businessContext={projectData.businessContext} 
-            updateBusinessContext={(context) => updateProjectData('businessContext', context)}
+          <TimelineBudget 
+            timelineBudget={projectData.timelineBudget}
+            updateTimelineBudget={(data) => updateProjectData('timelineBudget', data)}
           />
         );
       case 4:
         return (
-          <TimelineBudget 
-            timelineBudget={projectData.timelineBudget} 
-            updateTimelineBudget={(data) => updateProjectData('timelineBudget', data)}
+          <FeatureSelection 
+            selectedFeatures={projectData.features}
+            updateFeatures={(features) => updateProjectData('features', features)}
           />
         );
       case 5:
         return (
           <OnboardingSummary 
-            projectData={projectData} 
-            onEdit={(stepIndex) => setCurrentStep(stepIndex)}
+            projectData={projectData}
+            onEdit={(section) => {
+              const sectionMap = {
+                projectType: 1,
+                businessContext: 2,
+                timelineBudget: 3,
+                features: 4,
+              };
+              setStep(sectionMap[section as keyof typeof sectionMap] || 0);
+            }}
           />
         );
       default:
         return null;
     }
   };
-
+  
   return (
-    <div className="w-full max-w-4xl mx-auto bg-card rounded-xl border border-border shadow-xl overflow-hidden relative">
-      <OnboardingStyles />
-      
-      {/* Background sparkles */}
-      <BackgroundSparkles />
-      
-      {/* Progress Bar */}
-      <ProgressIndicator 
+    <div className="relative bg-card rounded-xl shadow-lg overflow-hidden">
+      {/* Progress Indicator */}
+      <ProgressIndicator
         steps={steps}
-        currentStep={currentStep}
+        currentStep={step}
         progressPercentage={progressPercentage}
       />
-
-      {/* Step Content */}
-      <div className="p-6 pt-0">
-        <AnimatePresence mode="wait">
+      
+      {/* Background Sparkles */}
+      <BackgroundSparkles />
+      
+      {/* Main Content */}
+      <Card className="border-0 bg-transparent shadow-none">
+        <CardContent className="pt-6 px-6 pb-6">
           <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
+            key={step}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="min-h-[400px]"
+            className="min-h-[300px]"
           >
-            {renderStep()}
+            {renderStepContent()}
           </motion.div>
-        </AnimatePresence>
-      </div>
-
-      {/* Step Navigation */}
-      <NavigationButtons 
-        currentStep={currentStep}
-        totalSteps={steps.length}
-        onBack={handleBack}
-        onNext={handleNext}
-        onComplete={onComplete}
-        projectData={projectData}
-      />
+          
+          {/* Navigation Buttons - Not shown on welcome and render custom on last step */}
+          {step > 0 && step < steps.length - 1 && (
+            <NavigationButtons
+              onNext={handleNext}
+              onBack={handleBack}
+              isFirstStep={step === 0}
+              loading={loading}
+            />
+          )}
+          
+          {step === steps.length - 1 && (
+            <NavigationButtons
+              onBack={handleBack}
+              onComplete={handleComplete}
+              isLastStep={true}
+              loading={loading}
+            />
+          )}
+        </CardContent>
+      </Card>
+      
+      {/* Global styles for the component */}
+      <OnboardingStyles />
     </div>
   );
 }

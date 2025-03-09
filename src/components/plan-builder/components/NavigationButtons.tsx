@@ -1,104 +1,83 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface NavigationButtonsProps {
-  currentStep: number;
-  totalSteps: number;
-  onBack: () => void;
-  onNext: () => void;
-  onComplete: (projectData: any) => void;
-  projectData: any;
+  onNext?: () => void;
+  onBack?: () => void;
+  onComplete?: () => void;
+  onSkip?: () => void;
+  isLastStep?: boolean;
+  isFirstStep?: boolean;
+  loading?: boolean;
+  nextDisabled?: boolean;
+  skipLabel?: string;
+  nextLabel?: string;
+  backLabel?: string;
+  completeLabel?: string;
 }
 
-export function NavigationButtons({ 
-  currentStep, 
-  totalSteps,
-  onBack, 
+export function NavigationButtons({
   onNext,
+  onBack,
   onComplete,
-  projectData
+  onSkip,
+  isLastStep = false,
+  isFirstStep = false,
+  loading = false,
+  nextDisabled = false,
+  skipLabel = "Skip",
+  nextLabel = "Next",
+  backLabel = "Back",
+  completeLabel = "Complete"
 }: NavigationButtonsProps) {
-  if (currentStep === 0) return null;
-  
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3 }}
-      className="p-4 border-t flex justify-between bg-muted/30 backdrop-blur-sm"
-    >
-      {currentStep > 0 && (
-        <motion.div
-          whileHover={{ x: -3, transition: { duration: 0.2 } }}
-          whileTap={{ x: 0, scale: 0.98, transition: { duration: 0.2 } }}
-        >
-          <Button variant="outline" onClick={onBack} size="sm" className="gap-2">
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Button>
-        </motion.div>
-      )}
-      
-      {currentStep < totalSteps - 1 ? (
-        <motion.div
-          whileHover={{ x: 3, transition: { duration: 0.2 } }}
-          whileTap={{ x: 0, scale: 0.98, transition: { duration: 0.2 } }}
-          className="ml-auto"
-        >
-          <Button onClick={onNext} size="sm" className="bg-gradient-to-r from-siso-red to-siso-orange hover:opacity-90 text-white">
-            Next
-            <motion.div
-              initial={{ x: 0 }}
-              animate={{ x: [0, 5, 0] }}
-              transition={{ 
-                duration: 1.5, 
-                repeat: Infinity, 
-                repeatType: "reverse", 
-                ease: "easeInOut" 
-              }}
-              className="ml-2"
-            >
-              <ArrowRight className="w-4 h-4" />
-            </motion.div>
-          </Button>
-        </motion.div>
-      ) : (
-        <motion.div
-          whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-          whileTap={{ scale: 0.98, transition: { duration: 0.2 } }}
-          className="ml-auto"
-        >
+    <div className="flex justify-between items-center gap-4 mt-6">
+      <div className="flex items-center gap-2">
+        {!isFirstStep && onBack && (
           <Button 
-            onClick={() => onComplete(projectData)} 
-            size="sm" 
-            className="bg-gradient-to-r from-siso-red to-siso-orange text-white hover:opacity-90 gap-2 relative overflow-hidden group"
+            variant="outline" 
+            onClick={onBack}
+            className="flex items-center gap-2"
+            disabled={loading}
           >
-            <span className="relative z-10">Start Planning</span>
-            <motion.div
-              initial={{ x: 0 }}
-              animate={{ x: [0, 5, 0] }}
-              transition={{ 
-                duration: 1.5, 
-                repeat: Infinity, 
-                repeatType: "reverse", 
-                ease: "easeInOut" 
-              }}
-              className="relative z-10"
-            >
-              <ArrowRight className="w-4 h-4" />
-            </motion.div>
-            <motion.div 
-              className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"
-              initial={{ x: "-100%" }}
-              whileHover={{ x: "100%" }}
-              transition={{ duration: 0.5 }}
-            />
+            <ArrowLeft className="w-4 h-4" />
+            {backLabel}
           </Button>
-        </motion.div>
-      )}
-    </motion.div>
+        )}
+        
+        {onSkip && (
+          <Button 
+            variant="ghost" 
+            onClick={onSkip}
+            disabled={loading}
+          >
+            {skipLabel}
+          </Button>
+        )}
+      </div>
+      
+      <div>
+        {isLastStep && onComplete ? (
+          <Button 
+            onClick={onComplete}
+            className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90 text-white"
+            disabled={loading || nextDisabled}
+          >
+            {completeLabel}
+          </Button>
+        ) : onNext && (
+          <Button 
+            onClick={onNext}
+            className="flex items-center gap-2 bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90 text-white"
+            disabled={loading || nextDisabled}
+          >
+            {nextLabel}
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
+    </div>
   );
 }
