@@ -8,10 +8,12 @@ import { usePlanChatAssistant } from '@/hooks/use-plan-chat-assistant';
 import { useToast } from '@/hooks/use-toast';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { PrePlanState } from '@/components/plan-builder/PrePlanState';
 
 export default function PlanBuilder() {
   const [isManualInputOpen, setIsManualInputOpen] = useState(false);
   const [showConnectionAlert, setShowConnectionAlert] = useState(false);
+  const [isPlanStarted, setIsPlanStarted] = useState(false);
   const { toast } = useToast();
   const [projectId, setProjectId] = useState<string>(() => {
     // Generate a unique project ID for this session if one doesn't exist
@@ -35,6 +37,27 @@ export default function PlanBuilder() {
     }
   }, [error]);
 
+  // Start plan with initial prompt
+  const handleStartPlan = async (prompt: string) => {
+    try {
+      toast({
+        title: "Processing Your Idea",
+        description: "We're creating your project plan based on your description...",
+        variant: "default"
+      });
+      
+      await sendMessage(prompt);
+      setIsPlanStarted(true);
+    } catch (error) {
+      console.error("Error starting plan:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem processing your request. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleSubmitToAI = async (prompt: string, formData?: Record<string, any>) => {
     try {
       // Send the form data to the AI assistant
@@ -50,6 +73,7 @@ export default function PlanBuilder() {
         
         // Close the manual input sheet after submission
         setIsManualInputOpen(false);
+        setIsPlanStarted(true);
       } catch (error) {
         console.error("Error communicating with AI assistant:", error);
         toast({
@@ -70,50 +94,56 @@ export default function PlanBuilder() {
 
   return (
     <MainLayout>
-      <div className="container max-w-6xl mx-auto py-8 px-4">
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-siso-text">AI Project Planner</h1>
-            <p className="text-siso-text-muted mt-1">
-              Get detailed project plans, budgets, and timelines based on your requirements
-            </p>
-          </div>
-          
-          <Button 
-            onClick={() => setIsManualInputOpen(true)}
-            className="bg-gradient-to-r from-siso-orange to-siso-red text-white"
-          >
-            <FileEdit className="mr-2 h-4 w-4" />
-            Create Plan With Form
-          </Button>
-        </div>
-
-        {showConnectionAlert && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              There was a problem connecting to the AI service. Please check your connection and try again.
+      <div className="container max-w-6xl mx-auto py-8 px-4 min-h-screen">
+        {!isPlanStarted ? (
+          <PrePlanState onSubmit={handleStartPlan} />
+        ) : (
+          <>
+            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-siso-text">AI Project Planner</h1>
+                <p className="text-siso-text-muted mt-1">
+                  Get detailed project plans, budgets, and timelines based on your requirements
+                </p>
+              </div>
+              
               <Button 
-                variant="link" 
-                className="text-white p-0 h-auto font-normal ml-2"
-                onClick={() => setShowConnectionAlert(false)}
+                onClick={() => setIsManualInputOpen(true)}
+                className="bg-gradient-to-r from-siso-orange to-siso-red text-white"
               >
-                Dismiss
+                <FileEdit className="mr-2 h-4 w-4" />
+                Create Plan With Form
               </Button>
-            </AlertDescription>
-          </Alert>
-        )}
+            </div>
 
-        <div className="grid grid-cols-1 gap-6">
-          <ChatInterface 
-            title="AI Project Planner" 
-            welcomeMessage="Hi! I'm your AI project planning assistant. Tell me about the app or software you want to build, and I'll help create a detailed plan including features, timeline, and budget estimates. You can describe your project in your own words or use the form button above for a more structured approach."
-            inputPlaceholder="Describe your project requirements..."
-            systemPrompt="You are a professional project planning assistant specialized in helping users create comprehensive software project plans. Help users define requirements, select features, estimate timelines, and budget effectively."
-            usePlanAssistant={true}
-            projectId={projectId}
-          />
-        </div>
+            {showConnectionAlert && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  There was a problem connecting to the AI service. Please check your connection and try again.
+                  <Button 
+                    variant="link" 
+                    className="text-white p-0 h-auto font-normal ml-2"
+                    onClick={() => setShowConnectionAlert(false)}
+                  >
+                    Dismiss
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <div className="grid grid-cols-1 gap-6">
+              <ChatInterface 
+                title="AI Project Planner" 
+                welcomeMessage="I'll help create a detailed plan for your project. Feel free to ask questions or provide more details as we refine your plan."
+                inputPlaceholder="Add more details or ask questions about your plan..."
+                systemPrompt="You are a professional project planning assistant specialized in helping users create comprehensive software project plans. Help users define requirements, select features, estimate timelines, and budget effectively."
+                usePlanAssistant={true}
+                projectId={projectId}
+              />
+            </div>
+          </>
+        )}
 
         <ManualInputSheet 
           isOpen={isManualInputOpen} 
