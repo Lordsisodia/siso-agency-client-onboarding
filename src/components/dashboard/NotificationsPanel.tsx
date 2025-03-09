@@ -5,6 +5,12 @@ import { Bell, CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Notification, NotificationType } from '@/types/dashboard';
 
+export interface NotificationsPanelProps {
+  notifications?: Notification[];
+  onMarkAsRead?: (id: string) => void;
+  onViewAll?: () => void;
+}
+
 // Mock data for notifications
 const mockNotifications: Notification[] = [
   {
@@ -41,8 +47,15 @@ const mockNotifications: Notification[] = [
   }
 ];
 
-export const NotificationsPanel = () => {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+export const NotificationsPanel: React.FC<NotificationsPanelProps> = ({ 
+  notifications: propNotifications,
+  onMarkAsRead,
+  onViewAll
+}) => {
+  const [internalNotifications, setInternalNotifications] = useState<Notification[]>(mockNotifications);
+  
+  // Use provided notifications if available, otherwise use internal state
+  const notifications = propNotifications || internalNotifications;
 
   const getIcon = (type: NotificationType) => {
     switch (type) {
@@ -59,9 +72,17 @@ export const NotificationsPanel = () => {
   };
 
   const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notification => ({ ...notification, read: true }))
-    );
+    if (onMarkAsRead) {
+      notifications.forEach(notification => {
+        if (!notification.read) {
+          onMarkAsRead(notification.id);
+        }
+      });
+    } else {
+      setInternalNotifications(prev => 
+        prev.map(notification => ({ ...notification, read: true }))
+      );
+    }
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -133,7 +154,12 @@ export const NotificationsPanel = () => {
       
       {notifications.length > 0 && (
         <div className="text-center pt-2">
-          <Button variant="ghost" size="sm" className="text-xs">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-xs"
+            onClick={onViewAll}
+          >
             View all notifications
           </Button>
         </div>

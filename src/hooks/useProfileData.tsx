@@ -20,9 +20,42 @@ export interface ProfileFormData {
   professionalRole: string;
 }
 
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  icon?: string;
+}
+
+export interface ProfileData {
+  id: string;
+  full_name: string;
+  avatar_url: string | null;
+  banner_url: string | null;
+  points: number;
+  siso_tokens: number;
+  rank: string;
+  business_name: string | null;
+  business_type: string | null;
+  industry: string | null;
+  interests: string[] | null;
+  bio: string | null;
+  linkedin_url: string | null;
+  website_url: string | null;
+  youtube_url: string | null;
+  instagram_url: string | null;
+  twitter_url: string | null;
+  professional_role: string | null;
+  solana_wallet_address: string | null;
+  achievements?: Achievement[];
+  contribution_count?: number;
+  referral_count?: number;
+}
+
 export const useProfileData = () => {
   const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -74,7 +107,7 @@ export const useProfileData = () => {
 
           if (profileData && isSubscribed) {
             console.log('[Profile] Profile data found:', profileData);
-            setProfile(profileData);
+            setProfile(profileData as ProfileData);
             setFormData({
               fullName: profileData.full_name || '',
               businessName: profileData.business_name || '',
@@ -117,7 +150,7 @@ export const useProfileData = () => {
         filter: user?.id ? `id=eq.${user.id}` : undefined,
       }, (payload) => {
         if (isSubscribed && payload.new) {
-          setProfile(payload.new);
+          setProfile(payload.new as ProfileData);
           setFormData({
             fullName: payload.new.full_name || '',
             businessName: payload.new.business_name || '',

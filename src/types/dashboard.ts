@@ -39,3 +39,30 @@ export interface ProjectDoc {
   implementation_status: string;
   priority: string;
 }
+
+export interface NetworkingResource {
+  id: string;
+  name: string;
+  description?: string;
+  category: string;
+  platform?: string;
+  profile_image_url?: string;
+  member_count?: number;
+  join_url?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CategoryStats {
+  category: string;
+  community_count: number;
+}
+
+export interface Assistant {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  created_at: string;
+  updated_at: string;
+}

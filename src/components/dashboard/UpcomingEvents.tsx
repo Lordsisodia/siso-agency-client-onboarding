@@ -6,8 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Event, EventType } from '@/types/dashboard';
 import { useEvents } from '@/hooks/useEvents';
 
-export const UpcomingEvents = () => {
-  const { events, handleViewCalendar } = useEvents();
+export interface UpcomingEventsProps {
+  events?: Event[];
+  onViewCalendar?: () => void;
+}
+
+export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events: propEvents, onViewCalendar }) => {
+  const { events: hookEvents, handleViewCalendar } = useEvents();
+  
+  // Use events from props if provided, otherwise use from hook
+  const events = propEvents || hookEvents;
+  const viewCalendarHandler = onViewCalendar || handleViewCalendar;
 
   const getEventIcon = (type: EventType) => {
     switch (type) {
@@ -31,7 +40,7 @@ export const UpcomingEvents = () => {
         <Button 
           variant="ghost" 
           size="sm"
-          onClick={handleViewCalendar}
+          onClick={viewCalendarHandler}
           className="text-xs"
         >
           <span>View Calendar</span>
@@ -81,7 +90,7 @@ export const UpcomingEvents = () => {
             variant="outline" 
             size="sm" 
             className="text-xs w-full"
-            onClick={handleViewCalendar}
+            onClick={viewCalendarHandler}
           >
             See all events
           </Button>
