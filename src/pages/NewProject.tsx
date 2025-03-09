@@ -139,7 +139,7 @@ export default function NewProject() {
           <Button 
             onClick={() => setIsWebsiteInputOpen(true)}
             variant="outline"
-            className="border-siso-border text-siso-text hover:bg-siso-bg-card flex items-center gap-2"
+            className="border-siso-border bg-card/50 backdrop-blur-sm text-siso-text hover:bg-siso-bg-alt hover:border-siso-border-hover flex items-center gap-2 transition-all duration-300"
           >
             <FileEdit className="w-4 h-4" />
             <span>Submit Website or Info</span>
@@ -152,7 +152,7 @@ export default function NewProject() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="p-0.5 bg-gradient-to-r from-siso-red/40 to-siso-orange/40 rounded-xl">
+            <div className="p-0.5 bg-gradient-to-r from-siso-red/40 to-siso-orange/40 rounded-xl shadow-lg">
               <ChatInterface 
                 title="New Project Setup" 
                 welcomeMessage="I'll help you create a new project plan. You can submit your website or info using the button above, or we can start the conversation here..."
