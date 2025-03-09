@@ -1,3 +1,4 @@
+
 @keyframes shimmer {
   0% {
     transform: translateX(-100%);
@@ -40,6 +41,49 @@
   }
 }
 
+@keyframes floatAnimation {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulseAnimation {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+}
+
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 .fade-in {
   animation: fadeIn 0.3s ease-out forwards;
 }
@@ -50,6 +94,23 @@
 
 .slide-in {
   animation: slideIn 0.3s ease-out forwards;
+}
+
+.float {
+  animation: floatAnimation 3s ease-in-out infinite;
+}
+
+.pulse {
+  animation: pulseAnimation 2s ease-in-out infinite;
+}
+
+.sparkle {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.gradient-flow {
+  background-size: 200% 200%;
+  animation: gradientFlow 5s ease infinite;
 }
 
 .news-card-grid {
@@ -185,4 +246,77 @@
   z-index: -1;
   border-radius: inherit;
   margin: -1px;
+}
+
+/* Button hover effects */
+.btn-hover-slide {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.btn-hover-slide::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: -1;
+}
+
+.btn-hover-slide:hover::after {
+  transform: translateX(0);
+}
+
+/* Magnetic effect */
+.magnetic-button {
+  transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Gradient animations */
+.gradient-text-animated {
+  background: linear-gradient(90deg, #FF5722, #FFA000, #FF5722);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradientFlow 5s ease infinite;
+}
+
+/* Custom focus ring */
+.focus-ring {
+  transition: box-shadow 0.3s ease;
+}
+
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 2px rgba(255, 87, 34, 0.5);
+  outline: none;
+}
+
+/* Icon animations */
+.icon-spin {
+  animation: spin 20s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

@@ -1,6 +1,7 @@
 
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
+import { motion } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
@@ -16,6 +17,10 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
+        success: "border-transparent bg-green-500 text-white hover:bg-green-600",
+        warning: "border-transparent bg-yellow-500 text-white hover:bg-yellow-600",
+        info: "border-transparent bg-blue-500 text-white hover:bg-blue-600",
+        gradient: "border-transparent bg-gradient-to-r from-siso-red to-siso-orange text-white",
       },
     },
     defaultVariants: {
@@ -26,11 +31,25 @@ const badgeVariants = cva(
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+    VariantProps<typeof badgeVariants> {
+    animated?: boolean;
+}
 
-function Badge({ className, variant, ...props }: BadgeProps) {
+function Badge({ className, variant, animated = false, ...props }: BadgeProps) {
+  const Component = animated ? motion.div : "div";
+  
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+    <Component
+      className={cn(badgeVariants({ variant }), className)}
+      {...(animated ? {
+        initial: { scale: 0.8, opacity: 0 },
+        animate: { scale: 1, opacity: 1 },
+        transition: { type: "spring", stiffness: 500, damping: 10 },
+        whileHover: { scale: 1.05 },
+        whileTap: { scale: 0.95 }
+      } : {})}
+      {...props}
+    />
   )
 }
 
