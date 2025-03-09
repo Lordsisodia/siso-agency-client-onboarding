@@ -93,6 +93,16 @@ export const menuSections: MenuSection[] = [
         href: '/notifications',
         icon: Bell,
         label: 'Notifications',
+      },
+      {
+        href: '/leaderboards',
+        icon: Trophy,
+        label: 'Leaderboards',
+      },
+      {
+        href: '/how-to-earn',
+        icon: Medal,
+        label: 'How to Earn',
       }
     ]
   }

@@ -5,6 +5,7 @@ import { ChatInterface } from '@/components/chat/ChatInterface';
 import { ProjectDocumentation } from '@/components/education/ProjectDocumentation';
 import { seedDemoData } from '@/utils/seedData';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
+import { Waves } from '@/components/ui/waves-background';
 
 const Support = () => {
   useEffect(() => {
@@ -14,7 +15,16 @@ const Support = () => {
 
   return (
     <MainLayout>
-      <div className="container mx-auto py-8 px-4 sm:px-6">
+      <div className="container mx-auto py-8 px-4 sm:px-6 relative">
+        <Waves 
+          waveSpeedX={0.015}
+          waveSpeedY={0.01}
+          waveAmpX={40}
+          waveAmpY={20}
+          lineColor="rgba(255,255,255,0.1)"
+          className="absolute inset-0 -z-10"
+        />
+        
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-siso-text-bold mb-2">Support</h1>
           <p className="text-siso-text/70">Get help with your project or explore our documentation</p>
