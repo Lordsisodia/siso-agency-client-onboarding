@@ -4,14 +4,11 @@ import { DashboardHeader } from './DashboardHeader';
 import { QuickStatsPanel } from './QuickStatsPanel';
 import { ProjectsOverview } from './ProjectsOverview';
 import { DashboardSidebar } from './DashboardSidebar';
+import { DashboardStats } from '@/types/dashboard';
 
 interface DashboardLayoutProps {
   userName: string;
-  stats: {
-    activeProjects: number;
-    pendingTasks: number;
-    upcomingEvents: number;
-  };
+  stats: DashboardStats;
 }
 
 export const DashboardLayout = ({ userName, stats }: DashboardLayoutProps) => {

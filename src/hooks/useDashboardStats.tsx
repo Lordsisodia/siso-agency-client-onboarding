@@ -1,11 +1,6 @@
 
 import { useState, useCallback } from 'react';
-
-interface DashboardStats {
-  activeProjects: number;
-  pendingTasks: number;
-  upcomingEvents: number;
-}
+import { DashboardStats } from '@/types/dashboard';
 
 export function useDashboardStats() {
   const [stats, setStats] = useState<DashboardStats>({

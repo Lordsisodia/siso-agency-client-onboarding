@@ -207,6 +207,42 @@ export type Database = {
           },
         ]
       }
+      banner_templates: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          is_default: boolean | null
+          metadata: Json | null
+          name: string
+          template_type: string
+          text_overlay: Json | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_default?: boolean | null
+          metadata?: Json | null
+          name: string
+          template_type: string
+          text_overlay?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_default?: boolean | null
+          metadata?: Json | null
+          name?: string
+          template_type?: string
+          text_overlay?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chat_users: {
         Row: {
           airtable_id: string | null
@@ -459,6 +495,42 @@ export type Database = {
         }
         Relationships: []
       }
+      crypto_transactions: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json | null
+          points_exchanged: number
+          status: string
+          tokens_received: number
+          transaction_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          points_exchanged: number
+          status?: string
+          tokens_received: number
+          transaction_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          points_exchanged?: number
+          status?: string
+          tokens_received?: number
+          transaction_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_metrics: {
         Row: {
           airtable_id: string | null
@@ -705,6 +777,33 @@ export type Database = {
           week?: string | null
           week_identifier?: string | null
           week_link?: string | null
+        }
+        Relationships: []
+      }
+      news_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          news_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          news_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          news_id?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -956,6 +1055,7 @@ export type Database = {
           points: number | null
           professional_role: string | null
           rank: string | null
+          siso_tokens: number | null
           solana_wallet_address: string | null
           twitter_url: string | null
           updated_at: string | null
@@ -979,6 +1079,7 @@ export type Database = {
           points?: number | null
           professional_role?: string | null
           rank?: string | null
+          siso_tokens?: number | null
           solana_wallet_address?: string | null
           twitter_url?: string | null
           updated_at?: string | null
@@ -1002,6 +1103,7 @@ export type Database = {
           points?: number | null
           professional_role?: string | null
           rank?: string | null
+          siso_tokens?: number | null
           solana_wallet_address?: string | null
           twitter_url?: string | null
           updated_at?: string | null
@@ -1232,6 +1334,33 @@ export type Database = {
         }
         Relationships: []
       }
+      tools: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_search_history: {
         Row: {
           created_at: string | null
@@ -1395,6 +1524,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      wallet_nonces: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          nonce: string
+          public_key: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          nonce: string
+          public_key: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          nonce?: string
+          public_key?: string
+        }
+        Relationships: []
+      }
+      welcome_nft_mints: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       youtube_videos: {
         Row: {
