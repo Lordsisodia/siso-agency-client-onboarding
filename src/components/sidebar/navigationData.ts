@@ -66,7 +66,7 @@ export const menuSections: MenuSection[] = [
       {
         href: '/support',
         icon: HelpCircle,
-        label: 'Support & Help Center',
+        label: 'Help Center',
       }
     ]
   },
