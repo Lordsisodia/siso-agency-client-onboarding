@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { OpenAI } from "https://esm.sh/openai@4.26.0";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
@@ -21,8 +20,8 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Get the assistant ID from environment variables, with a fallback to the hardcoded value
-const PLAN_BUILDER_ASSISTANT_ID = Deno.env.get('PLAN_BUILDER_ASSISTANT_ID') || "asst_VMa6tFDDh65o0R0VEhuzzdSA";
+// Get the assistant ID from environment variables only
+const PLAN_BUILDER_ASSISTANT_ID = Deno.env.get('PLAN_BUILDER_ASSISTANT_ID');
 
 /**
  * Validates environment variables and configuration
@@ -259,6 +258,10 @@ async function pollForCompletion(threadId: string, runId: string, maxPolls = 60,
  */
 async function verifyAssistant() {
   try {
+    if (!PLAN_BUILDER_ASSISTANT_ID) {
+      throw new Error("PLAN_BUILDER_ASSISTANT_ID environment variable is not set");
+    }
+    
     const assistant = await openai.beta.assistants.retrieve(PLAN_BUILDER_ASSISTANT_ID);
     console.log(`Assistant verified: ${assistant.name}, model: ${assistant.model}`);
     return assistant;

@@ -83,11 +83,27 @@ export function usePlanChatAssistant(projectId?: string) {
       
       setError(error instanceof Error ? error.message : 'Connection to the AI service interrupted');
       
+      // Make error message more user-friendly
+      const errorMessage = error instanceof Error ? 
+        error.message.includes('Connection issue') ? 
+          'Connection to the AI service interrupted. Please try again later.' : 
+          error.message : 
+        'An unexpected error occurred. Please try again.';
+      
       toast({
         title: "Connection Issue",
-        description: "There was a problem connecting to the AI service. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
+      
+      // Add error message as system message
+      const errorSystemMessage: ChatMessage = {
+        role: 'system',
+        content: `Error: ${errorMessage}`,
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorSystemMessage]);
     } finally {
       setIsLoading(false);
     }

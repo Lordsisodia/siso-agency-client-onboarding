@@ -5,12 +5,13 @@ import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Waves } from '@/components/ui/waves-background';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { motion } from 'framer-motion';
-import { ArrowLeft, FileEdit, Link } from 'lucide-react';
+import { ArrowLeft, FileEdit, Link, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePlanChatAssistant } from '@/hooks/use-plan-chat-assistant';
 import { useToast } from '@/hooks/use-toast';
 import { WebsiteInputSheet, WebsiteInputData } from '@/components/plan-builder/WebsiteInputSheet';
 import { supabase } from '@/integrations/supabase/client';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function NewProject() {
   const [projectId, setProjectId] = useState<string>(() => {
@@ -21,9 +22,10 @@ export default function NewProject() {
   });
   
   const [isWebsiteInputOpen, setIsWebsiteInputOpen] = useState(true); // Open by default
-  const { sendMessage, messages, isLoading, error } = usePlanChatAssistant(projectId);
+  const { sendMessage, messages, isLoading, error: chatError } = usePlanChatAssistant(projectId);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [connectionError, setConnectionError] = useState<string | null>(null);
 
   // Send an initial message to start the conversation
   useEffect(() => {
@@ -32,11 +34,15 @@ export default function NewProject() {
     // We're using sendMessage with an empty message to trigger the welcome message
     const startConversation = async () => {
       try {
+        setConnectionError(null);
         await sendMessage(initialPrompt);
       } catch (error) {
         console.error("Error starting conversation:", error);
+        setConnectionError(
+          "There was a problem connecting to the AI assistant. Please try again later."
+        );
         toast({
-          title: "Error",
+          title: "Connection Error",
           description: "There was a problem starting the conversation. Please try again.",
           variant: "destructive"
         });
@@ -147,6 +153,16 @@ export default function NewProject() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 relative z-10">
+          {connectionError && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Connection Error</AlertTitle>
+              <AlertDescription>
+                {connectionError}
+              </AlertDescription>
+            </Alert>
+          )}
+          
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

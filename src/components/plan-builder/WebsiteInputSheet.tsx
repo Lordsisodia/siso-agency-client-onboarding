@@ -84,7 +84,7 @@ export function WebsiteInputSheet({ isOpen, onClose, onSubmit }: WebsiteInputShe
       console.error("Error submitting website information:", error);
       toast({
         title: "Submission Error",
-        description: "There was a problem processing your information. Please try again.",
+        description: "There was a problem processing your information. Please try again later.",
         variant: "destructive"
       });
     } finally {
