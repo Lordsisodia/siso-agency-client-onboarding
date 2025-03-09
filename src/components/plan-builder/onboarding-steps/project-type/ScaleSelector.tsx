@@ -3,7 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ScaleOption } from './ScaleOption';
 import { scaleOptions } from './ProjectTypeData';
-import { ProjectTypeInfo } from './ProjectTypeInfo';
+import { ProjectTypeInfo } from './ProjectTypeData';
 
 interface ScaleSelectorProps {
   selectedScale: string;
