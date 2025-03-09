@@ -37,12 +37,12 @@ export function usePlanChatAssistant(projectId?: string) {
 
     try {
       console.log('Preparing to send message to chat-with-plan-assistant function');
-      console.log('Request payload:', {
-        messages: [...messages, userMessage],
-        projectId,
-        formData,
-        threadId
-      });
+      
+      // Create a fallback AI response in case the edge function fails
+      const fallbackResponse = {
+        response: "I'm having trouble connecting to the AI service right now. Please try again in a moment.",
+        threadId: threadId || null
+      };
       
       // Call the plan assistant edge function with improved error handling
       const { data, error: functionError } = await supabase.functions.invoke('chat-with-plan-assistant', {
@@ -56,6 +56,23 @@ export function usePlanChatAssistant(projectId?: string) {
 
       if (functionError) {
         console.error('Function error details:', functionError);
+        
+        // Use the fallback response in case of error
+        const assistantMessage: ChatMessage = {
+          role: 'assistant', 
+          content: fallbackResponse.response,
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, assistantMessage]);
+        
+        // Show error toast
+        toast({
+          title: "Service Unavailable",
+          description: "Unable to connect to the AI service. Please try again later.",
+          variant: "destructive"
+        });
+        
         throw new Error(`Supabase function error: ${functionError.message || 'Unknown error'}`);
       }
       
@@ -79,23 +96,27 @@ export function usePlanChatAssistant(projectId?: string) {
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error communicating with assistant (detailed):', error);
-      let errorMessage = 'Failed to get response from assistant';
       
-      if (error instanceof Error) {
-        errorMessage = `Error: ${error.message}`;
+      // Only set error if we haven't already added a fallback message
+      if (!messages.find(m => 
+        m.role === 'assistant' && 
+        m.content.includes("I'm having trouble connecting")
+      )) {
+        let errorMessage = 'Failed to get response from assistant';
+        
+        if (error instanceof Error) {
+          errorMessage = `Error: ${error.message}`;
+        }
+        
+        // Check for specific network issues
+        if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+          errorMessage = 'Network error: Unable to connect to the assistant service. Please check your connection and try again.';
+        }
+        
+        setError(errorMessage);
+        
+        // We don't need another toast since we already showed one earlier
       }
-      
-      // Check for specific network issues
-      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
-        errorMessage = 'Network error: Unable to connect to the assistant service. Please check your connection and try again.';
-      }
-      
-      setError(errorMessage);
-      toast({
-        title: "Communication Error",
-        description: errorMessage,
-        variant: "destructive"
-      });
     } finally {
       setIsLoading(false);
     }

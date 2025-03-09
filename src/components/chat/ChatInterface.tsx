@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
@@ -72,7 +71,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       };
       
       // Add the welcome message to messages state through the clear function
-      // which will reset messages and add our welcome message
       clearMessages([welcomeMsg]);
       setIsInitialized(true);
     }
@@ -101,7 +99,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       return;
     }
     
-    await sendMessage(message, systemPrompt);
+    try {
+      await sendMessage(message, systemPrompt);
+    } catch (err) {
+      console.error("Error sending message:", err);
+    }
   };
 
   return (

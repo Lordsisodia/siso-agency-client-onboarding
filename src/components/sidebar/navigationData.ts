@@ -6,8 +6,6 @@ import {
   BookOpen,
   Bot,
   Wrench,
-  Bell,
-  LayoutDashboard,
   FileText,
   FolderKanban,
   Building,
@@ -22,7 +20,7 @@ export const menuSections: MenuSection[] = [
   {
     type: 'main',
     href: '/dashboard',
-    icon: LayoutDashboard,
+    icon: Home,
     label: 'Dashboard',
   },
   {
@@ -49,36 +47,47 @@ export const menuSections: MenuSection[] = [
   },
   {
     type: 'section',
-    title: 'Resources',
-    icon: BookOpen,
+    title: 'Learning',
+    icon: GraduationCap,
     items: [
+      {
+        href: '/education',
+        icon: GraduationCap,
+        label: 'Learning Hub',
+      },
       {
         href: '/portfolio',
         icon: Briefcase,
         label: 'Portfolio',
-      },
-      {
-        href: 'https://www.sisoresourcehub.online/',
-        icon: BookOpen,
-        label: 'Resource Hub',
-        isExternal: true,
-      },
-      {
-        href: '/support',
-        icon: HelpCircle,
-        label: 'Help Center',
       }
     ]
   },
   {
     type: 'section',
-    title: 'Communication',
-    icon: Bell,
+    title: 'Community',
+    icon: Network,
     items: [
       {
-        href: '/notifications',
-        icon: Bell,
-        label: 'Notifications',
+        href: '/community',
+        icon: Network,
+        label: 'Networking',
+      },
+      {
+        href: '/tools',
+        icon: Wrench,
+        label: 'AI Tools',
+      }
+    ]
+  },
+  {
+    type: 'section',
+    title: 'Help',
+    icon: MessageCircle,
+    items: [
+      {
+        href: '/support',
+        icon: HelpCircle,
+        label: 'Help Center',
       }
     ]
   }

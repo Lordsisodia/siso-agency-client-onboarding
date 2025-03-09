@@ -32,11 +32,20 @@ export default function PlanBuilder() {
         variant: "default"
       });
       
-      // Send the form data to the AI assistant using the sendMessage function
-      await sendMessage(prompt, undefined, formData);
-      
-      // Close the manual input sheet after submission
-      setIsManualInputOpen(false);
+      try {
+        // Send the form data to the AI assistant using the sendMessage function
+        await sendMessage(prompt, undefined, formData);
+        
+        // Close the manual input sheet after submission
+        setIsManualInputOpen(false);
+      } catch (error) {
+        console.error("Error communicating with AI assistant:", error);
+        toast({
+          title: "Communication Error",
+          description: "There was an issue connecting to the AI assistant. Please try again later.",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
       console.error("Error submitting to AI:", error);
       toast({
