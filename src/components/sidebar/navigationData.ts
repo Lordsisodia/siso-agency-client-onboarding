@@ -1,136 +1,78 @@
-import {
-  BarChart3,
-  Bell,
-  Book,
-  CheckSquare,
-  LayoutDashboard,
-  ListChecks,
-  LucideIcon,
-  Mail,
-  MessagesSquare,
+
+import { 
+  Home,
+  GraduationCap,
   Network,
-  Settings,
-  ShoppingCart,
-  Users,
-  Calendar,
-  LayoutPanelTop,
+  BookOpen,
+  Bot,
+  Wrench,
+  FileText,
+  FolderKanban,
+  Building,
+  Briefcase,
+  TrendingUp,
+  HelpCircle,
+  MessageCircle
 } from 'lucide-react';
+import { MenuSection } from './types';
 
-export interface NavigationItem {
-  title: string;
-  href: string;
-  icon: LucideIcon;
-  badge?: string;
-  section: 'Main' | 'Platform' | 'Communicate' | 'Education' | 'Tools';
-}
-
-export const navigationItems: NavigationItem[] = [
+export const menuSections: MenuSection[] = [
   {
-    title: 'Dashboard',
+    type: 'main',
     href: '/dashboard',
-    icon: LayoutDashboard,
-    section: 'Main',
+    icon: Home,
+    label: 'Dashboard',
   },
   {
-    title: 'Analytics',
-    href: '/analytics',
-    icon: BarChart3,
-    section: 'Main',
+    type: 'section',
+    title: 'Projects',
+    icon: FolderKanban,
+    items: [
+      {
+        href: '/projects',
+        icon: FolderKanban,
+        label: 'My Projects',
+      },
+      {
+        href: '/plan-builder',
+        icon: FileText,
+        label: 'Plan Builder',
+      },
+      {
+        href: '/company-profile',
+        icon: Building,
+        label: 'Company Profile',
+      }
+    ]
   },
   {
-    title: 'Users',
-    href: '/users',
-    icon: Users,
-    section: 'Platform',
+    type: 'section',
+    title: 'Learning',
+    icon: GraduationCap,
+    items: [
+      {
+        href: 'https://www.sisoresourcehub.online/home',
+        icon: GraduationCap,
+        label: 'SISO Resources',
+        isExternal: true
+      },
+      {
+        href: '/portfolio',
+        icon: Briefcase,
+        label: 'Portfolio',
+      }
+    ]
   },
   {
-    title: 'Agencies',
-    href: '/agencies',
-    icon: ShoppingCart,
-    section: 'Platform',
-  },
-  {
-    title: 'Notifications',
-    href: '/notifications',
-    icon: Bell,
-    badge: '12',
-    section: 'Communicate',
-  },
-  {
-    title: 'Messages',
-    href: '/messages',
-    icon: MessagesSquare,
-    section: 'Communicate',
-  },
-  {
-    title: 'Email Marketing',
-    href: '/email-marketing',
-    icon: Mail,
-    section: 'Communicate',
-  },
-  {
-    title: 'Networking',
-    href: '/networking',
-    icon: Network,
-    section: 'Education',
-  },
-  {
-    title: 'Education',
-    href: '/education',
-    icon: Book,
-    section: 'Education',
-  },
-  {
-    title: 'Task Management',
-    href: '/tasks',
-    icon: ListChecks,
-    section: 'Tools',
-  },
-  {
-    title: 'AI Checklist',
-    href: '/ai-checklist',
-    icon: CheckSquare,
-    section: 'Tools',
-  },
-  {
-    title: 'Project Planning',
-    href: '/project-planning',
-    icon: LayoutPanelTop,
-    section: "Tools",
-  },
-  {
-    title: 'Calendar',
-    href: '/calendar',
-    icon: Calendar,
-    section: 'Tools',
-  },
-  {
-    title: 'Settings',
-    href: '/settings',
-    icon: Settings,
-    section: 'Platform',
-  },
-];
-
-export const sidebarSections = [
-  {
-    title: 'Main',
-    items: navigationItems.filter((item) => item.section === 'Main'),
-  },
-  {
-    title: 'Platform',
-    items: navigationItems.filter((item) => item.section === 'Platform'),
-  },
-  {
-    title: 'Communicate',
-    items: navigationItems.filter((item) => item.section === 'Communicate'),
-  },
-  {
-    title: 'Education',
-    items: navigationItems.filter((item) => item.section === 'Education'),
-  },
-    {
-    title: 'Tools',
-    items: navigationItems.filter((item) => item.section === 'Tools'),
-  },
+    type: 'section',
+    title: 'Help',
+    icon: MessageCircle,
+    items: [
+      {
+        href: '/support',
+        icon: HelpCircle,
+        label: 'Help Center',
+      }
+    ]
+  }
 ];
