@@ -13,7 +13,6 @@ import { WebsiteInputSheet, WebsiteInputData } from '@/components/plan-builder/W
 import { supabase } from '@/integrations/supabase/client';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';
-import { PrePlanState } from '@/components/plan-builder/PrePlanState';
 
 export default function NewProject() {
   const [projectId, setProjectId] = useState<string>(() => {
@@ -25,44 +24,38 @@ export default function NewProject() {
   
   const [isWebsiteInputOpen, setIsWebsiteInputOpen] = useState(false);
   const [isManualInputOpen, setIsManualInputOpen] = useState(false);
-  const [showChatInterface, setShowChatInterface] = useState(false);
   const { sendMessage, messages, isLoading, error: chatError } = usePlanChatAssistant(projectId);
   const navigate = useNavigate();
   const { toast } = useToast();
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
-  // Send an initial message to start the conversation when chat interface is shown
+  // Send an initial message to start the conversation
   useEffect(() => {
-    if (showChatInterface) {
-      const initialPrompt = "Hi! I'm here to help you plan your new project. You can provide your website URL, social media links, or basic information using the buttons above, or we can start the planning process through our chat. What would you like to do?";
-      
-      const startConversation = async () => {
-        try {
-          setConnectionError(null);
-          await sendMessage(initialPrompt);
-        } catch (error) {
-          console.error("Error starting conversation:", error);
-          setConnectionError(
-            "There was a problem connecting to the AI assistant. Please check if the PLAN_BUILDER_ASSISTANT_ID is correctly configured."
-          );
-          toast({
-            title: "Connection Error",
-            description: "There was a problem starting the conversation. The assistant might be incorrectly configured.",
-            variant: "destructive"
-          });
-        }
-      };
-      
-      startConversation();
-    }
-  }, [showChatInterface]);
+    const initialPrompt = "Hi! I'm here to help you plan your new project. You can provide your website URL, social media links, or basic information using the buttons above, or we can start the planning process through our chat. What would you like to do?";
+    
+    // We're using sendMessage with an empty message to trigger the welcome message
+    const startConversation = async () => {
+      try {
+        setConnectionError(null);
+        await sendMessage(initialPrompt);
+      } catch (error) {
+        console.error("Error starting conversation:", error);
+        setConnectionError(
+          "There was a problem connecting to the AI assistant. Please check if the PLAN_BUILDER_ASSISTANT_ID is correctly configured."
+        );
+        toast({
+          title: "Connection Error",
+          description: "There was a problem starting the conversation. The assistant might be incorrectly configured.",
+          variant: "destructive"
+        });
+      }
+    };
+    
+    startConversation();
+  }, []);
 
   const handleGoBack = () => {
     navigate('/plan-builder');
-  };
-
-  const handleStartWithChat = () => {
-    setShowChatInterface(true);
   };
 
   const handleWebsiteSubmit = async (data: WebsiteInputData) => {
@@ -114,8 +107,7 @@ export default function NewProject() {
       
       Based on this information, please start helping them plan their project by asking relevant questions to gather any missing details.`;
       
-      // Show the chat interface and then send the constructed prompt to the AI
-      setShowChatInterface(true);
+      // Send the constructed prompt to the AI
       await sendMessage(prompt);
       
       setIsWebsiteInputOpen(false);
@@ -153,27 +145,25 @@ export default function NewProject() {
             <span>Back</span>
           </Button>
           
-          {showChatInterface && (
-            <div className="flex gap-2">
-              <Button 
-                onClick={() => setIsWebsiteInputOpen(true)}
-                variant="outline"
-                className="h-8 text-sm border-siso-border bg-card/50 backdrop-blur-sm text-siso-text hover:bg-siso-bg-alt hover:border-siso-border-hover flex items-center gap-2 transition-all duration-300"
-              >
-                <Link className="w-3.5 h-3.5" />
-                <span>Website Analysis</span>
-              </Button>
-              
-              <Button 
-                onClick={() => setIsManualInputOpen(true)}
-                variant="outline"
-                className="h-8 text-sm border-siso-border bg-card/50 backdrop-blur-sm text-siso-text hover:bg-siso-bg-alt hover:border-siso-border-hover flex items-center gap-2 transition-all duration-300"
-              >
-                <FileEdit className="w-3.5 h-3.5" />
-                <span>Manual Input</span>
-              </Button>
-            </div>
-          )}
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => setIsWebsiteInputOpen(true)}
+              variant="outline"
+              className="h-8 text-sm border-siso-border bg-card/50 backdrop-blur-sm text-siso-text hover:bg-siso-bg-alt hover:border-siso-border-hover flex items-center gap-2 transition-all duration-300"
+            >
+              <Link className="w-3.5 h-3.5" />
+              <span>Website Analysis</span>
+            </Button>
+            
+            <Button 
+              onClick={() => setIsManualInputOpen(true)}
+              variant="outline"
+              className="h-8 text-sm border-siso-border bg-card/50 backdrop-blur-sm text-siso-text hover:bg-siso-bg-alt hover:border-siso-border-hover flex items-center gap-2 transition-all duration-300"
+            >
+              <FileEdit className="w-3.5 h-3.5" />
+              <span>Manual Input</span>
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 relative z-10">
@@ -187,31 +177,23 @@ export default function NewProject() {
             </Alert>
           )}
           
-          {!showChatInterface ? (
-            <PrePlanState 
-              onStartWithChat={handleStartWithChat} 
-              onManualInput={() => setIsManualInputOpen(true)}
-              onWebsiteAnalysis={() => setIsWebsiteInputOpen(true)}
-            />
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="p-0.5 bg-gradient-to-r from-siso-red/40 to-siso-orange/40 rounded-xl shadow-lg">
-                <ChatInterface 
-                  title="New Project Setup" 
-                  welcomeMessage="I'll help you create a new project plan. You can submit your website or provide details manually using the buttons above, or we can start the conversation here..."
-                  inputPlaceholder="Share details about your project (website, goals, audience, etc.)"
-                  systemPrompt="You are a helpful project planning assistant. Guide the user through creating a new project by asking for information in a conversational way. Suggest they provide their website URL or social links for better analysis. Ask for: project/company name, website URL, social media profiles, project goals, target audience, and requirements. Be friendly and conversational."
-                  usePlanAssistant={true}
-                  projectId={projectId}
-                  className="border-0 bg-transparent"
-                />
-              </div>
-            </motion.div>
-          )}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="p-0.5 bg-gradient-to-r from-siso-red/40 to-siso-orange/40 rounded-xl shadow-lg">
+              <ChatInterface 
+                title="New Project Setup" 
+                welcomeMessage="I'll help you create a new project plan. You can submit your website or provide details manually using the buttons above, or we can start the conversation here..."
+                inputPlaceholder="Share details about your project (website, goals, audience, etc.)"
+                systemPrompt="You are a helpful project planning assistant. Guide the user through creating a new project by asking for information in a conversational way. Suggest they provide their website URL or social links for better analysis. Ask for: project/company name, website URL, social media profiles, project goals, target audience, and requirements. Be friendly and conversational."
+                usePlanAssistant={true}
+                projectId={projectId}
+                className="border-0 bg-transparent"
+              />
+            </div>
+          </motion.div>
         </div>
         
         {/* Input Sheets */}
@@ -224,10 +206,7 @@ export default function NewProject() {
         <ManualInputSheet
           isOpen={isManualInputOpen}
           onClose={() => setIsManualInputOpen(false)}
-          onSubmitToAI={(prompt, formData) => {
-            setShowChatInterface(true);
-            return sendMessage(prompt, undefined, formData);
-          }}
+          onSubmitToAI={sendMessage}
         />
       </div>
     </MainLayout>
