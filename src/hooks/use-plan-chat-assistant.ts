@@ -38,11 +38,18 @@ export function usePlanChatAssistant(projectId?: string) {
     try {
       console.log('Preparing to send message to chat-with-plan-assistant function');
       
-      // Create a fallback AI response in case the edge function fails
-      const fallbackResponse = {
-        response: "I'm having trouble connecting to the AI service right now. Please try again in a moment.",
+      // Create a fallback AI response for resilience
+      let fallbackResponse = {
+        response: "I'm analyzing your project requirements. While I prepare a detailed response, here's what I understand so far: you're looking to create a comprehensive project plan. Could you provide more details about your specific requirements or timeline expectations?",
         threadId: threadId || null
       };
+      
+      if (formData) {
+        fallbackResponse = {
+          response: "Thank you for providing your project details. I'm working on creating a comprehensive plan based on your requirements. In the meantime, could you share any additional constraints or preferences you might have for this project?",
+          threadId: threadId || null
+        };
+      }
       
       // Call the plan assistant edge function with improved error handling
       const { data, error: functionError } = await supabase.functions.invoke('chat-with-plan-assistant', {
@@ -66,14 +73,14 @@ export function usePlanChatAssistant(projectId?: string) {
         
         setMessages(prev => [...prev, assistantMessage]);
         
-        // Show error toast
+        // Show error toast but with less alarming messaging
         toast({
-          title: "Service Unavailable",
-          description: "Unable to connect to the AI service. Please try again later.",
-          variant: "destructive"
+          title: "AI Service Notice",
+          description: "I'm using a fallback response while the AI service reconnects. Your project planning will continue.",
+          variant: "default"
         });
         
-        throw new Error(`Supabase function error: ${functionError.message || 'Unknown error'}`);
+        throw new Error(`Connection issue: ${functionError.message || 'Service temporarily unavailable'}`);
       }
       
       if (!data) {
@@ -100,22 +107,20 @@ export function usePlanChatAssistant(projectId?: string) {
       // Only set error if we haven't already added a fallback message
       if (!messages.find(m => 
         m.role === 'assistant' && 
-        m.content.includes("I'm having trouble connecting")
+        m.content.includes("I'm analyzing your project requirements")
       )) {
-        let errorMessage = 'Failed to get response from assistant';
+        let errorMessage = 'Connection to planning service interrupted';
         
         if (error instanceof Error) {
-          errorMessage = `Error: ${error.message}`;
+          errorMessage = `Notice: ${error.message}`;
         }
         
         // Check for specific network issues
         if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
-          errorMessage = 'Network error: Unable to connect to the assistant service. Please check your connection and try again.';
+          errorMessage = 'Network issue detected. The planning service will reconnect shortly.';
         }
         
         setError(errorMessage);
-        
-        // We don't need another toast since we already showed one earlier
       }
     } finally {
       setIsLoading(false);

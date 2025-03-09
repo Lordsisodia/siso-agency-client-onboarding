@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
@@ -45,10 +46,25 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [onlineStatus, setOnlineStatus] = useState(navigator.onLine);
+  const [hasAutoRetried, setHasAutoRetried] = useState(false);
 
   // Monitor online status
   useEffect(() => {
-    const handleOnline = () => setOnlineStatus(true);
+    const handleOnline = () => {
+      setOnlineStatus(true);
+      // If we were offline and now we're back online, consider auto-retrying the last message
+      if (!onlineStatus && !hasAutoRetried && messages.length > 0) {
+        const lastUserMessage = [...messages].reverse().find(m => m.role === 'user');
+        if (lastUserMessage && error) {
+          console.log('Auto-retrying last message after reconnection');
+          setHasAutoRetried(true);
+          setRetryCount(prev => prev + 1);
+          setTimeout(() => {
+            sendMessage(lastUserMessage.content, systemPrompt);
+          }, 1000); // Wait a second before auto-retry
+        }
+      }
+    };
     const handleOffline = () => setOnlineStatus(false);
     
     window.addEventListener('online', handleOnline);
@@ -58,7 +74,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, []);
+  }, [onlineStatus, messages, error, hasAutoRetried, sendMessage, systemPrompt]);
 
   // Add welcome message on mount, but only if there are no existing messages
   useEffect(() => {
@@ -81,6 +97,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Reset auto-retry flag when error is cleared
+  useEffect(() => {
+    if (!error) {
+      setHasAutoRetried(false);
+    }
+  }, [error]);
+
   const handleRetry = () => {
     // Find the last user message and resend it
     const lastUserMessage = [...messages].reverse().find(m => m.role === 'user');
@@ -93,6 +116,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const handleSendMessage = async (message: string) => {
     // Reset retry count on new message
     setRetryCount(0);
+    setHasAutoRetried(false);
     
     // Check online status before sending
     if (!onlineStatus) {
@@ -105,6 +129,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       console.error("Error sending message:", err);
     }
   };
+
+  // Determine if we're showing a loading state
+  const showLoadingState = isLoading && messages.length > 0 && 
+    messages[messages.length - 1].role === 'user';
 
   return (
     <motion.div 
@@ -126,7 +154,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             {onlineStatus ? (
               <Wifi className="w-4 h-4 text-green-500" />
             ) : (
-              <WifiOff className="w-4 h-4 text-red-500" />
+              <WifiOff className="w-4 h-4 text-amber-500" />
             )}
             
             <Button 
@@ -172,14 +200,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             <Alert variant="warning" className="mb-4 animate-fade-in bg-amber-900/20 border-amber-500/50">
               <WifiOff className="h-4 w-4 text-amber-500" />
               <AlertDescription>
-                You're currently offline. Please check your internet connection.
+                You're currently offline. The assistant will continue when you reconnect.
               </AlertDescription>
             </Alert>
           )}
           
           {error && (
-            <Alert variant="destructive" className="mb-4 animate-fade-in">
-              <AlertCircle className="h-4 w-4 mr-2" />
+            <Alert variant="default" className="mb-4 animate-fade-in bg-blue-900/10 border-blue-500/50">
+              <AlertCircle className="h-4 w-4 text-blue-500" />
               <AlertDescription className="flex items-center justify-between">
                 <span>{error}</span>
                 <Button 
@@ -196,7 +224,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             </Alert>
           )}
           
-          {isLoading && messages.length > 0 && messages[messages.length - 1].role === 'user' && (
+          {showLoadingState && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -224,7 +252,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         {!onlineStatus && (
           <p className="text-xs text-amber-500 mt-2 flex items-center">
             <WifiOff className="h-3 w-3 mr-1" />
-            You're offline. Messaging is unavailable.
+            Waiting for connection to resume...
           </p>
         )}
       </div>

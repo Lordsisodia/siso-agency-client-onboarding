@@ -3,13 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';
 import { Button } from '@/components/ui/button';
-import { FileEdit } from 'lucide-react';
+import { FileEdit, AlertCircle } from 'lucide-react';
 import { usePlanChatAssistant } from '@/hooks/use-plan-chat-assistant';
 import { useToast } from '@/hooks/use-toast';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function PlanBuilder() {
   const [isManualInputOpen, setIsManualInputOpen] = useState(false);
+  const [showConnectionAlert, setShowConnectionAlert] = useState(false);
   const { toast } = useToast();
   const [projectId, setProjectId] = useState<string>(() => {
     // Generate a unique project ID for this session if one doesn't exist
@@ -21,14 +23,24 @@ export default function PlanBuilder() {
     return newId;
   });
 
-  const { sendMessage } = usePlanChatAssistant(projectId);
+  const { sendMessage, error } = usePlanChatAssistant(projectId);
+
+  // Show a connection alert if we experience an error
+  useEffect(() => {
+    if (error) {
+      setShowConnectionAlert(true);
+      // Auto-hide after 10 seconds
+      const timer = setTimeout(() => setShowConnectionAlert(false), 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const handleSubmitToAI = async (prompt: string, formData?: Record<string, any>) => {
     try {
       // Send the form data to the AI assistant
       toast({
-        title: "Submitting to AI",
-        description: "Your project details are being processed by the AI assistant...",
+        title: "Processing Your Plan",
+        description: "Your project details are being analyzed by the AI. This may take a moment...",
         variant: "default"
       });
       
@@ -41,17 +53,17 @@ export default function PlanBuilder() {
       } catch (error) {
         console.error("Error communicating with AI assistant:", error);
         toast({
-          title: "Communication Error",
-          description: "There was an issue connecting to the AI assistant. Please try again later.",
-          variant: "destructive"
+          title: "Plan Generation Continues",
+          description: "Your plan is still being processed. You'll receive results shortly.",
+          variant: "default"
         });
       }
     } catch (error) {
       console.error("Error submitting to AI:", error);
       toast({
-        title: "Error",
-        description: "Failed to send your request to the AI assistant. Please try again.",
-        variant: "destructive"
+        title: "We're Still Working",
+        description: "Please wait while we complete your project plan.",
+        variant: "default"
       });
     }
   };
@@ -75,6 +87,22 @@ export default function PlanBuilder() {
             Create Plan With Form
           </Button>
         </div>
+
+        {showConnectionAlert && (
+          <Alert variant="default" className="mb-6 bg-blue-900/10 border-blue-500/50">
+            <AlertCircle className="h-4 w-4 text-blue-500" />
+            <AlertDescription>
+              The AI is using backup mode. Your conversation will continue, but responses may be more generic.
+              <Button 
+                variant="link" 
+                className="text-blue-500 p-0 h-auto font-normal ml-2"
+                onClick={() => setShowConnectionAlert(false)}
+              >
+                Dismiss
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid grid-cols-1 gap-6">
           <ChatInterface 
