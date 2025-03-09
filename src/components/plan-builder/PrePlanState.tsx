@@ -15,7 +15,7 @@ export const PrePlanState: React.FC<PrePlanStateProps> = ({ onShowProjectHistory
   const navigate = useNavigate();
 
   const handleStartPlanning = () => {
-    // Navigate to the project creation page
+    // Navigate to the project creation page with the new chat UI
     navigate('/new-project');
     // Also show project history in the current view
     onShowProjectHistory();

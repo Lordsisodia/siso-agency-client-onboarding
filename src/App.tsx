@@ -17,6 +17,7 @@ import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Dashboard from '@/pages/Dashboard';
 import Projects from '@/pages/Projects';
 import PlanBuilder from '@/pages/PlanBuilder';
+import NewProject from '@/pages/NewProject';
 import CompanyProfile from '@/pages/CompanyProfile';
 import ResourceHub from '@/pages/ResourceHub';
 import Portfolio from '@/pages/Portfolio';
@@ -61,7 +62,7 @@ function App() {
         <Route path="/projects" element={<Projects />} />
         <Route path="/plan-builder" element={<PlanBuilder />} />
         <Route path="/plan-builder/:projectId" element={<PlanBuilder />} />
-        <Route path="/new-project" element={<PlanBuilder />} />
+        <Route path="/new-project" element={<NewProject />} />
         <Route path="/resource-hub" element={<ResourceHub />} />
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/support" element={<Support />} />
