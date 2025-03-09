@@ -1,9 +1,9 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Waves } from '@/components/ui/waves-background';
 import { motion } from 'framer-motion';
-import { Filter, Search } from 'lucide-react';
+import { Filter, Search, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
@@ -18,10 +18,12 @@ import { ProjectSorter } from '@/components/portfolio/ProjectSorter';
 import { Project } from '@/components/portfolio/types';
 import { usePortfolio } from '@/hooks/usePortfolio';
 import { Skeleton } from '@/components/ui/skeleton';
+import { seedPortfolioData } from '@/services/portfolio-seed.service';
 
 export default function Portfolio() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [seedingData, setSeedingData] = useState(false);
   
   const {
     filteredProjects,
@@ -34,12 +36,28 @@ export default function Portfolio() {
     handleSearchChange,
     handleFilterChange,
     handleSortChange,
-    clearFilters
+    clearFilters,
+    refreshProjects
   } = usePortfolio();
 
   const handleProjectClick = (project: Project) => {
     setSelectedProject(project);
     setDetailOpen(true);
+  };
+
+  const handleSeedData = async () => {
+    setSeedingData(true);
+    try {
+      const success = await seedPortfolioData(true);
+      if (success) {
+        // Refresh projects after seeding
+        refreshProjects();
+      }
+    } catch (error) {
+      console.error('Error in seed operation:', error);
+    } finally {
+      setSeedingData(false);
+    }
   };
 
   return (
@@ -73,6 +91,20 @@ export default function Portfolio() {
             <p className="mt-4 text-lg text-siso-text/80 max-w-2xl mx-auto">
               Discover our collection of custom applications built for agencies across different industries. Each project showcases our commitment to innovation and quality.
             </p>
+            
+            {/* Admin button to seed data (for development only) */}
+            <div className="mt-4">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="bg-black/30 border-siso-orange/30 text-siso-orange"
+                onClick={handleSeedData}
+                disabled={seedingData}
+              >
+                <Database className="w-4 h-4 mr-2" />
+                {seedingData ? 'Seeding Data...' : 'Seed Sample Data'}
+              </Button>
+            </div>
           </motion.div>
           
           {/* Featured Projects Carousel */}
