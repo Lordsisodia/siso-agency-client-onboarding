@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Loader, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GradientHeading } from '@/components/ui/gradient-heading';
@@ -14,6 +14,27 @@ interface PrePlanStateProps {
 export const PrePlanState: React.FC<PrePlanStateProps> = ({ onSubmit }) => {
   const [inputValue, setInputValue] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
+
+  // Example project prompts that will rotate
+  const examplePrompts = [
+    "Build a social media analytics dashboard with user tracking and engagement metrics...",
+    "Create an AI-powered customer support chatbot with knowledge base integration...",
+    "Develop an e-commerce platform with inventory management and payment processing...",
+    "Design a project management tool with team collaboration features and task tracking...",
+    "Build a content management system with multi-language support and SEO optimization..."
+  ];
+
+  // Rotate through placeholder texts
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPlaceholderIndex((prevIndex) => 
+        prevIndex === examplePrompts.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 3000); // Change placeholder every 3 seconds
+    
+    return () => clearInterval(interval);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setInputValue(e.target.value);
@@ -81,8 +102,8 @@ export const PrePlanState: React.FC<PrePlanStateProps> = ({ onSubmit }) => {
   }
 
   return (
-    <div className="relative min-h-[80vh] flex flex-col items-center justify-center w-full p-6 overflow-hidden">
-      {/* Waves background */}
+    <div className="relative min-h-screen flex flex-col items-center justify-center w-full p-6 overflow-hidden">
+      {/* Waves background - making it cover the full page */}
       <Waves 
         lineColor="rgba(255, 87, 34, 0.1)" 
         backgroundColor="transparent" 
@@ -90,7 +111,7 @@ export const PrePlanState: React.FC<PrePlanStateProps> = ({ onSubmit }) => {
         waveSpeedY={0.005} 
         waveAmpX={32} 
         waveAmpY={16} 
-        className="absolute inset-0 z-0" 
+        className="absolute inset-0 z-0 w-full h-full" 
       />
       
       <motion.div 
@@ -138,8 +159,8 @@ export const PrePlanState: React.FC<PrePlanStateProps> = ({ onSubmit }) => {
                 <Textarea
                   value={inputValue}
                   onChange={handleChange}
-                  placeholder="Describe your project idea here..."
                   className="w-full h-40 p-5 pr-16 bg-transparent border-none text-siso-text resize-none focus:outline-none focus:ring-0 text-md"
+                  placeholder={examplePrompts[currentPlaceholderIndex]}
                 />
                 <div className="absolute bottom-4 right-4">
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>

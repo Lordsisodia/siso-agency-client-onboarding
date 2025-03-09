@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';
@@ -29,7 +28,6 @@ export default function PlanBuilder() {
   const { toast } = useToast();
   
   const [projectId, setProjectId] = useState<string>(() => {
-    // Generate a unique project ID for this session if one doesn't exist
     const existingId = sessionStorage.getItem('planProjectId');
     if (existingId) return existingId;
     
@@ -45,17 +43,6 @@ export default function PlanBuilder() {
     const fetchProjectHistory = async () => {
       try {
         setIsLoadingHistory(true);
-        // This would typically fetch from your database
-        // For now we'll use a mock response
-        
-        // This would be the actual database query with Supabase
-        // const { data, error } = await supabase
-        //   .from('plan_chat_history')
-        //   .select('*')
-        //   .order('created_at', { ascending: false })
-        //   .limit(5);
-        
-        // Mock data for now
         const mockData = [
           {
             id: '1',
@@ -86,7 +73,6 @@ export default function PlanBuilder() {
   useEffect(() => {
     if (error) {
       setShowConnectionAlert(true);
-      // Auto-hide after 10 seconds
       const timer = setTimeout(() => setShowConnectionAlert(false), 10000);
       return () => clearTimeout(timer);
     }
@@ -115,7 +101,6 @@ export default function PlanBuilder() {
 
   const handleSubmitToAI = async (prompt: string, formData?: Record<string, any>) => {
     try {
-      // Send the form data to the AI assistant
       toast({
         title: "Processing Your Plan",
         description: "Your project details are being analyzed by the AI. This may take a moment...",
@@ -123,10 +108,8 @@ export default function PlanBuilder() {
       });
       
       try {
-        // Send the form data to the AI assistant using the sendMessage function
         await sendMessage(prompt, undefined, formData);
         
-        // Close the manual input sheet after submission
         setIsManualInputOpen(false);
         setIsPlanStarted(true);
       } catch (error) {
@@ -148,7 +131,6 @@ export default function PlanBuilder() {
   };
 
   const handleNewProject = () => {
-    // Generate a new project ID
     const newId = `plan-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     sessionStorage.setItem('planProjectId', newId);
     setProjectId(newId);
@@ -158,18 +140,16 @@ export default function PlanBuilder() {
   return (
     <MainLayout>
       <div className="container max-w-6xl mx-auto py-8 px-4 min-h-screen relative">
-        {/* Waves background - only shown when plan is started */}
-        {isPlanStarted && (
-          <Waves 
-            lineColor="rgba(255, 87, 34, 0.05)" 
-            backgroundColor="transparent" 
-            waveSpeedX={0.01} 
-            waveSpeedY={0.004} 
-            waveAmpX={24} 
-            waveAmpY={12} 
-            className="absolute inset-0 z-0 opacity-50" 
-          />
-        )}
+        {/* Waves background - now shown always and covering entire page */}
+        <Waves 
+          lineColor="rgba(255, 87, 34, 0.05)" 
+          backgroundColor="transparent" 
+          waveSpeedX={0.01} 
+          waveSpeedY={0.004} 
+          waveAmpX={24} 
+          waveAmpY={12} 
+          className="absolute inset-0 z-0 w-full h-full" 
+        />
         
         {!isPlanStarted ? (
           <>
@@ -205,7 +185,6 @@ export default function PlanBuilder() {
                         className="group relative bg-siso-bg-alt/40 backdrop-blur-md border border-siso-border rounded-lg p-5 hover:border-siso-red/50 transition-all cursor-pointer overflow-hidden"
                         whileHover={{ y: -4, transition: { duration: 0.2 } }}
                         onClick={() => {
-                          // Logic to load this project would go here
                           toast({
                             title: "Loading Project",
                             description: `Loading ${project.title}...`,
