@@ -64,23 +64,6 @@ export const menuSections: MenuSection[] = [
   },
   {
     type: 'section',
-    title: 'Community',
-    icon: Network,
-    items: [
-      {
-        href: '/community',
-        icon: Network,
-        label: 'Networking',
-      },
-      {
-        href: '/tools',
-        icon: Wrench,
-        label: 'AI Tools',
-      }
-    ]
-  },
-  {
-    type: 'section',
     title: 'Help',
     icon: MessageCircle,
     items: [
