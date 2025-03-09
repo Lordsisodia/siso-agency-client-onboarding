@@ -23,7 +23,7 @@ export default function PlanBuilder() {
     return newId;
   });
 
-  const { sendMessage, error } = usePlanChatAssistant(projectId);
+  const { sendMessage, messages, isLoading, error } = usePlanChatAssistant(projectId);
 
   // Show a connection alert if we experience an error
   useEffect(() => {
@@ -53,17 +53,17 @@ export default function PlanBuilder() {
       } catch (error) {
         console.error("Error communicating with AI assistant:", error);
         toast({
-          title: "Plan Generation Continues",
-          description: "Your plan is still being processed. You'll receive results shortly.",
-          variant: "default"
+          title: "Error",
+          description: "There was a problem processing your request. Please try again.",
+          variant: "destructive"
         });
       }
     } catch (error) {
       console.error("Error submitting to AI:", error);
       toast({
-        title: "We're Still Working",
-        description: "Please wait while we complete your project plan.",
-        variant: "default"
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
       });
     }
   };
@@ -89,13 +89,13 @@ export default function PlanBuilder() {
         </div>
 
         {showConnectionAlert && (
-          <Alert variant="default" className="mb-6 bg-blue-900/10 border-blue-500/50">
-            <AlertCircle className="h-4 w-4 text-blue-500" />
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              The AI is using backup mode. Your conversation will continue, but responses may be more generic.
+              There was a problem connecting to the AI service. Please check your connection and try again.
               <Button 
                 variant="link" 
-                className="text-blue-500 p-0 h-auto font-normal ml-2"
+                className="text-white p-0 h-auto font-normal ml-2"
                 onClick={() => setShowConnectionAlert(false)}
               >
                 Dismiss

@@ -36,22 +36,13 @@ export function usePlanChatAssistant(projectId?: string) {
     setMessages(prev => [...prev, userMessage]);
 
     try {
-      console.log('Preparing to send message to chat-with-plan-assistant function');
+      console.log('Sending message to chat-with-plan-assistant function', { 
+        projectId, 
+        threadId, 
+        messageLength: message.length 
+      });
       
-      // Create a fallback AI response for resilience
-      let fallbackResponse = {
-        response: "I'm analyzing your project requirements. While I prepare a detailed response, here's what I understand so far: you're looking to create a comprehensive project plan. Could you provide more details about your specific requirements or timeline expectations?",
-        threadId: threadId || null
-      };
-      
-      if (formData) {
-        fallbackResponse = {
-          response: "Thank you for providing your project details. I'm working on creating a comprehensive plan based on your requirements. In the meantime, could you share any additional constraints or preferences you might have for this project?",
-          threadId: threadId || null
-        };
-      }
-      
-      // Call the plan assistant edge function with improved error handling
+      // Call the plan assistant edge function
       const { data, error: functionError } = await supabase.functions.invoke('chat-with-plan-assistant', {
         body: { 
           messages: [...messages, userMessage],
@@ -63,23 +54,6 @@ export function usePlanChatAssistant(projectId?: string) {
 
       if (functionError) {
         console.error('Function error details:', functionError);
-        
-        // Use the fallback response in case of error
-        const assistantMessage: ChatMessage = {
-          role: 'assistant', 
-          content: fallbackResponse.response,
-          timestamp: new Date()
-        };
-        
-        setMessages(prev => [...prev, assistantMessage]);
-        
-        // Show error toast but with less alarming messaging
-        toast({
-          title: "AI Service Notice",
-          description: "I'm using a fallback response while the AI service reconnects. Your project planning will continue.",
-          variant: "default"
-        });
-        
         throw new Error(`Connection issue: ${functionError.message || 'Service temporarily unavailable'}`);
       }
       
@@ -87,7 +61,10 @@ export function usePlanChatAssistant(projectId?: string) {
         throw new Error('No data returned from function');
       }
       
-      console.log('Success! Response from assistant:', data);
+      console.log('Response from AI assistant:', {
+        responseLength: data.response?.length || 0,
+        threadId: data.threadId || 'none'
+      });
       
       if (data.threadId) {
         setThreadId(data.threadId);
@@ -102,26 +79,15 @@ export function usePlanChatAssistant(projectId?: string) {
       
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('Error communicating with assistant (detailed):', error);
+      console.error('Error communicating with assistant:', error);
       
-      // Only set error if we haven't already added a fallback message
-      if (!messages.find(m => 
-        m.role === 'assistant' && 
-        m.content.includes("I'm analyzing your project requirements")
-      )) {
-        let errorMessage = 'Connection to planning service interrupted';
-        
-        if (error instanceof Error) {
-          errorMessage = `Notice: ${error.message}`;
-        }
-        
-        // Check for specific network issues
-        if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
-          errorMessage = 'Network issue detected. The planning service will reconnect shortly.';
-        }
-        
-        setError(errorMessage);
-      }
+      setError(error instanceof Error ? error.message : 'Connection to the AI service interrupted');
+      
+      toast({
+        title: "Connection Issue",
+        description: "There was a problem connecting to the AI service. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }

@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { OpenAI } from "https://esm.sh/openai@4.26.0";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
@@ -267,8 +268,8 @@ async function verifyAssistant() {
   }
 }
 
-// Non-streaming chat handler
-async function handleRegularChat(req: Request) {
+// Main chat handler
+async function handleChat(req: Request) {
   try {
     // Validate configuration
     const configError = validateConfiguration();
@@ -521,7 +522,7 @@ async function handleRegularChat(req: Request) {
       }
     );
   } catch (error) {
-    console.error('Error in handleRegularChat:', error);
+    console.error('Error in handleChat:', error);
     return new Response(
       JSON.stringify({ 
         error: error.message || 'An error occurred',
@@ -551,7 +552,7 @@ serve(async (req) => {
     console.log('Received request to chat-with-plan-assistant');
     console.log('Using OpenAI assistant ID:', PLAN_BUILDER_ASSISTANT_ID);
     
-    return await handleRegularChat(req);
+    return await handleChat(req);
   } catch (error) {
     console.error('Unhandled error:', error);
     return new Response(
