@@ -64,15 +64,15 @@ export const QuickActionsPanel = () => {
       className="h-full"
     >
       <Card className="border border-siso-border/50 hover:border-siso-border hover:shadow-md hover:shadow-siso-border/10 transition-all duration-300 overflow-hidden bg-gradient-to-b from-siso-bg/80 to-siso-bg/60 backdrop-blur-sm h-full">
-        <CardHeader className="flex flex-row items-center justify-between py-4 px-6 bg-gradient-to-r from-siso-bg/90 to-siso-bg/70">
-          <CardTitle className="text-base font-semibold flex items-center tracking-tight">
+        <CardHeader className="flex flex-row items-center justify-between py-3 px-4 bg-gradient-to-r from-siso-bg/90 to-siso-bg/70">
+          <CardTitle className="text-sm font-semibold flex items-center tracking-tight">
             <BarChart3 size={16} className="mr-2 text-siso-orange" />
             Quick Actions
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <ScrollArea className="h-[260px]">
-            <div className="p-4 space-y-3">
+          <ScrollArea className="h-[calc(100%-44px)]">
+            <div className="p-3 space-y-2">
               {actions.map((action, index) => (
                 <TooltipProvider key={action.title}>
                   <Tooltip delayDuration={300}>
@@ -85,24 +85,24 @@ export const QuickActionsPanel = () => {
                         variants={cardVariants}
                         transition={{ duration: 0.2, delay: 0.1 + index * 0.05 }}
                         onClick={() => navigate(action.path)}
-                        className="flex items-center p-3.5 rounded-md cursor-pointer bg-gradient-to-r from-siso-bg/70 to-transparent border border-siso-border/20 hover:border-siso-orange/30"
+                        className="flex items-center p-3 rounded-md cursor-pointer bg-gradient-to-r from-siso-bg/70 to-transparent border border-siso-border/20 hover:border-siso-orange/30"
                       >
                         <motion.div
                           whileHover={{ rotate: 5, scale: 1.1 }}
-                          className="p-2.5 rounded-md bg-gradient-to-br from-siso-orange/10 to-siso-red/5 text-siso-orange mr-4 shadow-sm"
+                          className="p-2 rounded-md bg-gradient-to-br from-siso-orange/10 to-siso-red/5 text-siso-orange mr-3 shadow-sm"
                         >
-                          <action.icon size={18} />
+                          <action.icon size={16} />
                         </motion.div>
-                        <div className="flex-1">
-                          <h3 className="text-sm font-semibold text-siso-text-bold tracking-tight">{action.title}</h3>
-                          <p className="text-xs text-siso-text/70 mt-0.5 font-medium">{action.description}</p>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-xs font-semibold text-siso-text-bold tracking-tight">{action.title}</h3>
+                          <p className="text-xs text-siso-text/70 mt-0.5 font-medium truncate">{action.description}</p>
                         </div>
                         <motion.div
                           initial={{ x: 0 }}
                           whileHover={{ x: 3 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <ArrowRight size={16} className="text-siso-text/40 group-hover:text-siso-orange transition-colors" />
+                          <ArrowRight size={14} className="text-siso-text/40 group-hover:text-siso-orange transition-colors" />
                         </motion.div>
                       </motion.div>
                     </TooltipTrigger>

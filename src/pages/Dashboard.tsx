@@ -147,38 +147,41 @@ export default function Dashboard() {
     <div className="flex min-h-screen bg-gradient-to-b from-[#0A0A0A] to-[#121212]">
       <Sidebar />
       <motion.div 
-        className="flex-1 p-5 md:p-8 overflow-hidden"
+        className="flex-1 p-5 md:p-6 overflow-hidden"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
         <DashboardHeader userName={user?.user_metadata?.full_name || 'User'} />
         
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6"
-          variants={itemVariants}
-        >
-          <div className="md:col-span-2">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 mb-5">
+          <motion.div 
+            className="md:col-span-8"
+            variants={itemVariants}
+          >
             <QuickStatsPanel
               activeProjects={stats.activeProjects}
               pendingTasks={stats.pendingTasks}
               upcomingEvents={stats.upcomingEvents}
             />
-          </div>
-          <div>
-            <QuickActionsPanel />
-          </div>
-        </motion.div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          </motion.div>
           <motion.div 
-            className="md:col-span-2"
+            className="md:col-span-4 h-full"
+            variants={itemVariants}
+          >
+            <QuickActionsPanel />
+          </motion.div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
+          <motion.div 
+            className="md:col-span-8"
             variants={itemVariants}
           >
             <ProjectsOverview />
           </motion.div>
           <motion.div 
-            className="space-y-6"
+            className="md:col-span-4 flex flex-col gap-5"
             variants={itemVariants}
           >
             <NotificationsPanel 

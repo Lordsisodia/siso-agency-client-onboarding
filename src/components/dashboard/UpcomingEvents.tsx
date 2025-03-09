@@ -63,16 +63,16 @@ export const UpcomingEvents = ({ events = [], onViewAll }: UpcomingEventsProps) 
       className="h-full"
     >
       <Card className="border border-siso-border/50 hover:border-siso-border hover:shadow-md hover:shadow-siso-border/10 transition-all duration-300 overflow-hidden bg-gradient-to-b from-siso-bg/80 to-siso-bg/60 backdrop-blur-sm h-full">
-        <CardHeader className="flex flex-row items-center justify-between py-4 px-6 bg-gradient-to-r from-siso-bg/90 to-siso-bg/70">
-          <CardTitle className="text-base font-semibold flex items-center">
+        <CardHeader className="flex flex-row items-center justify-between py-3 px-4 bg-gradient-to-r from-siso-bg/90 to-siso-bg/70">
+          <CardTitle className="text-sm font-semibold flex items-center">
             <Calendar size={16} className="mr-2 text-siso-orange" />
             Upcoming Events
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <ScrollArea className="h-[260px]">
+          <ScrollArea className="h-[200px]">
             {events.length === 0 ? (
-              <div className="text-center py-6 text-siso-text/70 px-6">
+              <div className="text-center py-4 text-siso-text/70 px-4">
                 No upcoming events to display.
               </div>
             ) : (
@@ -90,12 +90,12 @@ export const UpcomingEvents = ({ events = [], onViewAll }: UpcomingEventsProps) 
                       whileTap="tap"
                       variants={cardVariants}
                       transition={{ duration: 0.2, delay: 0.1 + index * 0.05 }}
-                      className="flex items-center p-3 rounded-md cursor-pointer mx-2"
+                      className="flex items-center p-2 rounded-md cursor-pointer mx-2"
                     >
                       <div className="relative mr-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-siso-bg/90 to-siso-bg/60 border border-siso-border/50 rounded-md flex flex-col items-center justify-center shadow-sm">
+                        <div className="w-10 h-10 bg-gradient-to-br from-siso-bg/90 to-siso-bg/60 border border-siso-border/50 rounded-md flex flex-col items-center justify-center shadow-sm">
                           <span className="text-xs font-medium text-siso-text/70">{event.date !== 'Today' && event.date !== 'Tomorrow' ? new Date(event.date).toLocaleDateString('en-US', { month: 'short' }) : ''}</span>
-                          <span className="text-sm font-bold text-siso-text-bold">{event.date === 'Today' ? 'Today' : event.date === 'Tomorrow' ? 'Tmrw' : new Date(event.date).getDate()}</span>
+                          <span className="text-xs font-bold text-siso-text-bold">{event.date === 'Today' ? 'Today' : event.date === 'Tomorrow' ? 'Tmrw' : new Date(event.date).getDate()}</span>
                         </div>
                         <motion.div 
                           className={`absolute -top-1 -right-1 rounded-full ${eventType.color} px-1 py-0.5 text-[8px] text-white whitespace-nowrap shadow-sm`}
@@ -111,9 +111,9 @@ export const UpcomingEvents = ({ events = [], onViewAll }: UpcomingEventsProps) 
                           ></motion.div>
                         )}
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <motion.h3 
-                          className="text-sm font-medium text-siso-text-bold line-clamp-1"
+                          className="text-xs font-medium text-siso-text-bold line-clamp-1"
                           whileHover={{ color: '#FF5722' }}
                         >
                           {event.title}
@@ -125,7 +125,7 @@ export const UpcomingEvents = ({ events = [], onViewAll }: UpcomingEventsProps) 
                         whileHover={{ x: 3 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <ChevronRight size={16} className="text-siso-text/40" />
+                        <ChevronRight size={14} className="text-siso-text/40" />
                       </motion.div>
                     </motion.div>
                   );
@@ -135,7 +135,7 @@ export const UpcomingEvents = ({ events = [], onViewAll }: UpcomingEventsProps) 
           </ScrollArea>
           
           <motion.div 
-            className="py-3 text-center border-t border-siso-border/30"
+            className="py-2 text-center border-t border-siso-border/30"
             whileHover={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
           >
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
