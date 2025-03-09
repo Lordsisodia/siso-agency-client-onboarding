@@ -1,205 +1,27 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
-import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
-import { QuickStatsPanel } from '@/components/dashboard/QuickStatsPanel';
-import { ProjectsOverview } from '@/components/dashboard/ProjectsOverview';
-import { QuickActionsPanel } from '@/components/dashboard/QuickActionsPanel';
-import { NotificationsPanel } from '@/components/dashboard/NotificationsPanel';
-import { UpcomingEvents } from '@/components/dashboard/UpcomingEvents';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-
-// Define correct types for notifications and events
-export type NotificationType = 'alert' | 'success' | 'warning' | 'info';
-export type EventType = 'deadline' | 'meeting' | 'reminder';
-
-export interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  time: string;
-  type: NotificationType;
-  read: boolean;
-}
-
-export interface Event {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  type: EventType;
-}
+import { useDashboardStats } from '@/hooks/useDashboardStats';
 
 export default function Dashboard() {
   const { user, loading } = useAuthSession();
   const navigate = useNavigate();
-  const [stats, setStats] = useState({
-    activeProjects: 0,
-    pendingTasks: 0,
-    upcomingEvents: 0
-  });
-
-  // Demo data for notifications
-  const notifications: Notification[] = [
-    {
-      id: '1',
-      title: 'New Message',
-      message: 'You have a new message from Alex Smith',
-      time: '5 min ago',
-      type: 'info',
-      read: false
-    },
-    {
-      id: '2',
-      title: 'Project Update',
-      message: 'Your project "Website Redesign" has been updated',
-      time: '2 hours ago',
-      type: 'success',
-      read: false
-    },
-    {
-      id: '3',
-      title: 'Deadline Approaching',
-      message: 'Project "Marketing Plan" deadline is tomorrow',
-      time: '1 day ago',
-      type: 'warning',
-      read: true
-    }
-  ];
-
-  // Demo data for events
-  const events: Event[] = [
-    {
-      id: '1',
-      title: 'Client Meeting',
-      date: 'Today',
-      time: '2:00 PM',
-      type: 'meeting'
-    },
-    {
-      id: '2',
-      title: 'Project Deadline',
-      date: 'Tomorrow',
-      time: '11:59 PM',
-      type: 'deadline'
-    },
-    {
-      id: '3',
-      title: 'Team Standup',
-      date: 'Wed, Sep 28',
-      time: '10:00 AM',
-      type: 'meeting'
-    }
-  ];
-  
-  // Mock implementation of mark as read
-  const handleMarkAsRead = (id: string) => {
-    console.log(`Marked notification ${id} as read`);
-  };
-  
-  // Mock implementation of view all
-  const handleViewAll = () => {
-    navigate('/notifications');
-  };
-  
-  // Mock implementation of view calendar
-  const handleViewCalendar = () => {
-    navigate('/calendar');
-  };
+  const { stats, fetchStats } = useDashboardStats();
 
   useEffect(() => {
-    // Fetch dashboard stats
-    // This is a mock implementation
-    setStats({
-      activeProjects: 5,
-      pendingTasks: 12,
-      upcomingEvents: 3
-    });
-  }, []);
-
-  // Animation variants for staggered children
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        type: "spring",
-        stiffness: 70,
-        damping: 15
-      }
-    }
-  };
+    fetchStats();
+  }, [fetchStats]);
 
   return (
     <div className="flex min-h-screen bg-gradient-to-b from-[#0A0A0A] to-[#121212]">
       <Sidebar />
-      <motion.div 
-        className="flex-1 p-4 md:p-5 overflow-auto"
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-      >
-        <DashboardHeader userName={user?.user_metadata?.full_name || 'User'} />
-        
-        <div className="grid grid-cols-12 gap-4 mt-4">
-          {/* Main content area - 9 columns */}
-          <div className="col-span-12 lg:col-span-9 space-y-4">
-            {/* Quick Stats Panel - Full width within main content */}
-            <motion.div variants={itemVariants}>
-              <QuickStatsPanel
-                activeProjects={stats.activeProjects}
-                pendingTasks={stats.pendingTasks}
-                upcomingEvents={stats.upcomingEvents}
-              />
-            </motion.div>
-            
-            {/* Projects Overview - Full width within main content */}
-            <motion.div variants={itemVariants}>
-              <div className="bg-siso-bg/30 border border-siso-border/30 rounded-xl overflow-hidden">
-                <ProjectsOverview />
-              </div>
-            </motion.div>
-          </div>
-          
-          {/* Right sidebar - 3 columns */}
-          <div className="col-span-12 lg:col-span-3 space-y-4">
-            {/* Quick Actions Panel */}
-            <motion.div variants={itemVariants} className="h-auto">
-              <QuickActionsPanel />
-            </motion.div>
-            
-            {/* Notifications Panel */}
-            <motion.div variants={itemVariants}>
-              <NotificationsPanel 
-                notifications={notifications} 
-                onMarkAsRead={handleMarkAsRead}
-                onViewAll={handleViewAll}
-              />
-            </motion.div>
-            
-            {/* Upcoming Events */}
-            <motion.div variants={itemVariants}>
-              <UpcomingEvents 
-                events={events}
-                onViewAll={handleViewCalendar}
-              />
-            </motion.div>
-          </div>
-        </div>
-      </motion.div>
+      <DashboardLayout 
+        userName={user?.user_metadata?.full_name || 'User'} 
+        stats={stats}
+      />
     </div>
   );
 }
