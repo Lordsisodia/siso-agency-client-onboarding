@@ -114,7 +114,7 @@ export default function NewProject() {
 
   return (
     <MainLayout>
-      <div className="container max-w-6xl mx-auto py-8 px-4 min-h-screen relative">
+      <div className="container max-w-6xl mx-auto py-6 px-4 min-h-screen relative">
         {/* Waves background */}
         <Waves 
           lineColor="rgba(255, 87, 34, 0.05)" 
@@ -126,27 +126,27 @@ export default function NewProject() {
           className="absolute inset-0 z-0 w-full h-full" 
         />
         
-        <div className="mb-6 flex items-center justify-between relative z-10">
+        <div className="mb-4 flex items-center justify-between relative z-10">
           <Button 
             onClick={handleGoBack}
             variant="outline"
-            className="border-siso-border text-siso-text hover:bg-siso-bg-card flex items-center gap-2"
+            className="h-8 text-sm border-siso-border text-siso-text hover:bg-siso-bg-card flex items-center gap-2"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Plan Builder</span>
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back</span>
           </Button>
           
           <Button 
             onClick={() => setIsWebsiteInputOpen(true)}
             variant="outline"
-            className="border-siso-border bg-card/50 backdrop-blur-sm text-siso-text hover:bg-siso-bg-alt hover:border-siso-border-hover flex items-center gap-2 transition-all duration-300"
+            className="h-8 text-sm border-siso-border bg-card/50 backdrop-blur-sm text-siso-text hover:bg-siso-bg-alt hover:border-siso-border-hover flex items-center gap-2 transition-all duration-300"
           >
-            <FileEdit className="w-4 h-4" />
+            <FileEdit className="w-3.5 h-3.5" />
             <span>Submit Website or Info</span>
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 relative z-10">
+        <div className="grid grid-cols-1 gap-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
