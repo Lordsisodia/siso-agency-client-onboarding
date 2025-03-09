@@ -746,6 +746,96 @@ export type Database = {
           },
         ]
       }
+      portfolio_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      portfolio_projects: {
+        Row: {
+          challenge: string
+          client: string
+          created_at: string
+          date: string
+          description: string
+          duration: string
+          featured: boolean
+          features: string[]
+          full_description: string
+          gallery: string[]
+          id: string
+          image: string
+          results: string
+          solution: string
+          tags: string[]
+          technologies: string[]
+          testimonial: Json | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          challenge: string
+          client: string
+          created_at?: string
+          date: string
+          description: string
+          duration: string
+          featured?: boolean
+          features?: string[]
+          full_description: string
+          gallery?: string[]
+          id?: string
+          image: string
+          results: string
+          solution: string
+          tags?: string[]
+          technologies?: string[]
+          testimonial?: Json | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          challenge?: string
+          client?: string
+          created_at?: string
+          date?: string
+          description?: string
+          duration?: string
+          featured?: boolean
+          features?: string[]
+          full_description?: string
+          gallery?: string[]
+          id?: string
+          image?: string
+          results?: string
+          solution?: string
+          tags?: string[]
+          technologies?: string[]
+          testimonial?: Json | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       post_interactions: {
         Row: {
           action: string | null

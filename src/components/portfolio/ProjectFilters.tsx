@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
+import { fetchCategories } from '@/services/portfolio.service';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ProjectFiltersProps {
   onFilterChange: (filters: string[]) => void;
@@ -18,9 +20,11 @@ interface ProjectFiltersProps {
 export function ProjectFilters({ onFilterChange }: ProjectFiltersProps) {
   const [selected, setSelected] = useState<string[]>([]);
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [categories, setCategories] = useState<{name: string, description: string}[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // All available categories/tags
-  const availableFilters = {
+  // Define filter categories
+  const filterCategories = {
     projectType: [
       "Web Application", 
       "CRM", 
@@ -42,6 +46,23 @@ export function ProjectFilters({ onFilterChange }: ProjectFiltersProps) {
     ]
   };
 
+  // Fetch categories from Supabase
+  useEffect(() => {
+    const loadCategories = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchCategories();
+        setCategories(data);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCategories();
+  }, []);
+
   useEffect(() => {
     onFilterChange(selected);
   }, [selected, onFilterChange]);
@@ -57,6 +78,15 @@ export function ProjectFilters({ onFilterChange }: ProjectFiltersProps) {
   const handleClearFilters = () => {
     setSelected([]);
   };
+
+  // Group categories by type
+  const projectTypes = categories
+    .filter(cat => ["Web Application", "CRM", "Analytics", "E-commerce", "Content Management"].includes(cat.name))
+    .sort((a, b) => a.name.localeCompare(b.name));
+    
+  const domainTypes = categories
+    .filter(cat => !["Web Application", "CRM", "Analytics", "E-commerce", "Content Management"].includes(cat.name))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="relative">
@@ -90,51 +120,66 @@ export function ProjectFilters({ onFilterChange }: ProjectFiltersProps) {
               )}
             </div>
             
-            <div>
-              <h4 className="text-sm font-medium text-siso-text-bold mb-2">Project Type</h4>
+            {loading ? (
               <div className="space-y-2">
-                {availableFilters.projectType.map(filter => (
-                  <div key={filter} className="flex items-center space-x-2">
-                    <Checkbox 
-                      id={`filter-${filter}`} 
-                      checked={selected.includes(filter)} 
-                      onCheckedChange={() => handleToggleFilter(filter)}
-                      className="data-[state=checked]:bg-siso-orange data-[state=checked]:border-siso-orange"
-                    />
-                    <label 
-                      htmlFor={`filter-${filter}`}
-                      className="text-sm text-siso-text leading-none cursor-pointer"
-                    >
-                      {filter}
-                    </label>
-                  </div>
-                ))}
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-full" />
               </div>
-            </div>
-            
-            <Separator className="bg-siso-border/20" />
-            
-            <div>
-              <h4 className="text-sm font-medium text-siso-text-bold mb-2">Domain/Industry</h4>
-              <div className="space-y-2">
-                {availableFilters.domain.map(filter => (
-                  <div key={filter} className="flex items-center space-x-2">
-                    <Checkbox 
-                      id={`filter-${filter}`} 
-                      checked={selected.includes(filter)} 
-                      onCheckedChange={() => handleToggleFilter(filter)}
-                      className="data-[state=checked]:bg-siso-orange data-[state=checked]:border-siso-orange"
-                    />
-                    <label 
-                      htmlFor={`filter-${filter}`}
-                      className="text-sm text-siso-text leading-none cursor-pointer"
-                    >
-                      {filter}
-                    </label>
+            ) : (
+              <>
+                <div>
+                  <h4 className="text-sm font-medium text-siso-text-bold mb-2">Project Type</h4>
+                  <div className="space-y-2">
+                    {projectTypes.map(filter => (
+                      <div key={filter.name} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`filter-${filter.name}`} 
+                          checked={selected.includes(filter.name)} 
+                          onCheckedChange={() => handleToggleFilter(filter.name)}
+                          className="data-[state=checked]:bg-siso-orange data-[state=checked]:border-siso-orange"
+                        />
+                        <label 
+                          htmlFor={`filter-${filter.name}`}
+                          className="text-sm text-siso-text leading-none cursor-pointer"
+                          title={filter.description}
+                        >
+                          {filter.name}
+                        </label>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
+                
+                <Separator className="bg-siso-border/20" />
+                
+                <div>
+                  <h4 className="text-sm font-medium text-siso-text-bold mb-2">Domain/Industry</h4>
+                  <div className="space-y-2">
+                    {domainTypes.map(filter => (
+                      <div key={filter.name} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`filter-${filter.name}`} 
+                          checked={selected.includes(filter.name)} 
+                          onCheckedChange={() => handleToggleFilter(filter.name)}
+                          className="data-[state=checked]:bg-siso-orange data-[state=checked]:border-siso-orange"
+                        />
+                        <label 
+                          htmlFor={`filter-${filter.name}`}
+                          className="text-sm text-siso-text leading-none cursor-pointer"
+                          title={filter.description}
+                        >
+                          {filter.name}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
             
             <div className="pt-2">
               <Button 

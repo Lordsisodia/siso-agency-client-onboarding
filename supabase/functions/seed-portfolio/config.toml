@@ -1,0 +1,6 @@
+
+# This config is applied when running the function locally with the Functions CLI
+# supabase functions serve seed-portfolio
+
+# Override the default maximum HTTP request body size limit of 4MB
+http_max_request_size = 10485760 # 10MB in bytes
