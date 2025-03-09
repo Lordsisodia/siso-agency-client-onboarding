@@ -5,8 +5,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Database } from '@/integrations/supabase/types';
 import { useQuery } from '@tanstack/react-query';
 import { showPointsEarnedToast } from '@/components/points/PointsEarnedToast';
+import { Transaction } from '@/types/dashboard';
 
-// [Analysis] Expanded type to include 'bookmark_article' and other actions
+// Updated type to include 'bookmark_article' and other actions
 type PointActionType = 
   | Database['public']['Enums']['point_action_type'] 
   | 'bookmark_article'
@@ -110,5 +111,30 @@ export const usePoints = (userId: string | undefined) => {
     }
   };
 
-  return { points, rank, isLoading, awardPoints };
+  // Add function to get transactions using the new table
+  const getTransactions = async (): Promise<Transaction[]> => {
+    if (!userId) return [];
+    
+    try {
+      const { data, error } = await supabase
+        .from('crypto_transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      
+      return data as Transaction[];
+    } catch (error: any) {
+      console.error('[usePoints] Error fetching transactions:', error);
+      toast({
+        variant: "destructive",
+        title: "Error fetching transactions",
+        description: error.message,
+      });
+      return [];
+    }
+  };
+
+  return { points, rank, isLoading, awardPoints, getTransactions };
 };

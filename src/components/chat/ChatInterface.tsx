@@ -42,7 +42,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   
   // Convert messages if needed (to handle different message format between hooks)
   const messages = usePlanAssistant
-    ? rawMessages as PlanChatMessage[]
+    ? (rawMessages as PlanChatMessage[])
     : rawMessages;
   
   // Use the custom hook for handling chat interface state
@@ -77,7 +77,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       />
       
       <ChatMessageList 
-        messages={messages}
+        messages={messages as any[]} // Use type assertion to handle the different message formats
         isLoading={isLoading}
         error={error}
         onlineStatus={onlineStatus}

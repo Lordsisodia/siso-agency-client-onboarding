@@ -845,6 +845,30 @@ export type Database = {
           },
         ]
       }
+      point_configurations: {
+        Row: {
+          action: string
+          created_at: string | null
+          description: string | null
+          id: string
+          points: number
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          points?: number
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          points?: number
+        }
+        Relationships: []
+      }
       portfolio_categories: {
         Row: {
           created_at: string
@@ -1361,6 +1385,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_crypto_history: {
+        Row: {
+          created_at: string | null
+          id: string
+          points_exchanged: number
+          status: string
+          tokens_received: number
+          transaction_type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          points_exchanged: number
+          status?: string
+          tokens_received: number
+          transaction_type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          points_exchanged?: number
+          status?: string
+          tokens_received?: number
+          transaction_type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_search_history: {
         Row: {
           created_at: string | null
@@ -1382,6 +1439,39 @@ export type Database = {
           query?: string
           result_type?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_skill_progress: {
+        Row: {
+          created_at: string | null
+          id: string
+          level: number | null
+          progress: number | null
+          skill_id: string
+          skill_name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          level?: number | null
+          progress?: number | null
+          skill_id: string
+          skill_name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          level?: number | null
+          progress?: number | null
+          skill_id?: string
+          skill_name?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -1483,6 +1573,108 @@ export type Database = {
           metadata?: Json | null
         }
         Relationships: []
+      }
+      video_bookmarks: {
+        Row: {
+          created_at: string | null
+          id: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_bookmarks_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "youtube_videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_progress: {
+        Row: {
+          created_at: string | null
+          id: string
+          progress: number | null
+          updated_at: string | null
+          user_id: string
+          video_id: string
+          watched: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          progress?: number | null
+          updated_at?: string | null
+          user_id: string
+          video_id: string
+          watched?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          progress?: number | null
+          updated_at?: string | null
+          user_id?: string
+          video_id?: string
+          watched?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_progress_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "youtube_videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_summaries: {
+        Row: {
+          created_at: string | null
+          id: string
+          key_points: Json | null
+          summary: string | null
+          updated_at: string | null
+          video_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          key_points?: Json | null
+          summary?: string | null
+          updated_at?: string | null
+          video_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          key_points?: Json | null
+          summary?: string | null
+          updated_at?: string | null
+          video_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_summaries_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "youtube_videos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       video_sync_history: {
         Row: {
@@ -1620,7 +1812,33 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      leaderboard: {
+        Row: {
+          avatar_url: string | null
+          full_name: string | null
+          id: string | null
+          points: number | null
+          rank: string | null
+          siso_tokens: number | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          full_name?: string | null
+          id?: string | null
+          points?: number | null
+          rank?: string | null
+          siso_tokens?: number | null
+        }
+        Update: {
+          avatar_url?: string | null
+          full_name?: string | null
+          id?: string | null
+          points?: number | null
+          rank?: string | null
+          siso_tokens?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       binary_quantize:

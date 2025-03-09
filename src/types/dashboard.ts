@@ -34,3 +34,41 @@ export interface DashboardStats {
   pendingTasks: number;
   upcomingEvents: number;
 }
+
+export interface Phase {
+  name: string;
+  status: 'completed' | 'in-progress' | 'pending';
+  progress: number;
+}
+
+export interface ProjectDoc {
+  id: string;
+  section: string;
+  content: string;
+  related_components: string[];
+  implementation_status: string;
+  priority: string;
+}
+
+export interface Video {
+  id: string;
+  title: string;
+  thumbnail_url: string;
+  duration: string;
+  channel_id: string;
+  url: string;
+  viewcount?: number;
+}
+
+export interface Assistant {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  assistant_type: string;
+  prompt_template: string;
+  use_cases: string[];
+  input_variables: string[];
+  created_at: string;
+  updated_at: string;
+}
