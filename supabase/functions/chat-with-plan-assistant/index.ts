@@ -1,6 +1,5 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { OpenAI } from "https://esm.sh/openai@4.26.0";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
 const corsHeaders = {
@@ -8,21 +7,51 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Initialize OpenAI client with the v2 beta header
-const openai = new OpenAI({
-  apiKey: Deno.env.get('OPENAI_API_KEY'),
-  defaultHeaders: {
-    'OpenAI-Beta': 'assistants=v2', // Use v2 API
-  }
-});
+// Initialize OpenAI API 
+const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+const MODEL_DEFAULT = 'gpt-4o-mini';  // Default model (faster, cheaper)
+const MODEL_FALLBACK = 'gpt-4o';      // Fallback model (more powerful)
 
 // Initialize Supabase client
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Get the assistant ID from environment variables only
-const PLAN_BUILDER_ASSISTANT_ID = Deno.env.get('PLAN_BUILDER_ASSISTANT_ID');
+// System prompt for project planning
+const PROJECT_PLANNER_SYSTEM_PROMPT = `
+You are an expert AI project planning assistant specialized in helping users create comprehensive software project plans.
+
+Your expertise includes:
+- Requirements gathering and analysis
+- Feature prioritization and selection
+- Technology stack recommendations
+- Resource allocation and team composition
+- Budget estimation and financial planning
+- Timeline creation with realistic milestones
+- Risk assessment and mitigation strategies
+
+COMMUNICATION STYLE:
+- Be professional but conversational and encouraging
+- Ask clarifying questions when information is incomplete
+- Provide rationale for your recommendations
+- Maintain a helpful and constructive tone
+- Use concrete examples to illustrate points
+
+INTERACTION APPROACH:
+1. Begin by understanding the project scope and goals
+2. Ask focused questions to fill knowledge gaps
+3. Provide structured recommendations based on best practices
+4. Break complex projects into manageable phases
+5. Suggest alternative approaches when appropriate
+
+RESPONSE FORMAT:
+- Use clear sections with headers for organization
+- Include bullet points for key information
+- Highlight important decisions or recommendations
+- Maintain conversation history context when responding
+
+IMPORTANT: Focus exclusively on helping users plan their software projects efficiently. Avoid generic advice and instead provide specific, actionable guidance tailored to their unique project needs.
+`;
 
 /**
  * Validates environment variables and configuration
@@ -31,7 +60,7 @@ const PLAN_BUILDER_ASSISTANT_ID = Deno.env.get('PLAN_BUILDER_ASSISTANT_ID');
 function validateConfiguration() {
   const missingVars = [];
   
-  if (!Deno.env.get('OPENAI_API_KEY')) {
+  if (!OPENAI_API_KEY) {
     missingVars.push('OPENAI_API_KEY');
   }
   
@@ -43,10 +72,6 @@ function validateConfiguration() {
     missingVars.push('SUPABASE_SERVICE_ROLE_KEY');
   }
   
-  if (!PLAN_BUILDER_ASSISTANT_ID) {
-    missingVars.push('PLAN_BUILDER_ASSISTANT_ID');
-  }
-  
   if (missingVars.length > 0) {
     return `Missing required configuration: ${missingVars.join(', ')}`;
   }
@@ -55,9 +80,9 @@ function validateConfiguration() {
 }
 
 /**
- * Gets or creates a thread for a project with better error handling
- * @param projectId The project ID
- * @returns Promise<string> The thread ID
+ * Get or create a thread record in the database
+ * @param projectId The project ID to associate with thread history
+ * @returns Thread ID for persistence
  */
 async function getOrCreateThread(projectId: string) {
   if (!projectId) {
@@ -74,32 +99,19 @@ async function getOrCreateThread(projectId: string) {
     
     if (existingThread?.thread_id) {
       console.log("Found existing thread:", existingThread.thread_id);
-      
-      try {
-        // Verify thread still exists in OpenAI
-        await openai.beta.threads.retrieve(existingThread.thread_id);
-        return existingThread.thread_id;
-      } catch (err) {
-        console.log("Thread no longer exists in OpenAI, creating a new one:", err.message);
-        // Continue to create a new thread
-      }
+      return existingThread.thread_id;
     }
     
-    // Create a new thread
+    // Create a new thread record
     console.log("Creating new thread for project:", projectId);
-    const thread = await openai.beta.threads.create({
-      metadata: {
-        project_id: projectId,
-        created_at: new Date().toISOString()
-      }
-    });
+    const threadId = crypto.randomUUID();
     
     // Store thread information
     const { data: savedThread, error: saveError } = await supabase
       .from('project_threads')
       .insert({
         project_id: projectId,
-        thread_id: thread.id,
+        thread_id: threadId,
         metadata: {
           created_at: new Date().toISOString(),
           message_count: 0
@@ -113,8 +125,8 @@ async function getOrCreateThread(projectId: string) {
       throw saveError;
     }
     
-    console.log("Created new thread:", thread.id);
-    return thread.id;
+    console.log("Created new thread:", threadId);
+    return threadId;
   } catch (err) {
     console.error("Error in getOrCreateThread:", err);
     throw new Error(`Failed to create or retrieve thread: ${err.message}`);
@@ -122,9 +134,15 @@ async function getOrCreateThread(projectId: string) {
 }
 
 /**
- * Save chat history with improved error handling and metadata
+ * Save chat history to database
  */
-async function saveChatHistory(projectId: string | null, userMessage: string, aiResponse: string, formData?: Record<string, any>, metadata?: Record<string, any>) {
+async function saveChatHistory(
+  projectId: string | null, 
+  userMessage: string, 
+  aiResponse: string, 
+  formData?: Record<string, any>, 
+  metadata?: Record<string, any>
+) {
   if (!projectId) {
     console.log("No project ID provided, skipping chat history save");
     return;
@@ -149,7 +167,6 @@ async function saveChatHistory(projectId: string | null, userMessage: string, ai
     
     if (error) {
       console.error("Error saving chat history:", error);
-      // Continue execution rather than throwing, as this is a non-critical operation
     } else {
       console.log("Successfully saved chat history");
       
@@ -171,108 +188,33 @@ async function saveChatHistory(projectId: string | null, userMessage: string, ai
 }
 
 /**
- * Process tool calls and handle function outputs
+ * Create a message history context with sliding window for OpenAI context management
  */
-async function processToolOutputs(runId: string, threadId: string, toolCalls: any[]) {
-  const toolOutputs = [];
+function createMessageContext(messages, maxTokens = 4000) {
+  // Start with the system message
+  const formattedMessages = [
+    { role: 'system', content: PROJECT_PLANNER_SYSTEM_PROMPT }
+  ];
   
-  for (const toolCall of toolCalls) {
-    if (toolCall.type === 'function') {
-      const functionName = toolCall.function.name;
-      const functionArgs = JSON.parse(toolCall.function.arguments);
-      
-      console.log(`Processing function call: ${functionName}`, functionArgs);
-      
-      let output = JSON.stringify(functionArgs);
-      
-      // Add custom function processing here if needed
-      // For now, we're just returning the arguments as the output
-      
-      toolOutputs.push({
-        tool_call_id: toolCall.id,
-        output
-      });
-    }
-  }
+  // Add latest user messages (most recent 10)
+  // Simplified approach - in production we'd want token counting instead of message count
+  const userMessages = messages
+    .filter(msg => msg.role === 'user' || msg.role === 'assistant')
+    .slice(-20); // Keep last 20 messages to maintain context
   
-  if (toolOutputs.length > 0) {
-    return await openai.beta.threads.runs.submitToolOutputs(
-      threadId,
-      runId,
-      { tool_outputs: toolOutputs }
-    );
-  }
+  userMessages.forEach(msg => {
+    formattedMessages.push({
+      role: msg.role,
+      content: msg.content
+    });
+  });
   
-  return null;
+  return formattedMessages;
 }
 
 /**
- * Enhanced run poller with timeout and better error handling
+ * Main chat handler function
  */
-async function pollForCompletion(threadId: string, runId: string, maxPolls = 60, initialBackoff = 1000) {
-  let pollCount = 0;
-  let backoff = initialBackoff;
-  
-  while (pollCount < maxPolls) {
-    try {
-      const runStatus = await openai.beta.threads.runs.retrieve(threadId, runId);
-      
-      console.log(`Run status: ${runStatus.status}, Poll: ${pollCount + 1}/${maxPolls}`);
-      
-      if (runStatus.status === 'completed') {
-        return runStatus;
-      }
-      
-      if (runStatus.status === 'failed' || runStatus.status === 'expired' || runStatus.status === 'cancelled') {
-        throw new Error(`Run ended with status: ${runStatus.status}, reason: ${runStatus.last_error?.message || 'unknown'}`);
-      }
-      
-      if (runStatus.status === 'requires_action') {
-        // Handle function calling
-        const requiredActions = runStatus.required_action?.submit_tool_outputs.tool_calls || [];
-        const updatedRun = await processToolOutputs(runId, threadId, requiredActions);
-        
-        if (updatedRun) {
-          // Reset backoff after successful action
-          backoff = initialBackoff;
-          continue;
-        }
-      }
-      
-      pollCount++;
-      
-      // Wait with exponential backoff (capped at 5 seconds)
-      await new Promise(resolve => setTimeout(resolve, Math.min(backoff, 5000)));
-      backoff = Math.min(backoff * 1.5, 5000); // Gradually increase backoff time
-      
-    } catch (err) {
-      console.error(`Error polling run status: ${err.message}`);
-      throw err;
-    }
-  }
-  
-  throw new Error(`Run timed out after ${maxPolls} polls`);
-}
-
-/**
- * Verify that the assistant exists and is configured correctly
- */
-async function verifyAssistant() {
-  try {
-    if (!PLAN_BUILDER_ASSISTANT_ID) {
-      throw new Error("PLAN_BUILDER_ASSISTANT_ID environment variable is not set");
-    }
-    
-    const assistant = await openai.beta.assistants.retrieve(PLAN_BUILDER_ASSISTANT_ID);
-    console.log(`Assistant verified: ${assistant.name}, model: ${assistant.model}`);
-    return assistant;
-  } catch (err) {
-    console.error(`Error verifying assistant: ${err.message}`);
-    throw new Error(`Invalid assistant ID or OpenAI API key: ${err.message}`);
-  }
-}
-
-// Main chat handler
 async function handleChat(req: Request) {
   try {
     // Validate configuration
@@ -281,23 +223,6 @@ async function handleChat(req: Request) {
       console.error('Configuration error:', configError);
       return new Response(
         JSON.stringify({ error: configError }),
-        {
-          status: 500,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-    }
-    
-    // Verify assistant exists
-    try {
-      await verifyAssistant();
-    } catch (err) {
-      console.error('Assistant verification failed:', err);
-      return new Response(
-        JSON.stringify({ error: `Assistant verification failed: ${err.message}` }),
         {
           status: 500,
           headers: {
@@ -359,32 +284,14 @@ async function handleChat(req: Request) {
       );
     }
     
-    console.log('Processing message:', userMessage.content);
-    console.log('Using assistant ID:', PLAN_BUILDER_ASSISTANT_ID);
+    console.log('Processing message:', userMessage.content.substring(0, 100) + '...');
     
-    // Get or create thread
+    // Get or create thread ID for persistence
     let threadId;
     try {
-      if (existingThreadId) {
-        // Use the provided thread ID if it exists
-        console.log('Using provided thread ID:', existingThreadId);
-        threadId = existingThreadId;
-        
-        try {
-          // Verify thread still exists in OpenAI
-          await openai.beta.threads.retrieve(threadId);
-        } catch (err) {
-          console.log('Thread no longer exists in OpenAI, creating a new one:', err.message);
-          threadId = projectId 
-            ? await getOrCreateThread(projectId) 
-            : await openai.beta.threads.create().then(t => t.id);
-        }
-      } else {
-        // Get or create a new thread
-        threadId = projectId 
-          ? await getOrCreateThread(projectId) 
-          : await openai.beta.threads.create().then(t => t.id);
-      }
+      // Use existing thread ID or create a new one
+      threadId = existingThreadId || 
+        (projectId ? await getOrCreateThread(projectId) : crypto.randomUUID());
       
       console.log('Using thread ID:', threadId);
     } catch (err) {
@@ -401,136 +308,130 @@ async function handleChat(req: Request) {
       );
     }
     
-    // Add user message to thread
-    try {
-      await openai.beta.threads.messages.create(threadId, {
-        role: 'user',
-        content: userMessage.content
-      });
-      console.log('Added user message to thread');
-    } catch (err) {
-      console.error('Error adding message to thread:', err);
-      return new Response(
-        JSON.stringify({ error: 'Failed to add message to thread: ' + err.message }),
-        {
-          status: 500,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-    }
+    // Create message context for OpenAI
+    const messageContext = createMessageContext(messages);
     
-    // Run the assistant on the thread
-    let run;
+    // Call OpenAI Chat Completions API
     try {
-      run = await openai.beta.threads.runs.create(threadId, {
-        assistant_id: PLAN_BUILDER_ASSISTANT_ID,
-      });
-      console.log('Created run:', run.id);
-    } catch (err) {
-      console.error('Error creating assistant run:', err);
-      return new Response(
-        JSON.stringify({ error: 'Failed to run assistant: ' + err.message }),
-        {
-          status: 500,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-    }
-    
-    // Wait for the run to complete
-    let runResult;
-    try {
-      runResult = await pollForCompletion(threadId, run.id);
-      console.log('Run completed with status:', runResult.status);
-    } catch (err) {
-      console.error('Error during run polling:', err);
-      return new Response(
-        JSON.stringify({ error: 'Assistant processing failed: ' + err.message }),
-        {
-          status: 500,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-    }
-    
-    // Get the assistant's response
-    let responseContent = '';
-    try {
-      const messages = await openai.beta.threads.messages.list(threadId);
+      console.log(`Calling OpenAI with ${messageContext.length} messages in context`);
       
-      // Find the assistant's messages after our user prompt
-      const assistantMessages = messages.data
-        .filter(msg => msg.role === 'assistant')
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      
-      // Extract the content from the most recent message
-      if (assistantMessages.length > 0) {
-        const message = assistantMessages[0];
-        responseContent = message.content.map(content => {
-          if (content.type === 'text') {
-            return content.text.value;
-          }
-          return '';
-        }).join('\n');
-      }
-      
-      console.log('Got assistant response of length:', responseContent.length);
-    } catch (err) {
-      console.error('Error retrieving assistant response:', err);
-      return new Response(
-        JSON.stringify({ error: 'Failed to retrieve assistant response: ' + err.message }),
-        {
-          status: 500,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-    }
-    
-    // Save chat history if we have a project ID
-    if (projectId) {
-      try {
-        await saveChatHistory(projectId, userMessage.content, responseContent, formData, {
-          thread_id: threadId,
-          run_id: run.id
-        });
-        console.log('Saved chat history for project:', projectId);
-      } catch (err) {
-        // Non-critical error, log but continue
-        console.error('Failed to save chat history:', err);
-      }
-    }
-    
-    // Return the assistant's response
-    return new Response(
-      JSON.stringify({ 
-        response: responseContent,
-        threadId: threadId
-      }),
-      {
+      const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
         headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: MODEL_DEFAULT,
+          messages: messageContext,
+          temperature: 0.7,
+          max_tokens: 2000,
+          frequency_penalty: 0.3,
+          presence_penalty: 0.3
+        })
+      });
+      
+      if (!openaiResponse.ok) {
+        const errorData = await openaiResponse.json();
+        console.error('OpenAI API error:', errorData);
+        
+        // Try fallback model if available and appropriate error
+        if (errorData?.error?.type === 'server_error' || errorData?.error?.type === 'invalid_request_error') {
+          console.log('Attempting fallback to more powerful model:', MODEL_FALLBACK);
+          
+          const fallbackResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${OPENAI_API_KEY}`
+            },
+            body: JSON.stringify({
+              model: MODEL_FALLBACK,
+              messages: messageContext,
+              temperature: 0.7,
+              max_tokens: 2000
+            })
+          });
+          
+          if (!fallbackResponse.ok) {
+            const fallbackError = await fallbackResponse.json();
+            throw new Error(`Fallback model also failed: ${fallbackError?.error?.message || 'Unknown error'}`);
+          }
+          
+          const fallbackData = await fallbackResponse.json();
+          const assistantResponse = fallbackData.choices[0].message.content;
+          
+          // Save chat history
+          await saveChatHistory(projectId, userMessage.content, assistantResponse, formData, { 
+            thread_id: threadId,
+            model: MODEL_FALLBACK,
+            fallback_used: true
+          });
+          
+          return new Response(
+            JSON.stringify({ 
+              response: assistantResponse,
+              threadId: threadId,
+              model: MODEL_FALLBACK
+            }),
+            {
+              headers: {
+                ...corsHeaders,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
         }
+        
+        throw new Error(`OpenAI API error: ${errorData?.error?.message || 'Unknown error'}`);
       }
-    );
+      
+      const data = await openaiResponse.json();
+      const assistantResponse = data.choices[0].message.content;
+      
+      console.log('Got assistant response of length:', assistantResponse.length);
+      
+      // Save chat history
+      await saveChatHistory(projectId, userMessage.content, assistantResponse, formData, { 
+        thread_id: threadId,
+        model: MODEL_DEFAULT
+      });
+      
+      // Return the assistant's response
+      return new Response(
+        JSON.stringify({ 
+          response: assistantResponse,
+          threadId: threadId,
+          model: MODEL_DEFAULT
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+    } catch (err) {
+      console.error('Error calling OpenAI:', err);
+      return new Response(
+        JSON.stringify({ error: `AI service error: ${err.message}` }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
   } catch (error) {
-    console.error('Error in handleChat:', error);
+    console.error('Unhandled error in handleChat:', error);
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'An error occurred',
-        details: error.stack // Include stack trace for debugging
+        error: 'Internal server error', 
+        message: error.message,
+        stack: error.stack,
       }),
       {
         status: 500,
@@ -554,8 +455,6 @@ serve(async (req) => {
   
   try {
     console.log('Received request to chat-with-plan-assistant');
-    console.log('Using OpenAI assistant ID:', PLAN_BUILDER_ASSISTANT_ID);
-    
     return await handleChat(req);
   } catch (error) {
     console.error('Unhandled error:', error);
@@ -563,7 +462,7 @@ serve(async (req) => {
       JSON.stringify({ 
         error: 'Internal server error', 
         message: error.message,
-        stack: error.stack, // Include stack trace for debugging
+        stack: error.stack,
         details: 'This error occurred in the chat-with-plan-assistant edge function'
       }),
       {

@@ -7,6 +7,7 @@ export type ChatMessage = {
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp?: Date;
+  id?: string;
 };
 
 export function usePlanChatAssistant(projectId?: string) {
@@ -30,7 +31,8 @@ export function usePlanChatAssistant(projectId?: string) {
     const userMessage: ChatMessage = { 
       role: 'user', 
       content: message,
-      timestamp: new Date()
+      timestamp: new Date(),
+      id: `user-${Date.now()}`
     };
     
     setMessages(prev => [...prev, userMessage]);
@@ -42,7 +44,7 @@ export function usePlanChatAssistant(projectId?: string) {
         messageLength: message.length 
       });
       
-      // Call the plan assistant edge function
+      // Call the plan assistant edge function with our new direct completion API
       const { data, error: functionError } = await supabase.functions.invoke('chat-with-plan-assistant', {
         body: { 
           messages: [...messages, userMessage],
@@ -63,7 +65,8 @@ export function usePlanChatAssistant(projectId?: string) {
       
       console.log('Response from AI assistant:', {
         responseLength: data.response?.length || 0,
-        threadId: data.threadId || 'none'
+        threadId: data.threadId || 'none',
+        model: data.model || 'unknown'
       });
       
       if (data.threadId) {
@@ -74,7 +77,8 @@ export function usePlanChatAssistant(projectId?: string) {
       const assistantMessage: ChatMessage = {
         role: 'assistant', 
         content: data.response,
-        timestamp: new Date()
+        timestamp: new Date(),
+        id: `assistant-${Date.now()}`
       };
       
       setMessages(prev => [...prev, assistantMessage]);
@@ -87,8 +91,8 @@ export function usePlanChatAssistant(projectId?: string) {
       let errorMessage = 'There was a problem connecting to the AI assistant.';
       
       if (error instanceof Error) {
-        if (error.message.includes('Assistant verification failed')) {
-          errorMessage = 'The AI assistant configuration is invalid. Please contact support.';
+        if (error.message.includes('API key')) {
+          errorMessage = 'The OpenAI API key is invalid or missing. Please check the configuration.';
         } else if (error.message.includes('Connection issue')) {
           errorMessage = 'Connection to the AI service interrupted. Please try again later.';
         } else {
@@ -106,7 +110,8 @@ export function usePlanChatAssistant(projectId?: string) {
       const errorSystemMessage: ChatMessage = {
         role: 'system',
         content: `Error: ${errorMessage}`,
-        timestamp: new Date()
+        timestamp: new Date(),
+        id: `system-${Date.now()}`
       };
       
       setMessages(prev => [...prev, errorSystemMessage]);
