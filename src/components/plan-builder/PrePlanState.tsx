@@ -1,28 +1,24 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { Sparkles, ArrowRight, MessageSquare, Globe, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GradientHeading } from '@/components/ui/gradient-heading';
 import { Waves } from '@/components/ui/waves-background';
-import { useNavigate } from 'react-router-dom';
 
 interface PrePlanStateProps {
-  onShowProjectHistory: () => void;
+  onStartWithChat: () => void;
+  onManualInput: () => void;
+  onWebsiteAnalysis: () => void;
 }
 
-export const PrePlanState: React.FC<PrePlanStateProps> = ({ onShowProjectHistory }) => {
-  const navigate = useNavigate();
-
-  const handleStartPlanning = () => {
-    // Navigate to the project creation page with the new chat UI
-    navigate('/new-project');
-    // Also show project history in the current view
-    onShowProjectHistory();
-  };
-
+export const PrePlanState: React.FC<PrePlanStateProps> = ({ 
+  onStartWithChat,
+  onManualInput,
+  onWebsiteAnalysis
+}) => {
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center w-full p-6 overflow-hidden">
+    <div className="relative min-h-[85vh] flex flex-col items-center justify-center w-full p-6 overflow-hidden">
       {/* Waves background - making it cover the full page */}
       <Waves 
         lineColor="rgba(255, 87, 34, 0.1)" 
@@ -52,42 +48,90 @@ export const PrePlanState: React.FC<PrePlanStateProps> = ({ onShowProjectHistory
         </motion.div>
         
         <GradientHeading variant="rainbow" size="lg" className="mb-6 !text-5xl" weight="bold">
-          AI Project Planner
+          How would you like to start?
         </GradientHeading>
         
         <motion.p 
-          className="text-lg text-siso-text-muted mb-8 max-w-2xl mx-auto leading-relaxed"
+          className="text-lg text-siso-text-muted mb-10 max-w-2xl mx-auto leading-relaxed"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          Start planning your projects with the help of AI and get detailed plans, features, timelines, and budgets
+          Choose one of the following methods to begin planning your project
         </motion.p>
       </motion.div>
 
       <motion.div 
-        className="w-full max-w-md mx-auto relative z-10"
+        className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mx-auto relative z-10"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-        <div className="flex justify-center">
-          <motion.div 
-            whileHover={{ scale: 1.05 }} 
-            whileTap={{ scale: 0.95 }}
-            className="relative"
+        {/* Option 1: Start with Chat */}
+        <motion.div 
+          whileHover={{ y: -10, scale: 1.03 }}
+          whileTap={{ scale: 0.98 }}
+          className="bg-card/60 backdrop-blur-sm border border-siso-border hover:border-siso-border-hover rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col"
+        >
+          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500/20 to-blue-600/20 flex items-center justify-center mb-4">
+            <MessageSquare className="w-6 h-6 text-blue-500" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2">Start with Chat</h3>
+          <p className="text-siso-text-muted text-sm mb-6 flex-grow">
+            Have a conversation with our AI assistant. Describe your project goals and get personalized guidance.
+          </p>
+          <Button
+            onClick={onStartWithChat}
+            className="w-full bg-blue-500 text-white hover:bg-blue-600 border-none shadow-md"
           >
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-siso-red to-siso-orange opacity-50 rounded-lg blur-md"></div>
-            <Button 
-              onClick={handleStartPlanning}
-              className="relative bg-gradient-to-r from-siso-red to-siso-orange hover:opacity-90 text-white text-lg py-6 px-8 rounded-lg shadow-lg flex items-center gap-3"
-              size="lg"
-            >
-              Start Planning Your Project
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-          </motion.div>
-        </div>
+            Start Chatting
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </motion.div>
+
+        {/* Option 2: Website Analysis */}
+        <motion.div 
+          whileHover={{ y: -10, scale: 1.03 }}
+          whileTap={{ scale: 0.98 }}
+          className="bg-card/60 backdrop-blur-sm border border-siso-border hover:border-siso-border-hover rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col"
+        >
+          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500/20 to-purple-600/20 flex items-center justify-center mb-4">
+            <Globe className="w-6 h-6 text-purple-500" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2">Website Analysis</h3>
+          <p className="text-siso-text-muted text-sm mb-6 flex-grow">
+            Provide your website URL and social links for AI analysis to get tailored recommendations.
+          </p>
+          <Button
+            onClick={onWebsiteAnalysis}
+            className="w-full bg-purple-500 text-white hover:bg-purple-600 border-none shadow-md"
+          >
+            Analyze Website
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </motion.div>
+
+        {/* Option 3: Manual Input */}
+        <motion.div 
+          whileHover={{ y: -10, scale: 1.03 }}
+          whileTap={{ scale: 0.98 }}
+          className="bg-card/60 backdrop-blur-sm border border-siso-border hover:border-siso-border-hover rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col"
+        >
+          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-green-500/20 to-green-600/20 flex items-center justify-center mb-4">
+            <FileText className="w-6 h-6 text-green-500" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2">Manual Input</h3>
+          <p className="text-siso-text-muted text-sm mb-6 flex-grow">
+            Fill out a guided form with details about your project, company, goals, and desired features.
+          </p>
+          <Button
+            onClick={onManualInput}
+            className="w-full bg-green-500 text-white hover:bg-green-600 border-none shadow-md"
+          >
+            Fill Form
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </motion.div>
       </motion.div>
     </div>
   );
