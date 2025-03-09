@@ -11,10 +11,10 @@ export function TypingIndicator() {
         fallback="AI"
       />
       <ChatBubbleMessage>
-        <div className="flex space-x-1">
-          <div className="animate-bounce delay-0">•</div>
-          <div className="animate-bounce delay-150">•</div>
-          <div className="animate-bounce delay-300">•</div>
+        <div className="flex space-x-1.5">
+          <div className="h-2 w-2 rounded-full bg-current animate-bounce delay-0" />
+          <div className="h-2 w-2 rounded-full bg-current animate-bounce delay-150" />
+          <div className="h-2 w-2 rounded-full bg-current animate-bounce delay-300" />
         </div>
       </ChatBubbleMessage>
     </ChatBubble>

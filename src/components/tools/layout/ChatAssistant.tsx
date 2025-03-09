@@ -6,11 +6,9 @@ import {
   ExpandableChatBody,
   ExpandableChatFooter,
 } from '@/components/ui/expandable-chat';
-import { ChatMessageList } from '@/components/ui/chat-message-list';
 import { useChatAssistantState } from './hooks/useChatAssistantState';
-import { ChatMessageBubble } from './components/ChatMessageBubble';
-import { TypingIndicator } from './components/TypingIndicator';
 import { ChatInputForm } from './components/ChatInputForm';
+import { MessageList } from './components/MessageList';
 
 export function ChatAssistant() {
   const { messages, inputValue, setInputValue, isSubmitting, handleSubmit } = useChatAssistantState();
@@ -29,12 +27,10 @@ export function ChatAssistant() {
       </ExpandableChatHeader>
 
       <ExpandableChatBody>
-        <ChatMessageList>
-          {messages.map((message) => (
-            <ChatMessageBubble key={message.id} message={message} />
-          ))}
-          {isSubmitting && <TypingIndicator />}
-        </ChatMessageList>
+        <MessageList 
+          messages={messages}
+          isSubmitting={isSubmitting}
+        />
       </ExpandableChatBody>
 
       <ExpandableChatFooter>
