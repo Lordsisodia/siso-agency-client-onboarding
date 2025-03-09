@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -7,6 +8,7 @@ import { PointsHistory } from '@/components/profile/PointsHistory';
 import { ProfileLayout } from '@/components/profile/ProfileLayout';
 import { ProfileSkeleton } from '@/components/profile/ProfileSkeleton';
 import { ProfileMetrics } from '@/components/profile/ProfileMetrics';
+import { AchievementsSection } from '@/components/profile/AchievementsSection';
 import { useProfileData } from '@/hooks/useProfileData';
 
 const Profile = () => {
@@ -25,6 +27,47 @@ const Profile = () => {
     handleAvatarUpload,
     handleBannerUpload
   } = useProfileData();
+
+  // Sample data for achievements (would normally come from the database)
+  const sampleAchievements = [
+    {
+      id: '1',
+      title: 'First Project Created',
+      description: 'Created your first project on the platform',
+      date: 'Jan 15, 2023'
+    },
+    {
+      id: '2',
+      title: '7-Day Login Streak',
+      description: 'Logged in for 7 consecutive days',
+      date: 'Feb 2, 2023'
+    },
+    {
+      id: '3',
+      title: 'Resource Contributor',
+      description: 'Shared 5 resources with the community',
+      date: 'Mar 10, 2023'
+    }
+  ];
+
+  // Sample data for recent activities (would normally come from the database)
+  const sampleActivities = [
+    {
+      action: 'Daily Login',
+      points: 5,
+      date: '2 hours ago'
+    },
+    {
+      action: 'Watched Tutorial Video',
+      points: 10,
+      date: 'Yesterday'
+    },
+    {
+      action: 'Project Milestone Completed',
+      points: 25,
+      date: '3 days ago'
+    }
+  ];
 
   const handleLogout = async () => {
     try {
@@ -120,6 +163,16 @@ const Profile = () => {
             formData={formData}
             onFormChange={handleFormChange}
             onSave={saveProfile}
+          />
+        </div>
+        
+        <div className="md:col-span-2">
+          <AchievementsSection 
+            achievements={sampleAchievements}
+            pointsTotal={profile?.points || 0}
+            pointsNextLevel={1000}
+            rank={profile?.rank || 'Bronze'}
+            recentActivities={sampleActivities}
           />
         </div>
         
