@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Smartphone, Globe, ShoppingCart, Brush, Terminal, LayoutGrid, BadgeCheck, Clock } from 'lucide-react';
@@ -11,6 +11,8 @@ interface ProjectTypeProps {
 }
 
 export function ProjectType({ projectType, projectScale, updateProjectData }: ProjectTypeProps) {
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  
   const projectTypes = [
     { id: 'mobile', name: 'Mobile App', icon: <Smartphone className="w-6 h-6" /> },
     { id: 'web', name: 'Website', icon: <Globe className="w-6 h-6" /> },
@@ -40,6 +42,8 @@ export function ProjectType({ projectType, projectScale, updateProjectData }: Pr
     hidden: { y: 20, opacity: 0 },
     show: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 50 } }
   };
+  
+  const springConfig = { type: "spring", stiffness: 300, damping: 20 };
 
   return (
     <motion.div 
@@ -67,6 +71,8 @@ export function ProjectType({ projectType, projectScale, updateProjectData }: Pr
                 scale: 0.98,
                 transition: { duration: 0.2 } 
               }}
+              onHoverStart={() => setHoveredCard(type.id)}
+              onHoverEnd={() => setHoveredCard(null)}
             >
               <Card 
                 className={`cursor-pointer transition-all relative overflow-hidden ${
@@ -86,20 +92,44 @@ export function ProjectType({ projectType, projectScale, updateProjectData }: Pr
                   </motion.div>
                 )}
                 
-                <CardContent className="p-6 flex flex-col items-center text-center">
+                {projectType === type.id && (
+                  <motion.div 
+                    className="absolute inset-0 bg-gradient-to-br from-siso-red/5 to-siso-orange/10 -z-0"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                )}
+                
+                <CardContent className="p-6 flex flex-col items-center text-center relative z-10">
                   <motion.div 
                     initial={{ y: 10, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: index * 0.1 }}
-                    className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
+                    className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 relative ${
                       projectType === type.id
                         ? 'bg-gradient-to-br from-siso-red to-siso-orange text-white shadow-lg'
                         : 'bg-muted'
                     }`}
                   >
+                    {hoveredCard === type.id && projectType !== type.id && (
+                      <motion.div 
+                        className="absolute inset-0 rounded-full"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.2 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        style={{
+                          background: "radial-gradient(circle at center, rgba(255, 87, 34, 0.5) 0%, rgba(255, 160, 0, 0) 70%)"
+                        }}
+                      />
+                    )}
+                    
                     <motion.div
                       animate={{ 
-                        rotate: projectType === type.id ? [0, 5, 0, -5, 0] : 0 
+                        rotate: projectType === type.id ? [0, 5, 0, -5, 0] : 0,
+                        scale: projectType === type.id ? [1, 1.1, 1] : 1
                       }}
                       transition={{ 
                         duration: 0.5, 
@@ -109,8 +139,35 @@ export function ProjectType({ projectType, projectScale, updateProjectData }: Pr
                     >
                       {type.icon}
                     </motion.div>
+                    
+                    {projectType === type.id && (
+                      <motion.div
+                        className="absolute inset-0 rounded-full"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ 
+                          opacity: [0.2, 0.6, 0.2],
+                          scale: [0.8, 1.2, 0.8]
+                        }}
+                        transition={{ 
+                          duration: 3,
+                          repeat: Infinity,
+                          repeatType: "reverse"
+                        }}
+                        style={{
+                          background: "radial-gradient(circle at center, rgba(255, 87, 34, 0.5) 0%, rgba(255, 160, 0, 0) 70%)"
+                        }}
+                      />
+                    )}
                   </motion.div>
-                  <span className="font-medium">{type.name}</span>
+                  <motion.span 
+                    className="font-medium"
+                    animate={{ 
+                      color: hoveredCard === type.id && projectType !== type.id ? "#FF5722" : "" 
+                    }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {type.name}
+                  </motion.span>
                 </CardContent>
               </Card>
             </motion.div>
@@ -157,6 +214,16 @@ export function ProjectType({ projectType, projectScale, updateProjectData }: Pr
                     </motion.div>
                   )}
                   
+                  {projectScale === scale.id && (
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-br from-siso-red/5 to-siso-orange/10 -z-0"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  )}
+                  
                   <motion.div 
                     className="mb-3" 
                     animate={{ 
@@ -167,21 +234,83 @@ export function ProjectType({ projectType, projectScale, updateProjectData }: Pr
                       repeat: projectScale === scale.id ? 0 : 0
                     }}
                   >
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${
-                      projectScale === scale.id
-                        ? 'bg-gradient-to-br from-siso-red to-siso-orange text-white shadow-md'
-                        : 'bg-muted'
-                    }`}>
+                    <motion.div 
+                      className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 relative ${
+                        projectScale === scale.id
+                          ? 'bg-gradient-to-br from-siso-red to-siso-orange text-white shadow-md'
+                          : 'bg-muted'
+                      }`}
+                      whileHover={{ 
+                        scale: projectScale !== scale.id ? 1.1 : 1,
+                        backgroundColor: projectScale !== scale.id ? "rgba(255, 87, 34, 0.1)" : ""
+                      }}
+                      transition={springConfig}
+                    >
                       <Clock className="w-6 h-6" />
-                    </div>
+                      
+                      {projectScale === scale.id && (
+                        <motion.div
+                          className="absolute inset-0 rounded-full"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ 
+                            opacity: [0.2, 0.5, 0.2],
+                            scale: [0.8, 1.1, 0.8]
+                          }}
+                          transition={{ 
+                            duration: 3,
+                            repeat: Infinity,
+                            repeatType: "reverse"
+                          }}
+                          style={{
+                            background: "radial-gradient(circle at center, rgba(255, 87, 34, 0.5) 0%, rgba(255, 160, 0, 0) 70%)"
+                          }}
+                        />
+                      )}
+                    </motion.div>
                   </motion.div>
-                  <span className="font-medium text-center">{scale.name}</span>
+                  
+                  <motion.span 
+                    className="font-medium text-center"
+                    animate={{ 
+                      color: projectScale === scale.id ? "#FF5722" : "" 
+                    }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {scale.name}
+                  </motion.span>
                 </CardContent>
               </Card>
             </motion.div>
           ))}
         </div>
       </motion.div>
+      
+      {/* Background decorative elements */}
+      <motion.div 
+        className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-gradient-to-r from-siso-red/5 to-siso-orange/5 blur-3xl -z-10 opacity-60"
+        animate={{ 
+          scale: [1, 1.1, 1],
+          opacity: [0.4, 0.6, 0.4]
+        }}
+        transition={{ 
+          duration: 8,
+          repeat: Infinity,
+          repeatType: "reverse"
+        }}
+      />
+      <motion.div 
+        className="absolute -top-20 -left-20 w-60 h-60 rounded-full bg-blue-500/5 blur-3xl -z-10 opacity-60"
+        animate={{ 
+          scale: [1, 1.2, 1],
+          opacity: [0.3, 0.5, 0.3]
+        }}
+        transition={{ 
+          duration: 10,
+          repeat: Infinity,
+          repeatType: "reverse",
+          delay: 1
+        }}
+      />
     </motion.div>
   );
 }

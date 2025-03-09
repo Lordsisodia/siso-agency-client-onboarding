@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,7 @@ interface FeatureSelectionProps {
 export function FeatureSelection({ features, updateFeatures }: FeatureSelectionProps) {
   const [activeTab, setActiveTab] = useState("all");
   const [initializedFeatures, setInitializedFeatures] = useState(false);
+  const [hoveredFeature, setHoveredFeature] = useState<string | null>(null);
   
   // Group features by category
   const categories = Array.from(new Set(featureOptions.map(f => f.category)));
@@ -114,6 +115,9 @@ export function FeatureSelection({ features, updateFeatures }: FeatureSelectionP
                 isPriority={features[feature.id]?.priority === 'must-have'}
                 onToggle={() => toggleFeature(feature.id)}
                 onPriorityToggle={() => togglePriority(feature.id)}
+                isHovered={hoveredFeature === feature.id}
+                onHover={() => setHoveredFeature(feature.id)}
+                onHoverEnd={() => setHoveredFeature(null)}
               />
             ))}
           </motion.div>
@@ -141,6 +145,9 @@ export function FeatureSelection({ features, updateFeatures }: FeatureSelectionP
                     isPriority={features[feature.id]?.priority === 'must-have'}
                     onToggle={() => toggleFeature(feature.id)}
                     onPriorityToggle={() => togglePriority(feature.id)}
+                    isHovered={hoveredFeature === feature.id}
+                    onHover={() => setHoveredFeature(feature.id)}
+                    onHoverEnd={() => setHoveredFeature(null)}
                   />
                 ))}
             </motion.div>
@@ -156,7 +163,7 @@ export function FeatureSelection({ features, updateFeatures }: FeatureSelectionP
       >
         <div className="text-sm font-medium flex items-center gap-2">
           <span>Selected:</span> 
-          <Badge animated variant="gradient" className="px-3 py-0.5">
+          <Badge animated variant="gradient" glow className="px-3 py-0.5">
             {Object.values(features).filter(f => f.selected).length} of {featureOptions.length}
           </Badge>
         </div>
@@ -168,11 +175,23 @@ export function FeatureSelection({ features, updateFeatures }: FeatureSelectionP
           transition={{ delay: 1, duration: 0.5 }}
         >
           <motion.div 
-            className="h-full bg-gradient-to-r from-siso-red to-siso-orange rounded-full"
+            className="h-full bg-gradient-to-r from-siso-red to-siso-orange rounded-full relative"
             initial={{ width: "0%" }}
             animate={{ width: `${(Object.values(features).filter(f => f.selected).length / featureOptions.length) * 100}%` }}
             transition={{ delay: 1.1, duration: 0.5 }}
-          />
+          >
+            <motion.div 
+              className="absolute inset-0 bg-white opacity-30"
+              animate={{ 
+                x: ["-100%", "100%"],
+              }}
+              transition={{ 
+                repeat: Infinity,
+                duration: 1.5,
+                ease: "easeInOut" 
+              }}
+            />
+          </motion.div>
         </motion.div>
       </motion.div>
     </div>
@@ -184,13 +203,31 @@ interface FeatureCardProps {
   isSelected: boolean, 
   isPriority: boolean,
   onToggle: () => void, 
-  onPriorityToggle: () => void 
+  onPriorityToggle: () => void,
+  isHovered: boolean,
+  onHover: () => void,
+  onHoverEnd: () => void
 }
 
-function FeatureCard({ feature, isSelected, isPriority, onToggle, onPriorityToggle }: FeatureCardProps) {
+function FeatureCard({ 
+  feature, 
+  isSelected, 
+  isPriority, 
+  onToggle, 
+  onPriorityToggle,
+  isHovered,
+  onHover,
+  onHoverEnd 
+}: FeatureCardProps) {
   const item = {
     hidden: { y: 20, opacity: 0 },
     show: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 50 } }
+  };
+
+  const springTransition = {
+    type: "spring",
+    stiffness: 500,
+    damping: 30
   };
 
   return (
@@ -198,48 +235,87 @@ function FeatureCard({ feature, isSelected, isPriority, onToggle, onPriorityTogg
       variants={item}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
       whileTap={{ y: 0, scale: 0.98, transition: { duration: 0.2 } }}
+      onHoverStart={onHover}
+      onHoverEnd={onHoverEnd}
       className="h-full"
     >
       <Card 
-        className={`transition-all duration-300 h-full ${
+        className={`transition-all duration-300 h-full relative ${
           isSelected 
-            ? 'border-primary shadow-md shadow-primary/10' 
-            : 'opacity-70 hover:opacity-90 hover:border-muted-foreground/30'
+            ? 'border-primary shadow-md' 
+            : 'opacity-70 hover:opacity-100 hover:border-muted-foreground/30'
         }`}
       >
+        {isSelected && (
+          <motion.div
+            className="absolute inset-0 rounded-md opacity-10"
+            initial={{ opacity: 0, background: "radial-gradient(circle at center, rgba(255, 87, 34, 0.3) 0%, rgba(255, 160, 0, 0) 70%)" }}
+            animate={{ 
+              opacity: [0.05, 0.15, 0.05],
+              scale: [0.9, 1.05, 0.9]
+            }}
+            transition={{ 
+              duration: 3, 
+              repeat: Infinity,
+              repeatType: "reverse" 
+            }}
+          />
+        )}
+        
         <CardHeader className="p-4 pb-2">
           <div className="flex justify-between items-start gap-2">
             <CardTitle className="text-base">{feature.name}</CardTitle>
-            <Switch checked={isSelected} onCheckedChange={onToggle} />
+            <motion.div
+              initial={false}
+              animate={{ scale: isHovered ? 1.1 : 1 }}
+              transition={springTransition}
+            >
+              <Switch checked={isSelected} onCheckedChange={onToggle} />
+            </motion.div>
           </div>
           <CardDescription className="line-clamp-2 text-xs mt-1">{feature.description}</CardDescription>
         </CardHeader>
         
-        <CardFooter 
-          className={`p-4 pt-2 border-t flex justify-between items-center transition-opacity duration-300 ${
-            isSelected ? 'opacity-100' : 'opacity-0'
-          }`}
-        >
-          <span className="text-xs text-muted-foreground">Priority:</span>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div onClick={onPriorityToggle} className="cursor-pointer">
-                  <Badge 
-                    animated
-                    variant={isPriority ? "gradient" : "outline"}
-                    className={`${isPriority ? '' : 'hover:bg-primary/10'} px-3 py-1`}
-                  >
-                    {isPriority ? 'Must-have' : 'Nice-to-have'}
-                  </Badge>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>Click to toggle priority</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </CardFooter>
+        <AnimatePresence>
+          {isSelected && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <CardFooter 
+                className="p-4 pt-2 border-t flex justify-between items-center"
+              >
+                <span className="text-xs text-muted-foreground">Priority:</span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <motion.div 
+                        onClick={onPriorityToggle} 
+                        className="cursor-pointer"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Badge 
+                          animated
+                          variant={isPriority ? "gradient" : "outline"}
+                          glow={isPriority}
+                          className={`${isPriority ? '' : 'hover:bg-primary/10'} px-3 py-1`}
+                        >
+                          {isPriority ? 'Must-have' : 'Nice-to-have'}
+                        </Badge>
+                      </motion.div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>Click to toggle priority</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </CardFooter>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </Card>
     </motion.div>
   );

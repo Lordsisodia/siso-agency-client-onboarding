@@ -20,7 +20,8 @@ const badgeVariants = cva(
         success: "border-transparent bg-green-500 text-white hover:bg-green-600",
         warning: "border-transparent bg-yellow-500 text-white hover:bg-yellow-600",
         info: "border-transparent bg-blue-500 text-white hover:bg-blue-600",
-        gradient: "border-transparent bg-gradient-to-r from-siso-red to-siso-orange text-white",
+        gradient: "border-transparent bg-gradient-to-r from-siso-red to-siso-orange text-white shadow-sm shadow-siso-red/20",
+        pulse: "border-transparent bg-gradient-to-r from-siso-red to-siso-orange text-white animate-pulse",
       },
     },
     defaultVariants: {
@@ -33,19 +34,24 @@ export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {
     animated?: boolean;
+    glow?: boolean;
 }
 
-function Badge({ className, variant, animated = false, ...props }: BadgeProps) {
+function Badge({ className, variant, animated = false, glow = false, ...props }: BadgeProps) {
   const Component = animated ? motion.div : "div";
   
   return (
     <Component
-      className={cn(badgeVariants({ variant }), className)}
+      className={cn(
+        badgeVariants({ variant }), 
+        glow && "relative after:absolute after:inset-0 after:rounded-full after:blur-md after:bg-inherit after:opacity-70 after:-z-10", 
+        className
+      )}
       {...(animated ? {
         initial: { scale: 0.8, opacity: 0 },
         animate: { scale: 1, opacity: 1 },
         transition: { type: "spring", stiffness: 500, damping: 10 },
-        whileHover: { scale: 1.05 },
+        whileHover: { scale: 1.05, y: -2 },
         whileTap: { scale: 0.95 }
       } : {})}
       {...props}
