@@ -10,19 +10,21 @@ interface ChatInputProps {
   isLoading?: boolean;
   placeholder?: string;
   className?: string;
+  disabled?: boolean;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({ 
   onSubmit, 
   isLoading = false,
   placeholder = "Type a message...",
-  className 
+  className, 
+  disabled = false
 }) => {
   const [input, setInput] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (input.trim() && !isLoading) {
+    if (input.trim() && !isLoading && !disabled) {
       onSubmit(input);
       setInput('');
     }
@@ -36,7 +38,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         onChange={(e) => setInput(e.target.value)}
         placeholder={placeholder}
         className="w-full p-4 pr-20 bg-siso-bg-alt/30 backdrop-blur-sm border border-siso-border rounded-lg text-siso-text placeholder-siso-text-muted focus:outline-none focus:ring-2 focus:ring-siso-red/50 transition-all"
-        disabled={isLoading}
+        disabled={isLoading || disabled}
       />
       
       <motion.div
@@ -47,7 +49,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <Button
           type="submit"
           className="bg-gradient-to-r from-siso-red to-siso-orange text-white rounded-md px-4 py-2 hover:opacity-90 transition-all"
-          disabled={isLoading || !input.trim()}
+          disabled={isLoading || !input.trim() || disabled}
         >
           {isLoading ? (
             <Loader2 className="h-5 w-5 animate-spin" />
