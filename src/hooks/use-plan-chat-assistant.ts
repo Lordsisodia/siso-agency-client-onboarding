@@ -83,12 +83,18 @@ export function usePlanChatAssistant(projectId?: string) {
       
       setError(error instanceof Error ? error.message : 'Connection to the AI service interrupted');
       
-      // Make error message more user-friendly
-      const errorMessage = error instanceof Error ? 
-        error.message.includes('Connection issue') ? 
-          'Connection to the AI service interrupted. Please try again later.' : 
-          error.message : 
-        'An unexpected error occurred. Please try again.';
+      // Show more specific error messages to the user
+      let errorMessage = 'There was a problem connecting to the AI assistant.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('Assistant verification failed')) {
+          errorMessage = 'The AI assistant configuration is invalid. Please contact support.';
+        } else if (error.message.includes('Connection issue')) {
+          errorMessage = 'Connection to the AI service interrupted. Please try again later.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
       
       toast({
         title: "Connection Issue",

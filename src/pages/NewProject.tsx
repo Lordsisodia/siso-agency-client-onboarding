@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { WebsiteInputSheet, WebsiteInputData } from '@/components/plan-builder/WebsiteInputSheet';
 import { supabase } from '@/integrations/supabase/client';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';
 
 export default function NewProject() {
   const [projectId, setProjectId] = useState<string>(() => {
@@ -21,7 +22,8 @@ export default function NewProject() {
     return newId;
   });
   
-  const [isWebsiteInputOpen, setIsWebsiteInputOpen] = useState(true); // Open by default
+  const [isWebsiteInputOpen, setIsWebsiteInputOpen] = useState(false);
+  const [isManualInputOpen, setIsManualInputOpen] = useState(false);
   const { sendMessage, messages, isLoading, error: chatError } = usePlanChatAssistant(projectId);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -29,7 +31,7 @@ export default function NewProject() {
 
   // Send an initial message to start the conversation
   useEffect(() => {
-    const initialPrompt = "Hi! I'm here to help you plan your new project. You can provide your website URL, social media links, or basic information using the 'Submit Website or Info' button, or we can start the planning process through our chat. What would you like to do?";
+    const initialPrompt = "Hi! I'm here to help you plan your new project. You can provide your website URL, social media links, or basic information using the buttons above, or we can start the planning process through our chat. What would you like to do?";
     
     // We're using sendMessage with an empty message to trigger the welcome message
     const startConversation = async () => {
@@ -39,11 +41,11 @@ export default function NewProject() {
       } catch (error) {
         console.error("Error starting conversation:", error);
         setConnectionError(
-          "There was a problem connecting to the AI assistant. Please try again later."
+          "There was a problem connecting to the AI assistant. Please check if the PLAN_BUILDER_ASSISTANT_ID is correctly configured."
         );
         toast({
           title: "Connection Error",
-          description: "There was a problem starting the conversation. Please try again.",
+          description: "There was a problem starting the conversation. The assistant might be incorrectly configured.",
           variant: "destructive"
         });
       }
@@ -108,6 +110,7 @@ export default function NewProject() {
       // Send the constructed prompt to the AI
       await sendMessage(prompt);
       
+      setIsWebsiteInputOpen(false);
     } catch (error) {
       console.error("Error processing website submission:", error);
       toast({
@@ -142,14 +145,25 @@ export default function NewProject() {
             <span>Back</span>
           </Button>
           
-          <Button 
-            onClick={() => setIsWebsiteInputOpen(true)}
-            variant="outline"
-            className="h-8 text-sm border-siso-border bg-card/50 backdrop-blur-sm text-siso-text hover:bg-siso-bg-alt hover:border-siso-border-hover flex items-center gap-2 transition-all duration-300"
-          >
-            <FileEdit className="w-3.5 h-3.5" />
-            <span>Submit Website or Info</span>
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => setIsWebsiteInputOpen(true)}
+              variant="outline"
+              className="h-8 text-sm border-siso-border bg-card/50 backdrop-blur-sm text-siso-text hover:bg-siso-bg-alt hover:border-siso-border-hover flex items-center gap-2 transition-all duration-300"
+            >
+              <Link className="w-3.5 h-3.5" />
+              <span>Website Analysis</span>
+            </Button>
+            
+            <Button 
+              onClick={() => setIsManualInputOpen(true)}
+              variant="outline"
+              className="h-8 text-sm border-siso-border bg-card/50 backdrop-blur-sm text-siso-text hover:bg-siso-bg-alt hover:border-siso-border-hover flex items-center gap-2 transition-all duration-300"
+            >
+              <FileEdit className="w-3.5 h-3.5" />
+              <span>Manual Input</span>
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 relative z-10">
@@ -171,7 +185,7 @@ export default function NewProject() {
             <div className="p-0.5 bg-gradient-to-r from-siso-red/40 to-siso-orange/40 rounded-xl shadow-lg">
               <ChatInterface 
                 title="New Project Setup" 
-                welcomeMessage="I'll help you create a new project plan. You can submit your website or info using the button above, or we can start the conversation here..."
+                welcomeMessage="I'll help you create a new project plan. You can submit your website or provide details manually using the buttons above, or we can start the conversation here..."
                 inputPlaceholder="Share details about your project (website, goals, audience, etc.)"
                 systemPrompt="You are a helpful project planning assistant. Guide the user through creating a new project by asking for information in a conversational way. Suggest they provide their website URL or social links for better analysis. Ask for: project/company name, website URL, social media profiles, project goals, target audience, and requirements. Be friendly and conversational."
                 usePlanAssistant={true}
@@ -182,11 +196,17 @@ export default function NewProject() {
           </motion.div>
         </div>
         
-        {/* Website Input Sheet */}
+        {/* Input Sheets */}
         <WebsiteInputSheet 
           isOpen={isWebsiteInputOpen}
           onClose={() => setIsWebsiteInputOpen(false)}
           onSubmit={handleWebsiteSubmit}
+        />
+        
+        <ManualInputSheet
+          isOpen={isManualInputOpen}
+          onClose={() => setIsManualInputOpen(false)}
+          onSubmitToAI={sendMessage}
         />
       </div>
     </MainLayout>

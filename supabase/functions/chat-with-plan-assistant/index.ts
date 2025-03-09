@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { OpenAI } from "https://esm.sh/openai@4.26.0";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
@@ -11,7 +12,7 @@ const corsHeaders = {
 const openai = new OpenAI({
   apiKey: Deno.env.get('OPENAI_API_KEY'),
   defaultHeaders: {
-    'OpenAI-Beta': 'assistants=v2', // Add v2 beta header
+    'OpenAI-Beta': 'assistants=v2', // Use v2 API
   }
 });
 

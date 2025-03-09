@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useChatAssistant } from '@/hooks/use-chat-assistant';
-import { usePlanChatAssistant } from '@/hooks/use-plan-chat-assistant';
+import { usePlanChatAssistant, ChatMessage as PlanChatMessage } from '@/hooks/use-plan-chat-assistant';
 import { useChatInterfaceState } from './useChatInterfaceState';
 import { ChatHeader } from './ChatHeader';
 import { ChatMessageList } from './ChatMessageList';
@@ -33,12 +33,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   
   // Use the appropriate chat hook
   const { 
-    messages, 
+    messages: rawMessages, 
     isLoading, 
     error, 
     sendMessage, 
     clearMessages 
   } = usePlanAssistant ? planChat : regularChat;
+  
+  // Convert messages if needed (to handle different message format between hooks)
+  const messages = usePlanAssistant
+    ? rawMessages as PlanChatMessage[]
+    : rawMessages;
   
   // Use the custom hook for handling chat interface state
   const {
