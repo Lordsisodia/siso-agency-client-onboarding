@@ -299,13 +299,13 @@ export function EnhancedProjectType({
                       <div className="text-xs text-center">
                         <span className="text-muted-foreground">Est. Time: </span>
                         <span className="font-medium">
-                          {getSelectedTypeInfo()?.timeEstimate[scale.value as keyof typeof getSelectedTypeInfo().timeEstimate]}
+                          {getSelectedTypeInfo()?.timeEstimate[scale.value as keyof typeof scaleOptions[0].value]}
                         </span>
                       </div>
                       <div className="text-xs text-center">
                         <span className="text-muted-foreground">Est. Cost: </span>
                         <span className="font-medium">
-                          {getSelectedTypeInfo()?.costEstimate[scale.value as keyof typeof getSelectedTypeInfo().costEstimate]}
+                          {getSelectedTypeInfo()?.costEstimate[scale.value as keyof typeof scaleOptions[0].value]}
                         </span>
                       </div>
                     </div>
