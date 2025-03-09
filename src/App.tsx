@@ -60,6 +60,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/plan-builder" element={<PlanBuilder />} />
+        <Route path="/plan-builder/:projectId" element={<PlanBuilder />} />
+        <Route path="/new-project" element={<PlanBuilder />} />
         <Route path="/resource-hub" element={<ResourceHub />} />
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/support" element={<Support />} />

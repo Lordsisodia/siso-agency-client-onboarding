@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';
 import { Button } from '@/components/ui/button';
-import { FileEdit, AlertCircle, History, PlusCircle } from 'lucide-react';
+import { FileEdit, AlertCircle, History, PlusCircle, ArrowLeft } from 'lucide-react';
 import { usePlanChatAssistant } from '@/hooks/use-plan-chat-assistant';
 import { useToast } from '@/hooks/use-toast';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
@@ -11,6 +11,7 @@ import { PrePlanState } from '@/components/plan-builder/PrePlanState';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
 import { Waves } from '@/components/ui/waves-background';
+import { useParams, useNavigate } from 'react-router-dom';
 
 type ProjectHistoryItem = {
   id: string;
@@ -25,18 +26,33 @@ export default function PlanBuilder() {
   const [isPlanStarted, setIsPlanStarted] = useState(false);
   const [projectHistory, setProjectHistory] = useState<ProjectHistoryItem[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [showProjectHistory, setShowProjectHistory] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { projectId: urlProjectId } = useParams();
   
   const [projectId, setProjectId] = useState<string>(() => {
+    // If there's a project ID in the URL, use that
+    if (urlProjectId) return urlProjectId;
+    
+    // Otherwise check session storage
     const existingId = sessionStorage.getItem('planProjectId');
     if (existingId) return existingId;
     
+    // If no existing ID, create a new one
     const newId = `plan-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     sessionStorage.setItem('planProjectId', newId);
     return newId;
   });
 
   const { sendMessage, messages, isLoading, error } = usePlanChatAssistant(projectId);
+
+  // Set plan started if we have a project ID from the URL
+  useEffect(() => {
+    if (urlProjectId) {
+      setIsPlanStarted(true);
+    }
+  }, [urlProjectId]);
 
   // Load project history
   useEffect(() => {
@@ -135,6 +151,12 @@ export default function PlanBuilder() {
     sessionStorage.setItem('planProjectId', newId);
     setProjectId(newId);
     setIsPlanStarted(false);
+    navigate('/plan-builder');
+  };
+
+  const handleGoBack = () => {
+    setIsPlanStarted(false);
+    navigate('/plan-builder');
   };
 
   return (
@@ -153,10 +175,10 @@ export default function PlanBuilder() {
         
         {!isPlanStarted ? (
           <>
-            <PrePlanState onSubmit={handleStartPlan} />
+            <PrePlanState onShowProjectHistory={() => setShowProjectHistory(true)} />
             
-            {/* Project History Section */}
-            {projectHistory.length > 0 && (
+            {/* Project History Section - Always visible now */}
+            {(projectHistory.length > 0 || showProjectHistory) && (
               <motion.div 
                 className="mt-12 max-w-2xl mx-auto"
                 initial={{ opacity: 0 }}
@@ -189,6 +211,11 @@ export default function PlanBuilder() {
                             title: "Loading Project",
                             description: `Loading ${project.title}...`,
                           });
+                          // Set the project ID and navigate to its page
+                          sessionStorage.setItem('planProjectId', project.id);
+                          setProjectId(project.id);
+                          setIsPlanStarted(true);
+                          navigate(`/plan-builder/${project.id}`);
                         }}
                       >
                         {/* Gradient hover effect */}
@@ -217,6 +244,17 @@ export default function PlanBuilder() {
               </div>
               
               <div className="flex space-x-3">
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button 
+                    onClick={handleGoBack}
+                    variant="outline"
+                    className="border-siso-border text-siso-text hover:bg-siso-bg-card flex items-center gap-2"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Back</span>
+                  </Button>
+                </motion.div>
+                
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button 
                     onClick={handleNewProject}

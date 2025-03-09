@@ -1,105 +1,25 @@
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Loader, Send } from 'lucide-react';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Sparkles, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GradientHeading } from '@/components/ui/gradient-heading';
 import { Waves } from '@/components/ui/waves-background';
-import { Textarea } from '@/components/ui/textarea';
+import { useNavigate } from 'react-router-dom';
 
 interface PrePlanStateProps {
-  onSubmit: (prompt: string) => void;
+  onShowProjectHistory: () => void;
 }
 
-export const PrePlanState: React.FC<PrePlanStateProps> = ({ onSubmit }) => {
-  const [inputValue, setInputValue] = useState('');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
+export const PrePlanState: React.FC<PrePlanStateProps> = ({ onShowProjectHistory }) => {
+  const navigate = useNavigate();
 
-  // Example project prompts that will rotate
-  const examplePrompts = [
-    "Build a social media analytics dashboard with user tracking and engagement metrics...",
-    "Create an AI-powered customer support chatbot with knowledge base integration...",
-    "Develop an e-commerce platform with inventory management and payment processing...",
-    "Design a project management tool with team collaboration features and task tracking...",
-    "Build a content management system with multi-language support and SEO optimization..."
-  ];
-
-  // Rotate through placeholder texts
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentPlaceholderIndex((prevIndex) => 
-        prevIndex === examplePrompts.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 3000); // Change placeholder every 3 seconds
-    
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setInputValue(e.target.value);
+  const handleStartPlanning = () => {
+    // Navigate to the project creation page
+    navigate('/new-project');
+    // Also show project history in the current view
+    onShowProjectHistory();
   };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (inputValue.trim()) {
-      setIsAnalyzing(true);
-      
-      // Create a prompt based on the input
-      const prompt = `Create a project plan for: ${inputValue}`;
-      
-      // Small delay to show the analyzing screen before submitting
-      setTimeout(() => {
-        onSubmit(prompt);
-      }, 1000);
-    }
-  };
-
-  if (isAnalyzing) {
-    return (
-      <motion.div 
-        className="w-full max-w-2xl mx-auto relative z-10 text-center"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="flex justify-center mb-8">
-          <div className="relative p-4">
-            <motion.div 
-              className="absolute inset-0 rounded-full bg-gradient-to-r from-siso-red to-siso-orange opacity-20 blur-lg"
-              animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.3, 0.2] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            />
-            <motion.div 
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              className="relative"
-            >
-              <Loader className="w-12 h-12 text-siso-orange" />
-            </motion.div>
-          </div>
-        </div>
-        
-        <h2 className="text-2xl font-bold text-siso-text mb-4">
-          AI Analysis in Progress
-        </h2>
-        
-        <p className="text-lg text-siso-text-muted max-w-md mx-auto">
-          Our AI is analyzing your project idea and generating a comprehensive project plan...
-        </p>
-
-        {/* Progress bar */}
-        <div className="w-full max-w-md mx-auto mt-8 h-1.5 bg-siso-border/30 rounded-full overflow-hidden">
-          <motion.div 
-            className="h-full bg-gradient-to-r from-siso-red to-siso-orange"
-            initial={{ width: "0%" }}
-            animate={{ width: ["0%", "95%"] }}
-            transition={{ duration: 10, ease: "easeInOut" }}
-          />
-        </div>
-      </motion.div>
-    );
-  }
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center w-full p-6 overflow-hidden">
@@ -141,52 +61,33 @@ export const PrePlanState: React.FC<PrePlanStateProps> = ({ onSubmit }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          Describe your project idea and let AI create a detailed plan with features, timeline, and budget
+          Start planning your projects with the help of AI and get detailed plans, features, timelines, and budgets
         </motion.p>
       </motion.div>
 
       <motion.div 
-        className="w-full max-w-2xl mx-auto relative z-10"
+        className="w-full max-w-md mx-auto relative z-10"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-siso-red to-siso-orange opacity-30 rounded-lg blur-md group-hover:opacity-50 transition-opacity"></div>
-            <div className="relative p-0.5 bg-gradient-to-r from-siso-red to-siso-orange rounded-lg">
-              <div className="relative bg-siso-bg-alt/70 backdrop-blur-md border border-siso-border rounded-lg overflow-hidden">
-                <Textarea
-                  value={inputValue}
-                  onChange={handleChange}
-                  className="w-full h-40 p-5 pr-16 bg-transparent border-none text-siso-text resize-none focus:outline-none focus:ring-0 text-md"
-                  placeholder={examplePrompts[currentPlaceholderIndex]}
-                />
-                <div className="absolute bottom-4 right-4">
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button 
-                      type="submit"
-                      className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90 text-white rounded-full w-12 h-12 p-0 flex items-center justify-center shadow-md"
-                      disabled={!inputValue.trim()}
-                      aria-label="Generate plan"
-                    >
-                      <Send className="w-5 h-5" />
-                    </Button>
-                  </motion.div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </form>
-        
-        <motion.div
-          className="mt-4 text-center text-siso-text-muted text-sm"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-        >
-          Press Enter or click the button to generate your plan
-        </motion.div>
+        <div className="flex justify-center">
+          <motion.div 
+            whileHover={{ scale: 1.05 }} 
+            whileTap={{ scale: 0.95 }}
+            className="relative"
+          >
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-siso-red to-siso-orange opacity-50 rounded-lg blur-md"></div>
+            <Button 
+              onClick={handleStartPlanning}
+              className="relative bg-gradient-to-r from-siso-red to-siso-orange hover:opacity-90 text-white text-lg py-6 px-8 rounded-lg shadow-lg flex items-center gap-3"
+              size="lg"
+            >
+              Start Planning Your Project
+              <ArrowRight className="w-5 h-5" />
+            </Button>
+          </motion.div>
+        </div>
       </motion.div>
     </div>
   );
