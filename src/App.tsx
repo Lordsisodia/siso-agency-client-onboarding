@@ -1,13 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, BrowserRouter, useLocation } from 'react-router-dom';
-import { ThemeProvider } from "@/components/theme-provider"
-import { siteConfig } from './config/site';
-import { Dashboard } from './pages/Dashboard';
-import { Auth } from './pages/Auth';
-import { Support } from './pages/Support';
-import { Portfolio } from './pages/Portfolio';
-import { Networking } from './pages/Networking';
-import { ProjectPlanning } from './pages/ProjectPlanning';
+import { ThemeProvider } from "@/components/theme-provider";
+// import { siteConfig } from './config/site'; // Removing this unused import
+
+// Fixing the import statements to use default exports instead of named exports
+import Dashboard from './pages/Dashboard';
+import Auth from './pages/Auth';
+import Support from './pages/Support';
+import Portfolio from './pages/Portfolio';
+import Networking from './pages/Networking';
+import ProjectPlanning from './pages/ProjectPlanning';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
