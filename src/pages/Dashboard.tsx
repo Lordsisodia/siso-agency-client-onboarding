@@ -147,53 +147,57 @@ export default function Dashboard() {
     <div className="flex min-h-screen bg-gradient-to-b from-[#0A0A0A] to-[#121212]">
       <Sidebar />
       <motion.div 
-        className="flex-1 p-5 md:p-6 overflow-hidden"
+        className="flex-1 p-4 md:p-5 overflow-auto"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
         <DashboardHeader userName={user?.user_metadata?.full_name || 'User'} />
         
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 mb-5">
-          <motion.div 
-            className="md:col-span-8"
-            variants={itemVariants}
-          >
-            <QuickStatsPanel
-              activeProjects={stats.activeProjects}
-              pendingTasks={stats.pendingTasks}
-              upcomingEvents={stats.upcomingEvents}
-            />
-          </motion.div>
-          <motion.div 
-            className="md:col-span-4 h-full"
-            variants={itemVariants}
-          >
-            <QuickActionsPanel />
-          </motion.div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
-          <motion.div 
-            className="md:col-span-8"
-            variants={itemVariants}
-          >
-            <ProjectsOverview />
-          </motion.div>
-          <motion.div 
-            className="md:col-span-4 flex flex-col gap-5"
-            variants={itemVariants}
-          >
-            <NotificationsPanel 
-              notifications={notifications} 
-              onMarkAsRead={handleMarkAsRead}
-              onViewAll={handleViewAll}
-            />
-            <UpcomingEvents 
-              events={events}
-              onViewAll={handleViewCalendar}
-            />
-          </motion.div>
+        <div className="grid grid-cols-12 gap-4 mt-4">
+          {/* Main content area - 9 columns */}
+          <div className="col-span-12 lg:col-span-9 space-y-4">
+            {/* Quick Stats Panel - Full width within main content */}
+            <motion.div variants={itemVariants}>
+              <QuickStatsPanel
+                activeProjects={stats.activeProjects}
+                pendingTasks={stats.pendingTasks}
+                upcomingEvents={stats.upcomingEvents}
+              />
+            </motion.div>
+            
+            {/* Projects Overview - Full width within main content */}
+            <motion.div variants={itemVariants}>
+              <div className="bg-siso-bg/30 border border-siso-border/30 rounded-xl overflow-hidden">
+                <ProjectsOverview />
+              </div>
+            </motion.div>
+          </div>
+          
+          {/* Right sidebar - 3 columns */}
+          <div className="col-span-12 lg:col-span-3 space-y-4">
+            {/* Quick Actions Panel */}
+            <motion.div variants={itemVariants} className="h-auto">
+              <QuickActionsPanel />
+            </motion.div>
+            
+            {/* Notifications Panel */}
+            <motion.div variants={itemVariants}>
+              <NotificationsPanel 
+                notifications={notifications} 
+                onMarkAsRead={handleMarkAsRead}
+                onViewAll={handleViewAll}
+              />
+            </motion.div>
+            
+            {/* Upcoming Events */}
+            <motion.div variants={itemVariants}>
+              <UpcomingEvents 
+                events={events}
+                onViewAll={handleViewCalendar}
+              />
+            </motion.div>
+          </div>
         </div>
       </motion.div>
     </div>

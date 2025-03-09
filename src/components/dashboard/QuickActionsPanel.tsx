@@ -71,7 +71,7 @@ export const QuickActionsPanel = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <ScrollArea className="h-[calc(100%-44px)]">
+          <ScrollArea className="h-[220px]">
             <div className="p-3 space-y-2">
               {actions.map((action, index) => (
                 <TooltipProvider key={action.title}>
@@ -85,13 +85,13 @@ export const QuickActionsPanel = () => {
                         variants={cardVariants}
                         transition={{ duration: 0.2, delay: 0.1 + index * 0.05 }}
                         onClick={() => navigate(action.path)}
-                        className="flex items-center p-3 rounded-md cursor-pointer bg-gradient-to-r from-siso-bg/70 to-transparent border border-siso-border/20 hover:border-siso-orange/30"
+                        className="flex items-center p-2.5 rounded-md cursor-pointer bg-gradient-to-r from-siso-bg/70 to-transparent border border-siso-border/20 hover:border-siso-orange/30"
                       >
                         <motion.div
                           whileHover={{ rotate: 5, scale: 1.1 }}
-                          className="p-2 rounded-md bg-gradient-to-br from-siso-orange/10 to-siso-red/5 text-siso-orange mr-3 shadow-sm"
+                          className="p-2 rounded-md bg-gradient-to-br from-siso-orange/10 to-siso-red/5 text-siso-orange mr-2.5 shadow-sm"
                         >
-                          <action.icon size={16} />
+                          <action.icon size={14} />
                         </motion.div>
                         <div className="flex-1 min-w-0">
                           <h3 className="text-xs font-semibold text-siso-text-bold tracking-tight">{action.title}</h3>
@@ -102,11 +102,11 @@ export const QuickActionsPanel = () => {
                           whileHover={{ x: 3 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <ArrowRight size={14} className="text-siso-text/40 group-hover:text-siso-orange transition-colors" />
+                          <ArrowRight size={12} className="text-siso-text/40 group-hover:text-siso-orange transition-colors" />
                         </motion.div>
                       </motion.div>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom" className="bg-siso-bg-alt border border-siso-border/60 text-xs px-3 py-1.5 rounded-md shadow-md">
+                    <TooltipContent side="left" className="bg-siso-bg-alt border border-siso-border/60 text-xs px-3 py-1.5 rounded-md shadow-md">
                       <p className="font-medium">{action.tooltip}</p>
                     </TooltipContent>
                   </Tooltip>

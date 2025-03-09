@@ -65,7 +65,7 @@ export const QuickStatsPanel = ({
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+    <div className="grid grid-cols-4 gap-3 md:gap-4">
       {stats.map((stat, index) => (
         <TooltipProvider key={stat.title}>
           <Tooltip delayDuration={300}>
@@ -80,16 +80,16 @@ export const QuickStatsPanel = ({
                   transition: { duration: 0.2 }
                 }}
                 whileTap={{ scale: 0.98 }}
-                className="h-full"
+                className="h-full col-span-2 sm:col-span-1"
               >
                 <Card className="bg-gradient-to-br from-siso-bg/80 to-siso-bg/60 backdrop-blur-sm border border-siso-border/40 hover:border-siso-orange/30 h-full cursor-pointer transition-all hover:shadow-lg hover:shadow-siso-orange/5">
-                  <CardContent className="p-4 flex flex-col h-full">
+                  <CardContent className="p-3 sm:p-4 flex flex-col h-full">
                     <div className="flex justify-between items-start mb-3">
                       <div>
                         <p className="text-siso-text/70 text-xs font-medium tracking-wide mb-1">{stat.title}</p>
                         <div className="flex items-center gap-2">
                           {stat.value !== null ? (
-                            <p className="text-xl font-bold text-siso-text-bold tracking-tight">{formatNumber(stat.value)}</p>
+                            <p className="text-lg sm:text-xl font-bold text-siso-text-bold tracking-tight">{formatNumber(stat.value)}</p>
                           ) : (
                             <p className="text-sm text-siso-orange mt-1 font-medium">View Report</p>
                           )}
@@ -108,9 +108,9 @@ export const QuickStatsPanel = ({
                       </div>
                       <motion.div
                         whileHover={{ rotate: 5, scale: 1.1 }}
-                        className="p-2.5 rounded-full bg-gradient-to-br from-siso-orange/10 to-siso-red/5 text-siso-orange shadow-inner"
+                        className="p-2 rounded-full bg-gradient-to-br from-siso-orange/10 to-siso-red/5 text-siso-orange shadow-inner"
                       >
-                        <stat.icon size={18} />
+                        <stat.icon size={16} />
                       </motion.div>
                     </div>
                     

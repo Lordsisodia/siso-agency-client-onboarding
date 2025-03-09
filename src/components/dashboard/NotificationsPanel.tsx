@@ -1,19 +1,12 @@
 
-import { Bell, XCircle, AlertTriangle, CheckCircle2, InfoIcon, X } from 'lucide-react';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  time: string;
-  type: 'info' | 'success' | 'warning' | 'alert';
-  read: boolean;
-}
+import { Bell, CheckCircle2, Info, AlertTriangle, MoreVertical, Eye } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Notification, NotificationType } from '@/pages/Dashboard';
 
 interface NotificationsPanelProps {
   notifications: Notification[];
@@ -22,130 +15,131 @@ interface NotificationsPanelProps {
 }
 
 export const NotificationsPanel = ({ 
-  notifications = [], 
-  onMarkAsRead,
-  onViewAll
+  notifications, 
+  onMarkAsRead, 
+  onViewAll 
 }: NotificationsPanelProps) => {
-  const getNotificationIcon = (type: string) => {
-    switch(type) {
-      case 'success':
-        return <CheckCircle2 size={14} className="text-green-500" />;
-      case 'warning':
-        return <AlertTriangle size={14} className="text-amber-500" />;
-      case 'alert':
-        return <XCircle size={14} className="text-red-500" />;
+  const [expandedNotification, setExpandedNotification] = useState<string | null>(null);
+  
+  const getIconForType = (type: NotificationType) => {
+    switch (type) {
       case 'info':
+        return <Info className="h-4 w-4 text-blue-400" />;
+      case 'success':
+        return <CheckCircle2 className="h-4 w-4 text-green-400" />;
+      case 'warning':
+        return <AlertTriangle className="h-4 w-4 text-amber-400" />;
+      case 'alert':
+        return <AlertTriangle className="h-4 w-4 text-red-400" />;
       default:
-        return <InfoIcon size={14} className="text-blue-500" />;
+        return <Info className="h-4 w-4 text-blue-400" />;
     }
   };
-
-  const unreadCount = notifications.filter(n => !n.read).length;
+  
+  const toggleExpanded = (id: string) => {
+    if (expandedNotification === id) {
+      setExpandedNotification(null);
+    } else {
+      setExpandedNotification(id);
+    }
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.1 }}
-      className="h-full"
+      transition={{ duration: 0.3 }}
     >
-      <Card className="border border-siso-border/50 hover:border-siso-border hover:shadow-md hover:shadow-siso-border/10 transition-all duration-300 overflow-hidden bg-gradient-to-b from-siso-bg/80 to-siso-bg/60 backdrop-blur-sm h-full">
+      <Card className="border border-siso-border/50 hover:border-siso-border hover:shadow-md hover:shadow-siso-border/10 transition-all duration-300 overflow-hidden bg-gradient-to-b from-siso-bg/80 to-siso-bg/60 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between py-3 px-4 bg-gradient-to-r from-siso-bg/90 to-siso-bg/70">
-          <CardTitle className="text-sm font-semibold flex items-center">
-            <motion.div
-              animate={unreadCount > 0 ? {
-                scale: [1, 1.2, 1],
-                rotate: [0, 5, 0, -5, 0]
-              } : {}}
-              transition={{
-                duration: 0.5,
-                repeat: unreadCount > 0 ? Infinity : 0,
-                repeatDelay: 2
-              }}
-              className="text-siso-orange mr-2"
-            >
-              <Bell size={16} />
-            </motion.div>
+          <CardTitle className="text-sm font-semibold flex items-center tracking-tight">
+            <Bell size={16} className="mr-2 text-siso-orange" />
             Notifications
-            {unreadCount > 0 && (
-              <Badge 
-                variant="gradient" 
-                glow 
-                animated
-                className="ml-2 text-xs px-1.5 py-0"
-              >
-                {unreadCount} new
+            {notifications.filter(n => !n.read).length > 0 && (
+              <Badge variant="outline" className="ml-2 bg-siso-orange/10 text-siso-orange border-siso-orange/30 text-xs px-1.5 py-0">
+                {notifications.filter(n => !n.read).length}
               </Badge>
             )}
           </CardTitle>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onViewAll}
+            className="h-7 px-2 text-xs text-siso-text/70 hover:text-siso-text-bold hover:bg-siso-bg/50"
+          >
+            <Eye size={14} className="mr-1" />
+            View All
+          </Button>
         </CardHeader>
         <CardContent className="p-0">
-          <ScrollArea className="h-[200px]">
-            {notifications.length === 0 ? (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center py-6 text-siso-text/70"
-              >
-                No notifications to display.
-              </motion.div>
-            ) : (
-              <div className="divide-y divide-siso-border/30">
-                <AnimatePresence initial={false}>
-                  {notifications.map((notification) => (
-                    <motion.div
-                      key={notification.id}
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.2 }}
-                      whileHover={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
-                      className={`py-2.5 px-4 flex items-start transition-colors ${!notification.read ? 'bg-gradient-to-r from-siso-orange/5 to-transparent' : ''}`}
-                    >
-                      <div className="mt-0.5 mr-2">
-                        {getNotificationIcon(notification.type)}
+          <ScrollArea className="h-[175px]">
+            <div className="px-3 py-2 space-y-2">
+              {notifications.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-6 text-center">
+                  <Bell size={20} className="text-siso-text/30 mb-2" />
+                  <p className="text-sm text-siso-text/50">No notifications</p>
+                </div>
+              ) : (
+                notifications.map((notification) => (
+                  <motion.div 
+                    key={notification.id}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className={`
+                      p-2.5 rounded-md border transition-all duration-200
+                      ${!notification.read 
+                        ? 'bg-siso-bg/70 border-siso-orange/20 shadow-sm' 
+                        : 'bg-siso-bg/40 border-siso-border/10'}
+                    `}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`
+                        p-1.5 rounded-full bg-siso-bg/70 flex-shrink-0 border
+                        ${notification.type === 'info' && 'border-blue-500/20'} 
+                        ${notification.type === 'success' && 'border-green-500/20'}
+                        ${notification.type === 'warning' && 'border-amber-500/20'}
+                        ${notification.type === 'alert' && 'border-red-500/20'}
+                      `}>
+                        {getIconForType(notification.type)}
                       </div>
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 space-y-1">
                         <div className="flex justify-between items-start">
-                          <p className="font-medium text-xs text-siso-text-bold">{notification.title}</p>
-                          <span className="text-xs text-siso-text/60 ml-2 whitespace-nowrap">{notification.time}</span>
+                          <h3 className={`text-xs font-semibold truncate ${!notification.read ? 'text-siso-text-bold' : 'text-siso-text/80'}`}>
+                            {notification.title}
+                          </h3>
+                          <span className="text-[10px] text-siso-text/50 flex-shrink-0 ml-2">{notification.time}</span>
                         </div>
-                        <p className="text-xs text-siso-text/80 mt-0.5 line-clamp-2">{notification.message}</p>
+                        <p className={`text-xs ${expandedNotification === notification.id ? '' : 'line-clamp-1'} ${!notification.read ? 'text-siso-text/80' : 'text-siso-text/60'}`}>
+                          {notification.message}
+                        </p>
                       </div>
+                    </div>
+                    <div className="flex justify-end mt-1.5 gap-1">
                       {!notification.read && (
-                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onMarkAsRead(notification.id)}
-                            className="ml-1 text-xs h-auto p-1 hover:bg-siso-orange/10 hover:text-siso-orange"
-                          >
-                            <X size={12} />
-                          </Button>
-                        </motion.div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onMarkAsRead(notification.id)}
+                          className="h-6 px-2 text-[10px] text-siso-text/60 hover:text-siso-text-bold hover:bg-siso-bg/50"
+                        >
+                          Mark as read
+                        </Button>
                       )}
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
-            )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleExpanded(notification.id)}
+                        className="h-6 w-6 p-0 text-siso-text/60 hover:text-siso-text-bold hover:bg-siso-bg/50"
+                      >
+                        <MoreVertical size={12} />
+                      </Button>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
           </ScrollArea>
-          
-          <motion.div 
-            className="py-2 text-center border-t border-siso-border/30"
-            whileHover={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
-          >
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={onViewAll}
-                className="text-siso-orange hover:text-siso-red hover:border-siso-orange/30 text-xs bg-transparent"
-              >
-                View all notifications
-              </Button>
-            </motion.div>
-          </motion.div>
         </CardContent>
       </Card>
     </motion.div>
