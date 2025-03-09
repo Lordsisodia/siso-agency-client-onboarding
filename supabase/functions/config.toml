@@ -4,3 +4,12 @@ project_id = "wnwhlqmeshtreeebxior"
 [functions.chat-with-assistant]
 verify_jwt = false
 
+[functions.chat-with-plan-assistant]
+verify_jwt = false
+
+[functions.analyze-website]
+verify_jwt = false
+
+[functions.seed-portfolio]
+verify_jwt = false
+
