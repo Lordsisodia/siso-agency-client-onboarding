@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';
 import { Button } from '@/components/ui/button';
-import { FileEdit, AlertCircle, History } from 'lucide-react';
+import { FileEdit, AlertCircle, History, PlusCircle } from 'lucide-react';
 import { usePlanChatAssistant } from '@/hooks/use-plan-chat-assistant';
 import { useToast } from '@/hooks/use-toast';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PrePlanState } from '@/components/plan-builder/PrePlanState';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
+import { Waves } from '@/components/ui/waves-background';
 
 type ProjectHistoryItem = {
   id: string;
@@ -156,7 +157,20 @@ export default function PlanBuilder() {
 
   return (
     <MainLayout>
-      <div className="container max-w-6xl mx-auto py-8 px-4 min-h-screen">
+      <div className="container max-w-6xl mx-auto py-8 px-4 min-h-screen relative">
+        {/* Waves background - only shown when plan is started */}
+        {isPlanStarted && (
+          <Waves 
+            lineColor="rgba(255, 87, 34, 0.05)" 
+            backgroundColor="transparent" 
+            waveSpeedX={0.01} 
+            waveSpeedY={0.004} 
+            waveAmpX={24} 
+            waveAmpY={12} 
+            className="absolute inset-0 z-0 opacity-50" 
+          />
+        )}
+        
         {!isPlanStarted ? (
           <>
             <PrePlanState onSubmit={handleStartPlan} />
@@ -186,9 +200,10 @@ export default function PlanBuilder() {
                     </div>
                   ) : (
                     projectHistory.map((project) => (
-                      <div 
+                      <motion.div 
                         key={project.id}
-                        className="bg-siso-bg-alt/30 backdrop-blur-md border border-siso-border rounded-lg p-4 hover:border-siso-red/50 transition-all cursor-pointer"
+                        className="group relative bg-siso-bg-alt/40 backdrop-blur-md border border-siso-border rounded-lg p-5 hover:border-siso-red/50 transition-all cursor-pointer overflow-hidden"
+                        whileHover={{ y: -4, transition: { duration: 0.2 } }}
                         onClick={() => {
                           // Logic to load this project would go here
                           toast({
@@ -197,12 +212,15 @@ export default function PlanBuilder() {
                           });
                         }}
                       >
-                        <h3 className="text-lg font-medium text-siso-text">{project.title}</h3>
-                        <p className="text-sm text-siso-text-muted mt-1">{project.snippet}</p>
-                        <div className="text-xs text-siso-text-muted mt-2">
+                        {/* Gradient hover effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-siso-red/10 to-siso-orange/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        
+                        <h3 className="text-lg font-medium text-siso-text relative z-10">{project.title}</h3>
+                        <p className="text-sm text-siso-text-muted mt-1 relative z-10">{project.snippet}</p>
+                        <div className="text-xs text-siso-text-muted mt-2 relative z-10">
                           Created {project.createdAt.toLocaleDateString()}
                         </div>
-                      </div>
+                      </motion.div>
                     ))
                   )}
                 </div>
@@ -211,35 +229,40 @@ export default function PlanBuilder() {
           </>
         ) : (
           <>
-            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between relative z-10">
               <div>
-                <h1 className="text-3xl font-bold text-siso-text">AI Project Planner</h1>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-siso-red to-siso-orange bg-clip-text text-transparent">AI Project Planner</h1>
                 <p className="text-siso-text-muted mt-1">
                   Get detailed project plans, budgets, and timelines based on your requirements
                 </p>
               </div>
               
               <div className="flex space-x-3">
-                <Button 
-                  onClick={handleNewProject}
-                  variant="outline"
-                  className="border-siso-border text-siso-text hover:bg-siso-bg-card"
-                >
-                  New Project
-                </Button>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button 
+                    onClick={handleNewProject}
+                    variant="outline"
+                    className="border-siso-border text-siso-text hover:bg-siso-bg-card flex items-center gap-2"
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    <span>New Project</span>
+                  </Button>
+                </motion.div>
                 
-                <Button 
-                  onClick={() => setIsManualInputOpen(true)}
-                  className="bg-gradient-to-r from-siso-orange to-siso-red text-white"
-                >
-                  <FileEdit className="mr-2 h-4 w-4" />
-                  Use Form
-                </Button>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button 
+                    onClick={() => setIsManualInputOpen(true)}
+                    className="bg-gradient-to-r from-siso-orange to-siso-red text-white hover:opacity-90"
+                  >
+                    <FileEdit className="mr-2 h-4 w-4" />
+                    Use Form
+                  </Button>
+                </motion.div>
               </div>
             </div>
 
             {showConnectionAlert && (
-              <Alert variant="destructive" className="mb-6">
+              <Alert variant="destructive" className="mb-6 relative z-10">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
                   There was a problem connecting to the AI service. Please check your connection and try again.
@@ -254,15 +277,24 @@ export default function PlanBuilder() {
               </Alert>
             )}
 
-            <div className="grid grid-cols-1 gap-6">
-              <ChatInterface 
-                title="AI Project Planner" 
-                welcomeMessage="I'll help create a detailed plan for your project. Feel free to ask questions or provide more details as we refine your plan."
-                inputPlaceholder="Add more details or ask questions about your plan..."
-                systemPrompt="You are a professional project planning assistant specialized in helping users create comprehensive software project plans. Help users define requirements, select features, estimate timelines, and budget effectively."
-                usePlanAssistant={true}
-                projectId={projectId}
-              />
+            <div className="grid grid-cols-1 gap-6 relative z-10">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="p-0.5 bg-gradient-to-r from-siso-red/40 to-siso-orange/40 rounded-xl">
+                  <ChatInterface 
+                    title="AI Project Planner" 
+                    welcomeMessage="I'll help create a detailed plan for your project. Feel free to ask questions or provide more details as we refine your plan."
+                    inputPlaceholder="Add more details or ask questions about your plan..."
+                    systemPrompt="You are a professional project planning assistant specialized in helping users create comprehensive software project plans. Help users define requirements, select features, estimate timelines, and budget effectively."
+                    usePlanAssistant={true}
+                    projectId={projectId}
+                    className="border-0 bg-transparent"
+                  />
+                </div>
+              </motion.div>
             </div>
           </>
         )}
