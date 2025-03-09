@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +8,8 @@ import { Building, MapPin, Globe, Mail, Phone, Palette, Save, Loader2, AlertCirc
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+import { ColorPicker } from './ColorPicker';
+import { getContrastTextColor } from '@/utils/colorUtils';
 
 interface CompanyProfileFormProps {
   initialData?: {
@@ -253,6 +254,53 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
     }
   };
 
+  // Get suggested colors based on industry
+  const getSuggestedColors = (field: string) => {
+    const industryColorMap: Record<string, Record<string, string[]>> = {
+      'Technology': {
+        primary: ['#0F172A', '#1E40AF', '#1E293B', '#3B82F6', '#1A202C'],
+        secondary: ['#6366F1', '#3B82F6', '#2563EB', '#4F46E5', '#8B5CF6'],
+        accent: ['#22D3EE', '#38BDF8', '#A5F3FC', '#7DD3FC', '#BAE6FD']
+      },
+      'Finance': {
+        primary: ['#0F766E', '#065F46', '#064E3B', '#0E7490', '#0C4A6E'],
+        secondary: ['#059669', '#0D9488', '#0891B2', '#0284C7', '#2DD4BF'],
+        accent: ['#14B8A6', '#10B981', '#34D399', '#22D3EE', '#4ADE80']
+      },
+      'Creative': {
+        primary: ['#9333EA', '#C026D3', '#7E22CE', '#6D28D9', '#A21CAF'],
+        secondary: ['#D946EF', '#E879F9', '#A855F7', '#8B5CF6', '#C084FC'],
+        accent: ['#F0ABFC', '#F5D0FE', '#DDD6FE', '#C4B5FD', '#E9D5FF']
+      },
+      'Retail': {
+        primary: ['#EA580C', '#C2410C', '#9A3412', '#D97706', '#B45309'],
+        secondary: ['#F97316', '#FB923C', '#FDBA74', '#F59E0B', '#FCD34D'],
+        accent: ['#FFEDD5', '#FED7AA', '#FEF3C7', '#FDE68A', '#FEF9C3']
+      }
+    };
+    
+    // Default colors if industry not found
+    const defaultColors = {
+      primary: ['#6E59A5', '#1F2937', '#047857', '#7C3AED', '#BE123C'],
+      secondary: ['#9b87f5', '#4B5563', '#10B981', '#8B5CF6', '#E11D48'],
+      accent: ['#D6BCFA', '#9CA3AF', '#A7F3D0', '#C4B5FD', '#FECDD3']
+    };
+    
+    const industry = formData.industry?.toLowerCase() || '';
+    
+    if (industry.includes('tech') || industry.includes('software') || industry.includes('digital')) {
+      return industryColorMap['Technology'][field] || [];
+    } else if (industry.includes('finance') || industry.includes('bank') || industry.includes('insurance')) {
+      return industryColorMap['Finance'][field] || [];
+    } else if (industry.includes('design') || industry.includes('art') || industry.includes('media') || industry.includes('creative')) {
+      return industryColorMap['Creative'][field] || [];
+    } else if (industry.includes('retail') || industry.includes('shop') || industry.includes('store') || industry.includes('consumer')) {
+      return industryColorMap['Retail'][field] || [];
+    }
+    
+    return defaultColors[field as keyof typeof defaultColors] || [];
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {showAnalysisAlert && (
@@ -428,105 +476,86 @@ export const CompanyProfileForm = ({ initialData, analysisData, onSave, userId }
           Branding
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <Label className="block text-sm font-medium text-siso-text/70 mb-2">Primary Color</Label>
-            <div className="flex">
-              <Input 
-                type="color"
-                value={formData.primary_color || '#6E59A5'}
-                onChange={(e) => handleChange('primary_color', e.target.value)}
-                className={`h-10 w-10 rounded-lg border cursor-pointer ${
-                  highlightedFields.includes('primary_color') 
-                    ? 'border-green-500/50 bg-green-500/5' 
-                    : 'border-siso-orange/20 bg-transparent'
-                }`}
-              />
-              <Input 
-                type="text"
-                value={formData.primary_color || '#6E59A5'}
-                onChange={(e) => handleChange('primary_color', e.target.value)}
-                className={`flex-1 p-3 ml-3 rounded-lg text-siso-text focus:border-siso-orange/50 focus:outline-none ${
-                  highlightedFields.includes('primary_color') 
-                    ? 'border-green-500/50 bg-green-500/5' 
-                    : 'border-siso-orange/20 bg-black/20'
-                }`}
-              />
-            </div>
-          </div>
-          <div>
-            <Label className="block text-sm font-medium text-siso-text/70 mb-2">Secondary Color</Label>
-            <div className="flex">
-              <Input 
-                type="color"
-                value={formData.secondary_color || '#9b87f5'}
-                onChange={(e) => handleChange('secondary_color', e.target.value)}
-                className={`h-10 w-10 rounded-lg border cursor-pointer ${
-                  highlightedFields.includes('secondary_color') 
-                    ? 'border-green-500/50 bg-green-500/5' 
-                    : 'border-siso-orange/20 bg-transparent'
-                }`}
-              />
-              <Input 
-                type="text"
-                value={formData.secondary_color || '#9b87f5'}
-                onChange={(e) => handleChange('secondary_color', e.target.value)}
-                className={`flex-1 p-3 ml-3 rounded-lg text-siso-text focus:border-siso-orange/50 focus:outline-none ${
-                  highlightedFields.includes('secondary_color') 
-                    ? 'border-green-500/50 bg-green-500/5' 
-                    : 'border-siso-orange/20 bg-black/20'
-                }`}
-              />
-            </div>
-          </div>
-          <div>
-            <Label className="block text-sm font-medium text-siso-text/70 mb-2">Accent Color</Label>
-            <div className="flex">
-              <Input 
-                type="color"
-                value={formData.accent_color || '#D6BCFA'}
-                onChange={(e) => handleChange('accent_color', e.target.value)}
-                className={`h-10 w-10 rounded-lg border cursor-pointer ${
-                  highlightedFields.includes('accent_color') 
-                    ? 'border-green-500/50 bg-green-500/5' 
-                    : 'border-siso-orange/20 bg-transparent'
-                }`}
-              />
-              <Input 
-                type="text"
-                value={formData.accent_color || '#D6BCFA'}
-                onChange={(e) => handleChange('accent_color', e.target.value)}
-                className={`flex-1 p-3 ml-3 rounded-lg text-siso-text focus:border-siso-orange/50 focus:outline-none ${
-                  highlightedFields.includes('accent_color') 
-                    ? 'border-green-500/50 bg-green-500/5' 
-                    : 'border-siso-orange/20 bg-black/20'
-                }`}
-              />
-            </div>
-          </div>
+          <ColorPicker
+            label="Primary Color"
+            color={formData.primary_color || '#6E59A5'}
+            onChange={(value) => handleChange('primary_color', value)}
+            isHighlighted={highlightedFields.includes('primary_color')}
+            suggestedColors={getSuggestedColors('primary')}
+          />
+          
+          <ColorPicker
+            label="Secondary Color"
+            color={formData.secondary_color || '#9b87f5'}
+            onChange={(value) => handleChange('secondary_color', value)}
+            isHighlighted={highlightedFields.includes('secondary_color')}
+            suggestedColors={getSuggestedColors('secondary')}
+          />
+          
+          <ColorPicker
+            label="Accent Color"
+            color={formData.accent_color || '#D6BCFA'}
+            onChange={(value) => handleChange('accent_color', value)}
+            isHighlighted={highlightedFields.includes('accent_color')}
+            suggestedColors={getSuggestedColors('accent')}
+          />
           
           <div className="md:col-span-3">
-            <p className="text-sm text-siso-text/70 mb-4">Preview your brand colors:</p>
-            <div className="flex flex-wrap gap-4">
-              <div className="flex-1 min-w-[100px]">
-                <div 
-                  className="w-full h-20 rounded-lg shadow-md transition-all duration-300"
-                  style={{ backgroundColor: formData.primary_color || '#6E59A5' }}
-                ></div>
-                <p className="text-xs text-center mt-2 text-siso-text/70">Primary</p>
-              </div>
-              <div className="flex-1 min-w-[100px]">
-                <div 
-                  className="w-full h-20 rounded-lg shadow-md transition-all duration-300"
-                  style={{ backgroundColor: formData.secondary_color || '#9b87f5' }}
-                ></div>
-                <p className="text-xs text-center mt-2 text-siso-text/70">Secondary</p>
-              </div>
-              <div className="flex-1 min-w-[100px]">
-                <div 
-                  className="w-full h-20 rounded-lg shadow-md transition-all duration-300"
-                  style={{ backgroundColor: formData.accent_color || '#D6BCFA' }}
-                ></div>
-                <p className="text-xs text-center mt-2 text-siso-text/70">Accent</p>
+            <p className="text-sm text-siso-text/70 mb-4">Preview your brand colors together:</p>
+            <div className="p-4 rounded-lg border border-siso-orange/10 bg-black/10">
+              <div className="flex flex-col space-y-4">
+                <div className="p-4 rounded-lg" style={{ backgroundColor: formData.primary_color || '#6E59A5' }}>
+                  <h4 className="text-lg font-semibold" style={{ color: getContrastTextColor(formData.primary_color || '#6E59A5') }}>
+                    Primary Color
+                  </h4>
+                  <p style={{ color: getContrastTextColor(formData.primary_color || '#6E59A5', 0.8) }}>
+                    This is how text would look on your primary color background.
+                  </p>
+                </div>
+                
+                <div className="flex flex-wrap gap-4">
+                  <div className="flex-1 min-w-[150px] p-4 rounded-lg"
+                    style={{ backgroundColor: formData.secondary_color || '#9b87f5' }}
+                  >
+                    <h4 className="font-medium" style={{ color: getContrastTextColor(formData.secondary_color || '#9b87f5') }}>
+                      Secondary
+                    </h4>
+                    <p className="text-sm" style={{ color: getContrastTextColor(formData.secondary_color || '#9b87f5', 0.8) }}>
+                      Secondary text
+                    </p>
+                  </div>
+                  
+                  <div className="flex-1 min-w-[150px] p-4 rounded-lg"
+                    style={{ backgroundColor: formData.accent_color || '#D6BCFA' }}
+                  >
+                    <h4 className="font-medium" style={{ color: getContrastTextColor(formData.accent_color || '#D6BCFA') }}>
+                      Accent
+                    </h4>
+                    <p className="text-sm" style={{ color: getContrastTextColor(formData.accent_color || '#D6BCFA', 0.8) }}>
+                      Accent text
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="bg-white dark:bg-gray-900 p-4 rounded-lg">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: formData.primary_color || '#6E59A5' }}></div>
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: formData.secondary_color || '#9b87f5' }}></div>
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: formData.accent_color || '#D6BCFA' }}></div>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Example UI element</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button className="text-xs" style={{ backgroundColor: formData.primary_color || '#6E59A5', color: getContrastTextColor(formData.primary_color || '#6E59A5') }}>
+                      Primary Button
+                    </Button>
+                    <Button variant="outline" className="text-xs" style={{ borderColor: formData.secondary_color || '#9b87f5', color: formData.secondary_color || '#9b87f5' }}>
+                      Secondary Button
+                    </Button>
+                    <div className="text-xs" style={{ color: formData.accent_color || '#D6BCFA' }}>
+                      Accent Text
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
