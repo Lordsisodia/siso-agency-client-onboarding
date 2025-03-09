@@ -2,11 +2,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useChatAssistant } from '@/hooks/use-chat-assistant';
-import { usePlanChatAssistant, ChatMessage as PlanChatMessage } from '@/hooks/use-plan-chat-assistant';
+import { usePlanChatAssistant } from '@/hooks/use-plan-chat-assistant';
 import { useChatInterfaceState } from './useChatInterfaceState';
 import { ChatHeader } from './ChatHeader';
 import { ChatMessageList } from './ChatMessageList';
 import { ChatFooter } from './ChatFooter';
+
+// Unified ChatMessage type to handle both regular and plan assistant message formats
+type UnifiedChatMessage = {
+  role: "user" | "assistant" | "system";
+  content: string;
+};
 
 interface ChatInterfaceProps {
   title?: string;
@@ -41,7 +47,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   } = usePlanAssistant ? planChat : regularChat;
   
   // Handle different message types using type assertion
-  const messages = rawMessages;
+  const messages = rawMessages as UnifiedChatMessage[];
   
   // Use the custom hook for handling chat interface state
   const {

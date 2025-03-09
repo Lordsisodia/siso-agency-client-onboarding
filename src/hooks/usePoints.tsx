@@ -8,9 +8,16 @@ import { showPointsEarnedToast } from '@/components/points/PointsEarnedToast';
 
 // Simplified type for point actions
 type PointActionType = 
-  | Database['public']['Enums']['point_action_type'] 
+  | 'login'
+  | 'complete_task'
   | 'bookmark_article'
-  | 'analyze_article';
+  | 'analyze_article'
+  | 'daily_login'
+  | 'streak_bonus'
+  | 'create_project'
+  | 'share_content'
+  | 'watch_video'
+  | 'contribute';
 
 export const usePoints = (userId: string | undefined) => {
   console.log('[usePoints] Hook called with userId:', userId);

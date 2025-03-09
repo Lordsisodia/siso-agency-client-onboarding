@@ -1,8 +1,18 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { ProjectDoc } from '@/types/dashboard';
 import { useToast } from '@/hooks/use-toast';
+
+export interface ProjectDoc {
+  id: string;
+  section: string;
+  content: string;
+  related_components: string[];
+  implementation_status: string;
+  priority: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export const useProjectDocumentation = () => {
   const [docs, setDocs] = useState<ProjectDoc[]>([]);
