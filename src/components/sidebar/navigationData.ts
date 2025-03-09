@@ -12,7 +12,11 @@ import {
   Briefcase,
   TrendingUp,
   HelpCircle,
-  MessageCircle
+  MessageCircle,
+  User,
+  Bell,
+  Trophy,
+  Medal
 } from 'lucide-react';
 import { MenuSection } from './types';
 
@@ -72,6 +76,23 @@ export const menuSections: MenuSection[] = [
         href: '/support',
         icon: HelpCircle,
         label: 'Help Center',
+      }
+    ]
+  },
+  {
+    type: 'section',
+    title: 'Account',
+    icon: User,
+    items: [
+      {
+        href: '/profile',
+        icon: User,
+        label: 'My Profile',
+      },
+      {
+        href: '/notifications',
+        icon: Bell,
+        label: 'Notifications',
       }
     ]
   }
