@@ -51,9 +51,10 @@ export const menuSections: MenuSection[] = [
     icon: GraduationCap,
     items: [
       {
-        href: '/education',
+        href: 'https://www.sisoresourcehub.online/home',
         icon: GraduationCap,
         label: 'Learning Hub',
+        isExternal: true
       },
       {
         href: '/portfolio',
