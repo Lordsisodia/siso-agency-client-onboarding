@@ -1,64 +1,57 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { projectTypes } from './ProjectTypeData';
+import { fadeInUp } from '@/components/ui/animations';
+import { ProjectTypeData } from './ProjectTypeData';
 
-export interface ProjectTypeInfoProps {
-  typeId: string;
-  onClose: () => void;
+// Import as a type
+import type { ProjectTypeInfo as ProjectTypeInfoType } from './ProjectTypeData';
+
+interface ProjectTypeInfoProps {
+  selectedType: string | null;
 }
 
-export const ProjectTypeInfo: React.FC<ProjectTypeInfoProps> = ({ typeId, onClose }) => {
-  const projectType = projectTypes.find(type => type.id === typeId);
+export const ProjectTypeInfo: React.FC<ProjectTypeInfoProps> = ({ selectedType }) => {
+  if (!selectedType) return null;
 
-  if (!projectType) {
-    return (
-      <div className="p-4 text-center">
-        <p>Project type information not found.</p>
-        <Button onClick={onClose} className="mt-4">Close</Button>
-      </div>
-    );
-  }
+  const projectInfo = ProjectTypeData.find(
+    (type) => type.id === selectedType
+  );
+
+  if (!projectInfo) return null;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="p-4"
+    <motion.div
+      className="mt-4 space-y-2 text-sm bg-gray-50 rounded-lg p-4 dark:bg-gray-800"
+      variants={fadeInUp}
+      initial="initial"
+      animate="animate"
+      exit="exit"
     >
-      <h3 className="text-xl font-semibold mb-3">{projectType.name}</h3>
-      
-      <div className="space-y-4">
-        <p className="text-muted-foreground">{projectType.description}</p>
-        
-        {projectType.keyFeatures && (
-          <div>
-            <h4 className="font-medium mb-2">Key Features</h4>
-            <ul className="list-disc list-inside space-y-1 text-sm">
-              {projectType.keyFeatures.map((feature, index) => (
-                <li key={index}>{feature}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-        
-        {projectType.timeline && (
-          <div>
-            <h4 className="font-medium mb-2">Typical Timeline</h4>
-            <p className="text-sm">{projectType.timeline}</p>
-          </div>
-        )}
-        
-        {projectType.bestFor && (
-          <div>
-            <h4 className="font-medium mb-2">Best For</h4>
-            <p className="text-sm">{projectType.bestFor}</p>
-          </div>
-        )}
-        
-        <Button onClick={onClose} className="w-full">Close</Button>
+      <h3 className="font-medium text-base mb-2">{projectInfo.title} Details</h3>
+      <p className="text-gray-600 dark:text-gray-300 mb-3">{projectInfo.description}</p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <h4 className="font-medium text-sm mb-1">Typical Features:</h4>
+          <ul className="list-disc pl-5 space-y-1 text-gray-600 dark:text-gray-300">
+            {projectInfo.features.map((feature, index) => (
+              <li key={index}>{feature}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="font-medium text-sm mb-1">Timeline Estimate:</h4>
+          <p className="text-gray-600 dark:text-gray-300">
+            {projectInfo.timelineEstimate}
+          </p>
+
+          <h4 className="font-medium text-sm mt-3 mb-1">Budget Range:</h4>
+          <p className="text-gray-600 dark:text-gray-300">
+            {projectInfo.budgetRange}
+          </p>
+        </div>
       </div>
     </motion.div>
   );

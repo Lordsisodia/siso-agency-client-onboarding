@@ -43,14 +43,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     messages: rawMessages, 
     isLoading, 
     error, 
-    sendMessage: hookSendMessage, 
+    sendMessage, 
     clearMessages 
   } = usePlanAssistant ? planChat : regularChat;
   
-  // Create a send message function that accepts the updated ChatMessage type
-  const sendMessage = (message: string) => {
-    hookSendMessage(message);
-  };
+  // Cast messages to the unified ChatMessage type
+  const messages = rawMessages as ChatMessage[];
   
   // Use the custom hook for handling chat interface state
   const {
@@ -59,7 +57,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     handleRetry,
     handleSendMessage
   } = useChatInterfaceState({
-    messages: rawMessages as any[], // Use type assertion to bypass strict type checking
+    messages,
     isLoading,
     error,
     clearMessages,
@@ -79,12 +77,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         title={title}
         onlineStatus={onlineStatus}
         isLoading={isLoading}
-        messagesCount={rawMessages.length}
+        messagesCount={messages.length}
         onClear={() => clearMessages()}
       />
       
       <ChatMessageList 
-        messages={rawMessages as any[]} // Use type assertion to bypass strict type checking
+        messages={messages}
         isLoading={isLoading}
         error={error}
         onlineStatus={onlineStatus}

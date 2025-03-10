@@ -18,7 +18,7 @@ export type PointActionType =
   | 'share_content'
   | 'watch_video'
   | 'contribute'
-  | 'share_article';
+  | 'share_article'; // Added to fix the error in ShareButtons component
 
 export const usePoints = (userId: string | undefined) => {
   console.log('[usePoints] Hook called with userId:', userId);

@@ -1,71 +1,40 @@
 
-import React, { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ShareButtons } from '../ShareButtons';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Copy } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 
 interface ShareDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  summary: string;
   title: string;
-  url: string;
-  summary?: string;
+  loadingSummary: boolean;
 }
 
-export const ShareDialog: React.FC<ShareDialogProps> = ({
-  open,
-  onOpenChange,
+export const ShareDialog = ({ 
+  open, 
+  onOpenChange, 
+  summary, 
   title,
-  url,
-  summary = ''
-}) => {
-  const { toast } = useToast();
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    toast({
-      title: "Link copied",
-      description: "The link has been copied to your clipboard.",
-    });
-    setTimeout(() => setCopied(false), 2000);
-  };
-
+  loadingSummary 
+}: ShareDialogProps) => {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Share this article</DialogTitle>
-          <DialogDescription>
-            Share this article with your network.
-          </DialogDescription>
-        </DialogHeader>
-        
-        <ShareButtons url={url} title={title} />
-        
-        <div className="flex items-center space-x-2 mt-4">
-          <div className="grid flex-1 gap-2">
-            <Input
-              readOnly
-              value={url}
-              className="w-full"
-            />
+    <DialogContent className="sm:max-w-[600px] w-[95vw] max-h-[90vh] overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle>AI Summary & Share Options</DialogTitle>
+      </DialogHeader>
+      <div className="space-y-4 sm:space-y-6 py-4">
+        {summary ? (
+          <div className="bg-card p-3 sm:p-4 rounded-lg border border-siso-red/20">
+            <p className="text-sm sm:text-base">{summary}</p>
           </div>
-          <Button variant="outline" size="icon" onClick={handleCopy}>
-            <Copy className="h-4 w-4" />
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+        ) : (
+          <div className="text-center text-muted-foreground">
+            {loadingSummary ? "Generating summary..." : "Click the button to generate a summary"}
+          </div>
+        )}
+        
+        <ShareButtons summary={summary || ''} title={title} />
+      </div>
+    </DialogContent>
   );
 };

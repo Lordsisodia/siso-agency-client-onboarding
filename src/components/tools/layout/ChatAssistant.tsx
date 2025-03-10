@@ -13,12 +13,6 @@ import { MessageList } from './components/MessageList';
 export function ChatAssistant() {
   const { messages, inputValue, setInputValue, isSubmitting, handleSubmit } = useChatAssistantState();
 
-  // Transform messages to the format expected by MessageList
-  const formattedMessages = messages.map(msg => ({
-    ...msg,
-    sender: msg.sender
-  }));
-
   return (
     <ExpandableChat
       size="lg"
@@ -34,7 +28,7 @@ export function ChatAssistant() {
 
       <ExpandableChatBody>
         <MessageList 
-          messages={formattedMessages}
+          messages={messages}
           isSubmitting={isSubmitting}
         />
       </ExpandableChatBody>

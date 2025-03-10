@@ -119,66 +119,6 @@ export type Database = {
         }
         Relationships: []
       }
-      ai_news_bookmarks: {
-        Row: {
-          created_at: string | null
-          id: string
-          news_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          news_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          news_id?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      ai_news_daily_summaries: {
-        Row: {
-          action_items: string[] | null
-          created_at: string | null
-          date: string
-          executive_summary: string | null
-          generated_with: string
-          id: string
-          industry_impacts: Json | null
-          key_developments: string[] | null
-          summary: string
-          updated_at: string | null
-        }
-        Insert: {
-          action_items?: string[] | null
-          created_at?: string | null
-          date: string
-          executive_summary?: string | null
-          generated_with: string
-          id?: string
-          industry_impacts?: Json | null
-          key_developments?: string[] | null
-          summary: string
-          updated_at?: string | null
-        }
-        Update: {
-          action_items?: string[] | null
-          created_at?: string | null
-          date?: string
-          executive_summary?: string | null
-          generated_with?: string
-          id?: string
-          industry_impacts?: Json | null
-          key_developments?: string[] | null
-          summary?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       ai_news_video_processing: {
         Row: {
           created_at: string | null
@@ -1017,33 +957,6 @@ export type Database = {
         }
         Relationships: []
       }
-      networking_resources: {
-        Row: {
-          category: string
-          community_count: number | null
-          created_at: string | null
-          id: string
-          name: string
-          updated_at: string | null
-        }
-        Insert: {
-          category: string
-          community_count?: number | null
-          created_at?: string | null
-          id?: string
-          name: string
-          updated_at?: string | null
-        }
-        Update: {
-          category?: string
-          community_count?: number | null
-          created_at?: string | null
-          id?: string
-          name?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       news_comments: {
         Row: {
           content: string
@@ -1372,13 +1285,11 @@ export type Database = {
       }
       profiles: {
         Row: {
-          achievements: Json | null
           avatar_url: string | null
           banner_url: string | null
           bio: string | null
           business_name: string | null
           business_type: string | null
-          contribution_count: number | null
           created_at: string
           full_name: string | null
           id: string
@@ -1387,28 +1298,23 @@ export type Database = {
           interests: string[] | null
           linkedin_url: string | null
           onboarding_completed: boolean | null
-          onboarding_step: number | null
           phone_number: string | null
           points: number | null
           professional_role: string | null
           rank: string | null
-          referral_count: number | null
           siso_tokens: number | null
           solana_wallet_address: string | null
           twitter_url: string | null
           updated_at: string | null
-          user_id: string | null
           website_url: string | null
           youtube_url: string | null
         }
         Insert: {
-          achievements?: Json | null
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
           business_name?: string | null
           business_type?: string | null
-          contribution_count?: number | null
           created_at?: string
           full_name?: string | null
           id: string
@@ -1417,28 +1323,23 @@ export type Database = {
           interests?: string[] | null
           linkedin_url?: string | null
           onboarding_completed?: boolean | null
-          onboarding_step?: number | null
           phone_number?: string | null
           points?: number | null
           professional_role?: string | null
           rank?: string | null
-          referral_count?: number | null
           siso_tokens?: number | null
           solana_wallet_address?: string | null
           twitter_url?: string | null
           updated_at?: string | null
-          user_id?: string | null
           website_url?: string | null
           youtube_url?: string | null
         }
         Update: {
-          achievements?: Json | null
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
           business_name?: string | null
           business_type?: string | null
-          contribution_count?: number | null
           created_at?: string
           full_name?: string | null
           id?: string
@@ -1447,17 +1348,14 @@ export type Database = {
           interests?: string[] | null
           linkedin_url?: string | null
           onboarding_completed?: boolean | null
-          onboarding_step?: number | null
           phone_number?: string | null
           points?: number | null
           professional_role?: string | null
           rank?: string | null
-          referral_count?: number | null
           siso_tokens?: number | null
           solana_wallet_address?: string | null
           twitter_url?: string | null
           updated_at?: string | null
-          user_id?: string | null
           website_url?: string | null
           youtube_url?: string | null
         }
@@ -2052,30 +1950,6 @@ export type Database = {
           },
         ]
       }
-      video_categories: {
-        Row: {
-          created_at: string | null
-          description: string | null
-          id: string
-          name: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          name: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          name?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       video_progress: {
         Row: {
           created_at: string | null
@@ -2250,10 +2124,8 @@ export type Database = {
           created_at: string | null
           date: string | null
           duration: string | null
-          education_creators: Json | null
           id: string
           thumbnail_url: string | null
-          thumbnailurl: string | null
           title: string
           updated_at: string | null
           url: string
@@ -2264,10 +2136,8 @@ export type Database = {
           created_at?: string | null
           date?: string | null
           duration?: string | null
-          education_creators?: Json | null
           id: string
           thumbnail_url?: string | null
-          thumbnailurl?: string | null
           title: string
           updated_at?: string | null
           url: string
@@ -2278,10 +2148,8 @@ export type Database = {
           created_at?: string | null
           date?: string | null
           duration?: string | null
-          education_creators?: Json | null
           id?: string
           thumbnail_url?: string | null
-          thumbnailurl?: string | null
           title?: string
           updated_at?: string | null
           url?: string

@@ -1,26 +1,12 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { motion } from 'framer-motion';
 import { Check, Edit } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 interface EnhancedOnboardingSummaryProps {
-  projectData: {
-    projectType: string;
-    projectScale: string;
-    businessContext: {
-      companyName: string;
-      industry: string;
-      targetAudience: string;
-      teamSize: string;
-    };
-    timelineBudget: {
-      timeline: string;
-      budget: string;
-      goals: string;
-    };
-    features: Record<string, { selected: boolean; priority: string }>;
-  };
+  projectData: any;
   onEdit: (section: string) => void;
 }
 
@@ -28,99 +14,107 @@ export const EnhancedOnboardingSummary: React.FC<EnhancedOnboardingSummaryProps>
   projectData,
   onEdit
 }) => {
-  // Count selected features
-  const selectedFeaturesCount = Object.values(projectData.features).filter(f => f.selected).length;
-
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold mb-2">Project Summary</h2>
-        <p className="text-muted-foreground">
-          Here's a summary of your project details. Review and make any necessary changes before proceeding.
+        <h1 className="text-2xl font-bold">Project Summary</h1>
+        <p className="text-muted-foreground mt-2">
+          Review your project details before finalizing
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-6">
         {/* Project Type Section */}
-        <Card className="relative">
-          <button
-            onClick={() => onEdit('projectType')}
-            className="absolute top-3 right-3 p-1 rounded-full hover:bg-muted"
-            aria-label="Edit project type"
-          >
-            <Edit className="h-4 w-4" />
-          </button>
-          <CardContent className="pt-6">
-            <h3 className="font-semibold text-lg mb-2">Project Type</h3>
-            <p>{projectData.projectType}</p>
-            <Badge variant="outline" className="mt-2">{projectData.projectScale} scale</Badge>
-          </CardContent>
-        </Card>
+        <SummarySection
+          title="Project Type"
+          onEdit={() => onEdit('projectType')}
+          items={[
+            { label: 'Project Type', value: projectData.projectType || 'Not specified' },
+            { label: 'Project Scale', value: projectData.projectScale || 'Medium' }
+          ]}
+        />
 
         {/* Business Context Section */}
-        <Card className="relative">
-          <button
-            onClick={() => onEdit('businessContext')}
-            className="absolute top-3 right-3 p-1 rounded-full hover:bg-muted"
-            aria-label="Edit business context"
-          >
-            <Edit className="h-4 w-4" />
-          </button>
-          <CardContent className="pt-6">
-            <h3 className="font-semibold text-lg mb-2">Business Context</h3>
-            <div className="space-y-2">
-              <p><span className="text-muted-foreground">Company:</span> {projectData.businessContext.companyName}</p>
-              <p><span className="text-muted-foreground">Industry:</span> {projectData.businessContext.industry}</p>
-              <p><span className="text-muted-foreground">Target Audience:</span> {projectData.businessContext.targetAudience}</p>
-              <p><span className="text-muted-foreground">Team Size:</span> {projectData.businessContext.teamSize}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <SummarySection
+          title="Business Context"
+          onEdit={() => onEdit('businessContext')}
+          items={[
+            { 
+              label: 'Company Name', 
+              value: projectData.businessContext?.companyName || 'Not specified' 
+            },
+            { 
+              label: 'Industry', 
+              value: projectData.businessContext?.industry || 'Not specified' 
+            },
+            { 
+              label: 'Target Audience', 
+              value: projectData.businessContext?.targetAudience || 'Not specified' 
+            },
+            { 
+              label: 'Team Size', 
+              value: projectData.businessContext?.teamSize || 'Not specified' 
+            }
+          ]}
+        />
 
         {/* Timeline & Budget Section */}
-        <Card className="relative">
-          <button
-            onClick={() => onEdit('timelineBudget')}
-            className="absolute top-3 right-3 p-1 rounded-full hover:bg-muted"
-            aria-label="Edit timeline and budget"
-          >
-            <Edit className="h-4 w-4" />
-          </button>
-          <CardContent className="pt-6">
-            <h3 className="font-semibold text-lg mb-2">Timeline & Budget</h3>
-            <div className="space-y-2">
-              <p><span className="text-muted-foreground">Timeline:</span> {projectData.timelineBudget.timeline}</p>
-              <p><span className="text-muted-foreground">Budget:</span> {projectData.timelineBudget.budget}</p>
-              <p><span className="text-muted-foreground">Goals:</span> {projectData.timelineBudget.goals}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <SummarySection
+          title="Timeline & Budget"
+          onEdit={() => onEdit('timelineBudget')}
+          items={[
+            { 
+              label: 'Timeline', 
+              value: projectData.timelineBudget?.timeline || 'Not specified' 
+            },
+            { 
+              label: 'Budget', 
+              value: projectData.timelineBudget?.budget || 'Not specified' 
+            },
+            { 
+              label: 'Goals', 
+              value: projectData.timelineBudget?.goals || 'Not specified' 
+            }
+          ]}
+        />
 
         {/* Features Section */}
-        <Card className="relative">
-          <button
-            onClick={() => onEdit('features')}
-            className="absolute top-3 right-3 p-1 rounded-full hover:bg-muted"
-            aria-label="Edit features"
-          >
-            <Edit className="h-4 w-4" />
-          </button>
-          <CardContent className="pt-6">
-            <h3 className="font-semibold text-lg mb-2">Selected Features</h3>
-            <p className="mb-2">{selectedFeaturesCount} features selected</p>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(projectData.features)
-                .filter(([_, details]) => details.selected)
-                .map(([name, details]) => (
-                  <Badge key={name} variant="outline" className="flex items-center gap-1">
-                    <Check className="h-3 w-3" />
-                    {name}
-                    <span className="ml-1 text-xs opacity-70">({details.priority})</span>
-                  </Badge>
-                ))
-                .slice(0, 5)}
-              {selectedFeaturesCount > 5 && (
-                <Badge variant="outline">+{selectedFeaturesCount - 5} more</Badge>
+        <Card className="overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Selected Features</h3>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="flex items-center gap-1 text-sm"
+                onClick={() => onEdit('features')}
+              >
+                <Edit className="h-3.5 w-3.5" />
+                Edit
+              </Button>
+            </div>
+            
+            <div className="space-y-2">
+              {Object.entries(projectData.features || {}).length > 0 ? (
+                <ul className="grid gap-2 sm:grid-cols-2">
+                  {Object.entries(projectData.features || {}).map(([feature, details]: [string, any]) => (
+                    details.selected && (
+                      <li key={feature} className="flex items-start gap-2">
+                        <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-medium">{feature}</span>
+                          {details.priority && (
+                            <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                              {details.priority}
+                            </span>
+                          )}
+                        </div>
+                      </li>
+                    )
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-muted-foreground">No features selected</p>
               )}
             </div>
           </CardContent>
@@ -129,3 +123,41 @@ export const EnhancedOnboardingSummary: React.FC<EnhancedOnboardingSummaryProps>
     </div>
   );
 };
+
+interface SummarySectionProps {
+  title: string;
+  onEdit: () => void;
+  items: { label: string; value: string }[];
+}
+
+const SummarySection: React.FC<SummarySectionProps> = ({ title, onEdit, items }) => {
+  return (
+    <Card className="overflow-hidden">
+      <CardContent className="p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">{title}</h3>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1 text-sm"
+            onClick={onEdit}
+          >
+            <Edit className="h-3.5 w-3.5" />
+            Edit
+          </Button>
+        </div>
+        
+        <dl className="grid gap-2 sm:grid-cols-2">
+          {items.map((item, index) => (
+            <div key={index} className="flex flex-col">
+              <dt className="text-sm text-muted-foreground">{item.label}</dt>
+              <dd className="font-medium">{item.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default EnhancedOnboardingSummary;

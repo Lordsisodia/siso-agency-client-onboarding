@@ -1,13 +1,8 @@
-import React, { useRef, useEffect } from 'react';
-import { TypingIndicator } from './TypingIndicator';
-import { ChatMessageBubble } from '@/components/ui/chat-bubble';
 
-export interface ChatMessage {
-  id: string;
-  content: string;
-  sender: 'user' | 'assistant';
-  timestamp: Date;
-}
+import React, { useRef, useEffect } from 'react';
+import { ChatMessage } from '@/components/chat/ChatInterface';
+import { ChatMessageBubble } from './ChatMessageBubble';
+import { TypingIndicator } from './TypingIndicator';
 
 interface MessageListProps {
   messages: ChatMessage[];
@@ -32,7 +27,8 @@ export const MessageList: React.FC<MessageListProps> = ({
       {messages.map((message, index) => (
         <ChatMessageBubble
           key={index}
-          message={message}
+          message={message.content}
+          isUser={message.role === 'user'}
         />
       ))}
       
