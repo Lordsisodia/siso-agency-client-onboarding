@@ -11,8 +11,15 @@ import { SidebarOverlay } from './sidebar/SidebarOverlay';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AnimatePresence } from 'framer-motion';
 
+// Sidebar state persistence key
+const SIDEBAR_STATE_KEY = 'siso-sidebar-state';
+
 export const Sidebar = () => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  // Initialize isExpanded from localStorage or default to false
+  const [isExpanded, setIsExpanded] = useState(() => {
+    const savedState = localStorage.getItem(SIDEBAR_STATE_KEY);
+    return savedState ? JSON.parse(savedState) : false;
+  });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showAlternateMenu, setShowAlternateMenu] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -20,6 +27,11 @@ export const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
+  
+  // Save sidebar state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_STATE_KEY, JSON.stringify(isExpanded));
+  }, [isExpanded]);
   
   // Handle navigation with improved external link support
   const handleItemClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -68,6 +80,7 @@ export const Sidebar = () => {
     }
   }, [location.pathname]);
 
+  // Close mobile menu on route change
   useEffect(() => {
     if (isMobile) {
       setIsMobileMenuOpen(false);
@@ -82,9 +95,10 @@ export const Sidebar = () => {
   }, [isMobile, isProfileOpen, showAlternateMenu]);
 
   const handleMouseLeave = useCallback(() => {
-    // We've removed the auto-collapse functionality
-    // The sidebar will only collapse when the toggle button is clicked
-  }, []);
+    if (!isMobile && !isProfileOpen && !showAlternateMenu && !isNavigating) {
+      setIsExpanded(false);
+    }
+  }, [isMobile, isProfileOpen, showAlternateMenu, isNavigating]);
 
   // Toggle between main navigation and alternate menu
   const toggleNavigation = () => {

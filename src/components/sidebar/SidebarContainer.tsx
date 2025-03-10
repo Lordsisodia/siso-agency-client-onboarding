@@ -27,7 +27,7 @@ export const SidebarContainer = ({
       transition: {
         type: "spring",
         stiffness: 200,
-        damping: 25,
+        damping: 30,
         mass: 0.8
       }
     },

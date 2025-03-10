@@ -1,5 +1,4 @@
 
-import { useState } from 'react';
 import { ChevronDown, ChevronRight, Link, Users, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -37,8 +36,14 @@ export const SidebarLogo = ({
     },
   ];
 
-  const toggleMenu = () => {
+  const toggleMenu = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event bubbling
     onLogoClick();
+  };
+
+  const handleToggleCollapse = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event bubbling
+    setCollapsed(!collapsed);
   };
 
   return (
@@ -115,7 +120,7 @@ export const SidebarLogo = ({
           </div>
           {/* Only show collapse button in regular navigation mode */}
           <button
-            onClick={() => setCollapsed(!collapsed)}
+            onClick={handleToggleCollapse}
             className="p-2 hover:bg-siso-text/5 rounded-lg transition-colors"
           >
             {collapsed ? (
