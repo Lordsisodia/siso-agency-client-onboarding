@@ -10,7 +10,7 @@ import { Button } from './ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const Sidebar = () => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNavigation, setShowNavigation] = useState(true);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -108,7 +108,19 @@ export const Sidebar = () => {
     }
   };
 
-  // Removed mouse enter/leave handlers to prevent auto-expanding/collapsing
+  const handleMouseEnter = useCallback(() => {
+    if (!isMobile && !isProfileOpen) {
+      setIsExpanded(true);
+    }
+  }, [isMobile, isProfileOpen]);
+
+  const handleMouseLeave = useCallback(() => {
+    // Important: Don't collapse if we're navigating or if profile is open
+    if (isMobile || isProfileOpen || isNavigating) return;
+    
+    // Immediately collapse without timeouts
+    setIsExpanded(false);
+  }, [isMobile, isProfileOpen, isNavigating]);
 
   return (
     <>
@@ -160,6 +172,8 @@ export const Sidebar = () => {
           border-r border-siso-text/10 shadow-lg
           ${isMobile ? 'left-0 z-40' : ''}
         `}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         <SidebarLogo 
           collapsed={!isExpanded} 
