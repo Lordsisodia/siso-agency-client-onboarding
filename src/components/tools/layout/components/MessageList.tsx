@@ -1,8 +1,15 @@
 
 import React, { useRef, useEffect } from 'react';
-import { ChatMessage } from '@/components/chat/ChatInterface';
 import { ChatMessageBubble } from './ChatMessageBubble';
 import { TypingIndicator } from './TypingIndicator';
+
+// Define a local interface that matches the structure expected by this component
+interface ChatMessage {
+  id: string;
+  content: string;
+  sender: 'user' | 'assistant';
+  timestamp: Date;
+}
 
 interface MessageListProps {
   messages: ChatMessage[];
@@ -28,7 +35,7 @@ export const MessageList: React.FC<MessageListProps> = ({
         <ChatMessageBubble
           key={index}
           message={message.content}
-          isUser={message.role === 'user'}
+          isUser={message.sender === 'user'}
         />
       ))}
       

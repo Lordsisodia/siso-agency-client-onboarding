@@ -1,14 +1,13 @@
 
 import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { DailySummaryData } from '@/types/daily-summary';
-import { Skeleton } from '@/components/ui/skeleton';
-import { motion } from 'framer-motion';
 
 export interface SummaryContentProps {
   summaryData: DailySummaryData;
   activeTab: string;
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
-  loading?: boolean; // Add loading prop
+  loading?: boolean;
 }
 
 export const SummaryContent: React.FC<SummaryContentProps> = ({
@@ -18,42 +17,110 @@ export const SummaryContent: React.FC<SummaryContentProps> = ({
   loading = false
 }) => {
   if (loading) {
-    return <SummaryContentSkeleton />;
+    return (
+      <div className="animate-pulse space-y-4 mt-4">
+        <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+        <div className="space-y-2">
+          <div className="h-4 bg-gray-200 rounded"></div>
+          <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+          <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+        </div>
+      </div>
+    );
   }
 
-  const getActiveContent = () => {
+  const summaryContent = () => {
     switch (activeTab) {
-      case 'executive_summary':
-        return summaryData.executive_summary || 'No executive summary available.';
-      case 'key_developments':
-        return summaryData.key_developments || 'No key developments available.';
-      case 'industry_impact':
-        return summaryData.industry_impact || 'No industry impact analysis available.';
-      case 'action_items':
-        return summaryData.action_items || 'No action items available.';
+      case 'summary':
+        return (
+          <div className="prose max-w-none">
+            <h3 className="font-semibold">Executive Summary</h3>
+            <div dangerouslySetInnerHTML={{ __html: summaryData.summary || '' }} />
+          </div>
+        );
+        
+      case 'developments':
+        return (
+          <div className="prose max-w-none">
+            <h3 className="font-semibold">Key Developments</h3>
+            <div dangerouslySetInnerHTML={{ __html: summaryData.key_points || '' }} />
+          </div>
+        );
+        
+      case 'impacts':
+        return (
+          <div className="prose max-w-none">
+            <h3 className="font-semibold">Industry Impacts</h3>
+            <div dangerouslySetInnerHTML={{ __html: summaryData.industry_impacts || '' }} />
+          </div>
+        );
+        
+      case 'actions':
+        return (
+          <div className="prose max-w-none">
+            <h3 className="font-semibold">Recommended Actions</h3>
+            <div dangerouslySetInnerHTML={{ __html: summaryData.action_recommendations || '' }} />
+          </div>
+        );
+        
       default:
-        return summaryData.executive_summary || 'No summary content available.';
+        return (
+          <div className="prose max-w-none">
+            <h3 className="font-semibold">Executive Summary</h3>
+            <div dangerouslySetInnerHTML={{ __html: summaryData.summary || '' }} />
+          </div>
+        );
     }
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-      className="mt-4 text-sm leading-relaxed whitespace-pre-line"
-    >
-      {getActiveContent()}
-    </motion.div>
+    <Card className="mt-4">
+      <CardContent className="pt-6">
+        <nav className="flex space-x-4 mb-4 overflow-x-auto pb-2">
+          <button
+            onClick={() => setActiveTab('summary')}
+            className={`px-3 py-1 text-sm rounded-full whitespace-nowrap ${
+              activeTab === 'summary' 
+                ? 'bg-primary text-white' 
+                : 'bg-gray-100 hover:bg-gray-200'
+            }`}
+          >
+            Executive Summary
+          </button>
+          <button
+            onClick={() => setActiveTab('developments')}
+            className={`px-3 py-1 text-sm rounded-full whitespace-nowrap ${
+              activeTab === 'developments' 
+                ? 'bg-primary text-white' 
+                : 'bg-gray-100 hover:bg-gray-200'
+            }`}
+          >
+            Key Developments
+          </button>
+          <button
+            onClick={() => setActiveTab('impacts')}
+            className={`px-3 py-1 text-sm rounded-full whitespace-nowrap ${
+              activeTab === 'impacts' 
+                ? 'bg-primary text-white' 
+                : 'bg-gray-100 hover:bg-gray-200'
+            }`}
+          >
+            Industry Impacts
+          </button>
+          <button
+            onClick={() => setActiveTab('actions')}
+            className={`px-3 py-1 text-sm rounded-full whitespace-nowrap ${
+              activeTab === 'actions' 
+                ? 'bg-primary text-white' 
+                : 'bg-gray-100 hover:bg-gray-200'
+            }`}
+          >
+            Recommended Actions
+          </button>
+        </nav>
+        
+        {summaryContent()}
+      </CardContent>
+    </Card>
   );
 };
-
-const SummaryContentSkeleton = () => (
-  <div className="mt-4 space-y-2">
-    <Skeleton className="w-full h-4" />
-    <Skeleton className="w-full h-4" />
-    <Skeleton className="w-full h-4" />
-    <Skeleton className="w-full h-4" />
-    <Skeleton className="w-3/4 h-4" />
-  </div>
-);
