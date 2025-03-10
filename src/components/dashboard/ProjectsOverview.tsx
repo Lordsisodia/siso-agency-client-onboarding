@@ -1,81 +1,45 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { ProjectCard } from './ProjectCard';
 
-// Create a ProjectPhase type to be used by ProjectCard
 export interface ProjectPhase {
   name: string;
-  status: 'completed' | 'in-progress' | 'pending';
+  status: 'pending' | 'in-progress' | 'completed';
   progress: number;
 }
 
-// Sample project data
-const projects = [
-  {
-    id: '1',
-    title: 'Website Redesign',
-    description: 'Redesigning the company website with a new modern look.',
-    deadline: '2023-12-15',
-    phases: [
-      { name: 'Planning', status: 'completed' as const, progress: 100 },
-      { name: 'Design', status: 'completed' as const, progress: 100 },
-      { name: 'Development', status: 'in-progress' as const, progress: 75 },
-      { name: 'Testing', status: 'pending' as const, progress: 0 },
-      { name: 'Deployment', status: 'pending' as const, progress: 0 }
-    ],
-    tags: ['Web', 'UI/UX', 'Branding']
-  },
-  {
-    id: '2',
-    title: 'Mobile App Development',
-    description: 'Creating a companion app for our main service.',
-    deadline: '2024-02-28',
-    phases: [
-      { name: 'Planning', status: 'completed' as const, progress: 100 },
-      { name: 'Design', status: 'in-progress' as const, progress: 60 },
-      { name: 'Development', status: 'pending' as const, progress: 0 },
-      { name: 'Testing', status: 'pending' as const, progress: 0 },
-      { name: 'Deployment', status: 'pending' as const, progress: 0 }
-    ],
-    tags: ['Mobile', 'iOS', 'Android']
-  },
-  {
-    id: '3',
-    title: 'Marketing Campaign',
-    description: 'Q4 marketing campaign for product launch.',
-    deadline: '2023-11-30',
-    phases: [
-      { name: 'Research', status: 'completed' as const, progress: 100 },
-      { name: 'Planning', status: 'completed' as const, progress: 100 },
-      { name: 'Content Creation', status: 'in-progress' as const, progress: 85 },
-      { name: 'Review', status: 'pending' as const, progress: 0 },
-      { name: 'Launch', status: 'pending' as const, progress: 0 }
-    ],
-    tags: ['Marketing', 'Social Media', 'Content']
-  }
-];
+export interface Project {
+  id: string;
+  title: string;
+  description: string;
+  deadline: string;
+  phases: ProjectPhase[];
+  tags: string[];
+}
 
-export const ProjectsOverview: React.FC = () => {
-  return (
-    <div className="bg-card rounded-xl p-5 border border-border shadow-sm">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold">Projects Overview</h2>
-        <button className="text-sm text-primary hover:text-primary/80 font-medium">
-          View All
-        </button>
+interface ProjectsOverviewProps {
+  projects: Project[];
+}
+
+export const ProjectsOverview: React.FC<ProjectsOverviewProps> = ({ projects }) => {
+  if (!projects || projects.length === 0) {
+    return (
+      <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-border">
+        <h2 className="text-xl font-semibold mb-4">Projects</h2>
+        <div className="text-center py-8 text-muted-foreground">
+          <p>No projects to display.</p>
+          <p className="mt-2 text-sm">Start a new project to see it here.</p>
+        </div>
       </div>
-      
-      <div className="space-y-4">
+    );
+  }
+
+  return (
+    <div className="bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-border">
+      <h2 className="text-xl font-semibold mb-4">Projects</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {projects.map((project) => (
-          <motion.div 
-            key={project.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <ProjectCard project={project} />
-          </motion.div>
+          <ProjectCard key={project.id} project={project} />
         ))}
       </div>
     </div>

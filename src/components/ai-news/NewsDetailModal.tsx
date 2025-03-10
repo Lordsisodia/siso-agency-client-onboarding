@@ -1,169 +1,112 @@
 
 import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { X, ExternalLink, CornerDownLeft } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { NewsItem } from '@/types/blog';
-import { ArticleMetadata } from './ArticleMetadata';
-import { useNavigate } from 'react-router-dom';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { NewsContent } from './NewsContent';
+import { Button } from '@/components/ui/button';
+import { NewsCardComments } from './NewsCardComments';
+import { ShareButtons } from './ShareButtons';
+import { Eye, MessageSquare, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { categoryColors } from '@/types/complexity';
 
 interface NewsDetailModalProps {
-  article: NewsItem | null;
+  article: {
+    id: string;
+    title: string;
+    content: string;
+    date: string;
+    source: string;
+    category: string;
+    image_url?: string;
+    views: number;
+    comments_count: number;
+    comments?: Array<{ id: string; text: string; author: string; timestamp: string }>;
+  };
   isOpen: boolean;
   onClose: () => void;
-  summary?: string;
-  onGenerateSummary?: () => void;
-  loadingSummary?: boolean;
+  onReadFull?: (id: string) => void;
 }
 
-// [Analysis] Modal component for showing quick article previews
-export const NewsDetailModal = ({
-  article,
-  isOpen,
+export const NewsDetailModal: React.FC<NewsDetailModalProps> = ({ 
+  article, 
+  isOpen, 
   onClose,
-  summary,
-  onGenerateSummary,
-  loadingSummary = false
-}: NewsDetailModalProps) => {
-  const navigate = useNavigate();
-
-  if (!article) return null;
-
-  const handleViewFull = () => {
-    navigate(`/ai-news/${article.id}`);
-    onClose();
-  };
-
-  const handleOpenSource = () => {
-    // [Analysis] Check if url exists before attempting to open it
-    if (article.url) {
-      window.open(article.url, '_blank', 'noopener,noreferrer');
-    } else {
-      // If there's no URL, we could either disable the button or use the source name as a fallback
-      console.warn('No URL available for article:', article.id);
+  onReadFull 
+}) => {
+  const getColorForCategory = (category: string) => {
+    const lowerCategory = category.toLowerCase();
+    if (lowerCategory in categoryColors) {
+      return categoryColors[lowerCategory as keyof typeof categoryColors];
     }
+    return categoryColors.other;
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl pr-8">{article.title}</DialogTitle>
-          <button 
-            className="absolute top-4 right-4 p-1 rounded-full hover:bg-muted"
-            onClick={onClose}
+    <Dialog open={isOpen} onOpenChange={() => onClose()}>
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 gap-0 bg-background/95 backdrop-blur-md">
+        <div className="relative p-6 border-b">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onClose} 
+            className="absolute right-4 top-4"
           >
             <X className="h-4 w-4" />
-          </button>
-          <DialogDescription>
-            <ArticleMetadata
-              date={article.date}
-              source={article.source}
-              impact={article.impact}
-              views={article.views}
-              bookmarks={article.bookmarks}
-              readingTime={article.reading_time}
-              sourceCredibility={article.source_credibility}
-              technicalComplexity={article.technical_complexity}
-              articleType={article.article_type}
-              isCompact={false}
-            />
-          </DialogDescription>
-        </DialogHeader>
-
-        {article.image_url && (
-          <div className="my-4 rounded-lg overflow-hidden">
-            <img 
-              src={article.image_url} 
-              alt={article.title} 
-              className="w-full h-52 object-cover"
-              onError={(e) => {
-                e.currentTarget.src = 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b';
-              }}
-            />
+          </Button>
+          
+          <div className="flex items-center gap-3 mb-2">
+            <Badge className={cn("px-3 py-1 font-medium", getColorForCategory(article.category))}>
+              {article.category}
+            </Badge>
+            <span className="text-xs text-muted-foreground">{article.date}</span>
+            <span className="text-xs text-muted-foreground">Source: {article.source}</span>
           </div>
-        )}
-
-        <div className="space-y-4">
-          {summary ? (
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h4 className="text-sm font-medium mb-2">Summary</h4>
-              <p className="text-sm text-muted-foreground">{summary}</p>
+          
+          <h2 className="text-xl font-bold pr-8">{article.title}</h2>
+          
+          <div className="flex items-center mt-3 gap-4">
+            <div className="flex items-center text-muted-foreground">
+              <Eye className="w-4 h-4 mr-1" />
+              <span className="text-sm">{String(article.views)}</span>
             </div>
-          ) : loadingSummary ? (
-            <div className="bg-muted/30 p-4 rounded-lg animate-pulse">
-              <h4 className="text-sm font-medium mb-2">Generating summary...</h4>
-              <div className="h-4 bg-muted rounded w-full mb-2"></div>
-              <div className="h-4 bg-muted rounded w-3/4"></div>
+            <div className="flex items-center text-muted-foreground">
+              <MessageSquare className="w-4 h-4 mr-1" />
+              <span className="text-sm">{article.comments_count}</span>
             </div>
-          ) : onGenerateSummary ? (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onGenerateSummary}
-              className="w-full"
-            >
-              Generate Summary
-            </Button>
-          ) : null}
-
-          <div className="prose prose-sm max-w-none dark:prose-invert">
-            <p className="leading-relaxed">{article.description}</p>
-            {article.content && article.content !== article.description && (
-              <div 
-                className="mt-4 leading-relaxed line-clamp-10"
-                dangerouslySetInnerHTML={{ __html: article.content }}
-              />
-            )}
           </div>
-
-          {article.content && article.content.length > 300 && (
-            <div className="relative py-6">
-              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent"></div>
+        </div>
+        
+        <div className="flex-1 overflow-auto p-6">
+          {article.image_url && (
+            <div 
+              className="w-full h-48 md:h-64 rounded-lg mb-6 bg-cover bg-center"
+              style={{ backgroundImage: `url(${article.image_url})` }}
+            />
+          )}
+          
+          <NewsContent content={article.content} />
+          
+          {onReadFull && (
+            <div className="mt-6 text-center">
+              <Button onClick={() => onReadFull(article.id)} variant="default">
+                Read Full Article
+              </Button>
+            </div>
+          )}
+          
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-3">Share</h3>
+            <ShareButtons title={article.title} />
+          </div>
+          
+          {article.comments && article.comments.length > 0 && (
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold mb-3">Comments</h3>
+              <NewsCardComments comments={article.comments} />
             </div>
           )}
         </div>
-
-        <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
-          <div className="flex-1 flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleOpenSource}
-              className="gap-2"
-              // [Analysis] Disable the button if no URL is available
-              disabled={!article.url}
-            >
-              <ExternalLink className="h-4 w-4" />
-              Visit Source
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="gap-2"
-            >
-              <CornerDownLeft className="h-4 w-4" />
-              Close
-            </Button>
-          </div>
-          
-          <Button
-            variant="default"
-            onClick={handleViewFull}
-            className="gap-2"
-          >
-            View Full Article
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
