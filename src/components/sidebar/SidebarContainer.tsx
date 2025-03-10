@@ -23,7 +23,7 @@ export const SidebarContainer = ({
 
   const sidebarVariants = {
     expanded: {
-      width: isMobile ? "16rem" : "16rem",
+      width: isMobile ? "18rem" : "18rem",
       transition: {
         type: "spring",
         stiffness: 200,

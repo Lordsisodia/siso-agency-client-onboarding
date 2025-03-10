@@ -16,7 +16,7 @@ export const MainContent = ({
     <motion.div 
       className="min-h-screen"
       animate={{
-        marginLeft: !isMobile ? (isExpanded ? '16rem' : '4rem') : 0
+        marginLeft: !isMobile ? (isExpanded ? '18rem' : '4rem') : 0
       }}
       transition={{
         type: "spring",
