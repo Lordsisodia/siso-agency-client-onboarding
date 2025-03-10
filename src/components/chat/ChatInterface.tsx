@@ -1,7 +1,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useChatAssistant } from '@/hooks/use-chat-assistant';
+import { useChatAssistant, ChatMessage as HookChatMessage } from '@/hooks/use-chat-assistant';
 import { usePlanChatAssistant } from '@/hooks/use-plan-chat-assistant';
 import { useChatInterfaceState } from './useChatInterfaceState';
 import { ChatHeader } from './ChatHeader';
@@ -55,7 +55,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     handleRetry,
     handleSendMessage
   } = useChatInterfaceState({
-    messages: rawMessages as ChatMessage[],
+    messages: rawMessages as unknown as ChatMessage[],
     isLoading,
     error,
     clearMessages,
@@ -80,7 +80,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       />
       
       <ChatMessageList 
-        messages={rawMessages as ChatMessage[]}
+        messages={rawMessages as unknown as ChatMessage[]}
         isLoading={isLoading}
         error={error}
         onlineStatus={onlineStatus}

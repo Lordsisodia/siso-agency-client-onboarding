@@ -1,68 +1,127 @@
 
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DailySummaryData } from '@/types/daily-summary';
 
-interface SummaryContentProps {
-  data: DailySummaryData;
+export interface SummaryContentProps {
+  summaryData: DailySummaryData | null;
+  loading?: boolean;
+  activeTab: string;
+  setActiveTab: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export const SummaryContent: React.FC<SummaryContentProps> = ({ data }) => {
-  if (!data) {
-    return (
-      <div className="text-center py-10">
-        <p className="text-lg text-muted-foreground">No summary available for this date.</p>
-      </div>
-    );
+export const SummaryContent: React.FC<SummaryContentProps> = ({
+  summaryData,
+  loading = false,
+  activeTab,
+  setActiveTab
+}) => {
+  if (loading) {
+    return <div className="p-4 text-center">Loading summary data...</div>;
   }
 
-  return (
-    <Tabs defaultValue="summary" className="w-full">
-      <TabsList className="grid grid-cols-4 mb-6">
-        <TabsTrigger value="summary">Summary</TabsTrigger>
-        <TabsTrigger value="keyPoints">Key Points</TabsTrigger>
-        <TabsTrigger value="impact">Industry Impact</TabsTrigger>
-        <TabsTrigger value="applications">Applications</TabsTrigger>
-      </TabsList>
+  if (!summaryData) {
+    return <div className="p-4 text-center">No summary data available.</div>;
+  }
 
-      <TabsContent value="summary" className="space-y-4">
-        <h3 className="text-xl font-semibold">Executive Summary</h3>
-        <p className="text-muted-foreground whitespace-pre-line">{data.executive_summary || data.summary}</p>
-      </TabsContent>
-
-      <TabsContent value="keyPoints" className="space-y-4">
-        <h3 className="text-xl font-semibold">Key Developments</h3>
-        <ul className="list-disc list-inside space-y-2">
-          {(data.key_developments || data.key_points).map((point, index) => (
-            <li key={index} className="text-muted-foreground">{point}</li>
-          ))}
-        </ul>
-      </TabsContent>
-
-      <TabsContent value="impact" className="space-y-4">
-        <h3 className="text-xl font-semibold">Industry Impact</h3>
-        {data.industry_impact || data.industry_impacts ? (
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'summary':
+        return (
           <div className="space-y-4">
-            {Object.entries(data.industry_impact || data.industry_impacts).map(([industry, impact], index) => (
-              <div key={index} className="bg-card/50 p-4 rounded-lg border border-border">
-                <h4 className="font-medium mb-2">{industry}</h4>
-                <p className="text-sm text-muted-foreground">{impact as string}</p>
-              </div>
-            ))}
+            <h3 className="text-lg font-medium">Executive Summary</h3>
+            <p className="text-muted-foreground">{summaryData.executive_summary || summaryData.summary}</p>
           </div>
-        ) : (
-          <p className="text-muted-foreground">No industry impact data available.</p>
-        )}
-      </TabsContent>
+        );
+      case 'key_developments':
+        return (
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Key Developments</h3>
+            <ul className="list-disc pl-5 space-y-2">
+              {(summaryData.key_developments || []).map((point, index) => (
+                <li key={index}>{point}</li>
+              ))}
+            </ul>
+          </div>
+        );
+      case 'impact':
+        return (
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Industry Impact</h3>
+            <div>{JSON.stringify(summaryData.industry_impacts || {}, null, 2)}</div>
+          </div>
+        );
+      case 'action':
+        return (
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Action Items</h3>
+            <ul className="list-disc pl-5 space-y-2">
+              {(summaryData.action_items || []).map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        );
+      default:
+        return (
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Summary</h3>
+            <p className="text-muted-foreground">{summaryData.executive_summary || summaryData.summary}</p>
+            
+            {summaryData.key_points && summaryData.key_points.length > 0 && (
+              <>
+                <h3 className="text-lg font-medium mt-6">Key Points</h3>
+                <ul className="list-disc pl-5 space-y-2">
+                  {summaryData.key_points.map((point, index) => (
+                    <li key={index}>{point}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+            
+            {summaryData.practical_applications && summaryData.practical_applications.length > 0 && (
+              <>
+                <h3 className="text-lg font-medium mt-6">Practical Applications</h3>
+                <ul className="list-disc pl-5 space-y-2">
+                  {summaryData.practical_applications.map((app, index) => (
+                    <li key={index}>{app}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
+        );
+    }
+  };
 
-      <TabsContent value="applications" className="space-y-4">
-        <h3 className="text-xl font-semibold">Practical Applications</h3>
-        <ul className="list-disc list-inside space-y-2">
-          {(data.action_items || data.practical_applications).map((application, index) => (
-            <li key={index} className="text-muted-foreground">{application}</li>
-          ))}
-        </ul>
-      </TabsContent>
-    </Tabs>
+  return (
+    <div className="p-4">
+      <div className="flex space-x-2 mb-4 border-b">
+        <button
+          className={`px-4 py-2 ${activeTab === 'summary' ? 'border-b-2 border-primary font-medium' : 'text-muted-foreground'}`}
+          onClick={() => setActiveTab('summary')}
+        >
+          Summary
+        </button>
+        <button
+          className={`px-4 py-2 ${activeTab === 'key_developments' ? 'border-b-2 border-primary font-medium' : 'text-muted-foreground'}`}
+          onClick={() => setActiveTab('key_developments')}
+        >
+          Key Developments
+        </button>
+        <button
+          className={`px-4 py-2 ${activeTab === 'impact' ? 'border-b-2 border-primary font-medium' : 'text-muted-foreground'}`}
+          onClick={() => setActiveTab('impact')}
+        >
+          Impact
+        </button>
+        <button
+          className={`px-4 py-2 ${activeTab === 'action' ? 'border-b-2 border-primary font-medium' : 'text-muted-foreground'}`}
+          onClick={() => setActiveTab('action')}
+        >
+          Action Items
+        </button>
+      </div>
+      {renderTabContent()}
+    </div>
   );
 };

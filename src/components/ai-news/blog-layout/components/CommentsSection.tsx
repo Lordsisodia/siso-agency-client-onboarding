@@ -1,92 +1,118 @@
 
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MessageSquare, Send } from 'lucide-react';
 import { NewsComment } from '@/types/comment';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { useAuthSession } from '@/hooks/useAuthSession';
 
-// Updated to make onCommentAdded optional
-export interface NewsCardCommentsProps {
-  newsId: string;
+interface CommentsSectionProps {
   comments: NewsComment[];
-  onCommentAdded?: () => void;
+  newsId: string;
+  onCommentAdded: (comment: NewsComment) => void;
 }
 
-export const CommentsSection: React.FC<NewsCardCommentsProps> = ({
+export const CommentsSection: React.FC<CommentsSectionProps> = ({ 
+  comments, 
   newsId,
-  comments,
-  onCommentAdded
+  onCommentAdded 
 }) => {
-  const [commentText, setCommentText] = useState('');
+  const [newComment, setNewComment] = useState('');
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { user } = useAuthSession();
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!commentText.trim() || !user) return;
-    
-    setIsSubmitting(true);
+    if (!newComment.trim() || isSubmitting) return;
     
     try {
-      // Add your comment submission logic here
-      // Example:
-      // await addComment(newsId, user.id, commentText);
+      setIsSubmitting(true);
       
-      setCommentText('');
-      // Call the callback if it exists
-      if (onCommentAdded) {
-        onCommentAdded();
-      }
+      // Simulate adding a comment
+      const comment: NewsComment = {
+        id: Date.now().toString(),
+        content: newComment,
+        author: 'Current User',
+        timestamp: new Date().toISOString(),
+        userId: 'current-user-id'
+      };
+      
+      // In a real app, you would call an API here
+      // Example: await addComment(newsId, newComment);
+      
+      onCommentAdded(comment);
+      setNewComment('');
     } catch (error) {
-      console.error('Error submitting comment:', error);
+      console.error('Error adding comment:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="mt-6 space-y-4">
-      <h3 className="text-lg font-semibold">Comments ({comments.length})</h3>
-      
-      {user ? (
-        <form onSubmit={handleSubmitComment} className="space-y-2">
-          <Textarea
-            value={commentText}
-            onChange={(e) => setCommentText(e.target.value)}
-            placeholder="Share your thoughts..."
-            className="resize-none"
-            rows={3}
-          />
-          <Button 
-            type="submit" 
-            disabled={!commentText.trim() || isSubmitting}
-            size="sm"
-          >
-            {isSubmitting ? 'Submitting...' : 'Post Comment'}
-          </Button>
-        </form>
-      ) : (
-        <p className="text-sm text-gray-500">Please sign in to leave a comment.</p>
-      )}
-      
-      <div className="space-y-4 mt-4">
-        {comments.length > 0 ? (
-          comments.map((comment) => (
-            <div key={comment.id} className="border-b pb-3">
-              <div className="flex items-center space-x-2 mb-1">
-                <span className="font-medium">{comment.user?.name || 'Anonymous'}</span>
-                <span className="text-xs text-gray-500">
-                  {new Date(comment.created_at).toLocaleDateString()}
-                </span>
-              </div>
-              <p className="text-sm whitespace-pre-line">{comment.content}</p>
-            </div>
-          ))
-        ) : (
-          <p className="text-sm text-gray-500">No comments yet. Be the first to share your thoughts!</p>
-        )}
+    <div className="mt-6 pt-6 border-t border-border">
+      <div 
+        className="flex items-center gap-2 mb-4 cursor-pointer" 
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <MessageSquare className="h-5 w-5" />
+        <h3 className="text-lg font-semibold">
+          Comments ({comments.length})
+        </h3>
       </div>
+      
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="space-y-4 mb-6">
+              {comments.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">
+                  No comments yet. Be the first to comment!
+                </p>
+              ) : (
+                comments.map((comment) => (
+                  <div 
+                    key={comment.id} 
+                    className="p-3 bg-muted/50 rounded-lg"
+                  >
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-medium">{comment.author || comment.user?.name || 'Anonymous'}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(comment.timestamp || comment.createdAt || Date.now()).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-sm">{comment.content || comment.text}</p>
+                  </div>
+                ))
+              )}
+            </div>
+            
+            <form onSubmit={handleSubmitComment} className="mt-4">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Add a comment..."
+                  className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  disabled={isSubmitting}
+                />
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                  disabled={!newComment.trim() || isSubmitting}
+                >
+                  <Send className="h-4 w-4" />
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
