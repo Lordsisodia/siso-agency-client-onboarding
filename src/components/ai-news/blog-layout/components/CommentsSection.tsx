@@ -1,106 +1,34 @@
 
-import React, { useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { NewsComment } from '@/types/comment';
+import React from 'react';
+import { NewsComment } from '@/types/blog';
+import { Avatar } from '@/components/ui/avatar';
+import { formatDistanceToNow } from 'date-fns';
 
-interface NewsCardCommentsProps {
-  newsId: string;
+interface CommentsSectionProps {
   comments: NewsComment[];
-  onCommentAdded?: (comment: NewsComment) => void;
 }
 
-export const CommentsSection: React.FC<NewsCardCommentsProps> = ({ 
-  newsId, 
-  comments = [],
-  onCommentAdded
-}) => {
-  const [comment, setComment] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
-
-  const handleSubmitComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!comment.trim()) return;
-
-    setIsSubmitting(true);
-    try {
-      // Simulated API call for now
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      const newComment: NewsComment = {
-        id: Date.now().toString(),
-        content: comment,
-        created_at: new Date().toISOString(),
-        author: {
-          name: 'Current User',
-          avatar: '/placeholder.svg'
-        }
-      };
-      
-      if (onCommentAdded) {
-        onCommentAdded(newComment);
-      }
-      
-      setComment('');
-      toast({
-        title: "Comment added",
-        description: "Your comment has been added successfully."
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to add comment. Please try again."
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
+export function CommentsSection({ comments }: CommentsSectionProps) {
   return (
-    <div className="mt-6 space-y-6">
-      <h3 className="text-xl font-semibold">Comments ({comments.length})</h3>
-      
-      <form onSubmit={handleSubmitComment} className="space-y-4">
-        <Textarea
-          placeholder="Add your comment..."
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          className="min-h-[100px]"
-        />
-        <Button type="submit" disabled={isSubmitting || !comment.trim()}>
-          {isSubmitting ? 'Posting...' : 'Post Comment'}
-        </Button>
-      </form>
-      
-      <div className="space-y-4 mt-6">
-        {comments.map((comment) => (
-          <div key={comment.id} className="border-b pb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={comment.author?.avatar} alt={comment.author?.name} />
-                <AvatarFallback>{comment.author?.name?.[0] || '?'}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-medium text-sm">{comment.author?.name}</p>
-                <p className="text-xs text-gray-500">
-                  {new Date(comment.created_at).toLocaleDateString()}
-                </p>
-              </div>
+    <div className="space-y-4">
+      {comments.map((comment) => (
+        <div key={comment.id} className="flex gap-4 p-4 bg-card rounded-lg">
+          <Avatar
+            src={comment.author.avatar}
+            fallback={comment.author.name[0]}
+            className="h-10 w-10"
+          />
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <span className="font-medium">{comment.author.name}</span>
+              <span className="text-sm text-muted-foreground">
+                {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+              </span>
             </div>
-            <p className="text-sm mt-2">{comment.content}</p>
+            <p className="mt-1 text-sm">{comment.content}</p>
           </div>
-        ))}
-        
-        {comments.length === 0 && (
-          <div className="text-center py-6 text-gray-500">
-            No comments yet. Be the first to comment!
-          </div>
-        )}
-      </div>
+        </div>
+      ))}
     </div>
   );
-};
+}
