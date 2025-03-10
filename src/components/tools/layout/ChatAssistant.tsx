@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/expandable-chat';
 import { useChatAssistantState } from './hooks/useChatAssistantState';
 import { ChatInputForm } from './components/ChatInputForm';
-import { MessageList } from './components/MessageList';
+import { MessageList, ToolsMessage } from './components/MessageList';
 
 export function ChatAssistant() {
   const { messages, inputValue, setInputValue, isSubmitting, handleSubmit } = useChatAssistantState();

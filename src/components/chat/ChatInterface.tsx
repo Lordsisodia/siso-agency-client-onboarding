@@ -39,7 +39,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const regularChat = useChatAssistant();
   const planChat = usePlanChatAssistant(projectId);
   
-  // Use the appropriate chat hook and cast messages to common type
+  // Use the appropriate chat hook
   const { 
     messages: rawMessages, 
     isLoading, 
@@ -55,12 +55,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     handleRetry,
     handleSendMessage
   } = useChatInterfaceState({
-    // Instead of casting, filter messages to ensure they match our expected format
-    messages: rawMessages.map(msg => ({
-      role: msg.role as "user" | "assistant" | "system", 
-      content: msg.content,
-      timestamp: msg.timestamp
-    })),
+    messages: rawMessages as ChatMessage[],
     isLoading,
     error,
     clearMessages,
@@ -85,11 +80,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       />
       
       <ChatMessageList 
-        messages={rawMessages.map(msg => ({
-          role: msg.role as "user" | "assistant" | "system", 
-          content: msg.content,
-          timestamp: msg.timestamp
-        }))}
+        messages={rawMessages as ChatMessage[]}
         isLoading={isLoading}
         error={error}
         onlineStatus={onlineStatus}
