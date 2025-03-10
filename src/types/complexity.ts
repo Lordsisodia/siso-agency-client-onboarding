@@ -1,73 +1,86 @@
 
-// Define enums for technical complexity and article impact
+// Define the technical complexity levels
 export enum TechnicalComplexity {
-  Low = "Low",
-  Medium = "Medium",
-  High = "High"
+  Low = "low",
+  Medium = "medium",
+  High = "high"
 }
 
+// Define the article impact levels
 export enum ArticleImpact {
-  Low = "Low",
-  Medium = "Medium",
-  High = "High",
-  Critical = "Critical"
+  Low = "low",
+  Medium = "medium",
+  High = "high"
 }
 
-// Define content category 
+// Define content categories
 export enum ContentCategory {
-  General = "General",
-  Technology = "Technology",
-  Business = "Business",
-  Marketing = "Marketing",
-  Design = "Design",
-  Development = "Development",
-  AITools = "AI Tools"
+  Research = "research",
+  Product = "product",
+  Tutorial = "tutorial",
+  News = "news",
+  Analysis = "analysis",
+  Opinion = "opinion"
 }
 
-// Colors for different complexity and impact levels
-export const complexityColors = {
-  Low: {
+// Define color mappings for technical complexity
+export const complexityColors: Record<TechnicalComplexity, {bg: string, text: string, border: string}> = {
+  [TechnicalComplexity.Low]: {
     bg: "bg-green-100",
     text: "text-green-800",
-    border: "border-green-200"
+    border: "border-green-300"
   },
-  Medium: {
-    bg: "bg-yellow-100",
+  [TechnicalComplexity.Medium]: {
+    bg: "bg-yellow-100", 
     text: "text-yellow-800",
-    border: "border-yellow-200"
+    border: "border-yellow-300"
   },
-  High: {
-    bg: "bg-orange-100",
-    text: "text-orange-800",
-    border: "border-orange-200"
-  },
-  Critical: {
+  [TechnicalComplexity.High]: {
     bg: "bg-red-100",
     text: "text-red-800",
-    border: "border-red-200"
+    border: "border-red-300"
   }
 };
 
-// Colors for different importance levels
-export const importanceColors = {
-  Low: {
+// Define color mappings for article impact
+export const impactColors: Record<ArticleImpact, {bg: string, text: string, border: string}> = {
+  [ArticleImpact.Low]: {
+    bg: "bg-gray-100",
+    text: "text-gray-800",
+    border: "border-gray-300"
+  },
+  [ArticleImpact.Medium]: {
     bg: "bg-blue-100",
     text: "text-blue-800",
-    border: "border-blue-200"
+    border: "border-blue-300"
   },
-  Medium: {
+  [ArticleImpact.High]: {
     bg: "bg-purple-100",
     text: "text-purple-800",
-    border: "border-purple-200"
-  },
-  High: {
-    bg: "bg-pink-100",
-    text: "text-pink-800",
-    border: "border-pink-200"
-  },
-  Critical: {
+    border: "border-purple-300"
+  }
+};
+
+// Define color mappings for importance
+export const importanceColors: Record<string, {bg: string, text: string, border: string}> = {
+  "high": {
     bg: "bg-red-100",
     text: "text-red-800",
-    border: "border-red-200"
+    border: "border-red-300"
+  },
+  "medium": {
+    bg: "bg-yellow-100",
+    text: "text-yellow-800",
+    border: "border-yellow-300"
+  },
+  "low": {
+    bg: "bg-green-100",
+    text: "text-green-800",
+    border: "border-green-300"
+  },
+  "default": {
+    bg: "bg-gray-100",
+    text: "text-gray-800",
+    border: "border-gray-300"
   }
 };

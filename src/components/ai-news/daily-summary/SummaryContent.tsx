@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { DailySummaryData } from '@/types/daily-summary';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DailySummaryData } from '@/types/daily-summary'; 
+import { Skeleton } from '@/components/ui/skeleton';
 
 export interface SummaryContentProps {
   summaryData: DailySummaryData;
@@ -10,117 +11,146 @@ export interface SummaryContentProps {
   loading?: boolean;
 }
 
-export const SummaryContent: React.FC<SummaryContentProps> = ({
+export const SummaryContent: React.FC<SummaryContentProps> = ({ 
   summaryData,
   activeTab,
   setActiveTab,
   loading = false
 }) => {
-  if (loading) {
+  // Helper function to render tabs
+  const renderTabs = () => {
+    const tabs = [
+      { id: 'summary', label: 'Summary' },
+      { id: 'key-points', label: 'Key Points' },
+      { id: 'impacts', label: 'Industry Impact' },
+      { id: 'applications', label: 'Applications' }
+    ];
+
     return (
-      <div className="animate-pulse space-y-4 mt-4">
-        <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-        <div className="space-y-2">
-          <div className="h-4 bg-gray-200 rounded"></div>
-          <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-          <div className="h-4 bg-gray-200 rounded w-4/6"></div>
-        </div>
+      <div className="flex flex-wrap gap-2 mb-6">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === tab.id
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted hover:bg-muted/80"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
     );
-  }
+  };
 
-  const summaryContent = () => {
+  // Render content based on active tab
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-3/4" />
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-6 w-5/6" />
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-6 w-4/5" />
+        </div>
+      );
+    }
+
     switch (activeTab) {
       case 'summary':
         return (
-          <div className="prose max-w-none">
-            <h3 className="font-semibold">Executive Summary</h3>
-            <div dangerouslySetInnerHTML={{ __html: summaryData.summary || '' }} />
+          <div className="space-y-4">
+            {summaryData.executive_summary || summaryData.summary ? (
+              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                {summaryData.executive_summary || summaryData.summary}
+              </p>
+            ) : (
+              <p className="text-gray-500 italic">
+                No summary available for this date.
+              </p>
+            )}
           </div>
         );
-        
-      case 'developments':
+      
+      case 'key-points':
         return (
-          <div className="prose max-w-none">
-            <h3 className="font-semibold">Key Developments</h3>
-            <div dangerouslySetInnerHTML={{ __html: summaryData.key_points || '' }} />
+          <div className="space-y-4">
+            {summaryData.key_developments?.length > 0 || summaryData.key_points?.length > 0 ? (
+              <ul className="list-disc pl-5 space-y-2">
+                {(summaryData.key_developments || summaryData.key_points)?.map((point, idx) => (
+                  <li key={idx} className="text-gray-700 dark:text-gray-300">
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500 italic">
+                No key points available for this date.
+              </p>
+            )}
           </div>
         );
-        
+      
       case 'impacts':
         return (
-          <div className="prose max-w-none">
-            <h3 className="font-semibold">Industry Impacts</h3>
-            <div dangerouslySetInnerHTML={{ __html: summaryData.industry_impacts || '' }} />
+          <div className="space-y-4">
+            {summaryData.industry_impacts && 
+             Object.keys(summaryData.industry_impacts).length > 0 ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                {Object.entries(summaryData.industry_impacts).map(([industry, impact]) => (
+                  <Card key={industry}>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg">{industry}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-700 dark:text-gray-300">
+                        {impact}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 italic">
+                No industry impact data available for this date.
+              </p>
+            )}
           </div>
         );
-        
-      case 'actions':
+      
+      case 'applications':
         return (
-          <div className="prose max-w-none">
-            <h3 className="font-semibold">Recommended Actions</h3>
-            <div dangerouslySetInnerHTML={{ __html: summaryData.action_recommendations || '' }} />
+          <div className="space-y-4">
+            {summaryData.action_items?.length > 0 || summaryData.practical_applications?.length > 0 ? (
+              <ul className="list-disc pl-5 space-y-2">
+                {(summaryData.action_items || summaryData.practical_applications)?.map((item, idx) => (
+                  <li key={idx} className="text-gray-700 dark:text-gray-300">
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500 italic">
+                No practical applications available for this date.
+              </p>
+            )}
           </div>
         );
-        
+      
       default:
-        return (
-          <div className="prose max-w-none">
-            <h3 className="font-semibold">Executive Summary</h3>
-            <div dangerouslySetInnerHTML={{ __html: summaryData.summary || '' }} />
-          </div>
-        );
+        return null;
     }
   };
 
   return (
-    <Card className="mt-4">
-      <CardContent className="pt-6">
-        <nav className="flex space-x-4 mb-4 overflow-x-auto pb-2">
-          <button
-            onClick={() => setActiveTab('summary')}
-            className={`px-3 py-1 text-sm rounded-full whitespace-nowrap ${
-              activeTab === 'summary' 
-                ? 'bg-primary text-white' 
-                : 'bg-gray-100 hover:bg-gray-200'
-            }`}
-          >
-            Executive Summary
-          </button>
-          <button
-            onClick={() => setActiveTab('developments')}
-            className={`px-3 py-1 text-sm rounded-full whitespace-nowrap ${
-              activeTab === 'developments' 
-                ? 'bg-primary text-white' 
-                : 'bg-gray-100 hover:bg-gray-200'
-            }`}
-          >
-            Key Developments
-          </button>
-          <button
-            onClick={() => setActiveTab('impacts')}
-            className={`px-3 py-1 text-sm rounded-full whitespace-nowrap ${
-              activeTab === 'impacts' 
-                ? 'bg-primary text-white' 
-                : 'bg-gray-100 hover:bg-gray-200'
-            }`}
-          >
-            Industry Impacts
-          </button>
-          <button
-            onClick={() => setActiveTab('actions')}
-            className={`px-3 py-1 text-sm rounded-full whitespace-nowrap ${
-              activeTab === 'actions' 
-                ? 'bg-primary text-white' 
-                : 'bg-gray-100 hover:bg-gray-200'
-            }`}
-          >
-            Recommended Actions
-          </button>
-        </nav>
-        
-        {summaryContent()}
-      </CardContent>
-    </Card>
+    <div className="w-full">
+      {renderTabs()}
+      <div className="p-2">
+        {renderContent()}
+      </div>
+    </div>
   );
 };

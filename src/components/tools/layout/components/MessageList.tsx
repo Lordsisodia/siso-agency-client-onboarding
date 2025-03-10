@@ -9,6 +9,7 @@ interface ChatMessage {
   content: string;
   sender: 'user' | 'assistant';
   timestamp: Date;
+  role?: 'user' | 'assistant' | 'system';
 }
 
 interface MessageListProps {
@@ -35,7 +36,7 @@ export const MessageList: React.FC<MessageListProps> = ({
         <ChatMessageBubble
           key={index}
           message={message.content}
-          isUser={message.sender === 'user'}
+          isUser={message.sender === 'user' || message.role === 'user'}
         />
       ))}
       

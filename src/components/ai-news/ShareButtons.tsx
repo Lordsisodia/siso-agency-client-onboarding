@@ -1,24 +1,26 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Share, Twitter, Facebook, Linkedin, Link } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { Twitter, Facebook, Linkedin, Mail } from 'lucide-react';
 import { usePoints } from '@/hooks/usePoints';
 import { useAuthSession } from '@/hooks/useAuthSession';
 
-interface ShareButtonsProps {
+export interface ShareButtonsProps {
   url: string;
   title: string;
-  onShare?: () => void;
+  summary?: string;
 }
 
-export const ShareButtons: React.FC<ShareButtonsProps> = ({ url, title, onShare }) => {
+export const ShareButtons: React.FC<ShareButtonsProps> = ({ url, title, summary = '' }) => {
   const { user } = useAuthSession();
   const { awardPoints } = usePoints(user?.id);
 
-  const handleShare = async (platform: string) => {
-    let shareUrl = '';
+  const handleShare = (platform: string) => {
+    if (user?.id) {
+      awardPoints('share_article');
+    }
     
+    let shareUrl = '';
     switch (platform) {
       case 'twitter':
         shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
@@ -27,72 +29,58 @@ export const ShareButtons: React.FC<ShareButtonsProps> = ({ url, title, onShare 
         shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
         break;
       case 'linkedin':
-        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(summary || '')}`;
         break;
-      case 'copy':
-        navigator.clipboard.writeText(url);
-        toast({
-          title: "Link copied!",
-          description: "The link has been copied to your clipboard.",
-        });
-        // Award points for sharing
-        if (user?.id) {
-          awardPoints('share_article'); // Updated to match the PointActionType
-        }
-        if (onShare) onShare();
-        return;
+      case 'email':
+        shareUrl = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`Check out this article: ${url}`)}`;
+        break;
     }
     
     if (shareUrl) {
       window.open(shareUrl, '_blank', 'noopener,noreferrer');
-      
-      // Award points for sharing
-      if (user?.id) {
-        awardPoints('share_article'); // Updated to match the PointActionType
-      }
-      
-      if (onShare) onShare();
     }
   };
 
   return (
-    <div className="flex items-center space-x-2">
-      <span className="text-sm text-gray-500 mr-1 hidden sm:inline-block">Share:</span>
+    <div className="flex flex-wrap gap-2 justify-center mt-2">
       <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 text-blue-400 hover:text-blue-600 hover:bg-blue-100"
+        variant="outline"
+        size="sm"
+        className="flex items-center gap-2"
         onClick={() => handleShare('twitter')}
-        title="Share on Twitter"
       >
-        <Twitter className="h-4 w-4" />
+        <Twitter size={16} />
+        Twitter
       </Button>
+      
       <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 text-blue-600 hover:text-blue-800 hover:bg-blue-100"
+        variant="outline"
+        size="sm"
+        className="flex items-center gap-2"
         onClick={() => handleShare('facebook')}
-        title="Share on Facebook"
       >
-        <Facebook className="h-4 w-4" />
+        <Facebook size={16} />
+        Facebook
       </Button>
+      
       <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 text-blue-700 hover:text-blue-900 hover:bg-blue-100"
+        variant="outline"
+        size="sm"
+        className="flex items-center gap-2"
         onClick={() => handleShare('linkedin')}
-        title="Share on LinkedIn"
       >
-        <Linkedin className="h-4 w-4" />
+        <Linkedin size={16} />
+        LinkedIn
       </Button>
+      
       <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-        onClick={() => handleShare('copy')}
-        title="Copy Link"
+        variant="outline"
+        size="sm"
+        className="flex items-center gap-2"
+        onClick={() => handleShare('email')}
       >
-        <Link className="h-4 w-4" />
+        <Mail size={16} />
+        Email
       </Button>
     </div>
   );
