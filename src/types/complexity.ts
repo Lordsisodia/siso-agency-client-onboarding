@@ -1,31 +1,78 @@
 
-// Define technical complexity levels for news and articles
-export type TechnicalComplexity = 'beginner' | 'intermediate' | 'advanced' | 'expert';
+// Types for content complexity and impact ratings
 
-// Define impact assessment levels for news and articles
-export type ArticleImpact = 'low' | 'medium' | 'high' | 'transformative';
+export type TechnicalComplexity = 'low' | 'medium' | 'high' | 'expert';
+export type ArticleImpact = 'minimal' | 'moderate' | 'significant' | 'transformative';
+export type ContentCategory = 'technology' | 'business' | 'strategy' | 'research' | 'news' | 'tutorial' | 'opinion';
 
-// Color schemes for complexity and impact levels
+// Colors for different complexity levels
 export const complexityColors = {
-  beginner: { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200' },
-  intermediate: { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-200' },
-  advanced: { bg: 'bg-purple-100', text: 'text-purple-800', border: 'border-purple-200' },
-  expert: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200' }
+  low: {
+    bg: '#E6F7EC',
+    text: '#18794E',
+    border: '#D3F0E1'
+  },
+  medium: {
+    bg: '#FEF7E6',
+    text: '#946300',
+    border: '#FEECBC'
+  },
+  high: {
+    bg: '#FEE6E6',
+    text: '#BF0D36',
+    border: '#FCCFCF'
+  },
+  expert: {
+    bg: '#E6E6FE',
+    text: '#383899',
+    border: '#CFCFFC'
+  }
 };
 
-// Color schemes for impact levels
+// Colors for different impact levels
 export const impactColors = {
-  low: { bg: 'bg-slate-100', text: 'text-slate-800', border: 'border-slate-200' },
-  medium: { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-200' },
-  high: { bg: 'bg-orange-100', text: 'text-orange-800', border: 'border-orange-200' },
-  transformative: { bg: 'bg-fuchsia-100', text: 'text-fuchsia-800', border: 'border-fuchsia-200' }
+  minimal: {
+    bg: '#F0F0F0',
+    text: '#6E6E6E',
+    border: '#E0E0E0'
+  },
+  moderate: {
+    bg: '#E6F0FE',
+    text: '#0053D9',
+    border: '#C7E0FF'
+  },
+  significant: {
+    bg: '#FEE6FE',
+    text: '#9C00AD',
+    border: '#F8C4F8'
+  },
+  transformative: {
+    bg: '#F7E6F7',
+    text: '#6E0091',
+    border: '#EEC4EE'
+  }
 };
 
-// Colors for importance rating
+// Map for importance levels colors
 export const importanceColors = {
-  1: { bg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-200' },
-  2: { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-200' },
-  3: { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200' },
-  4: { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-200' },
-  5: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200' }
+  low: {
+    bg: '#F5F5F5',
+    text: '#717171',
+    border: '#E5E5E5'
+  },
+  medium: {
+    bg: '#FBF8EF',
+    text: '#93762C',
+    border: '#F1EBDB'
+  },
+  high: {
+    bg: '#F2F8EF',
+    text: '#3F7A22',
+    border: '#E3EDDE'
+  },
+  critical: {
+    bg: '#FFF0EE',
+    text: '#C53010',
+    border: '#FCDDD8'
+  }
 };

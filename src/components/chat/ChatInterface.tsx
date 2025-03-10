@@ -55,8 +55,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     handleRetry,
     handleSendMessage
   } = useChatInterfaceState({
-    // Cast the messages to our common type to fix type inconsistencies
-    messages: rawMessages as unknown as ChatMessage[],
+    // Instead of casting, filter messages to ensure they match our expected format
+    messages: rawMessages.map(msg => ({
+      role: msg.role as "user" | "assistant" | "system", 
+      content: msg.content,
+      timestamp: msg.timestamp
+    })),
     isLoading,
     error,
     clearMessages,
@@ -81,7 +85,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       />
       
       <ChatMessageList 
-        messages={rawMessages as unknown as ChatMessage[]}
+        messages={rawMessages.map(msg => ({
+          role: msg.role as "user" | "assistant" | "system", 
+          content: msg.content,
+          timestamp: msg.timestamp
+        }))}
         isLoading={isLoading}
         error={error}
         onlineStatus={onlineStatus}

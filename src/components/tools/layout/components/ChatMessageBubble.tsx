@@ -1,9 +1,13 @@
 
 import React from 'react';
-import { ChatMessage } from '@/components/chat/ChatInterface';
+
+interface ChatMessageProps {
+  role: "user" | "assistant" | "system";
+  content: string;
+}
 
 interface ChatMessageBubbleProps {
-  message: ChatMessage;
+  message: ChatMessageProps;
   isUser: boolean;
 }
 

@@ -1,11 +1,18 @@
 
 import React, { useRef, useEffect } from 'react';
-import { ChatMessage } from '@/components/chat/ChatInterface';
 import { ChatMessageBubble } from './ChatMessageBubble';
 import { TypingIndicator } from './TypingIndicator';
 
+// Define a message type that matches what we're receiving
+export interface ToolsMessage {
+  id?: string;
+  content: string;
+  sender: 'user' | 'assistant'; // Using 'sender' rather than 'role'
+  timestamp?: Date;
+}
+
 interface MessageListProps {
-  messages: any[]; // Use any[] to accommodate different message types
+  messages: ToolsMessage[];
   isSubmitting: boolean;
 }
 
@@ -30,8 +37,8 @@ export const MessageList: React.FC<MessageListProps> = ({
           message={{
             role: message.sender === 'user' ? 'user' : 'assistant',
             content: message.content
-          } as ChatMessage}
-          isUser={message.sender === 'user' || message.role === 'user'}
+          }}
+          isUser={message.sender === 'user'}
         />
       ))}
       

@@ -19,12 +19,19 @@ export interface DashboardStats {
 }
 
 // Define props interface
-export interface DashboardLayoutProps {
+interface DashboardLayoutProps {
   userName: string;
   stats?: DashboardStats;
 }
 
-export const DashboardLayout = ({ 
+// Create a ProjectPhase interface for use by ProjectsOverview and ProjectCard
+export interface ProjectPhase {
+  name: string;
+  status: 'completed' | 'in-progress' | 'pending';
+  progress: number;
+}
+
+export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
   userName, 
   stats = {
     activeProjects: 3,
@@ -32,7 +39,7 @@ export const DashboardLayout = ({
     pendingTasks: 12,
     upcomingDeadlines: 4
   }
-}: DashboardLayoutProps) => {
+}) => {
   const { notifications, handleMarkAsRead, handleViewAll } = useNotifications();
   const { events, handleViewCalendar } = useEvents();
 
