@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Link, Users, ShoppingBag, ArrowLeft } from 'lucide-react';
+import { ChevronDown, ChevronRight, Link, Users, ShoppingBag, ArrowLeft, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface SidebarLogoProps {
@@ -19,10 +19,10 @@ export const SidebarLogo = ({ collapsed, setCollapsed, onLogoClick }: SidebarLog
       url: 'https://sisosaas.framer.website/',
     },
     {
-      name: 'SISO Sales Partners',
-      description: 'Join our partner program and earn from deal flow',
-      icon: <Users className="w-5 h-5" />,
-      url: 'https://siso-sales-team.framer.website/',
+      name: 'SISO Resource Hub',
+      description: 'Access comprehensive resources for business growth',
+      icon: <BookOpen className="w-5 h-5" />,
+      url: 'https://www.sisoresourcehub.online/home',
     },
     {
       name: 'SISO Apparel',

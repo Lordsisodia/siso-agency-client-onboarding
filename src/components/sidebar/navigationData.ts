@@ -6,7 +6,11 @@ import {
   Briefcase,
   User,
   HelpCircle,
-  Building
+  Building,
+  BookOpen,
+  Globe,
+  ExternalLink,
+  Book
 } from 'lucide-react';
 import { MenuSection } from './types';
 
@@ -77,6 +81,31 @@ export const menuSections: MenuSection[] = [
         href: '/support',
         icon: HelpCircle,
         label: 'Help Center',
+      }
+    ]
+  },
+  {
+    type: 'section',
+    title: 'Resources',
+    icon: BookOpen,
+    items: [
+      {
+        href: 'https://sisosaas.framer.website/',
+        icon: Globe,
+        label: 'SISO LinkedIn Sales Team',
+        isExternal: true
+      },
+      {
+        href: 'https://sisoapparel.framer.website/',
+        icon: ExternalLink,
+        label: 'SISO Apparel',
+        isExternal: true
+      },
+      {
+        href: 'https://www.sisoresourcehub.online/home',
+        icon: Book,
+        label: 'Resource Hub',
+        isExternal: true
       }
     ]
   }
