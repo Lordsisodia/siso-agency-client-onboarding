@@ -6,7 +6,10 @@ import {
   Briefcase,
   User,
   HelpCircle,
-  Building
+  Building,
+  Link,
+  ExternalLink,
+  ShoppingBag
 } from 'lucide-react';
 import { MenuSection } from './types';
 
@@ -36,6 +39,30 @@ export const menuSections: MenuSection[] = [
         href: '/tasks',
         icon: FileText,
         label: 'Pending Tasks',
+      }
+    ]
+  },
+  {
+    type: 'section',
+    title: 'Resources',
+    icon: Link,
+    items: [
+      {
+        href: '/resource-hub',
+        icon: Link,
+        label: 'Resource Hub',
+      },
+      {
+        href: 'https://sisosaas.framer.website/',
+        icon: ExternalLink,
+        label: 'LinkedIn Sales Team',
+        isExternal: true
+      },
+      {
+        href: 'https://sisoapparel.framer.website/',
+        icon: ShoppingBag,
+        label: 'SISO Apparel',
+        isExternal: true
       }
     ]
   },

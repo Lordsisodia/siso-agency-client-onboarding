@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { SidebarLogo } from './sidebar/SidebarLogo';
@@ -108,19 +107,18 @@ export const Sidebar = () => {
     }
   };
 
+  // We've modified this function to prevent automatic collapsing on mouse leave
   const handleMouseEnter = useCallback(() => {
     if (!isMobile && !isProfileOpen) {
       setIsExpanded(true);
     }
   }, [isMobile, isProfileOpen]);
 
+  // We've removed the auto-collapse functionality here
   const handleMouseLeave = useCallback(() => {
-    // Important: Don't collapse if we're navigating or if profile is open
-    if (isMobile || isProfileOpen || isNavigating) return;
-    
-    // Immediately collapse without timeouts
-    setIsExpanded(false);
-  }, [isMobile, isProfileOpen, isNavigating]);
+    // Removed the auto-collapse functionality
+    // The sidebar will only collapse when the toggle button is clicked
+  }, []);
 
   return (
     <>

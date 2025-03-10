@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, Link, Users, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,10 +20,10 @@ export const SidebarLogo = ({ collapsed, setCollapsed, onLogoClick }: SidebarLog
       url: 'https://sisosaas.framer.website/',
     },
     {
-      name: 'SISO Sales Partners',
-      description: 'Join our partner program and earn from deal flow',
+      name: 'SISO Resource Hub',
+      description: 'Access our comprehensive suite of tools and resources',
       icon: <Users className="w-5 h-5" />,
-      url: 'https://siso-sales-team.framer.website/',
+      url: '/resource-hub',
     },
     {
       name: 'SISO Apparel',
@@ -72,8 +73,8 @@ export const SidebarLogo = ({ collapsed, setCollapsed, onLogoClick }: SidebarLog
                 <a
                   key={link.name}
                   href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  target={link.url.startsWith('http') ? "_blank" : "_self"}
+                  rel={link.url.startsWith('http') ? "noopener noreferrer" : ""}
                   className="flex items-center gap-3 p-3 rounded-lg hover:bg-gradient-to-r from-siso-red/10 to-siso-orange/10 transition-all duration-300 group cursor-pointer"
                 >
                   <div className="p-2 rounded-lg bg-gradient-to-r from-siso-red/10 to-siso-orange/10 group-hover:from-siso-red/20 group-hover:to-siso-orange/20 transition-colors">
@@ -98,13 +99,11 @@ export const SidebarLogo = ({ collapsed, setCollapsed, onLogoClick }: SidebarLog
             className="flex items-center gap-2 cursor-pointer group" 
             onClick={toggleMenu}
           >
-            {!collapsed && (
-              <img 
-                src="/lovable-uploads/c5921a2f-8856-42f4-bec5-2d08b81c5691.png" 
-                alt="Siso Logo" 
-                className="w-8 h-8"
-              />
-            )}
+            <img 
+              src="/lovable-uploads/c5921a2f-8856-42f4-bec5-2d08b81c5691.png" 
+              alt="Siso Logo" 
+              className="w-8 h-8"
+            />
             {!collapsed && (
               <span className="text-xl font-bold bg-gradient-to-r from-siso-red to-siso-orange text-transparent bg-clip-text">
                 SISO
