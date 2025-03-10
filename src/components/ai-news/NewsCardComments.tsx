@@ -1,113 +1,68 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { useAuthSession } from '@/hooks/useAuthSession';
-import { supabase } from '@/integrations/supabase/client';
 
-interface NewsCardCommentsProps {
-  newsId: string;
-  comments: any[];
-  onCommentAdded: () => void;
+export interface NewsCardCommentsProps {
+  comments: {
+    id: string;
+    text: string;
+    author: string;
+    timestamp: string;
+    user?: string; // Optional user property to fix TS error
+  }[];
+  newsId: string; // Required prop
+  onCommentAdded: (newsId: string, comment: string) => void; // Required prop
 }
 
 export const NewsCardComments: React.FC<NewsCardCommentsProps> = ({ 
-  newsId, 
-  comments = [],
+  comments,
+  newsId,
   onCommentAdded
 }) => {
-  const [newComment, setNewComment] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
-  const { user } = useAuthSession();
+  const [comment, setComment] = useState('');
 
-  const handleSubmitComment = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to post comments",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (!newComment.trim()) return;
-    
-    setIsSubmitting(true);
-    
-    try {
-      const { error } = await supabase
-        .from('news_comments')
-        .insert({
-          news_id: newsId,
-          user_id: user.id,
-          content: newComment.trim()
-        });
-        
-      if (error) throw error;
-      
-      setNewComment('');
-      toast({
-        title: "Comment posted",
-        description: "Your comment has been added successfully."
-      });
-      
-      onCommentAdded();
-    } catch (error: any) {
-      toast({
-        title: "Error posting comment",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
+    if (comment.trim()) {
+      onCommentAdded(newsId, comment);
+      setComment('');
     }
   };
 
   return (
-    <div className="mt-6 space-y-4">
-      <h3 className="text-lg font-medium">Comments ({comments.length})</h3>
+    <div className="mt-4">
+      <h3 className="text-lg font-semibold mb-2">Comments</h3>
       
       {comments.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-3 mb-4">
           {comments.map((comment) => (
-            <div 
-              key={comment.id} 
-              className="p-3 bg-siso-bg/40 rounded-lg border border-siso-border/30"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <div className="font-medium">{comment.user?.name || "Anonymous"}</div>
-                <div className="text-xs text-siso-text/60">
-                  {new Date(comment.created_at).toLocaleString()}
-                </div>
+            <div key={comment.id} className="bg-gray-50 p-3 rounded">
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-medium">{comment.author}</span>
+                <span className="text-xs text-gray-500">{comment.timestamp}</span>
               </div>
-              <p className="text-sm">{comment.content}</p>
+              <p className="text-sm">{comment.text}</p>
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-siso-text/60 text-sm">No comments yet. Be the first to comment!</p>
+        <p className="text-gray-500 mb-4">No comments yet. Be the first to comment!</p>
       )}
       
-      <form onSubmit={handleSubmitComment} className="space-y-2">
-        <Textarea
+      <form onSubmit={handleSubmit} className="flex flex-col space-y-2">
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
           placeholder="Add a comment..."
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          className="min-h-[80px]"
+          className="border border-gray-300 rounded p-2 text-sm"
+          rows={3}
         />
-        <div className="flex justify-end">
-          <Button 
-            type="submit" 
-            disabled={isSubmitting || !newComment.trim()}
-            size="sm"
-          >
-            {isSubmitting ? "Posting..." : "Post Comment"}
-          </Button>
-        </div>
+        <button
+          type="submit"
+          disabled={!comment.trim()}
+          className="bg-blue-500 text-white py-1 px-3 rounded self-end text-sm disabled:bg-gray-300"
+        >
+          Post Comment
+        </button>
       </form>
     </div>
   );

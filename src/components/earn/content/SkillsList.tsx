@@ -1,175 +1,90 @@
 
-import { SkillPath, Skill, UserSkillProgress } from '@/types/skills';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import { Button } from '@/components/ui/button';
-import { usePoints } from '@/hooks/usePoints';
-import { useAuthSession } from '@/hooks/useAuthSession';
-import { useToast } from '@/hooks/use-toast';
+import React from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { ExternalLink } from 'lucide-react';
+import { toast } from 'sonner';
 
-interface SkillsListProps {
-  skills: Skill[];
-  userProgress: UserSkillProgress[];
-  skillPaths: SkillPath[];
-  onExternalLinkClick?: (url: string) => void;
-}
-
-export const SkillsList = ({
-  skills,
-  userProgress,
-  skillPaths,
-  onExternalLinkClick
-}: SkillsListProps) => {
-  const { user } = useAuthSession();
-  const { toast } = useToast();
-  const { awardPoints } = usePoints(user?.id);
-
-  const handleSkillAction = async (skill: Skill) => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to track your progress",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // [Analysis] Check if this is an external resource
-    const externalUrl = skill.requirements?.external_url;
-    if (externalUrl) {
-      onExternalLinkClick?.(externalUrl);
-      return;
-    }
-
+export const SkillsList = ({ skills, userId }) => {
+  const markSkillCompleted = async (skillId, skillName) => {
     try {
-      const progress = userProgress.find(p => p.skill_id === skill.id);
+      // Check if user has already completed this skill
+      const { data: existingProgress } = await supabase
+        .from('user_skill_progress')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('skill_id', skillId)
+        .single();
+
       const now = new Date().toISOString();
-
-      if (progress) {
-        if (skill.cooldown_minutes && progress.last_completed_at) {
-          const lastCompleted = new Date(progress.last_completed_at);
-          const cooldownEnd = new Date(lastCompleted.getTime() + skill.cooldown_minutes * 60000);
-          if (cooldownEnd > new Date()) {
-            toast({
-              title: "Cooldown active",
-              description: `This skill can be completed again after cooldown ends`,
-              variant: "destructive",
-            });
-            return;
-          }
-        }
-
+      
+      if (existingProgress) {
+        // Update existing record
         const { error } = await supabase
           .from('user_skill_progress')
           .update({
-            times_completed: progress.times_completed + 1,
+            progress: 100,
             last_completed_at: now,
-            completed_at: now,
+            times_completed: (existingProgress.times_completed || 0) + 1
           })
-          .eq('id', progress.id);
-
+          .eq('id', existingProgress.id);
+          
         if (error) throw error;
       } else {
+        // Create new record
         const { error } = await supabase
           .from('user_skill_progress')
           .insert({
-            user_id: user.id,
-            skill_id: skill.id,
+            user_id: userId,
+            skill_id: skillId,
+            skill_name: skillName, // Add the skill name to fix TS error
             completed_at: now,
             last_completed_at: now,
             times_completed: 1,
+            progress: 100
           });
-
+          
         if (error) throw error;
       }
-
-      await awardPoints(skill.name.toLowerCase().replace(/ /g, '_') as any);
-
-      toast({
-        title: "Skill completed!",
-        description: `You earned ${skill.points} points`,
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      
+      // Show success toast
+      toast.success(`${skillName} marked as completed!`);
+      
+    } catch (error) {
+      console.error('Error updating skill progress:', error);
+      toast.error('Failed to update skill progress');
     }
   };
 
-  const getSkillStatus = (skill: Skill) => {
-    const progress = userProgress.find(p => p.skill_id === skill.id);
-    if (!progress) return "locked";
-    if (progress.completed_at) return "completed";
-    return "in-progress";
-  };
-
   return (
-    <Accordion type="single" collapsible className="w-full space-y-4">
-      {skillPaths.map(path => {
-        const pathSkills = skills.filter(s => s.path_id === path.id);
-        return (
-          <AccordionItem key={path.id} value={path.id}>
-            <AccordionTrigger className="text-lg font-semibold">
-              {path.name}
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-4">
-                {pathSkills.map(skill => {
-                  const status = getSkillStatus(skill);
-                  const hasExternalUrl = !!skill.requirements?.external_url;
-                  
-                  return (
-                    <div
-                      key={skill.id}
-                      className="p-4 rounded-lg border border-siso-border bg-siso-bg-alt/30"
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h4 className="font-medium">{skill.name}</h4>
-                          <p className="text-sm text-siso-text/80">
-                            {skill.description}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm font-medium text-siso-orange">
-                            {skill.points} points
-                          </div>
-                          <div className="text-xs text-siso-text/60">
-                            Level {skill.level}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center mt-4">
-                        <div className="text-sm text-siso-text/80">
-                          {skill.requirements.description}
-                        </div>
-                        <Button
-                          variant={status === 'completed' ? "secondary" : "default"}
-                          size="sm"
-                          onClick={() => handleSkillAction(skill)}
-                          className="flex items-center gap-2"
-                        >
-                          {hasExternalUrl && <ExternalLink className="h-4 w-4" />}
-                          {hasExternalUrl ? 'Open Resource' : 
-                            status === 'completed' ? 'Complete Again' : 'Complete'}
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
+    <div className="space-y-4">
+      <h3 className="font-semibold text-lg">Available Skills</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {skills.map((skill) => (
+          <div key={skill.id} className="bg-card/50 backdrop-blur-sm p-4 rounded-lg border border-border">
+            <div className="flex justify-between items-start">
+              <div>
+                <h4 className="font-semibold">{skill.name}</h4>
+                <p className="text-sm text-muted-foreground mt-1">{skill.description}</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full">
+                    {skill.category}
+                  </span>
+                  {skill.points && (
+                    <span className="text-xs px-2 py-0.5 bg-green-100 text-green-800 rounded-full">
+                      {skill.points} points
+                    </span>
+                  )}
+                </div>
               </div>
-            </AccordionContent>
-          </AccordionItem>
-        );
-      })}
-    </Accordion>
+              <button
+                onClick={() => markSkillCompleted(skill.id, skill.name)}
+                className="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary/90 transition-colors"
+              >
+                Complete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };

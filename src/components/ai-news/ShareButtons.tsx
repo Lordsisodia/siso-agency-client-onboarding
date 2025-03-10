@@ -1,84 +1,89 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Share, Twitter, Facebook, Linkedin, Link2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { 
+  TwitterIcon, 
+  FacebookIcon, 
+  LinkedinIcon, 
+  MailIcon, 
+  LinkIcon 
+} from 'lucide-react';
 
 export interface ShareButtonsProps {
   title: string;
-  summary?: string;
+  summary?: string; // Make summary optional to fix type error
   url?: string;
 }
 
 export const ShareButtons: React.FC<ShareButtonsProps> = ({ 
   title, 
-  summary = '', 
+  summary = "", 
   url = window.location.href 
 }) => {
-  const handleShare = (platform: string) => {
-    let shareUrl = '';
-    
-    switch (platform) {
-      case 'twitter':
-        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
-        break;
-      case 'facebook':
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-        break;
-      case 'linkedin':
-        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(summary)}`;
-        break;
-      case 'copy':
-        navigator.clipboard.writeText(url);
-        toast.success('Link copied to clipboard!');
-        return;
-      default:
-        return;
+  const encodedUrl = encodeURIComponent(url);
+  const encodedTitle = encodeURIComponent(title);
+  const encodedSummary = encodeURIComponent(summary);
+
+  const shareLinks = [
+    {
+      name: 'Twitter',
+      icon: TwitterIcon,
+      url: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`,
+      color: 'bg-blue-400 hover:bg-blue-500'
+    },
+    {
+      name: 'Facebook',
+      icon: FacebookIcon,
+      url: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      color: 'bg-blue-600 hover:bg-blue-700'
+    },
+    {
+      name: 'LinkedIn',
+      icon: LinkedinIcon,
+      url: `https://www.linkedin.com/shareArticle?mini=true&url=${encodedUrl}&title=${encodedTitle}&summary=${encodedSummary}`,
+      color: 'bg-blue-700 hover:bg-blue-800'
+    },
+    {
+      name: 'Email',
+      icon: MailIcon,
+      url: `mailto:?subject=${encodedTitle}&body=${encodedSummary}%0A%0A${encodedUrl}`,
+      color: 'bg-gray-500 hover:bg-gray-600'
     }
-    
-    window.open(shareUrl, '_blank', 'width=600,height=400');
+  ];
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      alert('Link copied to clipboard!');
+    } catch (err) {
+      console.error('Failed to copy link: ', err);
+    }
   };
 
   return (
-    <div className="flex flex-wrap gap-2">
-      <Button 
-        variant="outline" 
-        size="sm" 
-        className="flex items-center gap-1"
-        onClick={() => handleShare('twitter')}
-      >
-        <Twitter className="h-4 w-4" />
-        <span className="hidden sm:inline">Twitter</span>
-      </Button>
+    <div className="flex flex-col space-y-3">
+      <div className="grid grid-cols-2 gap-3">
+        {shareLinks.map((link) => (
+          <a
+            key={link.name}
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${link.color} text-white py-2 px-4 rounded flex items-center justify-center`}
+          >
+            <link.icon className="h-4 w-4 mr-2" />
+            {link.name}
+          </a>
+        ))}
+      </div>
       
-      <Button 
-        variant="outline" 
-        size="sm" 
-        className="flex items-center gap-1"
-        onClick={() => handleShare('facebook')}
+      <Button
+        onClick={copyToClipboard}
+        variant="outline"
+        className="flex items-center justify-center"
       >
-        <Facebook className="h-4 w-4" />
-        <span className="hidden sm:inline">Facebook</span>
-      </Button>
-      
-      <Button 
-        variant="outline" 
-        size="sm" 
-        className="flex items-center gap-1"
-        onClick={() => handleShare('linkedin')}
-      >
-        <Linkedin className="h-4 w-4" />
-        <span className="hidden sm:inline">LinkedIn</span>
-      </Button>
-      
-      <Button 
-        variant="outline" 
-        size="sm" 
-        className="flex items-center gap-1"
-        onClick={() => handleShare('copy')}
-      >
-        <Link2 className="h-4 w-4" />
-        <span className="hidden sm:inline">Copy Link</span>
+        <LinkIcon className="h-4 w-4 mr-2" />
+        Copy Link
       </Button>
     </div>
   );

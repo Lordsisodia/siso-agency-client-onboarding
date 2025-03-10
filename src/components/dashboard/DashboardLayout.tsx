@@ -4,7 +4,7 @@ import { QuickActionsPanel } from './QuickActionsPanel';
 import { NotificationsPanel } from './NotificationsPanel';
 import { UpcomingEvents } from './UpcomingEvents';
 import { DashboardHeader } from './DashboardHeader';
-import { ProjectsOverview } from './ProjectsOverview';
+import { ProjectsOverview, Project } from './ProjectsOverview';
 import { DashboardSidebar } from './DashboardSidebar';
 import { ResourcesOverview } from './ResourcesOverview';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -22,13 +22,6 @@ export interface DashboardStats {
 interface DashboardLayoutProps {
   userName: string;
   stats?: DashboardStats;
-}
-
-// Create a ProjectPhase interface for use by ProjectsOverview and ProjectCard
-export interface ProjectPhase {
-  name: string;
-  status: 'completed' | 'in-progress' | 'pending';
-  progress: number;
 }
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
@@ -67,6 +60,48 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     }
   };
 
+  // Sample projects data
+  const sampleProjects: Project[] = [
+    {
+      id: "1",
+      title: "Website Redesign",
+      description: "Modernizing the company website with new UI/UX",
+      deadline: "2023-12-31",
+      phases: [
+        { name: "Research", status: "completed", progress: 100 },
+        { name: "Design", status: "in-progress", progress: 70 },
+        { name: "Development", status: "pending", progress: 0 }
+      ],
+      tags: ["Design", "Frontend"]
+    },
+    {
+      id: "2",
+      title: "Mobile App Development",
+      description: "Creating a native mobile app for both iOS and Android",
+      deadline: "2024-03-15",
+      phases: [
+        { name: "Planning", status: "completed", progress: 100 },
+        { name: "UI Design", status: "in-progress", progress: 85 },
+        { name: "Backend API", status: "in-progress", progress: 45 },
+        { name: "Frontend Development", status: "pending", progress: 0 }
+      ],
+      tags: ["Mobile", "Backend", "API"]
+    },
+    {
+      id: "3",
+      title: "Data Analytics Dashboard",
+      description: "Building an interactive analytics dashboard",
+      deadline: "2024-01-30",
+      phases: [
+        { name: "Requirements", status: "completed", progress: 100 },
+        { name: "Data Modeling", status: "completed", progress: 100 },
+        { name: "Dashboard Design", status: "in-progress", progress: 60 },
+        { name: "Implementation", status: "pending", progress: 10 }
+      ],
+      tags: ["Analytics", "Dashboard", "Visualization"]
+    }
+  ];
+
   return (
     <main className="flex-1 p-4 md:p-6 overflow-auto">
       <DashboardHeader userName={userName} stats={stats} />
@@ -82,7 +117,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           className="lg:col-span-2"
           variants={itemVariants}
         >
-          <ProjectsOverview />
+          <ProjectsOverview projects={sampleProjects} />
         </motion.div>
         
         {/* Sidebar Content */}

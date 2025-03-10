@@ -1,34 +1,63 @@
 
+// Colors for different complexity levels
+export const complexityColors = {
+  beginner: {
+    bg: "bg-green-100",
+    text: "text-green-800",
+    border: "border-green-200"
+  },
+  intermediate: {
+    bg: "bg-yellow-100",
+    text: "text-yellow-800",
+    border: "border-yellow-200"
+  },
+  advanced: {
+    bg: "bg-orange-100",
+    text: "text-orange-800",
+    border: "border-orange-200"
+  },
+  expert: {
+    bg: "bg-red-100",
+    text: "text-red-800",
+    border: "border-red-200"
+  }
+};
+
+// Colors for different importance levels
 export const importanceColors = {
-  low: { bg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-200' },
-  medium: { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-200' },
-  high: { bg: 'bg-purple-100', text: 'text-purple-800', border: 'border-purple-200' },
-  critical: { bg: 'bg-pink-100', text: 'text-pink-800', border: 'border-pink-200' },
+  high: {
+    bg: "bg-red-100",
+    text: "text-red-800",
+    border: "border-red-200"
+  },
+  medium: {
+    bg: "bg-yellow-100",
+    text: "text-yellow-800",
+    border: "border-yellow-200"
+  },
+  low: {
+    bg: "bg-blue-100",
+    text: "text-blue-800",
+    border: "border-blue-200"
+  }
 };
 
-export const eventCardColors = {
-  news: 'bg-blue-500',
-  research: 'bg-purple-500',
-  product: 'bg-green-500',
-  business: 'bg-amber-500',
-  opinion: 'bg-orange-500',
-  development: 'bg-indigo-500',
-  critical: 'text-red-800 bg-red-100',
-  important: 'text-orange-800 bg-orange-100',
-  moderate: 'text-blue-800 bg-blue-100',
-  low: 'text-gray-800 bg-gray-100',
-};
-
-export const timeframeOptions = [
-  { value: 'day', label: 'Today' },
-  { value: 'week', label: 'This Week' },
-  { value: 'month', label: 'This Month' },
-  { value: 'quarter', label: 'This Quarter' },
-  { value: 'year', label: 'This Year' },
+// Content types
+export const contentTypes = [
+  "Article",
+  "Tutorial",
+  "Research",
+  "News",
+  "Opinion",
+  "Analysis"
 ];
 
-export const summaryTypes = [
-  { value: 'executive', label: 'Executive' },
-  { value: 'technical', label: 'Technical' },
-  { value: 'comprehensive', label: 'Comprehensive' },
+// Impact categories
+export const impactCategories = [
+  "Industry",
+  "Technology",
+  "Society",
+  "Business",
+  "Policy",
+  "Research"
 ];

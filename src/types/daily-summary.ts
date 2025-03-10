@@ -1,17 +1,35 @@
 
 export interface DailySummaryData {
-  id: string;
+  id?: string;
   date: string;
+  title?: string;
   summary: string;
-  key_points: string[];
-  practical_applications: string[];
-  industry_impacts: Record<string, any>;
-  article_count: number;
-  generated_with?: string;
-  created_at: string;
-  updated_at: string;
+  key_topics?: string[];
   executive_summary?: string;
   key_developments?: string[];
-  industry_impact?: Record<string, any>;
+  industry_impacts?: string[];
+  industry_impact?: string; // For backward compatibility
   action_items?: string[];
+  sentiment?: string;
+  confidence_score?: number;
+  categorized_key_points?: Record<string, string[]>;
+  key_technologies?: string[];
+  application_details?: string[];
+  impact_severity?: Record<string, string>;
+  impact_trends?: Record<string, string>;
+  analysis_depth?: string;
+}
+
+export interface UseAiDailySummaryResult {
+  data: DailySummaryData | null;
+  isLoading: boolean;
+  error: any;
+  refetch: () => Promise<void>;
+}
+
+export interface SummaryContentProps {
+  summaryData: UseAiDailySummaryResult;
+  activeTab: string;
+  setActiveTab: React.Dispatch<React.SetStateAction<string>>;
+  loading?: boolean; // Added to fix prop mismatch error
 }

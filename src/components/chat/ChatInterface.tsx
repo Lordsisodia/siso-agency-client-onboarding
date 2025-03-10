@@ -55,7 +55,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     handleRetry,
     handleSendMessage
   } = useChatInterfaceState({
-    messages: rawMessages as unknown as ChatMessage[],
+    messages: rawMessages as ChatMessage[],
     isLoading,
     error,
     clearMessages,
@@ -80,7 +80,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       />
       
       <ChatMessageList 
-        messages={rawMessages as unknown as ChatMessage[]}
+        messages={rawMessages as ChatMessage[]}
         isLoading={isLoading}
         error={error}
         onlineStatus={onlineStatus}
