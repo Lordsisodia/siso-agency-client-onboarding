@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, Link, Users, ShoppingBag, ArrowLeft, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -109,6 +110,13 @@ export const SidebarLogo = ({ collapsed, setCollapsed, onLogoClick }: SidebarLog
               <span className="text-xl font-bold bg-gradient-to-r from-siso-red to-siso-orange text-transparent bg-clip-text">
                 SISO
               </span>
+            )}
+            {collapsed && (
+              <img 
+                src="/lovable-uploads/c5921a2f-8856-42f4-bec5-2d08b81c5691.png" 
+                alt="Siso Logo" 
+                className="w-8 h-8 mx-auto"
+              />
             )}
           </div>
           <button
