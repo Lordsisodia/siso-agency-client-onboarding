@@ -1,118 +1,131 @@
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, Send } from 'lucide-react';
-import { NewsComment } from '@/types/comment';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/components/ui/use-toast';
+import { NewsComment } from '@/types/news-comment';
 
 interface CommentsSectionProps {
-  comments: NewsComment[];
   newsId: string;
-  onCommentAdded: (comment: NewsComment) => void;
+  comments: NewsComment[];
+  onCommentAdded?: (comment: NewsComment) => void;
 }
 
 export const CommentsSection: React.FC<CommentsSectionProps> = ({ 
-  comments, 
-  newsId,
+  newsId, 
+  comments = [], 
   onCommentAdded 
 }) => {
+  const { toast } = useToast();
   const [newComment, setNewComment] = useState('');
-  const [isExpanded, setIsExpanded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmitComment = async (e: React.FormEvent) => {
+  const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!newComment.trim() || isSubmitting) return;
+    if (!newComment.trim()) {
+      toast({
+        description: "Comment cannot be empty",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
     
     try {
-      setIsSubmitting(true);
-      
-      // Simulate adding a comment
-      const comment: NewsComment = {
-        id: Date.now().toString(),
-        content: newComment,
-        author: 'Current User',
+      // Create placeholder comment object for immediate UI feedback
+      const tempComment: NewsComment = {
+        id: `temp-${Date.now()}`,
+        text: newComment,
+        author: "You", // or get from auth context
         timestamp: new Date().toISOString(),
-        userId: 'current-user-id'
       };
       
-      // In a real app, you would call an API here
-      // Example: await addComment(newsId, newComment);
+      // If you have an onCommentAdded handler, call it
+      if (onCommentAdded) {
+        onCommentAdded(tempComment);
+      }
       
-      onCommentAdded(comment);
+      // Reset comment input
       setNewComment('');
+      
+      toast({
+        description: "Comment added successfully!",
+      });
     } catch (error) {
-      console.error('Error adding comment:', error);
+      toast({
+        title: "Error adding comment",
+        description: "Please try again later",
+        variant: "destructive",
+      });
+      console.error("Error adding comment:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
   return (
-    <div className="mt-6 pt-6 border-t border-border">
-      <div 
-        className="flex items-center gap-2 mb-4 cursor-pointer" 
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <MessageSquare className="h-5 w-5" />
-        <h3 className="text-lg font-semibold">
-          Comments ({comments.length})
-        </h3>
-      </div>
+    <div className="mt-8 bg-card/30 p-6 rounded-xl border border-border shadow-sm">
+      <h3 className="text-xl font-semibold mb-4">Comments</h3>
       
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="space-y-4 mb-6">
-              {comments.length === 0 ? (
-                <p className="text-muted-foreground text-center py-4">
-                  No comments yet. Be the first to comment!
-                </p>
-              ) : (
-                comments.map((comment) => (
-                  <div 
-                    key={comment.id} 
-                    className="p-3 bg-muted/50 rounded-lg"
-                  >
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="font-medium">{comment.author || comment.user?.name || 'Anonymous'}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(comment.timestamp || comment.createdAt || Date.now()).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <p className="text-sm">{comment.content || comment.text}</p>
-                  </div>
-                ))
-              )}
-            </div>
-            
-            <form onSubmit={handleSubmitComment} className="mt-4">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Add a comment..."
-                  className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  disabled={isSubmitting}
-                />
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                  disabled={!newComment.trim() || isSubmitting}
-                >
-                  <Send className="h-4 w-4" />
-                </button>
+      {comments.length > 0 ? (
+        <div className="space-y-6 mb-6">
+          {comments.map((comment) => (
+            <div key={comment.id} className="flex gap-3">
+              <Avatar className="h-10 w-10">
+                {comment.user?.avatar && (
+                  <AvatarImage src={comment.user.avatar} alt={comment.user?.name || comment.author || 'Anonymous'} />
+                )}
+                <AvatarFallback>
+                  {getInitials(comment.user?.name || comment.author || 'AN')}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <p className="font-medium text-sm">{comment.user?.name || comment.author || 'Anonymous'}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(comment.timestamp || comment.created_at || '').toLocaleDateString()}
+                  </p>
+                </div>
+                <p className="mt-1 text-sm">{comment.text || comment.content}</p>
               </div>
-            </form>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="py-6 text-center text-muted-foreground">
+          <p>No comments yet. Be the first to comment!</p>
+        </div>
+      )}
+      
+      <form onSubmit={handleCommentSubmit} className="mt-4">
+        <Textarea
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          placeholder="Add a comment..."
+          className="resize-none mb-3"
+          rows={3}
+        />
+        <div className="flex justify-end">
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Posting...' : 'Post Comment'}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };

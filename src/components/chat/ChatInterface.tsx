@@ -1,14 +1,14 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useChatAssistant, ChatMessage as HookChatMessage } from '@/hooks/use-chat-assistant';
+import { useChatAssistant } from '@/hooks/use-chat-assistant';
 import { usePlanChatAssistant } from '@/hooks/use-plan-chat-assistant';
 import { useChatInterfaceState } from './useChatInterfaceState';
 import { ChatHeader } from './ChatHeader';
 import { ChatMessageList } from './ChatMessageList';
 import { ChatFooter } from './ChatFooter';
 
-// Define a common ChatMessage type that's compatible with both chat hooks
+// Define a common ChatMessage type that works with both hooks
 export type ChatMessage = {
   role: "user" | "assistant" | "system";
   content: string;
@@ -44,9 +44,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     messages: rawMessages, 
     isLoading, 
     error, 
-    sendMessage, 
+    sendMessage: hookSendMessage, 
     clearMessages 
   } = usePlanAssistant ? planChat : regularChat;
+  
+  // Map messages to ensure they match our expected ChatMessage type
+  const messages = (rawMessages as any[]).map(msg => ({
+    ...msg,
+    role: msg.role === "system" ? "system" : msg.role
+  })) as ChatMessage[];
   
   // Use the custom hook for handling chat interface state
   const {
@@ -55,13 +61,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     handleRetry,
     handleSendMessage
   } = useChatInterfaceState({
-    messages: rawMessages as unknown as ChatMessage[],
+    messages,
     isLoading,
     error,
     clearMessages,
     welcomeMessage,
     systemPrompt,
-    sendMessage
+    sendMessage: (message: string, formData?: Record<string, any>) => {
+      return hookSendMessage(message, formData);
+    }
   });
 
   return (
@@ -75,12 +83,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         title={title}
         onlineStatus={onlineStatus}
         isLoading={isLoading}
-        messagesCount={rawMessages.length}
+        messagesCount={messages.length}
         onClear={() => clearMessages()}
       />
       
       <ChatMessageList 
-        messages={rawMessages as unknown as ChatMessage[]}
+        messages={messages}
         isLoading={isLoading}
         error={error}
         onlineStatus={onlineStatus}

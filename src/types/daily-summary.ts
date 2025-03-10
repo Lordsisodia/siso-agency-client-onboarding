@@ -5,28 +5,29 @@ export interface DailySummaryData {
   summary: string;
   key_points?: string[];
   practical_applications?: string[];
-  industry_impacts?: any;
+  industry_impacts?: Record<string, any>;
   article_count?: number;
   generated_with?: string;
-  created_at?: string;
-  updated_at?: string;
   executive_summary?: string;
   key_developments?: string[];
   action_items?: string[];
+  // New fields for enhanced analytics
   sentiment?: string;
   confidence_score?: number;
-  categorized_key_points?: any;
+  categorized_key_points?: Record<string, any>;
   key_technologies?: any[];
   application_details?: string[];
-  impact_severity?: any;
-  impact_trends?: any;
+  impact_severity?: Record<string, any>;
+  impact_trends?: Record<string, any>;
   analysis_depth?: string;
 }
 
 export interface UseAiDailySummaryResult {
-  data: DailySummaryData | null;
-  loading: boolean;
-  error: any;
-  fetchSummary: (date: Date) => Promise<void>;
-  summaryData: DailySummaryData | null; // Adding this for backward compatibility
+  dailySummary: DailySummaryData | null;
+  isLoading: boolean;
+  error: Error | null;
+  summaryData?: DailySummaryData | null;
+  loading?: boolean;
+  fetchSummary: (date?: string) => Promise<void>;
+  refreshSummary: () => Promise<void>;
 }
