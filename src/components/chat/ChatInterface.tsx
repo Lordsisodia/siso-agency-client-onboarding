@@ -8,9 +8,9 @@ import { ChatHeader } from './ChatHeader';
 import { ChatMessageList } from './ChatMessageList';
 import { ChatFooter } from './ChatFooter';
 
-// Define a ChatMessage type that's compatible with both chat hooks
+// Define a common ChatMessage type that's compatible with both chat hooks
 export type ChatMessage = {
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
   content: string;
   timestamp?: Date;
 };
@@ -54,7 +54,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     handleRetry,
     handleSendMessage
   } = useChatInterfaceState({
-    messages: rawMessages,
+    messages: rawMessages as ChatMessage[], // Cast the messages to our common type
     isLoading,
     error,
     clearMessages,
@@ -79,7 +79,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       />
       
       <ChatMessageList 
-        messages={rawMessages}
+        messages={rawMessages as ChatMessage[]} // Cast the messages to our common type
         isLoading={isLoading}
         error={error}
         onlineStatus={onlineStatus}

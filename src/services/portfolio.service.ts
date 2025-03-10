@@ -124,15 +124,49 @@ export async function saveProject(project: Partial<Project> & { id?: string }) {
       // Update existing project
       result = await supabase
         .from('portfolio_projects')
-        .update(project)
+        .update({
+          title: project.title,
+          description: project.description,
+          full_description: project.fullDescription || project.full_description,
+          image: project.image,
+          gallery: project.gallery,
+          tags: project.tags,
+          features: project.features,
+          technologies: project.technologies,
+          client: project.client,
+          date: project.date,
+          duration: project.duration,
+          challenge: project.challenge,
+          solution: project.solution,
+          results: project.results,
+          testimonial: project.testimonial,
+          featured: project.featured
+        })
         .eq('id', project.id)
         .select()
         .single();
     } else {
-      // Create new project
+      // Create new project with required fields
       result = await supabase
         .from('portfolio_projects')
-        .insert(project)
+        .insert({
+          title: project.title || 'New Project',
+          description: project.description || '',
+          full_description: project.fullDescription || project.full_description || '',
+          image: project.image || '',
+          gallery: project.gallery || [],
+          tags: project.tags || [],
+          features: project.features || [],
+          technologies: project.technologies || [],
+          client: project.client || 'Client Name',
+          date: project.date || new Date().toISOString().split('T')[0],
+          duration: project.duration || '1 month',
+          challenge: project.challenge || '',
+          solution: project.solution || '',
+          results: project.results || '',
+          testimonial: project.testimonial || null,
+          featured: project.featured || false
+        })
         .select()
         .single();
     }
