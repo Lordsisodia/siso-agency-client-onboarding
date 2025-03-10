@@ -13,7 +13,7 @@ import ThankYou from '@/pages/ThankYou';
 import Terms from '@/pages/Terms';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 
-// New page imports
+// Core pages
 import Dashboard from '@/pages/Dashboard';
 import Projects from '@/pages/Projects';
 import PlanBuilder from '@/pages/PlanBuilder';
@@ -25,7 +25,6 @@ import Notifications from '@/pages/Notifications';
 
 import { Toaster } from '@/components/ui/toaster';
 import { useAuthSession } from '@/hooks/useAuthSession';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 function App() {
   const location = useLocation();
@@ -53,7 +52,7 @@ function App() {
         {/* Home route - redirect to plan-builder */}
         <Route path="/home" element={<Navigate to="/plan-builder" replace />} />
         
-        {/* All routes now accessible without authentication */}
+        {/* Core routes */}
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/plan-builder" element={<PlanBuilder />} />
@@ -69,7 +68,7 @@ function App() {
         <Route path="/onboarding/social" element={<SocialOnboarding />} />
         <Route path="/onboarding/congratulations" element={<OnboardingCongratulations />} />
 
-        {/* Modified fallback route with more specific handling */}
+        {/* Fallback route */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
 

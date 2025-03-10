@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useChatAssistant } from '@/hooks/use-chat-assistant';
 import { usePlanChatAssistant } from '@/hooks/use-plan-chat-assistant';
@@ -8,9 +8,9 @@ import { ChatHeader } from './ChatHeader';
 import { ChatMessageList } from './ChatMessageList';
 import { ChatFooter } from './ChatFooter';
 
-// Define a more flexible ChatMessage type that includes system messages
+// Define a ChatMessage type that's compatible with both chat hooks
 export type ChatMessage = {
-  role: "user" | "assistant" | "system";
+  role: "user" | "assistant";
   content: string;
   timestamp?: Date;
 };
@@ -47,9 +47,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     clearMessages 
   } = usePlanAssistant ? planChat : regularChat;
   
-  // Cast messages to the unified ChatMessage type
-  const messages = rawMessages as ChatMessage[];
-  
   // Use the custom hook for handling chat interface state
   const {
     onlineStatus,
@@ -57,7 +54,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     handleRetry,
     handleSendMessage
   } = useChatInterfaceState({
-    messages,
+    messages: rawMessages,
     isLoading,
     error,
     clearMessages,
@@ -77,12 +74,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         title={title}
         onlineStatus={onlineStatus}
         isLoading={isLoading}
-        messagesCount={messages.length}
+        messagesCount={rawMessages.length}
         onClear={() => clearMessages()}
       />
       
       <ChatMessageList 
-        messages={messages}
+        messages={rawMessages}
         isLoading={isLoading}
         error={error}
         onlineStatus={onlineStatus}

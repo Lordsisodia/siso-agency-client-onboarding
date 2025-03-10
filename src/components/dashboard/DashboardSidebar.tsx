@@ -43,7 +43,7 @@ export const DashboardSidebar = () => {
       <motion.div variants={itemVariants}>
         <UpcomingEvents 
           events={events}
-          onViewAll={handleViewCalendar}
+          onViewCalendar={handleViewCalendar}
         />
       </motion.div>
     </>

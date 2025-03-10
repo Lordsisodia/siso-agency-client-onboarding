@@ -1,390 +1,304 @@
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { motion } from 'framer-motion';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, ArrowRight } from 'lucide-react';
 import { ProjectCard } from './ProjectCard';
-import { Plus, Search, ArrowLeft, ArrowRight } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
-// Enhanced mock data with additional project metrics
-const mockProjects = [
-  { 
-    id: '1', 
-    title: 'Mobile App Redesign',
-    status: 'in-progress' as const, 
-    progress: 65,
-    deadline: '2023-12-24',
-    client: 'TechCorp',
-    description: 'Complete redesign of the mobile app interface with focus on improved user experience and performance optimization.',
-    priority: 'high' as const,
-    tasks: { total: 18, completed: 12 },
-    lastUpdated: '2023-11-15T10:30:00',
-    team: ['John Doe', 'Sarah Smith', 'Mike Johnson'],
-    // New fields for enhanced project card
-    phases: [
-      { name: 'Planning', status: 'completed', progress: 100 },
-      { name: 'Design', status: 'completed', progress: 100 },
-      { name: 'Development', status: 'in-progress', progress: 45 },
-      { name: 'Testing', status: 'pending', progress: 0 },
-      { name: 'Deployment', status: 'pending', progress: 0 }
-    ],
-    codeMetrics: {
-      linesOfCode: 8450,
-      commits: 72,
-      files: 34,
-      quality: 92
-    },
-    financialMetrics: {
-      marketValue: 48000,
-      costSavings: 12500,
-      developmentCost: 35500,
-      roi: 35
-    }
-  },
-  { 
-    id: '2', 
-    title: 'Website Development',
-    status: 'planning' as const, 
-    progress: 20,
-    deadline: '2024-01-15',
-    client: 'Design Studio',
-    description: 'Build a responsive website with modern design patterns, optimized for all devices and screen sizes.',
-    priority: 'medium' as const,
-    tasks: { total: 24, completed: 5 },
-    lastUpdated: '2023-11-10T14:15:00',
-    team: ['Lisa Wong', 'James Taylor'],
-    phases: [
-      { name: 'Planning', status: 'in-progress', progress: 60 },
-      { name: 'Design', status: 'pending', progress: 0 },
-      { name: 'Development', status: 'pending', progress: 0 },
-      { name: 'Testing', status: 'pending', progress: 0 },
-      { name: 'Deployment', status: 'pending', progress: 0 }
-    ],
-    codeMetrics: {
-      linesOfCode: 2120,
-      commits: 28,
-      files: 15,
-      quality: 88
-    },
-    financialMetrics: {
-      marketValue: 35000,
-      costSavings: 8000,
-      developmentCost: 27000,
-      roi: 29
-    }
-  },
-  { 
-    id: '3', 
-    title: 'E-commerce Platform',
-    status: 'reviewing' as const, 
-    progress: 80,
-    deadline: '2023-11-30',
-    client: 'RetailFusion',
-    description: 'Develop a custom e-commerce platform with payment integration, inventory management and analytics dashboard.',
-    priority: 'high' as const,
-    tasks: { total: 32, completed: 26 },
-    lastUpdated: '2023-11-18T09:45:00',
-    team: ['Chris Lee', 'Amanda Park', 'David Miller', 'Emma White'],
-    phases: [
-      { name: 'Planning', status: 'completed', progress: 100 },
-      { name: 'Design', status: 'completed', progress: 100 },
-      { name: 'Development', status: 'completed', progress: 100 },
-      { name: 'Testing', status: 'in-progress', progress: 75 },
-      { name: 'Deployment', status: 'pending', progress: 0 }
-    ],
-    codeMetrics: {
-      linesOfCode: 15320,
-      commits: 142,
-      files: 78,
-      quality: 95
-    },
-    financialMetrics: {
-      marketValue: 95000,
-      costSavings: 22000,
-      developmentCost: 73000,
-      roi: 30
-    }
-  },
-  { 
-    id: '4', 
-    title: 'Brand Identity Design',
-    status: 'completed' as const, 
-    progress: 100,
-    client: 'StartupX',
-    description: 'Create a comprehensive brand identity including logo, color palette, typography and brand guidelines document.',
-    priority: 'low' as const,
-    tasks: { total: 15, completed: 15 },
-    lastUpdated: '2023-11-05T16:20:00',
-    team: ['Jennifer Garcia', 'Robert Chen'],
-    phases: [
-      { name: 'Planning', status: 'completed', progress: 100 },
-      { name: 'Research', status: 'completed', progress: 100 },
-      { name: 'Concept Development', status: 'completed', progress: 100 },
-      { name: 'Refinement', status: 'completed', progress: 100 },
-      { name: 'Delivery', status: 'completed', progress: 100 }
-    ],
-    codeMetrics: {
-      linesOfCode: 0,
-      commits: 0,
-      files: 12,
-      quality: 98
-    },
-    financialMetrics: {
-      marketValue: 22000,
-      costSavings: 5500,
-      developmentCost: 16500,
-      roi: 33
-    }
-  }
-];
-
-type ProjectStatus = 'planning' | 'in-progress' | 'reviewing' | 'completed' | 'all';
-type ProjectPriority = 'low' | 'medium' | 'high' | 'all';
+// Define proper Phase type
+export interface Phase {
+  name: string;
+  status: "pending" | "completed" | "in-progress";
+  progress: number;
+}
 
 export const ProjectsOverview = () => {
+  const [activeTab, setActiveTab] = useState('active');
   const navigate = useNavigate();
-  const [projects] = useState(mockProjects);
-  const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeStatusFilter, setActiveStatusFilter] = useState<ProjectStatus>('all');
-  const [activePriorityFilter, setActivePriorityFilter] = useState<ProjectPriority>('all');
+  
+  // Sample project data
+  const projects = {
+    active: [
+      {
+        id: 'proj-1',
+        title: 'Digital Marketing Strategy',
+        status: 'in-progress' as const,
+        progress: 65,
+        deadline: '2023-12-15',
+        client: 'TechCorp Inc.',
+        description: 'Comprehensive digital marketing strategy focusing on lead generation and conversion optimization.',
+        team: [
+          { id: 'user-1', name: 'Alex Moore', avatar: '/placeholder-avatar.jpg' },
+          { id: 'user-2', name: 'Sarah Kim', avatar: '/placeholder-avatar.jpg' },
+        ],
+        phases: [
+          { name: 'Research', status: 'completed' as const, progress: 100 },
+          { name: 'Strategy', status: 'in-progress' as const, progress: 75 },
+          { name: 'Implementation', status: 'pending' as const, progress: 0 },
+        ],
+        tasks: { total: 24, completed: 14 },
+        priority: 'high',
+      },
+      {
+        id: 'proj-2',
+        title: 'Website Redesign',
+        status: 'in-progress' as const,
+        progress: 40,
+        deadline: '2024-01-30',
+        client: 'GreenLife Co.',
+        description: 'Complete redesign of e-commerce website with focus on improved user experience and conversion rate.',
+        team: [
+          { id: 'user-1', name: 'Alex Moore', avatar: '/placeholder-avatar.jpg' },
+          { id: 'user-3', name: 'David Chen', avatar: '/placeholder-avatar.jpg' },
+        ],
+        phases: [
+          { name: 'Discovery', status: 'completed' as const, progress: 100 },
+          { name: 'Design', status: 'in-progress' as const, progress: 60 },
+          { name: 'Development', status: 'pending' as const, progress: 0 },
+          { name: 'Testing', status: 'pending' as const, progress: 0 },
+        ],
+        tasks: { total: 36, completed: 12 },
+        priority: 'medium',
+      },
+    ],
+    completed: [
+      {
+        id: 'proj-3',
+        title: 'Brand Identity Design',
+        status: 'completed' as const,
+        progress: 100,
+        deadline: '2023-10-15',
+        client: 'Fusion Fitness',
+        description: 'Complete brand identity package including logo, color palette, typography, and brand guidelines.',
+        team: [
+          { id: 'user-2', name: 'Sarah Kim', avatar: '/placeholder-avatar.jpg' },
+          { id: 'user-4', name: 'Michael Johnson', avatar: '/placeholder-avatar.jpg' },
+        ],
+        phases: [
+          { name: 'Research', status: 'completed' as const, progress: 100 },
+          { name: 'Concepts', status: 'completed' as const, progress: 100 },
+          { name: 'Refinement', status: 'completed' as const, progress: 100 },
+          { name: 'Delivery', status: 'completed' as const, progress: 100 },
+        ],
+        tasks: { total: 18, completed: 18 },
+        priority: 'medium',
+      },
+    ],
+    draft: [
+      {
+        id: 'proj-4',
+        title: 'Social Media Campaign',
+        status: 'pending' as const,
+        progress: 0,
+        deadline: '2024-02-28',
+        client: 'Urban Eats',
+        description: 'Multi-platform social media campaign to increase brand awareness and engagement.',
+        team: [
+          { id: 'user-2', name: 'Sarah Kim', avatar: '/placeholder-avatar.jpg' },
+        ],
+        phases: [
+          { name: 'Planning', status: 'pending' as const, progress: 0 },
+          { name: 'Content Creation', status: 'pending' as const, progress: 0 },
+          { name: 'Scheduling', status: 'pending' as const, progress: 0 },
+          { name: 'Reporting', status: 'pending' as const, progress: 0 },
+        ],
+        tasks: { total: 12, completed: 0 },
+        priority: 'low',
+      },
+    ],
+  };
+  
+  const currentProjects = projects[activeTab as keyof typeof projects] || [];
   
   const handleViewDetails = (id: string) => {
-    navigate(`/projects/${id}`);
+    navigate(`/plan-builder/${id}`);
   };
   
   const handleEdit = (id: string) => {
-    navigate(`/projects/${id}/edit`);
+    navigate(`/plan-builder/${id}`);
   };
   
-  const handleCreateProject = () => {
-    navigate('/projects/new');
-  };
-
-  const filteredProjects = projects.filter(project => {
-    // First apply status filter
-    if (activeStatusFilter !== 'all' && project.status !== activeStatusFilter) return false;
-    
-    // Then apply priority filter
-    if (activePriorityFilter !== 'all' && project.priority !== activePriorityFilter) return false;
-    
-    // Then apply search term filter
-    if (searchTerm && 
-        !project.title.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !project.client?.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !project.description?.toLowerCase().includes(searchTerm.toLowerCase())) {
-      return false;
-    }
-    
-    return true;
-  });
-
-  const currentProject = filteredProjects[currentProjectIndex] || null;
-
-  const nextProject = () => {
-    if (currentProjectIndex < filteredProjects.length - 1) {
-      setCurrentProjectIndex(currentProjectIndex + 1);
-    } else {
-      setCurrentProjectIndex(0); // Loop back to the first project
-    }
-  };
-
-  const prevProject = () => {
-    if (currentProjectIndex > 0) {
-      setCurrentProjectIndex(currentProjectIndex - 1);
-    } else {
-      setCurrentProjectIndex(filteredProjects.length - 1); // Loop to the last project
-    }
-  };
-
-  const statusFilterOptions: { value: ProjectStatus; label: string }[] = [
-    { value: 'all', label: 'All' },
-    { value: 'planning', label: 'Planning' },
-    { value: 'in-progress', label: 'In Progress' },
-    { value: 'reviewing', label: 'Reviewing' },
-    { value: 'completed', label: 'Completed' }
-  ];
-
-  const priorityFilterOptions: { value: ProjectPriority; label: string }[] = [
-    { value: 'all', label: 'All' },
-    { value: 'high', label: 'High' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'low', label: 'Low' }
-  ];
-
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3, delay: 0.2 }}
-      className="p-6"
-    >
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h2 className="text-xl font-bold text-siso-text-bold bg-gradient-to-r from-siso-red to-siso-orange bg-clip-text text-transparent">Projects Overview</h2>
-        
-        <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="Search projects..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 w-full sm:w-[200px] bg-siso-bg/80 border-siso-border/50 focus:border-siso-orange/60"
-            />
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-siso-text/50" />
-          </div>
+    <Card className="border border-siso-border/40 bg-siso-bg-card/50 backdrop-blur-sm">
+      <CardHeader className="pb-2 flex flex-row items-center justify-between">
+        <CardTitle className="text-xl">Projects</CardTitle>
+        <Button 
+          variant="default" 
+          size="sm" 
+          className="text-xs"
+          onClick={() => navigate('/new-project')}
+        >
+          <Plus className="h-3.5 w-3.5 mr-1" />
+          New Project
+        </Button>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="bg-siso-bg-alt mb-4">
+            <TabsTrigger value="active" className="text-xs">
+              Active
+              {projects.active.length > 0 && (
+                <span className="ml-1 text-xs bg-siso-primary/10 text-siso-primary px-1.5 py-0.5 rounded-full">
+                  {projects.active.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="completed" className="text-xs">
+              Completed
+              {projects.completed.length > 0 && (
+                <span className="ml-1 text-xs bg-green-500/10 text-green-500 px-1.5 py-0.5 rounded-full">
+                  {projects.completed.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="draft" className="text-xs">
+              Draft
+              {projects.draft.length > 0 && (
+                <span className="ml-1 text-xs bg-orange-500/10 text-orange-500 px-1.5 py-0.5 rounded-full">
+                  {projects.draft.length}
+                </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
           
-          <div className="flex gap-2 flex-wrap">
-            <div className="flex rounded-md border border-siso-border/50 overflow-hidden shadow-sm">
-              {statusFilterOptions.map((option, index) => (
-                <Button
-                  key={option.value}
-                  variant={activeStatusFilter === option.value ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setActiveStatusFilter(option.value)}
-                  className={`
-                    ${activeStatusFilter === option.value ? 'bg-gradient-to-r from-siso-red to-siso-orange text-white shadow-inner' : 'text-siso-text hover:text-siso-text-bold bg-transparent'}
-                    rounded-none
-                    ${index === 0 ? 'rounded-l-md' : ''}
-                    ${index === statusFilterOptions.length - 1 ? 'rounded-r-md' : ''}
-                    px-2 py-1 h-9 text-xs font-medium
-                  `}
-                >
-                  {option.label}
-                </Button>
-              ))}
-            </div>
-            
-            <div className="flex rounded-md border border-siso-border/50 overflow-hidden shadow-sm">
-              {priorityFilterOptions.map((option, index) => (
-                <Button
-                  key={option.value}
-                  variant={activePriorityFilter === option.value ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setActivePriorityFilter(option.value)}
-                  className={`
-                    ${activePriorityFilter === option.value ? 'bg-gradient-to-r from-siso-red to-siso-orange text-white shadow-inner' : 'text-siso-text hover:text-siso-text-bold bg-transparent'}
-                    rounded-none
-                    ${index === 0 ? 'rounded-l-md' : ''}
-                    ${index === priorityFilterOptions.length - 1 ? 'rounded-r-md' : ''}
-                    px-2 py-1 h-9 text-xs font-medium
-                  `}
-                >
-                  {option.label}
-                </Button>
-              ))}
-            </div>
-            
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <Button 
-                onClick={handleCreateProject}
-                size="sm" 
-                className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90 shadow-md shadow-siso-orange/10"
-              >
-                <Plus size={14} className="mr-1" />
-                New Project
-              </Button>
-            </motion.div>
-          </div>
-        </div>
-      </div>
-      
-      {filteredProjects.length === 0 ? (
-        <div className="text-center py-16 border border-dashed border-siso-border rounded-lg bg-siso-bg/30 backdrop-blur-sm">
-          <div className="max-w-md mx-auto">
-            <p className="text-siso-text/70 mb-4">
-              {searchTerm || activeStatusFilter !== 'all' || activePriorityFilter !== 'all'
-                ? "No projects match your filters."
-                : "You don't have any projects yet."}
-            </p>
-            {!searchTerm && activeStatusFilter === 'all' && activePriorityFilter === 'all' && (
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                <Button 
-                  onClick={handleCreateProject}
-                  size="sm" 
-                  className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90"
-                >
-                  <Plus size={14} className="mr-1" />
-                  Create your first project
-                </Button>
-              </motion.div>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="relative rounded-xl overflow-hidden bg-siso-bg/30 p-6 border border-siso-border/30 shadow-lg">
-          {/* Project navigation controls */}
-          {filteredProjects.length > 1 && (
-            <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between pointer-events-none z-10 px-2">
-              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                <Button 
-                  onClick={prevProject} 
-                  variant="secondary" 
-                  size="icon" 
-                  className="h-10 w-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg pointer-events-auto"
-                >
-                  <ArrowLeft size={20} />
-                </Button>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                <Button 
-                  onClick={nextProject} 
-                  variant="secondary" 
-                  size="icon" 
-                  className="h-10 w-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg pointer-events-auto"
-                >
-                  <ArrowRight size={20} />
-                </Button>
-              </motion.div>
-            </div>
-          )}
-          
-          {/* Current project card */}
-          {currentProject && (
-            <div className="w-full mb-4">
-              <ProjectCard
-                key={currentProject.id}
-                {...currentProject}
-                onViewDetails={handleViewDetails}
-                onEdit={handleEdit}
-                isFullWidth={true}
+          <TabsContent value="active" className="m-0">
+            {projects.active.length === 0 ? (
+              <EmptyProjectsState 
+                title="No active projects"
+                description="Start building your first project to get going." 
+                buttonText="Create New Project"
+                onClick={() => navigate('/new-project')}
               />
-            </div>
-          )}
+            ) : (
+              <div className="space-y-4">
+                {projects.active.map(project => (
+                  <ProjectCard
+                    key={project.id}
+                    id={project.id}
+                    title={project.title}
+                    status={project.status}
+                    progress={project.progress}
+                    deadline={project.deadline}
+                    client={project.client}
+                    description={project.description}
+                    team={project.team}
+                    phases={project.phases}
+                    tasks={project.tasks}
+                    priority={project.priority}
+                    onViewDetails={handleViewDetails}
+                    onEdit={handleEdit}
+                    isFullWidth={true}
+                  />
+                ))}
+                
+                {projects.active.length > 2 && (
+                  <div className="text-center pt-2">
+                    <Button 
+                      variant="ghost" 
+                      className="text-sm text-siso-text-muted hover:text-siso-text"
+                      onClick={() => navigate('/projects')}
+                    >
+                      View All Projects
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </TabsContent>
           
-          {/* Project pagination indicator */}
-          {filteredProjects.length > 1 && (
-            <div className="flex justify-center gap-2 mt-4">
-              {filteredProjects.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentProjectIndex(index)}
-                  className={`h-2.5 rounded-full transition-all 
-                    ${index === currentProjectIndex 
-                      ? 'w-8 bg-gradient-to-r from-siso-red to-siso-orange' 
-                      : 'w-2.5 bg-siso-border hover:bg-siso-orange/50'}`}
-                  aria-label={`Go to project ${index + 1}`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-      
-      {filteredProjects.length > 0 && (
-        <div className="mt-6 text-center">
-          <Button 
-            variant="link" 
-            onClick={() => navigate('/projects')}
-            className="text-siso-orange hover:text-siso-red font-medium"
-          >
-            View all projects
-          </Button>
-        </div>
-      )}
-    </motion.div>
+          <TabsContent value="completed" className="m-0">
+            {projects.completed.length === 0 ? (
+              <EmptyProjectsState 
+                title="No completed projects"
+                description="Your completed projects will appear here."
+                buttonText="View Active Projects"
+                onClick={() => setActiveTab('active')}
+              />
+            ) : (
+              <div className="space-y-4">
+                {projects.completed.map(project => (
+                  <ProjectCard
+                    key={project.id}
+                    id={project.id}
+                    title={project.title}
+                    status={project.status}
+                    progress={project.progress}
+                    deadline={project.deadline}
+                    client={project.client}
+                    description={project.description}
+                    team={project.team}
+                    phases={project.phases}
+                    tasks={project.tasks}
+                    priority={project.priority}
+                    onViewDetails={handleViewDetails}
+                    onEdit={handleEdit}
+                    isFullWidth={true}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="draft" className="m-0">
+            {projects.draft.length === 0 ? (
+              <EmptyProjectsState 
+                title="No draft projects"
+                description="Save a project as draft to work on it later."
+                buttonText="Create New Project"
+                onClick={() => navigate('/new-project')}
+              />
+            ) : (
+              <div className="space-y-4">
+                {projects.draft.map(project => (
+                  <ProjectCard
+                    key={project.id}
+                    id={project.id}
+                    title={project.title}
+                    status={project.status}
+                    progress={project.progress}
+                    deadline={project.deadline}
+                    client={project.client}
+                    description={project.description}
+                    team={project.team}
+                    phases={project.phases}
+                    tasks={project.tasks}
+                    priority={project.priority}
+                    onViewDetails={handleViewDetails}
+                    onEdit={handleEdit}
+                    isFullWidth={true}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Empty state component
+const EmptyProjectsState = ({ 
+  title, 
+  description, 
+  buttonText, 
+  onClick 
+}: { 
+  title: string;
+  description: string;
+  buttonText: string;
+  onClick: () => void;
+}) => {
+  return (
+    <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+      <h3 className="text-xl font-semibold mb-2">{title}</h3>
+      <p className="text-sm text-siso-text-muted mb-6 max-w-sm">{description}</p>
+      <Button onClick={onClick}>
+        {buttonText}
+      </Button>
+    </div>
   );
 };
