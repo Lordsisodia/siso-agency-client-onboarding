@@ -13,6 +13,7 @@ export type ChatMessage = {
   role: "user" | "assistant" | "system";
   content: string;
   timestamp?: Date;
+  id?: string;
 };
 
 interface ChatInterfaceProps {
@@ -38,7 +39,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const regularChat = useChatAssistant();
   const planChat = usePlanChatAssistant(projectId);
   
-  // Use the appropriate chat hook
+  // Use the appropriate chat hook and cast messages to common type
   const { 
     messages: rawMessages, 
     isLoading, 
@@ -54,7 +55,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     handleRetry,
     handleSendMessage
   } = useChatInterfaceState({
-    messages: rawMessages as ChatMessage[], // Cast the messages to our common type
+    // Cast the messages to our common type to fix type inconsistencies
+    messages: rawMessages as unknown as ChatMessage[],
     isLoading,
     error,
     clearMessages,
@@ -79,7 +81,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       />
       
       <ChatMessageList 
-        messages={rawMessages as ChatMessage[]} // Cast the messages to our common type
+        messages={rawMessages as unknown as ChatMessage[]}
         isLoading={isLoading}
         error={error}
         onlineStatus={onlineStatus}

@@ -1,32 +1,31 @@
 
-// Complexity levels for content
-export type ComplexityLevel = 'basic' | 'intermediate' | 'advanced' | 'expert';
+// Define technical complexity levels for news and articles
+export type TechnicalComplexity = 'beginner' | 'intermediate' | 'advanced' | 'expert';
 
-// Type for technical complexity
-export type TechnicalComplexity = 'basic' | 'intermediate' | 'advanced';
-
-// Type for article impact
+// Define impact assessment levels for news and articles
 export type ArticleImpact = 'low' | 'medium' | 'high' | 'transformative';
 
-// Categories for content
-export type ContentCategory = 
-  | 'AI Tools' 
-  | 'AI Research' 
-  | 'Industry News' 
-  | 'Tutorials' 
-  | 'Case Studies' 
-  | 'Updates';
-
-// Impact levels for articles
-export type ImpactLevel = 'low' | 'medium' | 'high' | 'transformative';
-
-// Source credibility levels
-export type CredibilityLevel = 'low' | 'medium' | 'high' | 'authoritative';
-
-// Colors for complexity levels
+// Color schemes for complexity and impact levels
 export const complexityColors = {
-  basic: 'text-green-500 bg-green-500/10',
-  intermediate: 'text-blue-500 bg-blue-500/10',
-  advanced: 'text-purple-500 bg-purple-500/10',
-  expert: 'text-orange-500 bg-orange-500/10'
+  beginner: { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200' },
+  intermediate: { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-200' },
+  advanced: { bg: 'bg-purple-100', text: 'text-purple-800', border: 'border-purple-200' },
+  expert: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200' }
+};
+
+// Color schemes for impact levels
+export const impactColors = {
+  low: { bg: 'bg-slate-100', text: 'text-slate-800', border: 'border-slate-200' },
+  medium: { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-200' },
+  high: { bg: 'bg-orange-100', text: 'text-orange-800', border: 'border-orange-200' },
+  transformative: { bg: 'bg-fuchsia-100', text: 'text-fuchsia-800', border: 'border-fuchsia-200' }
+};
+
+// Colors for importance rating
+export const importanceColors = {
+  1: { bg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-200' },
+  2: { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-200' },
+  3: { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200' },
+  4: { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-200' },
+  5: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200' }
 };

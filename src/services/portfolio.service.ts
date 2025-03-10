@@ -122,51 +122,60 @@ export async function saveProject(project: Partial<Project> & { id?: string }) {
     
     if (project.id) {
       // Update existing project
+      const updateData: any = {
+        title: project.title,
+        description: project.description,
+        full_description: project.fullDescription || project.full_description,
+        image: project.image,
+        gallery: project.gallery,
+        tags: project.tags,
+        features: project.features,
+        technologies: project.technologies,
+        client: project.client,
+        date: project.date,
+        duration: project.duration,
+        challenge: project.challenge,
+        solution: project.solution,
+        results: project.results,
+        testimonial: project.testimonial,
+        featured: project.featured
+      };
+      
+      // Remove undefined values
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] === undefined) delete updateData[key];
+      });
+      
       result = await supabase
         .from('portfolio_projects')
-        .update({
-          title: project.title,
-          description: project.description,
-          full_description: project.fullDescription || project.full_description,
-          image: project.image,
-          gallery: project.gallery,
-          tags: project.tags,
-          features: project.features,
-          technologies: project.technologies,
-          client: project.client,
-          date: project.date,
-          duration: project.duration,
-          challenge: project.challenge,
-          solution: project.solution,
-          results: project.results,
-          testimonial: project.testimonial,
-          featured: project.featured
-        })
+        .update(updateData)
         .eq('id', project.id)
         .select()
         .single();
     } else {
-      // Create new project with required fields
+      // Prepare insert data with defaults for required fields
+      const insertData: any = {
+        title: project.title || 'New Project',
+        description: project.description || '',
+        full_description: project.fullDescription || project.full_description || '',
+        image: project.image || '',
+        gallery: project.gallery || [],
+        tags: project.tags || [],
+        features: project.features || [],
+        technologies: project.technologies || [],
+        client: project.client || 'Client Name',
+        date: project.date || new Date().toISOString().split('T')[0],
+        duration: project.duration || '1 month',
+        challenge: project.challenge || '',
+        solution: project.solution || '',
+        results: project.results || '',
+        testimonial: project.testimonial || null,
+        featured: project.featured || false
+      };
+      
       result = await supabase
         .from('portfolio_projects')
-        .insert({
-          title: project.title || 'New Project',
-          description: project.description || '',
-          full_description: project.fullDescription || project.full_description || '',
-          image: project.image || '',
-          gallery: project.gallery || [],
-          tags: project.tags || [],
-          features: project.features || [],
-          technologies: project.technologies || [],
-          client: project.client || 'Client Name',
-          date: project.date || new Date().toISOString().split('T')[0],
-          duration: project.duration || '1 month',
-          challenge: project.challenge || '',
-          solution: project.solution || '',
-          results: project.results || '',
-          testimonial: project.testimonial || null,
-          featured: project.featured || false
-        })
+        .insert(insertData)
         .select()
         .single();
     }

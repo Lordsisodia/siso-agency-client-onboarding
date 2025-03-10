@@ -10,19 +10,21 @@ import { ResourcesOverview } from './ResourcesOverview';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useEvents } from '@/hooks/useEvents';
 
-interface DashboardStats {
+// Explicitly define the DashboardStats interface
+export interface DashboardStats {
   activeProjects?: number;
   completedProjects?: number;
   pendingTasks?: number;
   upcomingDeadlines?: number;
 }
 
-interface DashboardLayoutProps {
+// Define props interface
+export interface DashboardLayoutProps {
   userName: string;
   stats?: DashboardStats;
 }
 
-export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
+export const DashboardLayout = ({ 
   userName, 
   stats = {
     activeProjects: 3,
@@ -30,7 +32,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     pendingTasks: 12,
     upcomingDeadlines: 4
   }
-}) => {
+}: DashboardLayoutProps) => {
   const { notifications, handleMarkAsRead, handleViewAll } = useNotifications();
   const { events, handleViewCalendar } = useEvents();
 

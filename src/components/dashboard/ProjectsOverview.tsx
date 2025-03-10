@@ -15,7 +15,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 // Define valid priority types
-type PriorityLevel = 'low' | 'medium' | 'high';
+export type PriorityLevel = 'low' | 'medium' | 'high';
 
 interface Project {
   id: string;
@@ -147,7 +147,7 @@ export const ProjectsOverview = () => {
                 <div className="flex items-center gap-4 mt-3">
                   <div className="flex items-center gap-1 text-xs text-siso-text-muted">
                     <Clock className="h-3 w-3" />
-                    <span>{formatDate(project.dueDate)}</span>
+                    <span>{new Date(project.dueDate).toLocaleDateString()}</span>
                   </div>
                   
                   <div className="flex items-center gap-1 text-xs text-siso-text-muted">
@@ -170,7 +170,12 @@ export const ProjectsOverview = () => {
                 {/* Progress bar */}
                 <div className="w-full h-1.5 bg-siso-bg-card/60 rounded-full mt-3 overflow-hidden">
                   <div 
-                    className={`h-full ${getProgressColor(project.progress)} rounded-full`}
+                    className={`h-full ${
+                      project.progress < 25 ? 'bg-blue-500' :
+                      project.progress < 50 ? 'bg-amber-500' :
+                      project.progress < 75 ? 'bg-emerald-500' :
+                      'bg-green-500'
+                    } rounded-full`}
                     style={{ width: `${project.progress}%` }}
                   ></div>
                 </div>
@@ -196,7 +201,7 @@ export const ProjectsOverview = () => {
                 <div className="flex items-center justify-between text-xs text-siso-text-muted mb-3">
                   <div className="flex items-center gap-1">
                     <Calendar className="h-3.5 w-3.5" />
-                    <span>{formatDate(project.dueDate)}</span>
+                    <span>{new Date(project.dueDate).toLocaleDateString()}</span>
                   </div>
                   
                   <div className="flex items-center gap-1">
@@ -213,7 +218,12 @@ export const ProjectsOverview = () => {
                 
                 <div className="w-full h-2 bg-siso-bg-card/60 rounded-full overflow-hidden">
                   <div 
-                    className={`h-full ${getProgressColor(project.progress)} rounded-full`}
+                    className={`h-full ${
+                      project.progress < 25 ? 'bg-blue-500' :
+                      project.progress < 50 ? 'bg-amber-500' :
+                      project.progress < 75 ? 'bg-emerald-500' :
+                      'bg-green-500'
+                    } rounded-full`}
                     style={{ width: `${project.progress}%` }}
                   ></div>
                 </div>

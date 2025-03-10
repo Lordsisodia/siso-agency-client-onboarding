@@ -5,7 +5,7 @@ import { ChatMessageBubble } from './ChatMessageBubble';
 import { TypingIndicator } from './TypingIndicator';
 
 interface MessageListProps {
-  messages: ChatMessage[];
+  messages: any[]; // Use any[] to accommodate different message types
   isSubmitting: boolean;
 }
 
@@ -27,8 +27,11 @@ export const MessageList: React.FC<MessageListProps> = ({
       {messages.map((message, index) => (
         <ChatMessageBubble
           key={index}
-          message={message}
-          isUser={message.role === 'user'}
+          message={{
+            role: message.sender === 'user' ? 'user' : 'assistant',
+            content: message.content
+          } as ChatMessage}
+          isUser={message.sender === 'user' || message.role === 'user'}
         />
       ))}
       
