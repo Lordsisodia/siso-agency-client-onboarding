@@ -14,7 +14,7 @@ import { AnimatePresence } from 'framer-motion';
 export const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showNavigation, setShowNavigation] = useState(true);
+  const [showAlternateMenu, setShowAlternateMenu] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const navigate = useNavigate();
@@ -76,15 +76,25 @@ export const Sidebar = () => {
 
   // Handle mouse interactions for desktop sidebar
   const handleMouseEnter = useCallback(() => {
-    if (!isMobile && !isProfileOpen) {
+    if (!isMobile && !isProfileOpen && !showAlternateMenu) {
       setIsExpanded(true);
     }
-  }, [isMobile, isProfileOpen]);
+  }, [isMobile, isProfileOpen, showAlternateMenu]);
 
   const handleMouseLeave = useCallback(() => {
     // We've removed the auto-collapse functionality
     // The sidebar will only collapse when the toggle button is clicked
   }, []);
+
+  // Toggle between main navigation and alternate menu
+  const toggleNavigation = () => {
+    setShowAlternateMenu(!showAlternateMenu);
+    
+    // If switching to alternate menu, ensure sidebar is expanded
+    if (!showAlternateMenu) {
+      setIsExpanded(true);
+    }
+  };
 
   return (
     <>
@@ -98,7 +108,7 @@ export const Sidebar = () => {
 
       {/* Sidebar Container */}
       <SidebarContainer
-        isExpanded={isExpanded}
+        isExpanded={showAlternateMenu ? true : isExpanded}
         isMobile={isMobile}
         isMobileMenuOpen={isMobileMenuOpen}
         onMouseEnter={handleMouseEnter}
@@ -107,26 +117,29 @@ export const Sidebar = () => {
         <SidebarLogo 
           collapsed={!isExpanded} 
           setCollapsed={() => setIsExpanded(!isExpanded)}
-          onLogoClick={() => setShowNavigation(!showNavigation)}
+          onLogoClick={toggleNavigation}
+          showAlternateMenu={showAlternateMenu}
         />
         <AnimatePresence mode="wait">
           <SidebarNavigation 
-            collapsed={!isExpanded} 
+            collapsed={showAlternateMenu ? false : !isExpanded} 
             onItemClick={handleItemClick}
-            visible={showNavigation}
+            visible={!showAlternateMenu}
           />
         </AnimatePresence>
-        <SidebarFooter 
-          collapsed={!isExpanded} 
-          onProfileOpen={(isOpen) => {
-            setIsProfileOpen(isOpen);
-            if (isOpen) setIsExpanded(true);
-          }}
-        />
+        {!showAlternateMenu && (
+          <SidebarFooter 
+            collapsed={!isExpanded} 
+            onProfileOpen={(isOpen) => {
+              setIsProfileOpen(isOpen);
+              if (isOpen) setIsExpanded(true);
+            }}
+          />
+        )}
       </SidebarContainer>
 
       {/* Main Content Wrapper */}
-      <MainContent isExpanded={isExpanded} isMobile={isMobile}>
+      <MainContent isExpanded={showAlternateMenu ? true : isExpanded} isMobile={isMobile}>
         {/* Mobile Overlay with improved backdrop blur */}
         <AnimatePresence>
           {isMobile && isMobileMenuOpen && (

@@ -27,7 +27,7 @@ export const MessageList: React.FC<MessageListProps> = ({
       {messages.map((message, index) => (
         <ChatMessageBubble
           key={index}
-          message={message.content}
+          message={message}
           isUser={message.role === 'user'}
         />
       ))}

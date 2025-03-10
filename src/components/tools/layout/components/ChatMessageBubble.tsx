@@ -1,25 +1,26 @@
 
 import React from 'react';
-import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage } from '@/components/ui/chat-bubble';
-import { ChatMessage } from '../hooks/useChatAssistantState';
+import { ChatMessage } from '@/components/chat/ChatInterface';
 
 interface ChatMessageBubbleProps {
   message: ChatMessage;
+  isUser: boolean;
 }
 
-export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
+export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({ message, isUser }) => {
   return (
-    <ChatBubble key={message.id} variant={message.sender === 'assistant' ? 'received' : 'sent'}>
-      {message.sender === 'assistant' && (
-        <ChatBubbleAvatar
-          className="h-8 w-8"
-          src="/lovable-uploads/c482563a-42db-4f47-83f2-c2e7771400b7.png"
-          fallback="AI"
-        />
-      )}
-      <ChatBubbleMessage>
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+      <div 
+        className={`
+          max-w-3/4 p-3 rounded-lg 
+          ${isUser ? 
+            'bg-primary text-primary-foreground' : 
+            'bg-muted text-muted-foreground'
+          }
+        `}
+      >
         {message.content}
-      </ChatBubbleMessage>
-    </ChatBubble>
+      </div>
+    </div>
   );
-}
+};

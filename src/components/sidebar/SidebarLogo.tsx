@@ -7,11 +7,15 @@ interface SidebarLogoProps {
   collapsed: boolean;
   setCollapsed: (collapsed: boolean) => void;
   onLogoClick: () => void;
+  showAlternateMenu: boolean;
 }
 
-export const SidebarLogo = ({ collapsed, setCollapsed, onLogoClick }: SidebarLogoProps) => {
-  const [showAlternateMenu, setShowAlternateMenu] = useState(false);
-
+export const SidebarLogo = ({ 
+  collapsed, 
+  setCollapsed, 
+  onLogoClick, 
+  showAlternateMenu 
+}: SidebarLogoProps) => {
   const businessLinks = [
     {
       name: 'SISO LinkedIn Sales Team',
@@ -34,7 +38,6 @@ export const SidebarLogo = ({ collapsed, setCollapsed, onLogoClick }: SidebarLog
   ];
 
   const toggleMenu = () => {
-    setShowAlternateMenu(!showAlternateMenu);
     onLogoClick();
   };
 
@@ -110,6 +113,7 @@ export const SidebarLogo = ({ collapsed, setCollapsed, onLogoClick }: SidebarLog
               </span>
             )}
           </div>
+          {/* Only show collapse button in regular navigation mode */}
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="p-2 hover:bg-siso-text/5 rounded-lg transition-colors"
