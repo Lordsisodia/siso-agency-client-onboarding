@@ -1,21 +1,61 @@
-
-export const dateFormat = 'MMM dd, yyyy';
-
-export const importanceColors = {
-  high: "bg-siso-red/10 text-siso-red border-siso-red/30",
-  medium: "bg-amber-500/10 text-amber-500 border-amber-500/30",
-  low: "bg-emerald-500/10 text-emerald-500 border-emerald-500/30"
+// Common colors for different content categories and complexity levels
+export const complexityColors = {
+  basic: {
+    bg: "bg-green-100",
+    text: "text-green-800",
+    border: "border-green-300"
+  },
+  intermediate: {
+    bg: "bg-blue-100",
+    text: "text-blue-800",
+    border: "border-blue-300"
+  },
+  advanced: {
+    bg: "bg-purple-100",
+    text: "text-purple-800",
+    border: "border-purple-300"
+  },
+  expert: {
+    bg: "bg-red-100",
+    text: "text-red-800",
+    border: "border-red-300"
+  }
 };
 
+// Category colors
 export const categoryColors = {
-  AI: "bg-siso-purple/10 text-siso-purple border-siso-purple/30",
-  Technology: "bg-blue-500/10 text-blue-500 border-blue-500/30", 
-  Business: "bg-orange-500/10 text-orange-500 border-orange-500/30",
-  Education: "bg-emerald-500/10 text-emerald-500 border-emerald-500/30",
-  Default: "bg-siso-text/10 text-siso-text border-siso-text/30"
+  "AI Tools": {
+    bg: "bg-blue-100",
+    text: "text-blue-800",
+    border: "border-blue-300"
+  },
+  "AI Research": {
+    bg: "bg-purple-100",
+    text: "text-purple-800",
+    border: "border-purple-300"
+  },
+  "Industry News": {
+    bg: "bg-orange-100",
+    text: "text-orange-800",
+    border: "border-orange-300"
+  },
+  "Tutorials": {
+    bg: "bg-green-100",
+    text: "text-green-800",
+    border: "border-green-300"
+  },
+  "Case Studies": {
+    bg: "bg-red-100",
+    text: "text-red-800",
+    border: "border-red-300"
+  },
+  "Updates": {
+    bg: "bg-gray-100",
+    text: "text-gray-800",
+    border: "border-gray-300"
+  }
 };
 
-export const animationConfig = {
-  duration: 0.5,
-  ease: [0.16, 1, 0.3, 1]
-};
+// Other UI constants
+export const contentSectionPadding = "py-6";
+export const contentMaxWidth = "max-w-3xl mx-auto";

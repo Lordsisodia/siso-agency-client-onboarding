@@ -1,7 +1,6 @@
 
 import React, { useRef, useEffect } from 'react';
-import { ChatMessageList } from '@/components/ui/chat-message-list';
-import { ChatMessage } from '../hooks/useChatAssistantState';
+import { ChatMessage } from '@/components/chat/ChatInterface';
 import { ChatMessageBubble } from './ChatMessageBubble';
 import { TypingIndicator } from './TypingIndicator';
 
@@ -10,23 +9,36 @@ interface MessageListProps {
   isSubmitting: boolean;
 }
 
-export function MessageList({ messages, isSubmitting }: MessageListProps) {
-  const messageEndRef = useRef<HTMLDivElement>(null);
-  
-  // Scroll to the bottom when messages change or when loading
+export const MessageList: React.FC<MessageListProps> = ({ 
+  messages, 
+  isSubmitting 
+}) => {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to the bottom of the chat when messages change
   useEffect(() => {
-    if (messageEndRef.current) {
-      messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, isSubmitting]);
+  }, [messages]);
 
   return (
-    <ChatMessageList>
-      {messages.map((message) => (
-        <ChatMessageBubble key={message.id || `${message.role}-${message.timestamp?.getTime() || Date.now()}`} message={message} />
+    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {messages.map((message, index) => (
+        <ChatMessageBubble
+          key={index}
+          message={message.content}
+          isUser={message.role === 'user'}
+        />
       ))}
-      {isSubmitting && <TypingIndicator />}
-      <div ref={messageEndRef} />
-    </ChatMessageList>
+      
+      {isSubmitting && (
+        <div className="flex justify-start">
+          <TypingIndicator />
+        </div>
+      )}
+      
+      <div ref={messagesEndRef} />
+    </div>
   );
-}
+};

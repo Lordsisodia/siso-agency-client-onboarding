@@ -6,8 +6,8 @@ import { Database } from '@/integrations/supabase/types';
 import { useQuery } from '@tanstack/react-query';
 import { showPointsEarnedToast } from '@/components/points/PointsEarnedToast';
 
-// Simplified type for point actions
-type PointActionType = 
+// Expanded type for point actions
+export type PointActionType = 
   | 'login'
   | 'complete_task'
   | 'bookmark_article'
@@ -17,7 +17,8 @@ type PointActionType =
   | 'create_project'
   | 'share_content'
   | 'watch_video'
-  | 'contribute';
+  | 'contribute'
+  | 'share_article'; // Added to fix the error in ShareButtons component
 
 export const usePoints = (userId: string | undefined) => {
   console.log('[usePoints] Hook called with userId:', userId);

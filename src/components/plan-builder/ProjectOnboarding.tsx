@@ -9,6 +9,23 @@ import { BackgroundSparkles } from './components/BackgroundSparkles';
 import { OnboardingStyles } from './components/OnboardingStyles';
 import { NavigationButtons } from './components/NavigationButtons';
 
+// Define component props types
+interface OnboardingWelcomeProps {
+  onNext: () => void;
+  onSkip?: () => void;
+}
+
+interface ProjectTypeProps {
+  projectType: string;
+  projectScale: string;
+  updateProjectData: (data: Record<string, any>) => void;
+}
+
+interface FeatureSelectionProps {
+  features: Record<string, { selected: boolean; priority: string }>;
+  updateFeatures: (features: Record<string, { selected: boolean; priority: string }>) => void;
+}
+
 // Onboarding Steps
 import { OnboardingWelcome } from './onboarding-steps/OnboardingWelcome';
 import { ProjectType } from './onboarding-steps/ProjectType';
@@ -42,7 +59,7 @@ export function ProjectOnboarding({ onComplete, onSkip }: ProjectOnboardingProps
       budget: '',
       goals: '',
     },
-    features: {},
+    features: {} as Record<string, { selected: boolean; priority: string }>,
   });
   
   // Function to update project data
@@ -112,14 +129,13 @@ export function ProjectOnboarding({ onComplete, onSkip }: ProjectOnboardingProps
   const renderStepContent = () => {
     switch (step) {
       case 0:
-        return <OnboardingWelcome onNext={handleNext} />;
+        return <OnboardingWelcome onNext={handleNext} onSkip={onSkip} />;
       case 1:
         return (
           <ProjectType 
             projectType={projectData.projectType}
             projectScale={projectData.projectScale}
-            updateProjectData={(data) => updateProjectData('projectType', data.projectType)}
-            updateProjectScale={(scale) => updateProjectData('projectScale', scale)}
+            updateProjectData={(data) => updateProjectData('projectType', data)}
           />
         );
       case 2:
@@ -139,7 +155,7 @@ export function ProjectOnboarding({ onComplete, onSkip }: ProjectOnboardingProps
       case 4:
         return (
           <FeatureSelection 
-            selectedFeatures={projectData.features}
+            features={projectData.features}
             updateFeatures={(features) => updateProjectData('features', features)}
           />
         );
@@ -148,13 +164,13 @@ export function ProjectOnboarding({ onComplete, onSkip }: ProjectOnboardingProps
           <OnboardingSummary 
             projectData={projectData}
             onEdit={(section) => {
-              const sectionMap = {
+              const sectionMap: Record<string, number> = {
                 projectType: 1,
                 businessContext: 2,
                 timelineBudget: 3,
                 features: 4,
               };
-              setStep(sectionMap[section as keyof typeof sectionMap] || 0);
+              setStep(sectionMap[section] || 0);
             }}
           />
         );

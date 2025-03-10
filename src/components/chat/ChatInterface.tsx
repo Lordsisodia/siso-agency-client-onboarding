@@ -8,10 +8,11 @@ import { ChatHeader } from './ChatHeader';
 import { ChatMessageList } from './ChatMessageList';
 import { ChatFooter } from './ChatFooter';
 
-// Unified ChatMessage type to handle both regular and plan assistant message formats
-type UnifiedChatMessage = {
+// Define a more flexible ChatMessage type that includes system messages
+export type ChatMessage = {
   role: "user" | "assistant" | "system";
   content: string;
+  timestamp?: Date;
 };
 
 interface ChatInterfaceProps {
@@ -46,8 +47,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     clearMessages 
   } = usePlanAssistant ? planChat : regularChat;
   
-  // Handle different message types using type assertion
-  const messages = rawMessages as UnifiedChatMessage[];
+  // Cast messages to the unified ChatMessage type
+  const messages = rawMessages as ChatMessage[];
   
   // Use the custom hook for handling chat interface state
   const {

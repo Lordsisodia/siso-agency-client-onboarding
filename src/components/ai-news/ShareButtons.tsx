@@ -1,97 +1,98 @@
+
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Twitter, Share2, Instagram } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from "@/integrations/supabase/client";
+import { Share, Twitter, Facebook, Linkedin, Link } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 import { usePoints } from '@/hooks/usePoints';
+import { useAuthSession } from '@/hooks/useAuthSession';
 
 interface ShareButtonsProps {
-  summary: string;
+  url: string;
   title: string;
+  onShare?: () => void;
 }
 
-export const ShareButtons = ({ summary, title }: ShareButtonsProps) => {
-  const { toast } = useToast();
-  const { awardPoints } = usePoints(undefined); // We'll get the user ID from the session
+export const ShareButtons: React.FC<ShareButtonsProps> = ({ url, title, onShare }) => {
+  const { user } = useAuthSession();
+  const { awardPoints } = usePoints(user?.id);
 
   const handleShare = async (platform: string) => {
-    const text = `${title}\n\n${summary}`;
-    const url = window.location.href;
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session) {
-        // Award points for sharing
-        await awardPoints('share_article');
+    let shareUrl = '';
+    
+    switch (platform) {
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
+        break;
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+        break;
+      case 'linkedin':
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+        break;
+      case 'copy':
+        navigator.clipboard.writeText(url);
         toast({
-          title: "Points awarded!",
-          description: `You earned 5 points for sharing on ${platform}!`,
+          title: "Link copied!",
+          description: "The link has been copied to your clipboard.",
         });
+        // Award points for sharing
+        if (user?.id) {
+          awardPoints('share_article'); // Updated to match the PointActionType
+        }
+        if (onShare) onShare();
+        return;
+    }
+    
+    if (shareUrl) {
+      window.open(shareUrl, '_blank', 'noopener,noreferrer');
+      
+      // Award points for sharing
+      if (user?.id) {
+        awardPoints('share_article'); // Updated to match the PointActionType
       }
-
-      switch (platform) {
-        case 'twitter':
-          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
-          break;
-        case 'whatsapp':
-          window.open(`https://wa.me/?text=${encodeURIComponent(text + '\n' + url)}`, '_blank');
-          break;
-        case 'instagram':
-        case 'skool':
-          navigator.clipboard.writeText(text + '\n' + url);
-          toast({
-            title: "Copied to clipboard",
-            description: `You can now paste this in ${platform}`,
-          });
-          break;
-      }
-    } catch (error: any) {
-      console.error('Error handling share:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to process sharing action",
-      });
+      
+      if (onShare) onShare();
     }
   };
 
   return (
-    <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-4 justify-center">
+    <div className="flex items-center space-x-2">
+      <span className="text-sm text-gray-500 mr-1 hidden sm:inline-block">Share:</span>
       <Button
-        variant="outline"
-        size="sm"
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 text-blue-400 hover:text-blue-600 hover:bg-blue-100"
         onClick={() => handleShare('twitter')}
-        className="text-xs sm:text-sm hover:bg-siso-red/10 hover:text-siso-red transition-colors"
+        title="Share on Twitter"
       >
-        <Twitter className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-        <span className="hidden sm:inline">Share on</span> X
+        <Twitter className="h-4 w-4" />
       </Button>
       <Button
-        variant="outline"
-        size="sm"
-        onClick={() => handleShare('whatsapp')}
-        className="text-xs sm:text-sm hover:bg-siso-red/10 hover:text-siso-red transition-colors"
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 text-blue-600 hover:text-blue-800 hover:bg-blue-100"
+        onClick={() => handleShare('facebook')}
+        title="Share on Facebook"
       >
-        <Share2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-        <span className="hidden sm:inline">Share on</span> WhatsApp
+        <Facebook className="h-4 w-4" />
       </Button>
       <Button
-        variant="outline"
-        size="sm"
-        onClick={() => handleShare('instagram')}
-        className="text-xs sm:text-sm hover:bg-siso-red/10 hover:text-siso-red transition-colors"
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 text-blue-700 hover:text-blue-900 hover:bg-blue-100"
+        onClick={() => handleShare('linkedin')}
+        title="Share on LinkedIn"
       >
-        <Instagram className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-        <span className="hidden sm:inline">Share on</span> Instagram
+        <Linkedin className="h-4 w-4" />
       </Button>
       <Button
-        variant="outline"
-        size="sm"
-        onClick={() => handleShare('skool')}
-        className="text-xs sm:text-sm hover:bg-siso-red/10 hover:text-siso-red transition-colors"
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+        onClick={() => handleShare('copy')}
+        title="Copy Link"
       >
-        <Share2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-        <span className="hidden sm:inline">Share on</span> Skool
+        <Link className="h-4 w-4" />
       </Button>
     </div>
   );

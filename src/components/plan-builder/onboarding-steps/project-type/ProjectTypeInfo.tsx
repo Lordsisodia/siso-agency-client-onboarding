@@ -1,60 +1,58 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Clock, DollarSign, Monitor, Info } from 'lucide-react';
-import { ProjectTypeInfo } from './ProjectTypeData';
+import { fadeInUp } from '@/components/ui/animations';
+import { ProjectTypeData } from './ProjectTypeData';
+
+// Import as a type
+import type { ProjectTypeInfo as ProjectTypeInfoType } from './ProjectTypeData';
 
 interface ProjectTypeInfoProps {
-  typeInfo: ProjectTypeInfo | null;
-  selectedScale: string;
+  selectedType: string | null;
 }
 
-export function ProjectTypeInfo({ typeInfo, selectedScale }: ProjectTypeInfoProps) {
-  if (!typeInfo) return null;
+export const ProjectTypeInfo: React.FC<ProjectTypeInfoProps> = ({ selectedType }) => {
+  if (!selectedType) return null;
+
+  const projectInfo = ProjectTypeData.find(
+    (type) => type.id === selectedType
+  );
+
+  if (!projectInfo) return null;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="mt-6"
+      className="mt-4 space-y-2 text-sm bg-gray-50 rounded-lg p-4 dark:bg-gray-800"
+      variants={fadeInUp}
+      initial="initial"
+      animate="animate"
+      exit="exit"
     >
-      <h3 className="text-lg font-semibold mb-3">{typeInfo.name} Details</h3>
+      <h3 className="font-medium text-base mb-2">{projectInfo.title} Details</h3>
+      <p className="text-gray-600 dark:text-gray-300 mb-3">{projectInfo.description}</p>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-card/60 backdrop-blur-sm p-4 rounded-lg border border-border">
-          <div className="flex items-center gap-2 mb-2 text-muted-foreground">
-            <Clock className="w-4 h-4" />
-            <span className="text-sm font-medium">Estimated Timeline</span>
-          </div>
-          <p className="text-base font-medium">{typeInfo.timeEstimate[selectedScale]}</p>
-        </div>
-        
-        <div className="bg-card/60 backdrop-blur-sm p-4 rounded-lg border border-border">
-          <div className="flex items-center gap-2 mb-2 text-muted-foreground">
-            <DollarSign className="w-4 h-4" />
-            <span className="text-sm font-medium">Estimated Cost</span>
-          </div>
-          <p className="text-base font-medium">{typeInfo.costEstimate[selectedScale]}</p>
-        </div>
-        
-        <div className="md:col-span-2 bg-card/60 backdrop-blur-sm p-4 rounded-lg border border-border">
-          <div className="flex items-center gap-2 mb-2 text-muted-foreground">
-            <Info className="w-4 h-4" />
-            <span className="text-sm font-medium">Description</span>
-          </div>
-          <p className="text-sm text-muted-foreground mb-3">{typeInfo.description}</p>
-          
-          <div className="flex items-center gap-2 mb-2 text-muted-foreground">
-            <Monitor className="w-4 h-4" />
-            <span className="text-sm font-medium">Examples</span>
-          </div>
-          <ul className="text-sm text-muted-foreground list-disc list-inside">
-            {typeInfo.examples.map((example, index) => (
-              <li key={index}>{example}</li>
+        <div>
+          <h4 className="font-medium text-sm mb-1">Typical Features:</h4>
+          <ul className="list-disc pl-5 space-y-1 text-gray-600 dark:text-gray-300">
+            {projectInfo.features.map((feature, index) => (
+              <li key={index}>{feature}</li>
             ))}
           </ul>
+        </div>
+
+        <div>
+          <h4 className="font-medium text-sm mb-1">Timeline Estimate:</h4>
+          <p className="text-gray-600 dark:text-gray-300">
+            {projectInfo.timelineEstimate}
+          </p>
+
+          <h4 className="font-medium text-sm mt-3 mb-1">Budget Range:</h4>
+          <p className="text-gray-600 dark:text-gray-300">
+            {projectInfo.budgetRange}
+          </p>
         </div>
       </div>
     </motion.div>
   );
-}
+};
