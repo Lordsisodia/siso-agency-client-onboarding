@@ -18,7 +18,6 @@ import Dashboard from '@/pages/Dashboard';
 import Projects from '@/pages/Projects';
 import PlanBuilder from '@/pages/PlanBuilder';
 import NewProject from '@/pages/NewProject';
-import CompanyProfile from '@/pages/CompanyProfile';
 import ResourceHub from '@/pages/ResourceHub';
 import Portfolio from '@/pages/Portfolio';
 import Support from '@/pages/Support';
@@ -51,9 +50,6 @@ function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/thank-you" element={<ThankYou />} />
         
-        {/* Company Profile route - accessible to all users */}
-        <Route path="/company-profile" element={<CompanyProfile />} />
-
         {/* Home route - redirect to plan-builder */}
         <Route path="/home" element={<Navigate to="/plan-builder" replace />} />
         

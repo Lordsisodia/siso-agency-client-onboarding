@@ -5,8 +5,7 @@ import {
   FolderKanban,
   Briefcase,
   User,
-  HelpCircle,
-  Building
+  HelpCircle
 } from 'lucide-react';
 import { MenuSection } from './types';
 
@@ -60,11 +59,6 @@ export const menuSections: MenuSection[] = [
         href: '/profile',
         icon: User,
         label: 'Profile & Settings',
-      },
-      {
-        href: '/company-profile',
-        icon: Building,
-        label: 'Company Details',
       }
     ]
   },
