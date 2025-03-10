@@ -14,9 +14,7 @@ import {
   HelpCircle,
   MessageCircle,
   User,
-  Bell,
-  Trophy,
-  Medal
+  Bell
 } from 'lucide-react';
 import { MenuSection } from './types';
 
@@ -93,16 +91,6 @@ export const menuSections: MenuSection[] = [
         href: '/notifications',
         icon: Bell,
         label: 'Notifications',
-      },
-      {
-        href: '/leaderboards',
-        icon: Trophy,
-        label: 'Leaderboards',
-      },
-      {
-        href: '/how-to-earn',
-        icon: Medal,
-        label: 'How to Earn',
       }
     ]
   }
