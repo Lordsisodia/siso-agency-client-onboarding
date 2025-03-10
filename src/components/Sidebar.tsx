@@ -1,12 +1,15 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { SidebarLogo } from './sidebar/SidebarLogo';
 import { SidebarNavigation } from './sidebar/SidebarNavigation';
 import { SidebarFooter } from './sidebar/SidebarFooter';
-import { Menu, X } from 'lucide-react';
+import { SidebarContainer } from './sidebar/SidebarContainer';
+import { MainContent } from './sidebar/MainContent';
+import { MobileSidebarButton } from './sidebar/MobileSidebarButton';
+import { SidebarOverlay } from './sidebar/SidebarOverlay';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Button } from './ui/button';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 
 export const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -14,7 +17,6 @@ export const Sidebar = () => {
   const [showNavigation, setShowNavigation] = useState(true);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
-  const sidebarRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -72,104 +74,33 @@ export const Sidebar = () => {
     }
   }, [location.pathname, isMobile]);
 
-  // Handle outside clicks to close the sidebar on mobile
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isMobile && isMobileMenuOpen && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isMobile, isMobileMenuOpen]);
-
-  const sidebarVariants = {
-    expanded: {
-      width: isMobile ? "16rem" : "16rem",
-      transition: {
-        type: "spring",
-        stiffness: 200,
-        damping: 25,
-        mass: 0.8
-      }
-    },
-    collapsed: {
-      width: isMobile ? "0" : "4rem",
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 35,
-        mass: 0.8
-      }
-    }
-  };
-
-  // We've modified this function to prevent automatic collapsing on mouse leave
+  // Handle mouse interactions for desktop sidebar
   const handleMouseEnter = useCallback(() => {
     if (!isMobile && !isProfileOpen) {
       setIsExpanded(true);
     }
   }, [isMobile, isProfileOpen]);
 
-  // We've removed the auto-collapse functionality here
   const handleMouseLeave = useCallback(() => {
-    // Removed the auto-collapse functionality
+    // We've removed the auto-collapse functionality
     // The sidebar will only collapse when the toggle button is clicked
   }, []);
 
   return (
     <>
-      {/* Mobile Menu Button with smooth icon transition */}
+      {/* Mobile Menu Button */}
       {isMobile && (
-        <motion.div
-          initial={false}
-          animate={{ scale: 1 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Button
-            variant="ghost"
-            size="icon"
-            className="fixed top-4 right-4 z-50 bg-siso-bg/80 backdrop-blur-sm"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={isMobileMenuOpen ? 'close' : 'menu'}
-                initial={{ opacity: 0, rotate: -90 }}
-                animate={{ opacity: 1, rotate: 0 }}
-                exit={{ opacity: 0, rotate: 90 }}
-                transition={{ duration: 0.2 }}
-              >
-                {isMobileMenuOpen ? (
-                  <X className="h-6 w-6 text-siso-text" />
-                ) : (
-                  <Menu className="h-6 w-6 text-siso-text" />
-                )}
-              </motion.div>
-            </AnimatePresence>
-          </Button>
-        </motion.div>
+        <MobileSidebarButton 
+          isMobileMenuOpen={isMobileMenuOpen}
+          setIsMobileMenuOpen={setIsMobileMenuOpen}
+        />
       )}
 
-      {/* Sidebar with improved animations */}
-      <motion.div 
-        ref={sidebarRef}
-        initial={false}
-        animate={
-          isMobile 
-            ? isMobileMenuOpen ? "expanded" : "collapsed"
-            : isExpanded ? "expanded" : "collapsed"
-        }
-        variants={sidebarVariants}
-        className={`
-          fixed top-0 h-screen overflow-y-auto
-          bg-gradient-to-b from-siso-bg to-siso-bg/95 
-          border-r border-siso-text/10 shadow-lg
-          ${isMobile ? 'left-0 z-40' : ''}
-        `}
+      {/* Sidebar Container */}
+      <SidebarContainer
+        isExpanded={isExpanded}
+        isMobile={isMobile}
+        isMobileMenuOpen={isMobileMenuOpen}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -192,34 +123,20 @@ export const Sidebar = () => {
             if (isOpen) setIsExpanded(true);
           }}
         />
-      </motion.div>
+      </SidebarContainer>
 
-      {/* Main Content Wrapper with smooth margin transition */}
-      <motion.div 
-        className="min-h-screen"
-        animate={{
-          marginLeft: !isMobile ? (isExpanded ? '16rem' : '4rem') : 0
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 200,
-          damping: 25
-        }}
-      >
+      {/* Main Content Wrapper */}
+      <MainContent isExpanded={isExpanded} isMobile={isMobile}>
         {/* Mobile Overlay with improved backdrop blur */}
         <AnimatePresence>
           {isMobile && isMobileMenuOpen && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30"
-              onClick={() => setIsMobileMenuOpen(false)}
+            <SidebarOverlay 
+              isMobileMenuOpen={isMobileMenuOpen} 
+              setIsMobileMenuOpen={setIsMobileMenuOpen} 
             />
           )}
         </AnimatePresence>
-      </motion.div>
+      </MainContent>
     </>
   );
 };
