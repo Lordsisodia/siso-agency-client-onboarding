@@ -145,13 +145,20 @@ export const fetchCategory = async (categorySlug: string): Promise<DocCategory |
       return null;
     }
     
+    // We need to include empty sections array for each article to satisfy the type
+    const articlesWithSections: DocArticle[] = (articlesData || []).map(article => ({
+      ...article,
+      difficulty: article.difficulty as 'beginner' | 'intermediate' | 'advanced' | undefined,
+      sections: [] // Initialize with empty sections, will be populated in fetchArticle
+    }));
+    
     const category: DocCategory = {
       ...categoryData,
       id: categoryData.id,
       slug: categoryData.slug,
       icon: getIconComponent(categoryData.icon),
-      articleCount: articlesData?.length || 0,
-      articles: articlesData || []
+      articleCount: articlesWithSections.length || 0,
+      articles: articlesWithSections
     };
     
     return category;
@@ -232,6 +239,7 @@ export const fetchArticle = async (categorySlug: string, articleSlug: string): P
     
     const article: DocArticle = {
       ...articleData,
+      difficulty: articleData.difficulty as 'beginner' | 'intermediate' | 'advanced' | undefined,
       sections: sectionsWithQuestions
     };
     
@@ -320,8 +328,15 @@ export const searchDocumentation = async (query: string): Promise<DocCategory[]>
           console.error('Error searching articles:', articlesError);
           return null;
         }
+
+        // Convert to DocArticle type with empty sections array
+        const articlesWithSections: DocArticle[] = (articlesData || []).map(article => ({
+          ...article,
+          difficulty: article.difficulty as 'beginner' | 'intermediate' | 'advanced' | undefined,
+          sections: [] // Initialize with empty sections
+        }));
         
-        if (!articlesData || articlesData.length === 0) {
+        if (!articlesWithSections || articlesWithSections.length === 0) {
           // No matches in articles, check if the category itself matches
           if (
             category.title.toLowerCase().includes(lowercaseQuery) ||
@@ -339,13 +354,20 @@ export const searchDocumentation = async (query: string): Promise<DocCategory[]>
               return null;
             }
             
+            // Convert to DocArticle type with empty sections array
+            const allArticlesWithSections: DocArticle[] = (allArticles || []).map(article => ({
+              ...article,
+              difficulty: article.difficulty as 'beginner' | 'intermediate' | 'advanced' | undefined,
+              sections: [] // Initialize with empty sections
+            }));
+            
             return {
               ...category,
               id: category.id,
               slug: category.slug,
               icon: getIconComponent(category.icon),
-              articleCount: allArticles?.length || 0,
-              articles: allArticles || []
+              articleCount: allArticlesWithSections.length || 0,
+              articles: allArticlesWithSections
             } as DocCategory;
           }
           
@@ -357,8 +379,8 @@ export const searchDocumentation = async (query: string): Promise<DocCategory[]>
           id: category.id,
           slug: category.slug,
           icon: getIconComponent(category.icon),
-          articleCount: articlesData.length,
-          articles: articlesData
+          articleCount: articlesWithSections.length,
+          articles: articlesWithSections
         } as DocCategory;
       })
     );
@@ -419,3 +441,4 @@ export const importTestDocumentation = async (): Promise<boolean> => {
     return false;
   }
 };
+
