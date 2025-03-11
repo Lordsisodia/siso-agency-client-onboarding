@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { LoginStreakTracker } from '@/components/points/LoginStreakTracker';
 import { PointsDisplay } from '@/components/points/PointsDisplay';
 import { PointsHistory } from '@/components/profile/PointsHistory';
