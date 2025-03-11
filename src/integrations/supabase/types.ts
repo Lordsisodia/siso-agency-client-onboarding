@@ -1394,7 +1394,6 @@ export type Database = {
           rank: string | null
           referral_count: number | null
           siso_tokens: number | null
-          solana_wallet_address: string | null
           twitter_url: string | null
           updated_at: string | null
           user_id: string | null
@@ -1424,7 +1423,6 @@ export type Database = {
           rank?: string | null
           referral_count?: number | null
           siso_tokens?: number | null
-          solana_wallet_address?: string | null
           twitter_url?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -1454,7 +1452,6 @@ export type Database = {
           rank?: string | null
           referral_count?: number | null
           siso_tokens?: number | null
-          solana_wallet_address?: string | null
           twitter_url?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -2189,60 +2186,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      wallet_nonces: {
-        Row: {
-          created_at: string
-          expires_at: string
-          id: string
-          nonce: string
-          public_key: string
-        }
-        Insert: {
-          created_at?: string
-          expires_at?: string
-          id?: string
-          nonce: string
-          public_key: string
-        }
-        Update: {
-          created_at?: string
-          expires_at?: string
-          id?: string
-          nonce?: string
-          public_key?: string
-        }
-        Relationships: []
-      }
-      welcome_nft_mints: {
-        Row: {
-          completed_at: string | null
-          created_at: string
-          error_message: string | null
-          id: string
-          metadata: Json | null
-          status: string
-          user_id: string
-        }
-        Insert: {
-          completed_at?: string | null
-          created_at?: string
-          error_message?: string | null
-          id?: string
-          metadata?: Json | null
-          status?: string
-          user_id: string
-        }
-        Update: {
-          completed_at?: string | null
-          created_at?: string
-          error_message?: string | null
-          id?: string
-          metadata?: Json | null
-          status?: string
-          user_id?: string
-        }
-        Relationships: []
       }
       youtube_videos: {
         Row: {
