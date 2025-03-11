@@ -65,11 +65,14 @@ function App() {
           <Route path="/plan-builder" element={<PlanBuilder />} />
           <Route path="/plan-builder/:projectId" element={<PlanBuilder />} />
           <Route path="/new-project" element={<NewProject />} />
+          
+          {/* Support routes - properly nested */}
           <Route path="/support" element={<Support />} />
+          <Route path="/support/import" element={<ImportDocumentationPage />} />
           <Route path="/support/:categoryId" element={<DocumentationCategoryPage />} />
           <Route path="/support/:categoryId/:articleId" element={<DocumentationArticlePage />} />
           <Route path="/support/:categoryId/:articleId/:questionId" element={<DocumentationQuestionPage />} />
-          <Route path="/import-documentation" element={<ImportDocumentationPage />} />
+          
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/tasks" element={<Tasks />} />
@@ -79,6 +82,7 @@ function App() {
           <Route path="/pending-tasks" element={<Navigate to="/tasks" replace />} />
           <Route path="/organization" element={<Navigate to="/profile" replace />} />
           <Route path="/company-profile" element={<Navigate to="/profile" replace />} />
+          <Route path="/import-documentation" element={<Navigate to="/support/import" replace />} />
           
           {/* Onboarding routes */}
           <Route path="/onboarding/social" element={<SocialOnboarding />} />
