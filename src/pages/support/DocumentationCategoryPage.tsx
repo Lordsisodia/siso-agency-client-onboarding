@@ -5,14 +5,17 @@ import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { getCategory } from '@/services/documentation.service';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, ChevronLeft, Search } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Search, Settings, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { useViewportLoading } from '@/hooks/useViewportLoading';
 
 const DocumentationCategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedQuestion, setExpandedQuestion] = useState<string | null>(null);
   
   const category = categoryId ? getCategory(categoryId) : null;
   
@@ -39,6 +42,14 @@ const DocumentationCategoryPage = () => {
       )
     : category.articles;
 
+  const toggleQuestion = (questionId: string) => {
+    if (expandedQuestion === questionId) {
+      setExpandedQuestion(null);
+    } else {
+      setExpandedQuestion(questionId);
+    }
+  };
+
   return (
     <MainLayout>
       <div className="container mx-auto py-8 px-4 sm:px-6">
@@ -47,7 +58,7 @@ const DocumentationCategoryPage = () => {
           <div className="mb-6">
             <nav className="flex items-center text-sm">
               <Link to="/support" className="text-siso-text/70 hover:text-siso-text transition-colors">
-                Help Center
+                All Collections
               </Link>
               <ChevronRight className="h-4 w-4 mx-2 text-siso-text/50" />
               <span className="text-siso-text-bold">{category.title}</span>
@@ -55,17 +66,23 @@ const DocumentationCategoryPage = () => {
           </div>
           
           {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-siso-orange/10 p-3 rounded-full">
-                <category.icon className="h-6 w-6 text-siso-orange" />
+          <div className="mb-10">
+            <div className="flex items-center mb-4">
+              <div className="bg-gray-100 p-3 rounded-full mr-4">
+                <Settings className="h-6 w-6 text-gray-800" />
               </div>
-              <h1 className="text-3xl font-bold text-siso-text-bold">{category.title}</h1>
+              <div>
+                <h1 className="text-3xl font-bold text-siso-text-bold">{category.title}</h1>
+                <p className="text-siso-text/70">{category.description}</p>
+              </div>
             </div>
-            <p className="text-siso-text/70 text-lg mb-6">{category.description}</p>
+            
+            <div className="mt-3 text-sm text-siso-text/60">
+              {category.articleCount} articles
+            </div>
             
             {/* Search */}
-            <div className="relative mb-8">
+            <div className="relative mt-6">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-siso-text/60" />
               <Input
                 type="search"
@@ -77,40 +94,44 @@ const DocumentationCategoryPage = () => {
             </div>
           </div>
           
-          {/* Article list */}
-          <div className="space-y-4">
+          {/* Article list with collapsible questions */}
+          <div>
             {filteredArticles.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-siso-text/70">No articles found for "{searchQuery}"</p>
               </div>
             ) : (
-              filteredArticles.map((article) => (
-                <Card 
-                  key={article.id}
-                  className="border border-siso-border hover:border-siso-border-hover cursor-pointer transition-all duration-300"
-                  onClick={() => navigate(`/support/${categoryId}/${article.id}`)}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h2 className="text-xl font-semibold mb-2">{article.title}</h2>
-                        <p className="text-siso-text/70">{article.excerpt}</p>
-                        
-                        <div className="mt-4 text-xs text-siso-text/50">
-                          Last updated: {article.lastUpdated}
-                        </div>
+              <div className="border border-gray-200 rounded-md overflow-hidden">
+                {filteredArticles.map((article) => (
+                  <div key={article.id} className="border-b border-gray-200 last:border-b-0">
+                    {article.sections.map((section) => (
+                      <div key={section.id}>
+                        {section.questions.map((question) => (
+                          <div key={question.id} className="border-b border-gray-100 last:border-b-0">
+                            <button
+                              onClick={() => toggleQuestion(question.id)}
+                              className="w-full text-left py-4 px-6 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                            >
+                              <span className="font-medium text-gray-900">{question.question}</span>
+                              <ChevronDown
+                                className={`h-5 w-5 text-gray-500 transition-transform ${
+                                  expandedQuestion === question.id ? "transform rotate-180" : ""
+                                }`}
+                              />
+                            </button>
+                            
+                            {expandedQuestion === question.id && (
+                              <div className="px-6 pb-4 pt-1 text-gray-600">
+                                <p>{question.answer}</p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
-                      
-                      <div className="flex items-center">
-                        <Badge variant="outline" className="mr-3">
-                          {article.difficulty}
-                        </Badge>
-                        <ChevronRight className="h-5 w-5 text-siso-orange" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
+                    ))}
+                  </div>
+                ))}
+              </div>
             )}
           </div>
           
