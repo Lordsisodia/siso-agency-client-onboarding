@@ -1,55 +1,53 @@
-import * as React from "react";
-import { ArrowDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useAutoScroll } from "@/hooks/use-auto-scroll";
 
-interface ChatMessageListProps extends React.HTMLAttributes<HTMLDivElement> {
-  smooth?: boolean;
+import React, { useRef, useState, useEffect } from 'react';
+import { useAutoScroll } from '@/hooks/use-auto-scroll';
+
+interface ChatMessageListProps {
+  children: React.ReactNode;
+  className?: string;
 }
 
-const ChatMessageList = React.forwardRef<HTMLDivElement, ChatMessageListProps>(
-  ({ className, children, smooth = false, ...props }, _ref) => {
-    const {
-      scrollRef,
-      isAtBottom,
-      autoScrollEnabled,
-      scrollToBottom,
-      disableAutoScroll,
-    } = useAutoScroll({
-      smooth,
-      content: children,
-    });
-
-    return (
-      <div className="relative w-full h-full">
-        <div
-          className={`flex flex-col w-full h-full p-4 overflow-y-auto ${className}`}
-          ref={scrollRef}
-          onWheel={disableAutoScroll}
-          onTouchMove={disableAutoScroll}
-          {...props}
+export function ChatMessageList({ children, className = '' }: ChatMessageListProps) {
+  const listRef = useRef<HTMLDivElement>(null);
+  const [isScrolledToBottom, setIsScrolledToBottom] = useState(true);
+  
+  // Setup auto-scrolling
+  useEffect(() => {
+    if (listRef.current && isScrolledToBottom) {
+      listRef.current.scrollTop = listRef.current.scrollHeight;
+    }
+  }, [children, isScrolledToBottom]);
+  
+  // Handle scroll events to detect if user has scrolled away from bottom
+  const handleScroll = () => {
+    if (!listRef.current) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = listRef.current;
+    const isBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 10;
+    setIsScrolledToBottom(isBottom);
+  };
+  
+  return (
+    <div 
+      ref={listRef}
+      className={`flex-1 overflow-y-auto ${className}`}
+      onScroll={handleScroll}
+    >
+      {children}
+      {!isScrolledToBottom && (
+        <button 
+          className="fixed bottom-20 right-5 bg-primary text-white rounded-full p-2 shadow-lg"
+          onClick={() => {
+            if (listRef.current) {
+              listRef.current.scrollTop = listRef.current.scrollHeight;
+              setIsScrolledToBottom(true);
+            }
+          }}
         >
-          <div className="flex flex-col gap-6">{children}</div>
-        </div>
-
-        {!isAtBottom && (
-          <Button
-            onClick={() => {
-              scrollToBottom();
-            }}
-            size="icon"
-            variant="outline"
-            className="absolute bottom-2 left-1/2 transform -translate-x-1/2 inline-flex rounded-full shadow-md"
-            aria-label="Scroll to bottom"
-          >
-            <ArrowDown className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
-    );
-  }
-);
-
-ChatMessageList.displayName = "ChatMessageList";
-
-export { ChatMessageList };
+          <span className="sr-only">Scroll to bottom</span>
+          ↓
+        </button>
+      )}
+    </div>
+  );
+}

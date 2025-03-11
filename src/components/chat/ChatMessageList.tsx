@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { AlertTriangle } from 'lucide-react';
@@ -99,13 +100,6 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
       {!onlineStatus && (
         <div className="p-3 bg-gray-100 text-gray-700 rounded-lg text-sm mt-4">
           You're currently offline. Messages will be sent when you're back online.
-        </div>
-      )}
-      
-      {/* Reconnecting message - we're keeping this for when onlineStatus has a third state in the future */}
-      {!onlineStatus && (
-        <div className="p-3 bg-amber-50 text-amber-700 rounded-lg text-sm mt-4">
-          Reconnecting to server...
         </div>
       )}
     </div>

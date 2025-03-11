@@ -1,125 +1,115 @@
 
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { ChatMessage } from '@/types/chat';
+import { useToast } from './use-toast';
+import { v4 as uuidv4 } from 'uuid';
+
+type MessageRole = 'user' | 'assistant' | 'system';
+
+interface Message {
+  id?: string;
+  role: MessageRole;
+  content: string;
+  loading?: boolean;
+}
+
+interface UsePlanChatAssistantProps {
+  projectId?: string;
+}
 
 export function usePlanChatAssistant(projectId?: string) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [threadId, setThreadId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const clearMessages = useCallback((initialMessages: ChatMessage[] = []) => {
-    setMessages(initialMessages);
+  const clearMessages = useCallback(() => {
+    setMessages([]);
+    setError(null);
   }, []);
 
-  const sendMessage = useCallback(async (message: string, systemPrompt?: string, formData?: Record<string, any>) => {
-    if (!message.trim() || isLoading) return;
-    
-    setIsLoading(true);
-    setError(null);
-
-    // Add user message to UI immediately
-    const userMessage: ChatMessage = { 
-      role: 'user', 
-      content: message,
-      timestamp: new Date(),
-      id: `user-${Date.now()}`
-    };
-    
-    setMessages(prev => [...prev, userMessage]);
+  const sendMessage = useCallback(async (
+    content: string, 
+    systemPrompt?: string, 
+    formData?: Record<string, any>
+  ) => {
+    if (!content.trim()) return;
 
     try {
-      console.log('Sending message to chat-with-plan-assistant function', { 
-        projectId, 
-        threadId, 
-        messageLength: message.length 
-      });
-      
-      // Call the plan assistant edge function with our new direct completion API
-      const { data, error: functionError } = await supabase.functions.invoke('chat-with-plan-assistant', {
-        body: { 
-          messages: [...messages, userMessage],
-          projectId,
-          formData,
-          threadId,
-          systemPrompt
-        },
-      });
+      setIsLoading(true);
+      setError(null);
 
-      if (functionError) {
-        console.error('Function error details:', functionError);
-        throw new Error(`Connection issue: ${functionError.message || 'Service temporarily unavailable'}`);
+      // Add user message to state
+      const userMessageId = uuidv4();
+      const userMessage: Message = { id: userMessageId, role: 'user', content };
+      
+      // Prepare the messages array, including system message if provided
+      const messagesArray = [...messages, userMessage];
+      
+      // Add system message to the beginning if provided and not already present
+      if (systemPrompt && !messages.some(m => m.role === 'system')) {
+        messagesArray.unshift({
+          id: uuidv4(),
+          role: 'system' as MessageRole, // Explicitly type this as MessageRole
+          content: systemPrompt
+        });
       }
       
-      if (!data) {
-        throw new Error('No data returned from function');
-      }
-      
-      console.log('Response from AI assistant:', {
-        responseLength: data.response?.length || 0,
-        threadId: data.threadId || 'none',
-        model: data.model || 'unknown'
-      });
-      
-      if (data.threadId) {
-        setThreadId(data.threadId);
-      }
+      setMessages(messagesArray);
 
-      // Add assistant response
-      const assistantMessage: ChatMessage = {
+      // Optimistically show the loading message
+      setMessages(prev => [...prev, { 
+        id: uuidv4(), 
         role: 'assistant', 
-        content: data.response,
-        timestamp: new Date(),
-        id: `assistant-${Date.now()}`
-      };
-      
-      setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error('Error communicating with assistant:', error);
-      
-      setError(error instanceof Error ? error.message : 'Connection to the AI service interrupted');
-      
-      // Show more specific error messages to the user
-      let errorMessage = 'There was a problem connecting to the AI assistant.';
-      
-      if (error instanceof Error) {
-        if (error.message.includes('API key')) {
-          errorMessage = 'The OpenAI API key is invalid or missing. Please check the configuration.';
-        } else if (error.message.includes('Connection issue')) {
-          errorMessage = 'Connection to the AI service interrupted. Please try again later.';
-        } else {
-          errorMessage = error.message;
+        content: '', 
+        loading: true 
+      }]);
+
+      // Make the API call to the Edge Function
+      const { data, error } = await supabase.functions.invoke('chat-with-plan-assistant', {
+        body: {
+          messages: messagesArray.map(({ id, loading, ...rest }) => rest),
+          planId: projectId,
+          formData
         }
-      }
-      
-      toast({
-        title: "Connection Issue",
-        description: errorMessage,
-        variant: "destructive"
       });
-      
-      // Add error message as assistant message with an error flag
-      const errorSystemMessage: ChatMessage = {
-        role: 'assistant',
-        content: `Error: ${errorMessage}`,
-        timestamp: new Date(),
-        id: `error-${Date.now()}`
-      };
-      
-      setMessages(prev => [...prev, errorSystemMessage]);
+
+      // Remove the loading message and handle the response
+      setMessages(prev => prev.filter(msg => !msg.loading));
+
+      if (error) {
+        console.error('Error getting reply:', error);
+        setError(`Failed to get a response: ${error.message || 'Unknown error'}`);
+        toast({
+          title: 'Error',
+          description: 'Failed to get a response from the assistant.',
+          variant: 'destructive',
+        });
+      } else if (data) {
+        const assistantMessage: Message = {
+          id: uuidv4(),
+          role: 'assistant',
+          content: data.reply || 'Sorry, I couldn\'t generate a response.'
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+      }
+    } catch (err: any) {
+      console.error('Error in chat:', err);
+      setError(`Something went wrong: ${err.message || 'Unknown error'}`);
+      toast({
+        title: 'Error',
+        description: 'An unexpected error occurred.',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, messages, projectId, threadId, toast]);
+  }, [messages, projectId, toast]);
 
   return {
     messages,
     isLoading,
     error,
-    threadId,
     sendMessage,
     clearMessages
   };

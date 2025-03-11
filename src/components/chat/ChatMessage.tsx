@@ -1,96 +1,37 @@
 
 import React from 'react';
-import { Bot, User, Copy } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import ReactMarkdown from 'react-markdown';
-import { AIThinkingLoader } from '@/components/ui/ai-thinking-loader';
-import { useToast } from '@/hooks/use-toast';
 import { ChatMessage as ChatMessageType } from '@/types/chat';
 
-interface ChatMessageProps {
+export interface ChatMessageProps {
   message: ChatMessageType;
 }
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
-  const { role, content, timestamp, loading } = message;
-  const isAssistant = role === 'assistant';
-  const { toast } = useToast();
-  
-  const handleCopyContent = () => {
-    navigator.clipboard.writeText(content);
-    toast({
-      title: "Copied to clipboard",
-      description: "Message content has been copied",
-    });
-  };
+  const isUser = message.role === 'user';
   
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      className={cn(
-        "flex gap-4 p-4 rounded-xl backdrop-blur-sm transition-all",
-        isAssistant 
-          ? "bg-siso-bg-card/40 border border-siso-border hover:border-siso-border-hover shadow-lg" 
-          : "bg-gradient-to-r from-siso-red/5 to-siso-orange/5 border border-siso-border/50 hover:border-siso-border"
-      )}
+      transition={{ duration: 0.3 }}
+      className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
     >
-      <div className="flex-shrink-0 mt-1">
-        <div className={cn(
-          "w-10 h-10 rounded-full flex items-center justify-center relative overflow-hidden",
-          isAssistant ? "bg-gradient-to-r from-siso-red to-siso-orange" : "bg-siso-bg-card border border-siso-border"
-        )}>
-          {isAssistant ? (
-            <Bot className="w-5 h-5 text-white relative z-10" />
-          ) : (
-            <User className="w-5 h-5 text-siso-text" />
-          )}
-          
-          {isAssistant && (
-            <motion.div 
-              className="absolute inset-0 rounded-full bg-gradient-to-r from-siso-red to-siso-orange opacity-30"
-              initial={{ scale: 0.85 }}
-              animate={{ scale: [0.85, 1.1, 0.85] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            />
-          )}
-        </div>
-      </div>
-      
-      <div className="flex-1 space-y-1">
-        <div className="flex items-center justify-between">
-          <div className="text-sm font-medium text-siso-text-muted">
-            {isAssistant ? 'AI Assistant' : 'You'}
+      <div
+        className={`
+          px-4 py-3 rounded-lg max-w-[80%] shadow-sm
+          ${isUser ? 'bg-siso-orange-100 text-siso-orange-800' : 'bg-white text-siso-text'}
+          ${message.loading ? 'animate-pulse' : ''}
+        `}
+      >
+        {message.loading ? (
+          <div className="flex items-center space-x-1">
+            <div className="h-2 w-2 bg-siso-text/40 rounded-full animate-bounce delay-100"></div>
+            <div className="h-2 w-2 bg-siso-text/40 rounded-full animate-bounce delay-200"></div>
+            <div className="h-2 w-2 bg-siso-text/40 rounded-full animate-bounce delay-300"></div>
           </div>
-          
-          {timestamp && (
-            <div className="text-xs text-siso-text-muted">
-              {new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </div>
-          )}
-        </div>
-        
-        {loading ? (
-          <AIThinkingLoader variant="default" showStages={true} />
         ) : (
-          <div className="relative group">
-            {isAssistant && (
-              <motion.button
-                initial={{ opacity: 0 }}
-                whileHover={{ opacity: 1 }}
-                className="absolute right-1 top-1 p-1.5 text-siso-text-muted hover:text-siso-text bg-siso-bg/80 hover:bg-siso-bg rounded-md cursor-pointer z-10"
-                onClick={handleCopyContent}
-                title="Copy to clipboard"
-              >
-                <Copy className="w-4 h-4" />
-              </motion.button>
-            )}
-            <div className="prose prose-invert prose-sm max-w-none relative z-0">
-              <ReactMarkdown>{content}</ReactMarkdown>
-            </div>
-          </div>
+          <div className="whitespace-pre-wrap break-words">{message.content}</div>
         )}
       </div>
     </motion.div>
