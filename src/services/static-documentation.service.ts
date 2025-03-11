@@ -1,4 +1,3 @@
-
 import { DocCategory, DocArticle, DocSection, DocQuestion } from '@/types/documentation';
 import { Book, Globe, UserCircle, Settings, MessageSquare, ShieldAlert, BadgeHelp } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
@@ -45,7 +44,7 @@ export const documentationData: DocCategory[] = [
                 id: 'who-for',
                 slug: 'who-for',
                 question: 'Who is this platform designed for?',
-                answer: 'Our platform is designed for developers, entrepreneurs, product managers, and businesses of all sizes. Whether you're a solo developer wanting to build faster, a startup with limited resources, or an enterprise looking to innovate quickly, our tools scale to your needs.'
+                answer: 'Our platform is designed for developers, entrepreneurs, product managers, and businesses of all sizes. Whether you\'re a solo developer wanting to build faster, a startup with limited resources, or an enterprise looking to innovate quickly, our tools scale to your needs.'
               }
             ]
           },
