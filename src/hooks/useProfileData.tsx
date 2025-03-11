@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useProfileImage } from './useProfileImage';
+import { safeJsonArray } from '@/utils/json-helpers';
+import { Json } from '@/integrations/supabase/types';
 
 // [Analysis] Separated profile data concerns from auth logic
 export interface ProfileFormData {
@@ -107,7 +109,17 @@ export const useProfileData = () => {
 
           if (profileData && isSubscribed) {
             console.log('[Profile] Profile data found:', profileData);
-            setProfile(profileData as ProfileData);
+            
+            // Convert JSON achievements to proper Achievement[] type
+            const achievements = safeJsonArray<Achievement>(profileData.achievements);
+            
+            // Create a properly typed ProfileData with achievements array
+            const typedProfileData: ProfileData = {
+              ...profileData,
+              achievements
+            };
+            
+            setProfile(typedProfileData);
             setFormData({
               fullName: profileData.full_name || '',
               businessName: profileData.business_name || '',
@@ -150,7 +162,16 @@ export const useProfileData = () => {
         filter: user?.id ? `id=eq.${user.id}` : undefined,
       }, (payload) => {
         if (isSubscribed && payload.new) {
-          setProfile(payload.new as ProfileData);
+          // Convert JSON achievements to proper Achievement[] type
+          const achievements = safeJsonArray<Achievement>(payload.new.achievements);
+          
+          // Create a properly typed ProfileData with achievements array
+          const typedProfileData: ProfileData = {
+            ...payload.new,
+            achievements
+          };
+          
+          setProfile(typedProfileData);
           setFormData({
             fullName: payload.new.full_name || '',
             businessName: payload.new.business_name || '',

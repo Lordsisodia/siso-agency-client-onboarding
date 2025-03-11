@@ -2,6 +2,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { safeJsonProperty } from '@/utils/json-helpers';
 
 export type OnboardingStep = 'welcome' | 'profile' | 'goals' | 'complete';
 
@@ -91,11 +92,12 @@ export function useOnboardingChat() {
           .single();
           
         if (threadData?.metadata) {
+          // Safely access JSON properties with fallbacks
           setProgress({
-            currentStep: threadData.metadata.currentStep || 'welcome',
-            completedSteps: threadData.metadata.completedSteps || [],
-            profileData: threadData.metadata.profileData,
-            goalsData: threadData.metadata.goalsData
+            currentStep: safeJsonProperty(threadData.metadata, 'currentStep', 'welcome') as OnboardingStep,
+            completedSteps: safeJsonProperty(threadData.metadata, 'completedSteps', []) as OnboardingStep[],
+            profileData: safeJsonProperty(threadData.metadata, 'profileData', undefined),
+            goalsData: safeJsonProperty(threadData.metadata, 'goalsData', undefined)
           });
         }
       }
