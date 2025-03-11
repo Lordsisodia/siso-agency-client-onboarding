@@ -7,14 +7,17 @@ export interface ChatMessageProps {
   message: ChatMessageType;
   assistantType?: string;
   isLoading?: boolean;
+  role?: 'user' | 'assistant'; // Add role property to support direct passing
 }
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ 
   message, 
   assistantType,
-  isLoading 
+  isLoading,
+  role: explicitRole // Accept explicit role if provided
 }) => {
-  const isUser = message.role === 'user';
+  // Use explicit role if provided, otherwise use message.role
+  const isUser = explicitRole ? explicitRole === 'user' : message.role === 'user';
   
   return (
     <motion.div

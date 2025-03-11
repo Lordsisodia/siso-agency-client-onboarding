@@ -1,8 +1,10 @@
 
+import { ReactNode } from 'react';
+
 export interface FeatureItem {
   title: string;
   description: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   url?: string;
 }
 
@@ -16,6 +18,6 @@ export interface HomeMessage {
 export interface Feature {
   title: string;
   description: string;
-  icon?: React.ReactNode;
+  icon: React.ElementType; // Changed from ReactNode to ElementType for proper component rendering
   link?: string;
 }
