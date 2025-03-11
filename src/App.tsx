@@ -48,6 +48,9 @@ function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/thank-you" element={<ThankYou />} />
         
+        {/* Home route - redirect to plan-builder */}
+        <Route path="/home" element={<Navigate to="/plan-builder" replace />} />
+        
         {/* Core routes */}
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/projects" element={<Projects />} />
