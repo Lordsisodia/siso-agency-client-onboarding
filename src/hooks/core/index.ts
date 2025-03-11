@@ -5,6 +5,7 @@ export * from "../use-click-outside";
 export * from "../use-mobile";
 export * from "../use-pagination";
 export * from "../use-toast";
+export * from "../use-plan-chat-assistant";
 
 // Export chat assistant hooks
 export * from "../use-chat-assistant";

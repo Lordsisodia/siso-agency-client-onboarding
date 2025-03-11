@@ -1,7 +1,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { useChatAssistant } from '@/hooks/core';
+import { useChatAssistant, usePlanChatAssistant } from '@/hooks/core';
 import { useChatInterfaceState } from './useChatInterfaceState';
 import { ChatHeader } from './ChatHeader';
 import { ChatMessageList } from './ChatMessageList';
@@ -15,6 +15,7 @@ interface ChatInterfaceProps {
   inputPlaceholder?: string;
   className?: string;
   projectId?: string;
+  usePlanAssistant?: boolean;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -23,8 +24,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   welcomeMessage = 'Hello! How can I help you today?',
   inputPlaceholder = 'Type your message...',
   className,
-  projectId
+  projectId,
+  usePlanAssistant = false
 }) => {
+  // Use either the plan chat assistant hook or the regular chat assistant hook
+  const useChatHook = usePlanAssistant ? usePlanChatAssistant : useChatAssistant;
+  
   // Use the chat assistant hook
   const { 
     messages: rawMessages, 
@@ -32,7 +37,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     error, 
     sendMessage: hookSendMessage, 
     clearMessages 
-  } = useChatAssistant();
+  } = usePlanAssistant ? usePlanChatAssistant(projectId) : useChatAssistant();
   
   // Map messages to ensure they match our ChatMessage type
   const messages = (rawMessages || []).map(msg => ({
