@@ -26,6 +26,7 @@ import Portfolio from '@/pages/Portfolio';
 import DocumentationCategoryPage from '@/pages/support/DocumentationCategoryPage';
 import DocumentationArticlePage from '@/pages/support/DocumentationArticlePage';
 import DocumentationQuestionPage from '@/pages/support/DocumentationQuestionPage';
+import ImportDocumentationPage from '@/pages/support/ImportDocumentationPage';
 
 import { Toaster } from '@/components/ui/toaster';
 import { useAuthSession } from '@/hooks/core';
@@ -68,6 +69,7 @@ function App() {
           <Route path="/support/:categoryId" element={<DocumentationCategoryPage />} />
           <Route path="/support/:categoryId/:articleId" element={<DocumentationArticlePage />} />
           <Route path="/support/:categoryId/:articleId/:questionId" element={<DocumentationQuestionPage />} />
+          <Route path="/import-documentation" element={<ImportDocumentationPage />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/tasks" element={<Tasks />} />

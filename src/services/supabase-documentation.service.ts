@@ -397,3 +397,25 @@ export const saveQuestionFeedback = async (
     return false;
   }
 };
+
+// Import test documentation data
+export const importTestDocumentation = async (): Promise<boolean> => {
+  try {
+    const response = await fetch('/api/import-documentation', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to import documentation: ${response.statusText}`);
+    }
+    
+    const result = await response.json();
+    return result.success;
+  } catch (error) {
+    console.error('Error importing documentation:', error);
+    return false;
+  }
+};
