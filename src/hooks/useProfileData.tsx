@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -167,7 +166,7 @@ export const useProfileData = () => {
           
           // Create a properly typed ProfileData with achievements array
           const typedProfileData: ProfileData = {
-            ...payload.new,
+            ...(payload.new as any),
             achievements
           };
           
