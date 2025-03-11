@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useLocation } from 'react-router-dom';
@@ -24,6 +25,7 @@ import Portfolio from '@/pages/Portfolio';
 
 import { Toaster } from '@/components/ui/toaster';
 import { useAuthSession } from '@/hooks/core';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 function App() {
   const location = useLocation();
@@ -35,49 +37,51 @@ function App() {
   }, [location]);
 
   return (
-    <>
+    <SidebarProvider className="flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar">
       <Helmet>
         <title>SISO - Your business planning platform</title>
         <meta name="description" content="SISO is the premier platform for business planning and resource management." />
       </Helmet>
 
-      <Routes>
-        {/* Public routes */}
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/thank-you" element={<ThankYou />} />
-        
-        {/* Default route - show dashboard for both logged in and not logged in users */}
-        <Route path="/" element={<Dashboard />} />
-        
-        {/* Core routes */}
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/projects" element={<Projects />} />
-        <Route path="/plan-builder" element={<PlanBuilder />} />
-        <Route path="/plan-builder/:projectId" element={<PlanBuilder />} />
-        <Route path="/new-project" element={<NewProject />} />
-        <Route path="/support" element={<Support />} />
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/portfolio" element={<Portfolio />} />
-        <Route path="/tasks" element={<Tasks />} />
-        <Route path="/organization" element={<Organization />} />
-        
-        {/* Redirects for renamed/moved pages */}
-        <Route path="/pending-tasks" element={<Navigate to="/tasks" replace />} />
-        <Route path="/profile" element={<Navigate to="/organization" replace />} />
-        <Route path="/company-profile" element={<Navigate to="/organization" replace />} />
-        
-        {/* Onboarding routes */}
-        <Route path="/onboarding/social" element={<SocialOnboarding />} />
-        <Route path="/onboarding/congratulations" element={<OnboardingCongratulations />} />
+      <div className="flex min-h-screen w-full bg-gradient-to-b from-gray-900 to-black">
+        <Routes>
+          {/* Public routes */}
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/thank-you" element={<ThankYou />} />
+          
+          {/* Default route - show dashboard for both logged in and not logged in users */}
+          <Route path="/" element={<Dashboard />} />
+          
+          {/* Core routes */}
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/plan-builder" element={<PlanBuilder />} />
+          <Route path="/plan-builder/:projectId" element={<PlanBuilder />} />
+          <Route path="/new-project" element={<NewProject />} />
+          <Route path="/support" element={<Support />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/portfolio" element={<Portfolio />} />
+          <Route path="/tasks" element={<Tasks />} />
+          <Route path="/organization" element={<Organization />} />
+          
+          {/* Redirects for renamed/moved pages */}
+          <Route path="/pending-tasks" element={<Navigate to="/tasks" replace />} />
+          <Route path="/profile" element={<Navigate to="/organization" replace />} />
+          <Route path="/company-profile" element={<Navigate to="/organization" replace />} />
+          
+          {/* Onboarding routes */}
+          <Route path="/onboarding/social" element={<SocialOnboarding />} />
+          <Route path="/onboarding/congratulations" element={<OnboardingCongratulations />} />
 
-        {/* Fallback route */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
+          {/* Fallback route */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </div>
 
       <Toaster />
-    </>
+    </SidebarProvider>
   );
 }
 

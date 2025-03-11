@@ -148,42 +148,33 @@
   }
 }
 
-@keyframes pulseBorder {
-  0%, 100% {
-    border-color: rgba(255, 87, 34, 0.3);
-  }
-  50% {
-    border-color: rgba(255, 87, 34, 0.8);
-  }
+/* Global reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-@keyframes vibrate {
-  0%, 100% {
-    transform: translate(0);
-  }
-  20% {
-    transform: translate(-2px, 2px);
-  }
-  40% {
-    transform: translate(-2px, -2px);
-  }
-  60% {
-    transform: translate(2px, 2px);
-  }
-  80% {
-    transform: translate(2px, -2px);
-  }
+body {
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  background-color: #121212;
+  color: #E0E0E0;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.5;
 }
 
-@keyframes cardHoverGlow {
-  0%, 100% {
-    box-shadow: 0 0 5px rgba(255, 87, 34, 0.1);
-  }
-  50% {
-    box-shadow: 0 0 15px rgba(255, 87, 34, 0.3);
-  }
+/* Ensure all elements within #root fill the viewport */
+#root {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #121212;
 }
 
+/* Animation utility classes */
 .fade-in {
   animation: fadeIn 0.3s ease-out forwards;
 }
@@ -217,30 +208,6 @@
   animation: cardFadeIn 0.5s ease-out forwards;
 }
 
-.progress-bar-fill {
-  animation: progressBarFill 1s ease-out forwards;
-}
-
-.stat-count-up {
-  animation: statCountUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-}
-
-.notification-bell {
-  animation: notificationBell 2s ease-in-out infinite;
-}
-
-.pulse-border {
-  animation: pulseBorder 2s ease-in-out infinite;
-}
-
-.vibrate {
-  animation: vibrate 0.3s linear infinite;
-}
-
-.card-hover-glow {
-  animation: cardHoverGlow 2s ease-in-out infinite;
-}
-
 /* Card transitions */
 .dashboard-card {
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -257,102 +224,4 @@
 
 .dashboard-card:hover .dashboard-icon {
   transform: scale(1.1);
-}
-
-.grid-fix {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  align-items: stretch;
-}
-
-.card-equal-height {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.card-equal-height > div {
-  flex-grow: 1;
-}
-
-/* Dashboard specific layout fixes */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 1rem;
-}
-
-.dashboard-main {
-  grid-column: span 12;
-}
-
-.dashboard-sidebar {
-  grid-column: span 12;
-}
-
-@media (min-width: 1024px) {
-  .dashboard-main {
-    grid-column: span 9;
-  }
-  
-  .dashboard-sidebar {
-    grid-column: span 3;
-  }
-}
-
-.card-equal-height {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.card-equal-height > * {
-  flex-grow: 1;
-}
-
-.card-header-compact {
-  padding: 0.75rem 1rem;
-}
-
-.card-content-compact {
-  padding: 0.5rem;
-}
-
-/* Hero section specific styles */
-.hero-title-animation {
-  animation: heroTitleSlide 0.8s ease-out forwards;
-}
-
-.hero-content-animation {
-  animation: heroContentFade 1s ease-out forwards;
-}
-
-/* Ensure consistent heights for dashboard cards */
-.dashboard-card {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.dashboard-card-header {
-  flex: 0 0 auto;
-}
-
-.dashboard-card-content {
-  flex: 1 1 auto;
-  overflow: auto;
-}
-
-/* Fix responsive grid issues */
-@media (max-width: 640px) {
-  .grid-fix-sm {
-    grid-template-columns: repeat(1, 1fr) !important;
-  }
-}
-
-@media (min-width: 641px) and (max-width: 1023px) {
-  .grid-fix-md {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
 }

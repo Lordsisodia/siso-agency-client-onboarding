@@ -3,8 +3,6 @@ import { useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { DashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useEvents } from '@/hooks/useEvents';
 import { awardNavigationPoints } from '@/utils/navigationPoints';
@@ -12,6 +10,7 @@ import { useLocation } from 'react-router-dom';
 import { useBasicUserData } from '@/hooks/useBasicUserData';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import { DashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuthSession();
@@ -86,26 +85,24 @@ export default function Dashboard() {
   }
 
   return (
-    <SidebarProvider>
-      <motion.div 
-        className="flex min-h-screen bg-gradient-to-b from-[#0A0A0A] to-[#121212]"
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-      >
-        <Sidebar />
-        <DashboardLayout 
-          userName={getDisplayName()} 
-          greeting={getGreeting()}
-          stats={stats}
-          statsLoading={statsLoading}
-          notifications={notifications}
-          events={events}
-          onNotificationRead={handleMarkAsRead}
-          onViewAllNotifications={handleViewAll}
-          onViewCalendar={handleViewCalendar}
-        />
-      </motion.div>
-    </SidebarProvider>
+    <motion.div 
+      className="flex min-h-screen w-full bg-gradient-to-b from-[#0A0A0A] to-[#121212]"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <Sidebar />
+      <DashboardLayout 
+        userName={getDisplayName()} 
+        greeting={getGreeting()}
+        stats={stats}
+        statsLoading={statsLoading}
+        notifications={notifications}
+        events={events}
+        onNotificationRead={handleMarkAsRead}
+        onViewAllNotifications={handleViewAll}
+        onViewCalendar={handleViewCalendar}
+      />
+    </motion.div>
   );
 }
