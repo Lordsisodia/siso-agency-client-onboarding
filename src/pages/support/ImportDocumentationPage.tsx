@@ -2,29 +2,34 @@
 import React, { useState } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { ArrowRight, CheckCircle, AlertCircle, LoaderCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { importTestDocumentation } from '@/services/supabase-documentation.service';
-import { Loader2 } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
-const ImportDocumentationPage = () => {
+const ImportDocumentationPage: React.FC = () => {
   const [isImporting, setIsImporting] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
+  const [importSuccess, setImportSuccess] = useState<boolean | null>(null);
+  const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleImport = async () => {
+  const handleImportData = async () => {
     setIsImporting(true);
+    setImportSuccess(null);
     
     try {
       const success = await importTestDocumentation();
       
+      setImportSuccess(success);
+      
       if (success) {
         toast({
-          title: "Documentation imported successfully",
-          description: "The test documentation data has been imported into the database.",
+          title: "Import successful",
+          description: "Documentation data has been imported successfully.",
           variant: "default",
         });
-        setIsComplete(true);
       } else {
         toast({
           title: "Import failed",
@@ -33,10 +38,12 @@ const ImportDocumentationPage = () => {
         });
       }
     } catch (error) {
-      console.error('Error during import:', error);
+      console.error('Error importing documentation:', error);
+      setImportSuccess(false);
+      
       toast({
-        title: "Import failed",
-        description: "There was an error importing the documentation data.",
+        title: "Import error",
+        description: "An unexpected error occurred during import.",
         variant: "destructive",
       });
     } finally {
@@ -46,45 +53,74 @@ const ImportDocumentationPage = () => {
 
   return (
     <MainLayout>
-      <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">Import Documentation Data</h1>
-          
-          <Card className="p-6">
-            <div className="space-y-4">
-              <p className="text-lg">
-                This page allows you to import test documentation data into the database. 
-                This will create categories, articles, sections, and questions for testing purposes.
-              </p>
-              
-              <div className="bg-amber-50 border-l-4 border-amber-400 p-4 text-amber-700">
-                <p className="font-medium">Warning</p>
-                <p>This action will trigger the Edge Function to import documentation data. Only use this for testing purposes.</p>
+      <div className="container mx-auto py-12 px-4 sm:px-6">
+        <div className="max-w-2xl mx-auto">
+          <Card className="border border-siso-border">
+            <CardHeader>
+              <CardTitle className="text-2xl">Import Documentation Data</CardTitle>
+              <CardDescription>
+                Use this tool to import sample documentation content for development and testing purposes.
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent className="space-y-6">
+              <div className="bg-siso-bg-alt/20 rounded-lg p-4 border border-siso-border/40">
+                <h3 className="font-medium mb-2">What this will do:</h3>
+                <ul className="list-disc list-inside space-y-1 text-sm text-siso-text/70">
+                  <li>Import predefined documentation categories</li>
+                  <li>Create sample articles with sections and questions</li>
+                  <li>Populate the help center with test content</li>
+                  <li>Skip any existing categories to prevent duplicates</li>
+                </ul>
               </div>
               
-              {isComplete ? (
-                <div className="bg-green-50 border-l-4 border-green-400 p-4 text-green-700">
-                  <p className="font-medium">Success!</p>
-                  <p>Documentation data has been successfully imported.</p>
-                </div>
-              ) : (
-                <Button 
-                  onClick={handleImport} 
+              {importSuccess === true && (
+                <Alert className="bg-green-500/10 border-green-500/20">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <AlertTitle className="text-green-500">Import Successful</AlertTitle>
+                  <AlertDescription className="text-siso-text/80">
+                    Documentation data has been imported successfully. You can now view the content in the help center.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {importSuccess === false && (
+                <Alert className="bg-red-500/10 border-red-500/20">
+                  <AlertCircle className="h-4 w-4 text-red-500" />
+                  <AlertTitle className="text-red-500">Import Failed</AlertTitle>
+                  <AlertDescription className="text-siso-text/80">
+                    There was an error importing the documentation data. Please check the console for error details.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              <div className="flex justify-between">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/support')}
+                >
+                  Back to Help Center
+                </Button>
+                
+                <Button
+                  onClick={handleImportData}
                   disabled={isImporting}
-                  size="lg"
-                  className="w-full sm:w-auto"
+                  className="bg-siso-blue hover:bg-siso-blue/90"
                 >
                   {isImporting ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
                       Importing...
                     </>
                   ) : (
-                    'Import Documentation Data'
+                    <>
+                      Import Documentation
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
                   )}
                 </Button>
-              )}
-            </div>
+              </div>
+            </CardContent>
           </Card>
         </div>
       </div>

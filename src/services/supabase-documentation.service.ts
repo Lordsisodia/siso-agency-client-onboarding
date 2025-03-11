@@ -146,11 +146,55 @@ export const fetchCategory = async (categorySlug: string): Promise<DocCategory |
     }
     
     // We need to include empty sections array for each article to satisfy the type
-    const articlesWithSections: DocArticle[] = (articlesData || []).map(article => ({
-      ...article,
-      difficulty: article.difficulty as 'beginner' | 'intermediate' | 'advanced' | undefined,
-      sections: [] // Initialize with empty sections, will be populated in fetchArticle
-    }));
+    const articlesWithSections: DocArticle[] = await Promise.all(
+      (articlesData || []).map(async (article) => {
+        // Fetch sections for this article
+        const { data: sectionsData, error: sectionsError } = await supabase
+          .from('documentation_sections')
+          .select('*')
+          .eq('article_id', article.id)
+          .order('display_order', { ascending: true });
+          
+        if (sectionsError) {
+          console.error(`Error fetching sections for article ${article.id}:`, sectionsError);
+          return {
+            ...article,
+            difficulty: article.difficulty as 'beginner' | 'intermediate' | 'advanced' | undefined,
+            sections: []
+          };
+        }
+        
+        // Fetch questions for each section
+        const sectionsWithQuestions = await Promise.all(
+          (sectionsData || []).map(async (section) => {
+            const { data: questionsData, error: questionsError } = await supabase
+              .from('documentation_questions')
+              .select('*')
+              .eq('section_id', section.id)
+              .order('display_order', { ascending: true });
+              
+            if (questionsError) {
+              console.error(`Error fetching questions for section ${section.id}:`, questionsError);
+              return {
+                ...section,
+                questions: []
+              };
+            }
+            
+            return {
+              ...section,
+              questions: questionsData || []
+            } as DocSection;
+          })
+        );
+        
+        return {
+          ...article,
+          difficulty: article.difficulty as 'beginner' | 'intermediate' | 'advanced' | undefined,
+          sections: sectionsWithQuestions
+        };
+      })
+    );
     
     const category: DocCategory = {
       ...categoryData,

@@ -3,14 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { AiChatSection } from '@/components/support/AiChatSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MessagesSquare, Book, Search } from 'lucide-react';
+import { MessagesSquare, Book, Search, Clock, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { fetchCategories, searchDocumentation } from '@/services/supabase-documentation.service';
 import { DocCategory } from '@/services/supabase-documentation.service';
 import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 const Support = () => {
   const [activeTab, setActiveTab] = useState('documentation');
@@ -18,6 +19,8 @@ const Support = () => {
   const [categories, setCategories] = useState<DocCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { toast } = useToast();
   
   useEffect(() => {
     const loadCategories = async () => {

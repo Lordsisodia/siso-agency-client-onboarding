@@ -1,180 +1,145 @@
 
-import { 
-  Book, UserCircle, FileText, FolderKanban, 
-  Sparkles, Code2, HelpCircle,
-  LucideIcon
-} from 'https://esm.sh/lucide@0.265.0';
+// This file contains static documentation data for testing/development
 
-interface DocQuestion {
-  id: string;
+// Define the structure of our documentation content
+interface StaticDocQuestion {
   question: string;
   answer: string;
 }
 
-interface DocSection {
-  id: string;
+interface StaticDocSection {
   title: string;
-  questions: DocQuestion[];
+  questions: StaticDocQuestion[];
 }
 
-interface DocArticle {
-  id: string;
+interface StaticDocArticle {
   title: string;
+  slug: string;
   excerpt: string;
   content: string;
-  sections: DocSection[];
-  lastUpdated?: string;
   difficulty?: 'beginner' | 'intermediate' | 'advanced';
+  lastUpdated?: string;
+  sections: StaticDocSection[];
 }
 
-interface DocCategory {
-  id: string;
+interface StaticDocCategory {
   title: string;
   description: string;
-  icon: any; // Lucide icon component
-  articleCount: number;
-  articles: DocArticle[];
+  icon: { name: string };
+  articles: StaticDocArticle[];
 }
 
-// This is a copy of the static documentation data
-export const documentationData: DocCategory[] = [
+// Export the static documentation data
+export const documentationData: StaticDocCategory[] = [
   {
-    id: 'getting-started',
-    title: 'Getting Started',
-    description: 'Learn the basics and get up to speed quickly',
-    icon: Book,
-    articleCount: 6,
+    title: "Getting Started",
+    description: "Learn the basics of our platform and how to set up your account",
+    icon: { name: "SparklesIcon" },
     articles: [
       {
-        id: 'welcome',
-        title: 'Welcome to the Platform',
-        excerpt: 'Get an overview of what our platform offers',
-        content: 'Welcome to the platform! This guide will help you get started with creating your first project.',
-        lastUpdated: '2024-03-28',
-        difficulty: 'beginner',
+        title: "Platform Overview",
+        slug: "platform-overview",
+        excerpt: "Learn about our platform capabilities and how it can help you build applications faster",
+        content: "This article provides a comprehensive overview of our platform features and capabilities.",
+        difficulty: "beginner",
         sections: [
           {
-            id: 'overview',
-            title: 'Platform Overview',
+            title: "General Platform Overview",
             questions: [
               {
-                id: 'what-is-platform',
-                question: 'What is our platform?',
-                answer: 'Our platform is a comprehensive project planning and management tool designed to help businesses streamline their workflows, collaborate effectively, and achieve their goals faster.'
+                question: "What is this platform and what can it do for me?",
+                answer: "Our platform is an AI-powered app development environment that helps you build web and mobile applications faster than traditional methods. It provides tools for planning, designing, and implementing your apps with intelligent assistance at every step."
               },
               {
-                id: 'key-features',
-                question: 'What are the key features?',
-                answer: 'Our platform offers intuitive project planning, task management, AI-powered assistance, collaboration tools, and detailed analytics and reporting capabilities.'
+                question: "How does this platform help me build apps quickly and efficiently?",
+                answer: "The platform accelerates development through AI-assisted planning, pre-built components, automated code generation, and intelligent suggestions. Instead of starting from scratch, you can describe what you want to build and our AI will help create a structured plan and implementation path."
+              },
+              {
+                question: "Who is this platform designed for?",
+                answer: "Our platform is designed for developers, entrepreneurs, product managers, and businesses of all sizes. Whether you're a solo developer wanting to build faster, a startup with limited resources, or an enterprise looking to innovate quickly, our tools scale to your needs."
+              },
+              {
+                question: "Can I build both web and mobile apps using this platform?",
+                answer: "Yes, you can build responsive web applications that work on all devices, as well as native mobile apps for iOS and Android. Our platform supports multiple deployment targets from a single project."
+              },
+              {
+                question: "What makes this platform different from traditional app development tools?",
+                answer: "Unlike traditional development environments, our platform combines AI planning, component-based development, and intelligent assistance. This means you spend less time writing boilerplate code and more time creating unique features for your app. The AI learns from your preferences and improves over time."
               }
             ]
           },
           {
-            id: 'benefits',
-            title: 'Benefits',
+            title: "Account Creation & Onboarding",
             questions: [
               {
-                id: 'why-use',
-                question: 'Why should I use this platform?',
-                answer: 'Our platform saves you time and effort by automating routine tasks, providing intelligent recommendations, and offering a centralized workspace for all your project needs.'
+                question: "How do I sign up for an account?",
+                answer: "To sign up, click the 'Get Started' button on our homepage. You can create an account using your email address or by signing in with Google, GitHub, or other supported authentication providers."
               },
               {
-                id: 'who-for',
-                question: 'Who is this platform for?',
-                answer: 'This platform is designed for business owners, project managers, team leaders, and anyone involved in planning and executing projects, regardless of industry or company size.'
-              }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'quick-start',
-        title: 'Quick Start Guide',
-        excerpt: 'Get up and running in minutes',
-        content: 'Welcome to the platform! This guide will help you get started with creating your first project.',
-        lastUpdated: '2024-03-27',
-        difficulty: 'beginner',
-        sections: [
-          {
-            id: 'first-steps',
-            title: 'First Steps',
-            questions: [
-              {
-                id: 'create-account',
-                question: 'How do I create an account?',
-                answer: 'Navigate to the sign-up page, enter your email address, create a password, and complete the verification process. You can also sign up using Google or other social accounts for faster access.'
+                question: "Is there a free trial available, and if so, what does it include?",
+                answer: "Yes, we offer a 14-day free trial that includes access to all core features. During the trial, you can create up to 3 projects, use all AI planning tools, and export your work. Usage limits apply to certain advanced features."
               },
               {
-                id: 'create-project',
-                question: 'How do I create my first project?',
-                answer: 'After logging in, click on the "New Project" button on your dashboard. Give your project a name and description, then choose whether to start from scratch or use a template.'
+                question: "What information do I need to provide during sign-up?",
+                answer: "Basic sign-up requires only your name, email address, and a password. For a business account, you'll also need to provide company information. We recommend completing your profile with additional details to enhance the AI's personalization."
+              },
+              {
+                question: "How long does the onboarding process take?",
+                answer: "The initial onboarding takes about 5-10 minutes, where you'll answer questions about your experience level and project needs. This helps customize the platform experience for you. You can skip detailed onboarding and complete it later if you prefer."
+              },
+              {
+                question: "Are there any prerequisites before creating an account?",
+                answer: "There are no technical prerequisites to create an account. Basic familiarity with application concepts is helpful but not required. Our platform is designed to be accessible to users with varying levels of technical expertise."
               }
             ]
           },
           {
-            id: 'navigation',
-            title: 'Navigating the Platform',
+            title: "Quick Start Guide",
             questions: [
               {
-                id: 'dashboard',
-                question: 'What does the dashboard show?',
-                answer: 'Your dashboard displays an overview of all your projects, recent activities, upcoming deadlines, and quick access to frequently used features.'
+                question: "What are the first steps I should take after logging in?",
+                answer: "After logging in for the first time, we recommend: 1) Take the guided tour to understand the interface, 2) Create your first project using the 'New Project' button, 3) Explore the AI Plan Builder to define your app's structure, and 4) Check out sample projects for inspiration."
               },
               {
-                id: 'find-resources',
-                question: 'Where can I find learning resources?',
-                answer: 'Visit the Help Center (where you are now) for comprehensive guides, tutorials, and answers to frequently asked questions. You can also use the AI Assistant for personalized help.'
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'account-profile',
-    title: 'Account & Profile',
-    description: 'Manage your account settings and profile',
-    icon: UserCircle,
-    articleCount: 10,
-    articles: [
-      {
-        id: 'account-setup',
-        title: 'Account Setup',
-        excerpt: 'Configure your account settings and preferences',
-        content: 'Setting up your account properly helps you get the most out of the platform.',
-        lastUpdated: '2024-03-25',
-        difficulty: 'beginner',
-        sections: [
-          {
-            id: 'profile-info',
-            title: 'Profile Information',
-            questions: [
-              {
-                id: 'edit-profile',
-                question: 'How do I edit my profile?',
-                answer: 'Navigate to the Profile page by clicking on your avatar in the top right corner and selecting "Profile". From there, you can edit your personal information, professional details, and preferences.'
+                question: "How do I set up my account quickly?",
+                answer: "For the fastest setup, click 'Complete Profile' after logging in, fill in the basic information about yourself and your goals, then select a template project that's closest to what you want to build. This will pre-populate many settings and give you a head start."
               },
               {
-                id: 'profile-picture',
-                question: 'How do I change my profile picture?',
-                answer: 'Go to your Profile page, hover over your current profile picture, and click on the "Edit" icon. You can upload a new image or select from preset avatars.'
+                question: "Where can I find a tutorial or walkthrough to get started?",
+                answer: "Tutorials are available under the 'Learn' section in the main navigation. We also provide interactive walkthroughs that appear when you use key features for the first time. For comprehensive learning, visit our Academy where step-by-step courses are available."
+              },
+              {
+                question: "What should I do if I get stuck during the initial setup?",
+                answer: "If you get stuck, click the help icon (question mark) in the top right corner for contextual help. You can also chat with our AI assistant by clicking 'Get Help' or visit the community forum through the Support menu. For urgent issues, use the live chat in the bottom right."
+              },
+              {
+                question: "Can I preview a demo of the platform before I dive in?",
+                answer: "Yes, we offer an interactive demo that doesn't require account creation. Visit the 'Try Demo' section on our homepage to explore a limited version of the platform with pre-loaded sample projects. This gives you a feel for the interface and key features."
               }
             ]
           },
           {
-            id: 'security',
-            title: 'Security Settings',
+            title: "Understanding the Dashboard",
             questions: [
               {
-                id: 'change-password',
-                question: 'How do I change my password?',
-                answer: 'Go to Profile > Security, click on "Change Password", enter your current password, then enter and confirm your new password.'
+                question: "What are the main sections of the dashboard?",
+                answer: "The dashboard consists of: 1) The Projects section showing your recent and pinned projects, 2) Quick Stats displaying your usage and activity metrics, 3) Resources section with learning materials and templates, 4) News & Updates about new features, and 5) The Activity Feed showing recent actions and collaborator activities."
               },
               {
-                id: 'enable-2fa',
-                question: 'How do I enable two-factor authentication?',
-                answer: 'Navigate to Profile > Security, find the "Two-Factor Authentication" section, and click "Enable". Follow the instructions to set up an authenticator app or receive codes via SMS.'
+                question: "How do I navigate between features on the dashboard?",
+                answer: "Use the main navigation menu on the left sidebar to switch between major sections like Projects, Plan Builder, Resources, and Settings. The top bar provides quick access to search, notifications, and your profile. Each section has its own sub-navigation that appears when you select it."
+              },
+              {
+                question: "Can I customize the dashboard layout?",
+                answer: "Yes, you can customize the dashboard by clicking the 'Customize' button in the top right corner. This allows you to rearrange widgets, hide sections you don't use frequently, and choose which metrics and projects to highlight. Your customizations are saved automatically."
+              },
+              {
+                question: "How do I access quick actions like starting a new project or checking tasks?",
+                answer: "Quick actions are available through the '+ New' button in the top navigation bar. This dropdown menu lets you create projects, add tasks, or access other creation tools. You can also use keyboard shortcuts (press '?' to see all shortcuts) for common actions."
+              },
+              {
+                question: "Where do I find my latest notifications and project updates?",
+                answer: "Notifications appear in the bell icon menu in the top navigation bar. This shows system notifications, project updates, and mentions. The Activity Feed on the dashboard also displays recent changes across all your projects, and each project has its own activity timeline."
               }
             ]
           }
@@ -183,253 +148,39 @@ export const documentationData: DocCategory[] = [
     ]
   },
   {
-    id: 'plan-builder',
-    title: 'Plan Builder',
-    description: 'Create and manage project plans effectively',
-    icon: FileText,
-    articleCount: 15,
+    title: "Account & Profile",
+    description: "Manage your account settings, profile, and security preferences",
+    icon: { name: "UserCircleIcon" },
     articles: [
       {
-        id: 'plan-builder-intro',
-        title: 'Introduction to Plan Builder',
-        excerpt: 'Learn the basics of the Plan Builder tool',
-        content: 'The Plan Builder is a powerful tool that helps you define your project\'s scope, features, and specifications.',
-        lastUpdated: '2024-03-20',
-        difficulty: 'intermediate',
+        title: "Managing Your Account",
+        slug: "managing-account",
+        excerpt: "Learn how to manage your account settings, profile information, and security options",
+        content: "This article explains how to effectively manage all aspects of your account.",
+        difficulty: "beginner",
         sections: [
           {
-            id: 'builder-basics',
-            title: 'Builder Basics',
+            title: "Setting Up Your Account",
             questions: [
               {
-                id: 'what-is-plan-builder',
-                question: 'What is the Plan Builder?',
-                answer: 'The Plan Builder is our core tool that guides you through creating comprehensive project plans. It helps you define project requirements, features, specifications, and timelines in a structured way.'
+                question: "How do I create my account and log in for the first time?",
+                answer: "To create an account, visit our homepage and click 'Sign Up'. You can register with your email address or use social login options like Google or GitHub. After submitting the registration form, you'll receive a verification email. Click the link in that email to verify your account, and then you can log in."
               },
               {
-                id: 'access-builder',
-                question: 'How do I access the Plan Builder?',
-                answer: 'You can access the Plan Builder from your dashboard by clicking on "Plan Builder" in the sidebar, or by clicking "New Project" and selecting "Start with Plan Builder".'
-              }
-            ]
-          },
-          {
-            id: 'using-builder',
-            title: 'Using the Builder',
-            questions: [
-              {
-                id: 'builder-steps',
-                question: 'What are the steps in the Plan Builder?',
-                answer: 'The Plan Builder typically guides you through 5 key steps: Project Type selection, Business Context definition, Feature Selection, Timeline & Budget planning, and Summary review.'
+                question: "What information do I need to provide during setup?",
+                answer: "During initial account setup, you'll need to provide your name, email address, and create a password. Optionally, you can add your job title, company name, and profile picture. The more information you provide, the more personalized your experience will be."
               },
               {
-                id: 'save-progress',
-                question: 'Can I save my progress and come back later?',
-                answer: 'Yes, your progress is automatically saved at each step. You can exit the Plan Builder and return later to continue from where you left off.'
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'projects-tasks',
-    title: 'Projects & Tasks',
-    description: 'Organize and track your work',
-    icon: FolderKanban,
-    articleCount: 20,
-    articles: [
-      {
-        id: 'creating-projects',
-        title: 'Creating New Projects',
-        excerpt: 'How to create and configure new projects',
-        content: 'Projects are the core of our platform. Here\'s how to create and configure them effectively.',
-        lastUpdated: '2024-03-18',
-        difficulty: 'beginner',
-        sections: [
-          {
-            id: 'project-creation',
-            title: 'Project Creation',
-            questions: [
-              {
-                id: 'create-project',
-                question: 'How do I create a new project?',
-                answer: 'From your dashboard, click the "New Project" button. Enter a name and description for your project, then choose whether to use the Plan Builder or start with a blank project.'
+                question: "Can I sign up using my social media accounts?",
+                answer: "Yes, we support social login with Google, GitHub, and Microsoft accounts. This allows for faster registration and login without needing to create and remember another password. Your account will be linked to the social provider you choose."
               },
               {
-                id: 'project-templates',
-                question: 'Can I use templates for my projects?',
-                answer: 'Yes, when creating a new project, you\'ll have the option to select from various templates tailored for different types of projects. Templates come with pre-configured settings and sections.'
-              }
-            ]
-          },
-          {
-            id: 'project-settings',
-            title: 'Project Settings',
-            questions: [
-              {
-                id: 'edit-project',
-                question: 'How do I edit project details?',
-                answer: 'Open your project, click on the "Settings" tab or gear icon, and you\'ll be able to modify the project name, description, visibility, and other core settings.'
+                question: "How do I verify my email address or phone number?",
+                answer: "After registration, we automatically send a verification email to your provided email address. Click the link in the email to verify your account. For phone verification (optional), go to Account Settings → Security, add your phone number, and we'll send a verification code via SMS."
               },
               {
-                id: 'archive-project',
-                question: 'How do I archive or delete a project?',
-                answer: 'In project settings, scroll to the bottom to find the Archive and Delete options. Archiving hides the project from view but preserves its data, while deletion permanently removes it.'
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'ai-features',
-    title: 'AI Features',
-    description: 'Leverage AI capabilities',
-    icon: Sparkles,
-    articleCount: 12,
-    articles: [
-      {
-        id: 'assistant-basics',
-        title: 'Assistant Basics',
-        excerpt: 'Getting started with the AI assistant',
-        content: 'Our AI assistant is designed to help you navigate the platform and answer questions about your projects.',
-        lastUpdated: '2024-03-15',
-        difficulty: 'beginner',
-        sections: [
-          {
-            id: 'ai-introduction',
-            title: 'Introduction to AI Features',
-            questions: [
-              {
-                id: 'what-ai-does',
-                question: 'What can the AI assistant help with?',
-                answer: 'Our AI assistant can answer questions about the platform, help you navigate features, provide suggestions for your projects, assist with problem-solving, and automate certain tasks to save you time.'
-              },
-              {
-                id: 'ai-access',
-                question: 'How do I access the AI assistant?',
-                answer: 'You can access the AI assistant from the Help Center by clicking on the "AI Assistant" tab, or via the assistant icon in the bottom right corner of any page throughout the platform.'
-              }
-            ]
-          },
-          {
-            id: 'using-ai',
-            title: 'Using the AI Assistant',
-            questions: [
-              {
-                id: 'ask-questions',
-                question: 'How do I ask the AI assistant questions?',
-                answer: 'Simply type your question in the chat input and press Enter. Try to be specific about what you need help with for the most accurate responses.'
-              },
-              {
-                id: 'ai-limitations',
-                question: 'What are the limitations of the AI assistant?',
-                answer: 'While the AI assistant is powerful, it may not have answers to highly specialized questions outside the scope of our platform. It cannot access your private files or perform actions that require administrative privileges.'
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'api-integration',
-    title: 'API & Integration',
-    description: 'Connect and extend the platform',
-    icon: Code2,
-    articleCount: 8,
-    articles: [
-      {
-        id: 'api-overview',
-        title: 'API Overview',
-        excerpt: 'Introduction to our API capabilities',
-        content: 'Our platform provides a comprehensive API that allows you to integrate with other tools and extend functionality.',
-        lastUpdated: '2024-03-10',
-        difficulty: 'advanced',
-        sections: [
-          {
-            id: 'api-basics',
-            title: 'API Basics',
-            questions: [
-              {
-                id: 'what-api',
-                question: 'What is the API used for?',
-                answer: 'Our API allows you to programmatically interact with our platform, enabling custom integrations, automations, data extraction, and extending the platform\'s functionality to meet your specific needs.'
-              },
-              {
-                id: 'api-access',
-                question: 'How do I get API access?',
-                answer: 'API access is available on Business and Enterprise plans. Navigate to your Profile > Developer Settings to generate API keys and access documentation.'
-              }
-            ]
-          },
-          {
-            id: 'integrations',
-            title: 'Integrations',
-            questions: [
-              {
-                id: 'available-integrations',
-                question: 'What integrations are available?',
-                answer: 'We offer pre-built integrations with popular tools like Slack, Microsoft Teams, Google Workspace, GitHub, Jira, Trello, and many more. These can be set up without coding knowledge.'
-              },
-              {
-                id: 'custom-integration',
-                question: 'Can I build custom integrations?',
-                answer: 'Yes, using our API, you can build custom integrations with any system that has an API. We provide SDKs for JavaScript, Python, and Ruby to simplify development.'
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'troubleshooting',
-    title: 'Troubleshooting',
-    description: 'Solve common issues and get help',
-    icon: HelpCircle,
-    articleCount: 15,
-    articles: [
-      {
-        id: 'common-errors',
-        title: 'Common Errors',
-        excerpt: 'Solutions to frequently encountered problems',
-        content: 'Here are solutions to some of the most frequently encountered issues on our platform.',
-        lastUpdated: '2024-03-05',
-        difficulty: 'beginner',
-        sections: [
-          {
-            id: 'account-issues',
-            title: 'Account Issues',
-            questions: [
-              {
-                id: 'login-problems',
-                question: 'I can\'t log in to my account',
-                answer: 'Try resetting your password using the "Forgot Password" link. Make sure cookies are enabled in your browser and you\'re using the correct email address. If problems persist, check if your account has been deactivated or contact support.'
-              },
-              {
-                id: 'verification-email',
-                question: 'I didn\'t receive my verification email',
-                answer: 'Check your spam or junk folder first. If you still don\'t see it, try requesting another verification email. Make sure to add our domain to your safe senders list to ensure future emails reach your inbox.'
-              }
-            ]
-          },
-          {
-            id: 'performance-issues',
-            title: 'Performance Issues',
-            questions: [
-              {
-                id: 'slow-platform',
-                question: 'The platform is running slowly',
-                answer: 'Try clearing your browser cache and cookies. Using the latest version of Chrome, Firefox, or Edge can also help improve performance. If you\'re working with large projects, consider breaking them down into smaller sub-projects.'
-              },
-              {
-                id: 'browser-compatibility',
-                question: 'Which browsers are supported?',
-                answer: 'We officially support the latest versions of Chrome, Firefox, Safari, and Edge. Internet Explorer is not supported. For the best experience, we recommend using Chrome or Firefox with automatic updates enabled.'
+                question: "What should I do if I encounter issues during sign-up?",
+                answer: "If you encounter any issues during sign-up, first check that you're using a supported browser (Chrome, Firefox, Safari, or Edge). Clear your browser cache and try again. If problems persist, check our status page for any system issues, or contact support with details about the problem you're experiencing."
               }
             ]
           }

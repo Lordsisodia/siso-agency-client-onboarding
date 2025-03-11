@@ -4,32 +4,30 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, ChevronLeft, Search, ExternalLink } from 'lucide-react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { fetchCategory, DocCategory, DocArticle } from '@/services/supabase-documentation.service';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  fetchCategory, 
+  DocCategory, 
+  DocArticle
+} from '@/services/supabase-documentation.service';
 
 const DocumentationCategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
   const [category, setCategory] = useState<DocCategory | null>(null);
-  const [filteredArticles, setFilteredArticles] = useState<DocArticle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    const loadCategory = async () => {
+    const loadData = async () => {
       if (!categoryId) return;
       
       setIsLoading(true);
       try {
-        const data = await fetchCategory(categoryId);
-        setCategory(data);
-        
-        if (data) {
-          setFilteredArticles(data.articles);
-        }
+        const categoryData = await fetchCategory(categoryId);
+        setCategory(categoryData);
       } catch (error) {
         console.error('Error loading category:', error);
       } finally {
@@ -37,23 +35,9 @@ const DocumentationCategoryPage = () => {
       }
     };
     
-    loadCategory();
+    loadData();
   }, [categoryId]);
   
-  useEffect(() => {
-    if (!category) return;
-    
-    if (searchQuery) {
-      const filtered = category.articles.filter(article => 
-        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.excerpt?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredArticles(filtered);
-    } else {
-      setFilteredArticles(category.articles);
-    }
-  }, [searchQuery, category]);
-
   if (isLoading) {
     return (
       <MainLayout>
@@ -90,95 +74,90 @@ const DocumentationCategoryPage = () => {
           <div className="mb-6">
             <nav className="flex items-center text-sm">
               <Link to="/support" className="text-siso-text/70 hover:text-siso-text transition-colors">
-                All Collections
+                Help Center
               </Link>
               <ChevronRight className="h-4 w-4 mx-2 text-siso-text/50" />
-              <span className="font-medium text-siso-text-bold">{category.title}</span>
+              <span className="text-siso-text-bold">{category.title}</span>
             </nav>
           </div>
           
-          {/* Header */}
-          <div className="mb-10">
-            <div className="flex items-center mb-6">
-              <div className="bg-gradient-to-r from-siso-red/20 to-siso-orange/20 p-3 rounded-full mr-4">
+          {/* Category header */}
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-siso-orange/10 p-3 rounded-lg">
                 <category.icon className="h-6 w-6 text-siso-orange" />
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-siso-text-bold mb-1">{category.title}</h1>
-                <p className="text-siso-text/90">{category.description}</p>
-              </div>
+              <h1 className="text-3xl font-bold text-siso-text-bold">{category.title}</h1>
             </div>
             
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-siso-text/80 font-medium bg-siso-bg-alt/50 px-3 py-1 rounded-full">
-                {category.articleCount} articles
-              </div>
-            </div>
-            
-            {/* Search */}
-            <div className="relative mt-6">
-              <div className="relative flex items-center">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-siso-text/60">
-                  <Search className="h-4 w-4" />
-                </div>
-                <Input
-                  type="search"
-                  placeholder={`Search in ${category.title}...`}
-                  className="pl-10 py-6 bg-siso-bg-alt/30 border-siso-border rounded-xl w-full focus:border-siso-orange focus:ring focus:ring-siso-orange/20"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
+            <p className="text-lg text-siso-text/80 mb-6">{category.description}</p>
           </div>
           
-          {/* Article list with clickable questions */}
-          <div>
-            {filteredArticles.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-siso-text/80">No articles found for "{searchQuery}"</p>
-              </div>
-            ) : (
-              <div className="bg-siso-bg-alt/20 border border-siso-border rounded-xl overflow-hidden">
-                {filteredArticles.map((article) => (
-                  <div key={article.id} className="border-b border-siso-border/40 last:border-b-0">
-                    <div className="py-6 px-6">
-                      <h2 className="text-lg font-semibold text-siso-text-bold mb-4">{article.title}</h2>
-                      
-                      {article.sections.map((section) => (
-                        <div key={section.id} className="mb-5 last:mb-0">
-                          {section.title && (
-                            <h3 className="text-md font-medium text-siso-text-bold mb-3">{section.title}</h3>
-                          )}
-                          
-                          <div className="space-y-2">
-                            {section.questions.map((question) => (
-                              <Link
-                                key={question.id}
-                                to={`/support/${categoryId}/${article.slug}/${question.slug}`}
-                                className="flex items-center justify-between p-3 bg-siso-bg-alt/30 rounded-lg hover:bg-siso-bg-alt/50 transition-colors text-siso-text-bold"
-                              >
-                                <span>{question.question}</span>
-                                <ExternalLink className="h-4 w-4 text-siso-orange flex-shrink-0 ml-4" />
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+          {/* Articles list */}
+          <div className="space-y-6">
+            {category.articles.map((article) => (
+              <Card 
+                key={article.id} 
+                className="border border-siso-border overflow-hidden hover:border-siso-border-hover transition-all duration-300"
+              >
+                <div className="px-6 py-5 border-b border-siso-border/50 bg-siso-bg-alt/10">
+                  <div className="flex justify-between items-start mb-2">
+                    <h2 className="text-xl font-semibold text-siso-text-bold">{article.title}</h2>
+                    {article.difficulty && (
+                      <Badge variant="outline" className={cn(
+                        "text-xs",
+                        article.difficulty === 'beginner' && "bg-green-500/10 text-green-500 border-green-500/20",
+                        article.difficulty === 'intermediate' && "bg-blue-500/10 text-blue-500 border-blue-500/20", 
+                        article.difficulty === 'advanced' && "bg-purple-500/10 text-purple-500 border-purple-500/20"
+                      )}>
+                        {article.difficulty.charAt(0).toUpperCase() + article.difficulty.slice(1)}
+                      </Badge>
+                    )}
                   </div>
-                ))}
-              </div>
-            )}
+                  <p className="text-sm text-siso-text/70">{article.excerpt}</p>
+                </div>
+                
+                <CardContent className="p-0">
+                  <div className="divide-y divide-siso-border/30">
+                    {article.sections.map((section) => (
+                      <div key={section.id} className="px-6 py-4">
+                        <h3 className="font-medium text-siso-text mb-3">{section.title}</h3>
+                        <ul className="space-y-2 ml-1">
+                          {section.questions.map((question) => (
+                            <li key={question.id}>
+                              <Link 
+                                to={`/support/${categoryId}/${article.slug}/${question.slug}`}
+                                className="block py-1.5 text-sm text-siso-text/80 hover:text-siso-text-bold transition-colors"
+                              >
+                                {question.question}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+                
+                <div className="px-6 py-3 border-t border-siso-border/50 bg-siso-bg-alt/5 flex justify-between items-center">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate(`/support/${categoryId}/${article.slug}`)}
+                  >
+                    View full article
+                  </Button>
+                  <span className="text-xs text-siso-text/50">
+                    Updated: {new Date(article.last_updated).toLocaleDateString()}
+                  </span>
+                </div>
+              </Card>
+            ))}
           </div>
           
           {/* Back button */}
-          <div className="mt-10 flex justify-center">
-            <Button 
-              variant="outline" 
-              className="px-5 py-2 border-siso-border hover:border-siso-orange/50 hover:bg-siso-bg-alt/30 transition-colors"
-              onClick={() => navigate('/support')}
-            >
+          <div className="mt-8">
+            <Button variant="ghost" onClick={() => navigate('/support')}>
               <ChevronLeft className="h-4 w-4 mr-2" />
               Back to Help Center
             </Button>
