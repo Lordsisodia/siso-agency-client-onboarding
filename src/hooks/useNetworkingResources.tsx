@@ -1,77 +1,72 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-
-export interface NetworkingResource {
-  id: string;
-  name: string;
-  category: string;
-  community_count?: number;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface CategoryStat {
-  category: string;
-  count: number;
-}
+import { NetworkingResource, CategoryStats } from '@/types/dashboard';
 
 export interface UseNetworkingResourcesResult {
   resources: NetworkingResource[];
-  isLoading: boolean;
+  categories: CategoryStats[];
   error: Error | null;
-  categoryStats: CategoryStat[];
+  loading: boolean; // Added missing property
 }
 
 export const useNetworkingResources = (): UseNetworkingResourcesResult => {
   const [resources, setResources] = useState<NetworkingResource[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [categories, setCategories] = useState<CategoryStats[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
-  const [categoryStats, setCategoryStats] = useState<CategoryStat[]>([]);
 
   useEffect(() => {
-    const fetchResources = async () => {
+    const fetchNetworkingResources = async () => {
       try {
-        setIsLoading(true);
-        
-        const { data, error: fetchError } = await supabase
+        const { data, error } = await supabase
           .from('networking_resources')
-          .select('*')
-          .order('name');
-          
-        if (fetchError) {
-          throw new Error(fetchError.message);
+          .select('*');
+
+        if (error) {
+          throw error;
         }
-        
-        setResources(data || []);
-        
-        // Calculate category stats
-        const stats: Record<string, number> = {};
-        data?.forEach((resource: NetworkingResource) => {
-          stats[resource.category] = (stats[resource.category] || 0) + 1;
-        });
-        
-        const categoryStatsArray = Object.entries(stats).map(([category, count]) => ({
-          category,
-          count
+
+        // Transform data to match NetworkingResource interface
+        const transformedResources: NetworkingResource[] = data.map(item => ({
+          id: item.id,
+          name: item.name,
+          category: item.category,
+          description: item.description || undefined,
+          platform: item.platform || undefined,
+          profile_image_url: item.profile_image_url || undefined,
+          member_count: item.member_count || undefined,
+          join_url: item.join_url || undefined,
+          created_at: item.created_at,
+          updated_at: item.updated_at || item.created_at,
         }));
-        
-        setCategoryStats(categoryStatsArray);
+
+        setResources(transformedResources);
+
+        // Group by category and count
+        const categoryGroups: Record<string, number> = {};
+        transformedResources.forEach(resource => {
+          const category = resource.category;
+          categoryGroups[category] = (categoryGroups[category] || 0) + 1;
+        });
+
+        // Create CategoryStats array
+        const categoryStats: CategoryStats[] = Object.keys(categoryGroups).map(category => ({
+          category,
+          community_count: categoryGroups[category]
+        }));
+
+        setCategories(categoryStats);
       } catch (err) {
-        console.error('Error fetching networking resources:', err);
+        console.error("Error fetching networking resources:", err);
         setError(err instanceof Error ? err : new Error('Unknown error occurred'));
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
-    
-    fetchResources();
+
+    fetchNetworkingResources();
   }, []);
 
-  return {
-    resources,
-    isLoading,
-    error,
-    categoryStats
-  };
+  return { resources, categories, error, loading };
 };

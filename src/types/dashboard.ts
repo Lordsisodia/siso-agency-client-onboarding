@@ -1,4 +1,3 @@
-
 export type NotificationType = 'alert' | 'success' | 'warning' | 'info';
 export type EventType = 'deadline' | 'meeting' | 'reminder';
 
@@ -49,13 +48,13 @@ export interface NetworkingResource {
   profile_image_url?: string;
   member_count?: number;
   join_url?: string;
-  created_at: string;
-  updated_at: string;
+  created_at: string;  // Changed from optional to required
+  updated_at: string;  // Changed from optional to required
 }
 
 export interface CategoryStats {
   category: string;
-  community_count: number;
+  community_count: number;  // Added missing property
 }
 
 export interface Assistant {
