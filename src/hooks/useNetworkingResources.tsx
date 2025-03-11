@@ -1,81 +1,77 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
-// Define types
 export interface NetworkingResource {
   id: string;
   name: string;
   category: string;
-  community_count: number;
-  created_at: string;
-  updated_at: string;
+  community_count?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CategoryStat {
+  category: string;
+  count: number;
 }
 
 export interface UseNetworkingResourcesResult {
   resources: NetworkingResource[];
-  categories: string[];
   isLoading: boolean;
   error: Error | null;
-  refreshResources: () => Promise<void>;
+  categoryStats: CategoryStat[];
 }
 
 export const useNetworkingResources = (): UseNetworkingResourcesResult => {
   const [resources, setResources] = useState<NetworkingResource[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
-  const { toast } = useToast();
-
-  const fetchResources = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const { data, error } = await supabase
-        .from('networking_resources')
-        .select('*')
-        .order('name');
-      
-      if (error) throw error;
-      
-      setResources(data || []);
-      
-      // Extract unique categories
-      const uniqueCategories = Array.from(
-        new Set((data || []).map(resource => resource.category))
-      );
-      
-      setCategories(uniqueCategories);
-    } catch (err: any) {
-      console.error('Error fetching networking resources:', err);
-      setError(err);
-      toast({
-        title: "Error",
-        description: "Failed to load networking resources",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [categoryStats, setCategoryStats] = useState<CategoryStat[]>([]);
 
   useEffect(() => {
+    const fetchResources = async () => {
+      try {
+        setIsLoading(true);
+        
+        const { data, error: fetchError } = await supabase
+          .from('networking_resources')
+          .select('*')
+          .order('name');
+          
+        if (fetchError) {
+          throw new Error(fetchError.message);
+        }
+        
+        setResources(data || []);
+        
+        // Calculate category stats
+        const stats: Record<string, number> = {};
+        data?.forEach((resource: NetworkingResource) => {
+          stats[resource.category] = (stats[resource.category] || 0) + 1;
+        });
+        
+        const categoryStatsArray = Object.entries(stats).map(([category, count]) => ({
+          category,
+          count
+        }));
+        
+        setCategoryStats(categoryStatsArray);
+      } catch (err) {
+        console.error('Error fetching networking resources:', err);
+        setError(err instanceof Error ? err : new Error('Unknown error occurred'));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
     fetchResources();
   }, []);
 
-  const refreshResources = async () => {
-    await fetchResources();
-  };
-
   return {
     resources,
-    categories,
     isLoading,
     error,
-    refreshResources
+    categoryStats
   };
 };
-
-export default useNetworkingResources;

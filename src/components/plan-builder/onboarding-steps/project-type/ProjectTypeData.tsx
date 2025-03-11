@@ -1,135 +1,110 @@
 
-import { Building, ShoppingCart, Smartphone, Globe, Brush, Terminal, LayoutGrid } from 'lucide-react';
-import { ReactNode } from 'react';
-
 export interface ProjectTypeInfo {
-  name: string;
-  icon: ReactNode;
-  description: string;
-  timeEstimate: Record<string, string>;
-  costEstimate: Record<string, string>;
-  examples: string[];
-}
-
-export interface ScaleOptionType {
-  value: string;
+  id: string;
   name: string;
   description: string;
+  icon: string;
+  features: string[];
+  timelineSmall: string;
+  timelineMedium: string; 
+  timelineLarge: string;
 }
 
-export const projectTypes: Record<string, ProjectTypeInfo> = {
-  mobile: {
-    name: 'Mobile App',
-    icon: <Smartphone className="w-6 h-6" />,
-    description: 'Create a native or cross-platform mobile application',
-    timeEstimate: {
-      small: '1-2 months',
-      medium: '3-6 months',
-      large: '6+ months'
-    },
-    costEstimate: {
-      small: '$5,000 - $15,000',
-      medium: '$15,000 - $50,000',
-      large: '$50,000+'
-    },
-    examples: ['Food delivery app', 'Fitness tracker', 'Mobile banking']
-  },
-  web: {
+// Sample project types data
+export const projectTypes: ProjectTypeInfo[] = [
+  {
+    id: 'website',
     name: 'Website',
-    icon: <Globe className="w-6 h-6" />,
-    description: 'Build a responsive website for your business or personal brand',
-    timeEstimate: {
-      small: '2-4 weeks',
-      medium: '1-3 months',
-      large: '3+ months'
-    },
-    costEstimate: {
-      small: '$3,000 - $10,000',
-      medium: '$10,000 - $30,000',
-      large: '$30,000+'
-    },
-    examples: ['Corporate website', 'Portfolio site', 'Blog platform']
+    description: 'Create an informational website to showcase your brand, products, or services.',
+    icon: 'Globe',
+    features: [
+      'Responsive design for all devices',
+      'Contact forms and integrations',
+      'Content management system',
+      'SEO optimization',
+      'Analytics integration',
+      'Performance optimization',
+      'Multiple language support',
+      'Advanced animations and interactions'
+    ],
+    timelineSmall: '2-4 weeks',
+    timelineMedium: '4-8 weeks',
+    timelineLarge: '8-12 weeks'
   },
-  ecommerce: {
+  {
+    id: 'ecommerce',
     name: 'E-commerce',
-    icon: <ShoppingCart className="w-6 h-6" />,
-    description: 'Create an online store with product listings and checkout',
-    timeEstimate: {
-      small: '1-2 months',
-      medium: '2-4 months',
-      large: '4+ months'
-    },
-    costEstimate: {
-      small: '$5,000 - $15,000',
-      medium: '$15,000 - $50,000',
-      large: '$50,000+'
-    },
-    examples: ['Online boutique', 'Digital product store', 'Subscription service']
-  },
-  design: {
-    name: 'UI/UX Design',
-    icon: <Brush className="w-6 h-6" />,
-    description: 'Professional design services for your digital products',
-    timeEstimate: {
-      small: '2-4 weeks',
-      medium: '1-2 months',
-      large: '2+ months'
-    },
-    costEstimate: {
-      small: '$2,000 - $8,000',
-      medium: '$8,000 - $20,000',
-      large: '$20,000+'
-    },
-    examples: ['Brand redesign', 'App UI design', 'Design system']
-  },
-  software: {
-    name: 'Software',
-    icon: <Terminal className="w-6 h-6" />,
-    description: 'Custom software solution for your specific needs',
-    timeEstimate: {
-      small: '1-3 months',
-      medium: '3-6 months',
-      large: '6+ months'
-    },
-    costEstimate: {
-      small: '$8,000 - $20,000',
-      medium: '$20,000 - $60,000',
-      large: '$60,000+'
-    },
-    examples: ['CRM system', 'Inventory management', 'Data analysis tool']
-  },
-  other: {
-    name: 'Other',
-    icon: <LayoutGrid className="w-6 h-6" />,
-    description: 'Have a unique project in mind? Let us help you plan it',
-    timeEstimate: {
-      small: 'Varies',
-      medium: 'Varies',
-      large: 'Varies'
-    },
-    costEstimate: {
-      small: 'Varies',
-      medium: 'Varies',
-      large: 'Varies'
-    },
-    examples: ['Custom solution', 'Hybrid project', 'Innovative concept']
-  }
-};
-
-export const scaleOptions: ScaleOptionType[] = [
-  {
-    value: 'small',
-    name: 'Small',
-    description: 'Basic features, less complexity, faster delivery'
+    description: 'Build an online store to sell products or services with secure payment processing.',
+    icon: 'ShoppingCart',
+    features: [
+      'Product catalog management',
+      'Shopping cart functionality',
+      'Secure payment processing',
+      'Inventory management',
+      'Order tracking system',
+      'Customer account management',
+      'Promotions and discount system',
+      'Multiple shipping options'
+    ],
+    timelineSmall: '4-6 weeks',
+    timelineMedium: '8-12 weeks',
+    timelineLarge: '12-16 weeks'
   },
   {
-    value: 'medium',
-    name: 'Medium',
-    description: 'More features, moderate complexity, standard timeline'
+    id: 'webapp',
+    name: 'Web Application',
+    description: 'Develop a feature-rich application with user authentication and advanced functionality.',
+    icon: 'Layout',
+    features: [
+      'User authentication system',
+      'Dashboard interfaces',
+      'Data visualization',
+      'User permissions and roles',
+      'Real-time updates',
+      'Offline capabilities',
+      'Integration with third-party services',
+      'Comprehensive testing coverage'
+    ],
+    timelineSmall: '6-8 weeks',
+    timelineMedium: '10-14 weeks',
+    timelineLarge: '16-24 weeks'
   },
   {
-    value: 'large',
-    name: 'Large',
-    description: 'Comprehensive features, higher complexity, longer timeline'
+    id: 'portal',
+    name: 'Customer Portal',
+    description: 'Create a secure portal for customer account management and service delivery.',
+    icon: 'Users',
+    features: [
+      'Secure login system',
+      'Profile management',
+      'Document storage and sharing',
+      'Communication tools',
+      'Service request system',
+      'Billing and payment management',
+      'Appointment scheduling',
+      'Reporting and analytics'
+    ],
+    timelineSmall: '4-8 weeks',
+    timelineMedium: '8-12 weeks',
+    timelineLarge: '12-20 weeks'
+  },
+  {
+    id: 'mobile',
+    name: 'Mobile App',
+    description: 'Design and develop a native or cross-platform mobile application.',
+    icon: 'Smartphone',
+    features: [
+      'Cross-platform compatibility',
+      'Responsive UI for different device sizes',
+      'Push notifications',
+      'Offline capabilities',
+      'Device feature integration',
+      'App store optimization',
+      'Analytics and crash reporting',
+      'Continuous integration and deployment'
+    ],
+    timelineSmall: '6-10 weeks',
+    timelineMedium: '10-16 weeks',
+    timelineLarge: '16-24 weeks'
   }
 ];

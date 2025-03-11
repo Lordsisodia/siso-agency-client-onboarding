@@ -1,121 +1,155 @@
 
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 
-// Basic fade in animation component
-export const FadeIn = ({ 
-  children, 
-  delay = 0, 
-  duration = 0.5,
-  ...props 
-}: {
+export interface FadeInProps {
   children: React.ReactNode;
   delay?: number;
   duration?: number;
-  [key: string]: any;
-}) => (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
-    transition={{ delay, duration }}
-    {...props}
-  >
-    {children}
-  </motion.div>
-);
+  className?: string;
+}
 
-// Slide up animation component
-export const SlideUp = ({ 
+export const FadeIn: React.FC<FadeInProps> = ({ 
   children, 
   delay = 0, 
   duration = 0.5,
-  distance = 20,
-  ...props 
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  duration?: number;
-  distance?: number;
-  [key: string]: any;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, y: distance }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: distance }}
-    transition={{ delay, duration }}
-    {...props}
-  >
-    {children}
-  </motion.div>
-);
-
-// Staggered list animation
-export const StaggeredList = ({ 
-  children, 
-  staggerDelay = 0.1,
-  ...props 
-}: {
-  children: React.ReactNode[];
-  staggerDelay?: number;
-  [key: string]: any;
-}) => (
-  <>
-    {React.Children.map(children, (child, i) => (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          delay: i * staggerDelay,
-        }}
-        {...props}
-      >
-        {child}
-      </motion.div>
-    ))}
-  </>
-);
-
-// Animated counter
-export const AnimatedCounter = ({ 
-  value = 0, 
-  duration = 2,
-  ...props 
-}: { 
-  value: number; 
-  duration?: number;
-  [key: string]: any;
+  className = '' 
 }) => {
-  const [displayValue, setDisplayValue] = React.useState(0);
-  
-  React.useEffect(() => {
-    let startTime: number;
-    let animationFrame: number;
-    const startValue = displayValue;
-
-    const updateValue = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const elapsed = timestamp - startTime;
-      const progress = Math.min(elapsed / (duration * 1000), 1);
-      
-      setDisplayValue(Math.floor(startValue + progress * (value - startValue)));
-      
-      if (progress < 1) {
-        animationFrame = requestAnimationFrame(updateValue);
-      }
-    };
-    
-    animationFrame = requestAnimationFrame(updateValue);
-    
-    return () => cancelAnimationFrame(animationFrame);
-  }, [value, duration, displayValue]);
-  
-  return <span {...props}>{displayValue}</span>;
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration, delay }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
 };
 
-export default {
-  FadeIn,
-  SlideUp,
-  StaggeredList,
-  AnimatedCounter
+export interface SlideInProps {
+  children: React.ReactNode;
+  direction?: 'left' | 'right' | 'up' | 'down';
+  delay?: number;
+  duration?: number;
+  className?: string;
+}
+
+export const SlideIn: React.FC<SlideInProps> = ({ 
+  children, 
+  direction = 'up', 
+  delay = 0, 
+  duration = 0.5,
+  className = '' 
+}) => {
+  const directionMap = {
+    left: { x: -50, y: 0 },
+    right: { x: 50, y: 0 },
+    up: { x: 0, y: 50 },
+    down: { x: 0, y: -50 }
+  };
+  
+  const { x, y } = directionMap[direction];
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, x, y }}
+      animate={{ opacity: 1, x: 0, y: 0 }}
+      transition={{ duration, delay }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+export interface StaggerContainerProps {
+  children: React.ReactNode;
+  staggerDelay?: number;
+  className?: string;
+}
+
+export const StaggerContainer: React.FC<StaggerContainerProps> = ({ 
+  children, 
+  staggerDelay = 0.1,
+  className = '' 
+}) => {
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: staggerDelay
+      }
+    }
+  };
+  
+  return (
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+export interface StaggerItemProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export const StaggerItem: React.FC<StaggerItemProps> = ({ children, className = '' }) => {
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        type: 'spring',
+        damping: 15
+      }
+    }
+  };
+  
+  return (
+    <motion.div
+      variants={itemVariants}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+export interface PulseProps {
+  children: React.ReactNode;
+  intensity?: number;
+  duration?: number;
+  className?: string;
+}
+
+export const Pulse: React.FC<PulseProps> = ({ 
+  children, 
+  intensity = 1.05, 
+  duration = 2,
+  className = '' 
+}) => {
+  return (
+    <motion.div
+      animate={{ 
+        scale: [1, intensity, 1],
+      }}
+      transition={{ 
+        duration,
+        repeat: Infinity,
+        ease: "easeInOut" 
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
 };
