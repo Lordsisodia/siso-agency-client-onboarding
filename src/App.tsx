@@ -20,6 +20,7 @@ import NewProject from '@/pages/NewProject';
 import Portfolio from '@/pages/Portfolio';
 import Support from '@/pages/Support';
 import Notifications from '@/pages/Notifications';
+import PendingTasks from '@/pages/PendingTasks';
 
 import { Toaster } from '@/components/ui/toaster';
 import { useAuthSession } from '@/hooks/useAuthSession';
@@ -60,6 +61,7 @@ function App() {
         <Route path="/support" element={<Support />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/pending-tasks" element={<PendingTasks />} />
         
         <Route path="/onboarding/social" element={<SocialOnboarding />} />
         <Route path="/onboarding/congratulations" element={<OnboardingCongratulations />} />
