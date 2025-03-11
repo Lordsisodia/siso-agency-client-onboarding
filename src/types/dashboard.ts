@@ -40,14 +40,6 @@ export interface ProjectDoc {
   priority: string;
 }
 
-export interface NetworkingResource {
-  id: string;
-  name: string;
-  category: string;
-  created_at: string;
-  updated_at: string;
-}
-
 export interface CategoryStats {
   category: string;
   community_count: number;
