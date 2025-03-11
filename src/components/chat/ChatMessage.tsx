@@ -8,7 +8,7 @@ export interface ChatMessageProps {
   content?: string;
   assistantType?: string;
   isLoading?: boolean;
-  role?: 'user' | 'assistant' | string; // Accept any role as string
+  role?: 'user' | 'assistant' | string;
 }
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ 
@@ -16,7 +16,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   content,
   assistantType,
   isLoading,
-  role: explicitRole // Accept explicit role if provided
+  role: explicitRole
 }) => {
   // Use explicit role if provided, otherwise use message.role
   const isUser = explicitRole 
