@@ -43,12 +43,6 @@ export const menuSections: MenuSection[] = [
     ]
   },
   {
-    type: 'main',
-    href: '/portfolio',
-    icon: BookOpen,
-    label: 'Portfolio',
-  },
-  {
     type: 'section',
     title: 'Settings',
     icon: Settings,
@@ -69,5 +63,11 @@ export const menuSections: MenuSection[] = [
         label: 'Help Center',
       }
     ]
+  },
+  {
+    type: 'main',
+    href: '/portfolio',
+    icon: BookOpen,
+    label: 'Portfolio',
   }
 ];
