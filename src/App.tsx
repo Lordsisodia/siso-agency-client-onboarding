@@ -17,15 +17,11 @@ import Dashboard from '@/pages/Dashboard';
 import Projects from '@/pages/Projects';
 import PlanBuilder from '@/pages/PlanBuilder';
 import NewProject from '@/pages/NewProject';
-import Portfolio from '@/pages/Portfolio';
 import Support from '@/pages/Support';
 import Notifications from '@/pages/Notifications';
-import PendingTasks from '@/pages/PendingTasks';
 
 // Feature pages (not in navigation but still accessible)
 import SisoAI from '@/pages/SisoAI';
-import Leaderboards from '@/pages/Leaderboards';
-import CryptoExchange from '@/pages/CryptoExchange';
 
 import { Toaster } from '@/components/ui/toaster';
 import { useAuthSession } from '@/hooks/core';
@@ -62,16 +58,12 @@ function App() {
         <Route path="/plan-builder" element={<PlanBuilder />} />
         <Route path="/plan-builder/:projectId" element={<PlanBuilder />} />
         <Route path="/new-project" element={<NewProject />} />
-        <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/support" element={<Support />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/pending-tasks" element={<PendingTasks />} />
         
         {/* Feature routes - still accessible but not in navigation */}
         <Route path="/siso-ai" element={<SisoAI />} />
-        <Route path="/leaderboards" element={<Leaderboards />} />
-        <Route path="/crypto-exchange" element={<CryptoExchange />} />
         
         <Route path="/onboarding/social" element={<SocialOnboarding />} />
         <Route path="/onboarding/congratulations" element={<OnboardingCongratulations />} />

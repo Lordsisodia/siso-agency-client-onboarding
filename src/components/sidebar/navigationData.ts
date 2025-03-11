@@ -31,19 +31,8 @@ export const menuSections: MenuSection[] = [
         href: '/projects',
         icon: FolderKanban,
         label: 'My Projects',
-      },
-      {
-        href: '/pending-tasks',
-        icon: ClipboardCheck,
-        label: 'Pending Tasks',
       }
     ]
-  },
-  {
-    type: 'main',
-    href: '/portfolio',
-    icon: Briefcase,
-    label: 'My Portfolio',
   },
   {
     type: 'main',

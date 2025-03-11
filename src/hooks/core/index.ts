@@ -5,9 +5,13 @@ export * from "../use-click-outside";
 export * from "../use-mobile";
 export * from "../use-pagination";
 export * from "../use-toast";
+
+// Explicitly re-export ChatMessage from use-chat-assistant to avoid ambiguity
+export { ChatMessage } from "../use-chat-assistant";
 export * from "../use-plan-chat-assistant";
 export * from "../use-project-planning";
-export * from "../use-chat-assistant";
+
+// Export additional hooks
 export * from "../useAuthSession";
 export * from "../useBasicUserData";
 export * from "../useDashboardStats";

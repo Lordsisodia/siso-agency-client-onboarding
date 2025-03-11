@@ -68,7 +68,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     welcomeMessage,
     systemPrompt,
     sendMessage: (message: string, formData?: Record<string, any>) => {
-      return hookSendMessage(message, formData as any);
+      // Adapt the interface to work with both types of chat hooks
+      if (usePlanAssistant) {
+        return hookSendMessage(message, formData);
+      } else {
+        // For regular chat, pass systemPrompt as second parameter
+        return hookSendMessage(message, systemPrompt || undefined);
+      }
     }
   });
 
