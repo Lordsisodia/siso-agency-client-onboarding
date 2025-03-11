@@ -1,29 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-
-export interface Assistant {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  created_at: string;
-  updated_at: string;
-  assistant_type?: string;
-  prompt_template?: string;
-  use_cases?: string[];
-  input_variables?: string[];
-  model_type?: string;
-  response_format?: string;
-  rating?: number;
-  likes_count?: number;
-  downloads_count?: number;
-  website_url?: string;
-  gpt_url?: string;
-  review_average?: number;
-  review_count?: number;
-  num_conversations_str?: string;
-}
+import { Assistant } from '../types';
 
 export function useAssistants() {
   const [assistants, setAssistants] = useState<Assistant[]>([]);
@@ -40,14 +18,21 @@ export function useAssistants() {
 
         if (error) throw error;
 
-        // Map the data to the Assistant interface, providing default values for missing properties
+        // Type assertion to handle missing properties safely
         const mappedData = data.map(item => ({
           id: item.id,
           name: item.name,
-          description: item.description,
-          category: item.category,
+          description: item.description || '',
+          category: item.category || '',
           created_at: item.created_at,
           updated_at: item.updated_at,
+          assistant_id: item.assistant_id,
+          instructions: item.instructions,
+          metadata: item.metadata,
+          model: item.model,
+          tools: item.tools,
+          
+          // Default values for properties that might not exist in the database
           assistant_type: item.assistant_type || '',
           prompt_template: item.prompt_template || '',
           use_cases: item.use_cases || [],
@@ -62,7 +47,7 @@ export function useAssistants() {
           review_average: item.review_average || 0,
           review_count: item.review_count || 0,
           num_conversations_str: item.num_conversations_str || ''
-        })) as Assistant[];
+        }) as Assistant);
 
         setAssistants(mappedData);
       } catch (error) {

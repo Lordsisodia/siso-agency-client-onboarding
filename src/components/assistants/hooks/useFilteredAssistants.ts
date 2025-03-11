@@ -1,12 +1,12 @@
 
 import { useState } from 'react';
-import { Assistant } from '@/components/assistants/types';
+import { Assistant } from '../types';
 import { useAssistants } from './useAssistants';
 
 export function useFilteredAssistants() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const { data: assistants, isLoading } = useAssistants();
+  const { assistants, loading: isLoading, error } = useAssistants();
 
   const categoryCounts = assistants?.reduce((acc, assistant) => {
     const category = assistant.category === 'gpt builder' ? 'gpt' : (assistant.assistant_type || 'gpt');
@@ -17,11 +17,11 @@ export function useFilteredAssistants() {
   const filteredAssistants = assistants?.filter(assistant => {
     const matchesSearch = !searchQuery || 
       assistant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      assistant.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      (assistant.description?.toLowerCase() || '').includes(searchQuery.toLowerCase());
     
     const matchesCategory = 
       selectedCategory === 'all' || 
-      (selectedCategory === 'featured' && (assistant.rating >= 4.5 || assistant.review_average >= 4.5)) ||
+      (selectedCategory === 'featured' && ((assistant.rating || 0) >= 4.5 || (assistant.review_average || 0) >= 4.5)) ||
       (selectedCategory === 'gpt' && assistant.category === 'gpt builder') ||
       (selectedCategory !== 'gpt' && assistant.assistant_type === selectedCategory);
 
@@ -29,7 +29,7 @@ export function useFilteredAssistants() {
   });
 
   const featuredCount = assistants?.filter(a => 
-    (a.rating && a.rating >= 4.5) || (a.review_average && a.review_average >= 4.5)
+    ((a.rating || 0) >= 4.5) || ((a.review_average || 0) >= 4.5)
   ).length || 0;
 
   const totalConversations = assistants?.reduce((sum, assistant) => {
