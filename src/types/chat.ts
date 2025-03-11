@@ -6,3 +6,6 @@ export interface ChatMessage {
   id?: string;
   loading?: boolean;
 }
+
+// Removing unused types that were causing errors
+// AgentCategory and ProcessingStage were referenced but not defined

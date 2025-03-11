@@ -6,14 +6,7 @@ import { useChatInterfaceState } from './useChatInterfaceState';
 import { ChatHeader } from './ChatHeader';
 import { ChatMessageList } from './ChatMessageList';
 import { ChatFooter } from './ChatFooter';
-
-// Define a common ChatMessage type that works with both hooks
-export type ChatMessage = {
-  role: "user" | "assistant" | "system";
-  content: string;
-  timestamp?: Date;
-  id?: string;
-};
+import { ChatMessage } from '@/types/chat';
 
 interface ChatInterfaceProps {
   title?: string;
@@ -34,7 +27,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   usePlanAssistant = false,
   projectId
 }) => {
-  // Use the plan chat assistant hook (this is the only hook we'll use)
+  // Use the plan chat assistant hook
   const { 
     messages: rawMessages, 
     isLoading, 
@@ -46,7 +39,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   // Map messages to ensure they match our expected ChatMessage type
   const messages = (rawMessages || []).map(msg => ({
     ...msg,
-    role: msg.role === "system" ? "system" : msg.role
+    role: msg.role as "user" | "assistant" | "system"
   })) as ChatMessage[];
   
   // Use the custom hook for handling chat interface state
@@ -62,11 +55,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     clearMessages,
     welcomeMessage,
     systemPrompt,
-    sendMessage: (message: string, formData?: Record<string, any>) => {
+    sendMessage: (message: string) => {
       if (usePlanAssistant) {
-        return hookSendMessage(message, undefined, formData);
+        return hookSendMessage(message, undefined, {});
       } else {
-        return hookSendMessage(message, undefined, systemPrompt ? { systemPrompt } : undefined);
+        return hookSendMessage(message, systemPrompt, {});
       }
     }
   });

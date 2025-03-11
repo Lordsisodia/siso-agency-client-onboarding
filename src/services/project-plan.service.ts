@@ -1,4 +1,6 @@
+
 import { supabase } from '@/integrations/supabase/client';
+import { ChatMessage } from '@/types/chat';
 
 export interface ProjectPlan {
   id: string;
@@ -280,7 +282,7 @@ class ProjectPlanService {
    * Stream responses from the plan builder assistant
    */
   streamChatWithPlanAssistant(
-    messages: any[],
+    messages: ChatMessage[],
     projectId?: string,
     formData?: Record<string, any>,
     onChunk: (chunk: string) => void = () => {},
@@ -316,10 +318,3 @@ class ProjectPlanService {
 }
 
 export const projectPlanService = new ProjectPlanService();
-
-// Define ChatMessage type for the service
-type ChatMessage = {
-  role: "user" | "assistant" | "system";
-  content: string;
-  id?: string;
-};

@@ -2,13 +2,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-
-export type ChatMessage = {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  timestamp?: Date;
-  id?: string;
-};
+import { ChatMessage } from '@/types/chat';
 
 export function usePlanChatAssistant(projectId?: string) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);

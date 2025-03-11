@@ -1,15 +1,15 @@
 
 import { useState, useEffect } from 'react';
-import { ChatMessage as ChatMessageType } from '@/hooks/use-chat-assistant';
+import { ChatMessage } from '@/types/chat';
 
 interface UseChatInterfaceStateProps {
-  messages: ChatMessageType[];
+  messages: ChatMessage[];
   isLoading: boolean;
   error: string | null;
-  clearMessages: (initialMessages?: ChatMessageType[]) => void;
+  clearMessages: (initialMessages?: ChatMessage[]) => void;
   welcomeMessage: string;
   systemPrompt?: string;
-  sendMessage: (message: string, systemPrompt?: string) => Promise<void>;
+  sendMessage: (message: string) => Promise<void>;
 }
 
 export const useChatInterfaceState = ({
@@ -38,7 +38,7 @@ export const useChatInterfaceState = ({
           setHasAutoRetried(true);
           setRetryCount(prev => prev + 1);
           setTimeout(() => {
-            sendMessage(lastUserMessage.content, systemPrompt);
+            sendMessage(lastUserMessage.content);
           }, 1000); // Wait a second before auto-retry
         }
       }
@@ -58,7 +58,7 @@ export const useChatInterfaceState = ({
   useEffect(() => {
     if (!isInitialized && messages.length === 0) {
       // Create a welcome message directly instead of sending it through the API
-      const welcomeMsg: ChatMessageType = {
+      const welcomeMsg: ChatMessage = {
         role: 'assistant',
         content: welcomeMessage,
         timestamp: new Date()
@@ -82,7 +82,7 @@ export const useChatInterfaceState = ({
     const lastUserMessage = [...messages].reverse().find(m => m.role === 'user');
     if (lastUserMessage) {
       setRetryCount(prev => prev + 1);
-      sendMessage(lastUserMessage.content, systemPrompt);
+      sendMessage(lastUserMessage.content);
     }
   };
 
@@ -97,7 +97,7 @@ export const useChatInterfaceState = ({
     }
     
     try {
-      await sendMessage(message, systemPrompt);
+      await sendMessage(message);
     } catch (err) {
       console.error("Error sending message:", err);
     }

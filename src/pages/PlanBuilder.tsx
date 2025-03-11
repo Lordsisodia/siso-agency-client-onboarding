@@ -102,7 +102,7 @@ export default function PlanBuilder() {
         variant: "default"
       });
       
-      await sendMessage(prompt);
+      await sendMessage(prompt, undefined, {});
       setIsPlanStarted(true);
     } catch (error) {
       console.error("Error starting plan:", error);
@@ -123,7 +123,7 @@ export default function PlanBuilder() {
       });
       
       try {
-        await sendMessage(prompt, formData);
+        await sendMessage(prompt, undefined, formData);
         
         setIsManualInputOpen(false);
         setIsPlanStarted(true);

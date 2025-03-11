@@ -153,7 +153,7 @@ export default function NewProject() {
       Based on this information, please start helping them plan their project by asking relevant questions to gather any missing details.`;
       
       // Send the constructed prompt to the AI
-      await sendMessage(prompt);
+      await sendMessage(prompt, undefined, {});
       
       setIsWebsiteInputOpen(false);
     } catch (error) {
