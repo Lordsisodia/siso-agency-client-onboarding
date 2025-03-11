@@ -71,7 +71,17 @@ export const useProfileFetch = () => {
               
               if (newProfile && isSubscribed) {
                 console.log('[Profile] Created new profile:', newProfile);
-                setProfile(newProfile);
+                
+                // Convert JSON achievements to proper Achievement[] type
+                const achievements = safeJsonArray<Achievement>(newProfile.achievements);
+                
+                // Create a properly typed ProfileData with achievements array
+                const typedProfileData: ProfileData = {
+                  ...newProfile,
+                  achievements
+                };
+                
+                setProfile(typedProfileData);
               }
             }
             
