@@ -6,7 +6,10 @@ import {
   User,
   HelpCircle,
   ClipboardCheck,
-  Briefcase
+  Briefcase,
+  Building2,
+  Settings,
+  BookOpen
 } from 'lucide-react';
 import { MenuSection } from './types';
 
@@ -20,7 +23,7 @@ export const menuSections: MenuSection[] = [
   {
     type: 'section',
     title: 'Projects',
-    icon: FolderKanban,
+    icon: Briefcase,
     items: [
       {
         href: '/plan-builder',
@@ -45,10 +48,26 @@ export const menuSections: MenuSection[] = [
     ]
   },
   {
-    type: 'main',
-    href: '/profile',
+    type: 'section',
+    title: 'Account',
     icon: User,
-    label: 'Profile & Settings',
+    items: [
+      {
+        href: '/profile',
+        icon: User,
+        label: 'Profile',
+      },
+      {
+        href: '/company-profile',
+        icon: Building2,
+        label: 'Company Profile',
+      },
+      {
+        href: '/settings',
+        icon: Settings,
+        label: 'Settings',
+      }
+    ]
   },
   {
     type: 'main',

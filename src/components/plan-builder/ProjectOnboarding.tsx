@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
@@ -69,7 +68,7 @@ export function ProjectOnboarding({ onComplete, onSkip }: ProjectOnboardingProps
       if (typeof data === 'object' && data !== null && !Array.isArray(data)) {
         return { 
           ...prev, 
-          [section]: { ...prev[section as keyof typeof prev] as object, ...data }
+          [section]: { ...(prev[section as keyof typeof prev] as object || {}), ...data }
         };
       } else {
         return {
