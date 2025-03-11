@@ -7,6 +7,12 @@ import { ProgressIndicator } from './components/ProgressIndicator';
 import { BackgroundSparkles } from './components/BackgroundSparkles';
 import { OnboardingStyles } from './components/OnboardingStyles';
 import { NavigationButtons } from './components/NavigationButtons';
+import { OnboardingWelcome } from './onboarding-steps/OnboardingWelcome';
+import { ProjectType } from './onboarding-steps/ProjectType';
+import { BusinessContext } from './onboarding-steps/BusinessContext';
+import { TimelineBudget } from './onboarding-steps/TimelineBudget';
+import { FeatureSelection } from './onboarding-steps/FeatureSelection';
+import { OnboardingSummary } from './onboarding-steps/OnboardingSummary';
 
 interface OnboardingWelcomeProps {
   onNext: () => void;
