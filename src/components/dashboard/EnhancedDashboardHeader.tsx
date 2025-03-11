@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Bell, Settings, ChevronDown, UserCircle, LogOut, UserCog } from 'lucide-react';
 import { DashboardStats } from '@/types/dashboard';
@@ -7,30 +6,24 @@ import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuthSession } from '@/hooks/useAuthSession';
-
 interface DashboardHeaderProps {
   userName: string;
   greeting: string;
   stats?: DashboardStats;
 }
-
-export const EnhancedDashboardHeader: React.FC<DashboardHeaderProps> = ({ 
-  userName, 
+export const EnhancedDashboardHeader: React.FC<DashboardHeaderProps> = ({
+  userName,
   greeting,
-  stats 
+  stats
 }) => {
   const navigate = useNavigate();
-  const { handleSignOut } = useAuthSession();
+  const {
+    handleSignOut
+  } = useAuthSession();
   const [showDropdown, setShowDropdown] = useState(false);
-  
+
   // Enhanced greeting with emoji based on time of day
   const getGreetingEmoji = () => {
     const hour = new Date().getHours();
@@ -38,16 +31,17 @@ export const EnhancedDashboardHeader: React.FC<DashboardHeaderProps> = ({
     if (hour < 18) return '☀️'; // Afternoon
     return '🌙'; // Evening
   };
-
-  return (
-    <div className="flex flex-col space-y-6">
+  return <div className="flex flex-col space-y-6">
       <div className="flex justify-between items-center">
-        <motion.div 
-          className="flex flex-col"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <motion.div className="flex flex-col" initial={{
+        opacity: 0,
+        y: -20
+      }} animate={{
+        opacity: 1,
+        y: 0
+      }} transition={{
+        duration: 0.5
+      }}>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-indigo-500">
               {getGreetingEmoji()} {greeting}, {userName}!
@@ -59,18 +53,9 @@ export const EnhancedDashboardHeader: React.FC<DashboardHeaderProps> = ({
         </motion.div>
         
         <div className="flex items-center space-x-4">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate('/notifications')}
-            className="relative"
-          >
+          <Button variant="ghost" size="icon" onClick={() => navigate('/notifications')} className="relative">
             <Bell className="h-5 w-5" />
-            <Badge 
-              variant="destructive" 
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 animate-pulse shadow-glow"
-              glow
-            >
+            <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 animate-pulse shadow-glow" glow>
               3
             </Badge>
           </Button>
@@ -115,10 +100,7 @@ export const EnhancedDashboardHeader: React.FC<DashboardHeaderProps> = ({
                 <span>Organization</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                className="cursor-pointer text-destructive focus:text-destructive" 
-                onClick={handleSignOut}
-              >
+              <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive" onClick={handleSignOut}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Sign out</span>
               </DropdownMenuItem>
@@ -127,47 +109,16 @@ export const EnhancedDashboardHeader: React.FC<DashboardHeaderProps> = ({
         </div>
       </div>
       
-      {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard 
-            label="Active Projects" 
-            value={stats.activeProjects || 0}
-            onClick={() => navigate('/projects')}
-            color="indigo"
-          />
-          <StatCard 
-            label="Pending Tasks" 
-            value={stats.pendingTasks || 0} 
-            onClick={() => navigate('/tasks')}
-            color="amber"
-          />
-          <StatCard 
-            label="Upcoming Events" 
-            value={stats.upcomingEvents || 0} 
-            onClick={() => navigate('/calendar')}
-            color="emerald"
-          />
-          <StatCard 
-            label="Login Streak" 
-            value={stats.loginStreak || 0} 
-            badgeText={stats.loginStreak && stats.loginStreak > 5 ? "Impressive!" : undefined}
-            color="purple"
-          />
-        </div>
-      )}
+      {stats && <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard label="Active Projects" value={stats.activeProjects || 0} onClick={() => navigate('/projects')} color="indigo" />
+          <StatCard label="Pending Tasks" value={stats.pendingTasks || 0} onClick={() => navigate('/tasks')} color="amber" />
+          <StatCard label="Upcoming Events" value={stats.upcomingEvents || 0} onClick={() => navigate('/calendar')} color="emerald" />
+          <StatCard label="Login Streak" value={stats.loginStreak || 0} badgeText={stats.loginStreak && stats.loginStreak > 5 ? "Impressive!" : undefined} color="purple" />
+        </div>}
       
-      <div className="flex justify-end">
-        <Button 
-          onClick={() => navigate('/new-project')}
-          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-300"
-        >
-          Start New Project
-        </Button>
-      </div>
-    </div>
-  );
+      
+    </div>;
 };
-
 interface StatCardProps {
   label: string;
   value: number;
@@ -175,8 +126,13 @@ interface StatCardProps {
   onClick?: () => void;
   color?: 'indigo' | 'amber' | 'emerald' | 'purple' | 'rose';
 }
-
-const StatCard: React.FC<StatCardProps> = ({ label, value, badgeText, onClick, color = 'indigo' }) => {
+const StatCard: React.FC<StatCardProps> = ({
+  label,
+  value,
+  badgeText,
+  onClick,
+  color = 'indigo'
+}) => {
   const colorClasses = {
     indigo: 'from-indigo-500/20 to-indigo-600/10 hover:from-indigo-500/30 hover:to-indigo-600/20 text-indigo-500',
     amber: 'from-amber-500/20 to-amber-600/10 hover:from-amber-500/30 hover:to-amber-600/20 text-amber-500',
@@ -184,26 +140,5 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, badgeText, onClick, c
     purple: 'from-purple-500/20 to-purple-600/10 hover:from-purple-500/30 hover:to-purple-600/20 text-purple-500',
     rose: 'from-rose-500/20 to-rose-600/10 hover:from-rose-500/30 hover:to-rose-600/20 text-rose-500'
   };
-
-  return (
-    <motion.div 
-      className={`bg-gradient-to-br ${colorClasses[color]} p-4 rounded-lg border border-border/30 
-                  backdrop-blur-sm hover:shadow-md hover:border-border/50 transition-all duration-300 ${onClick ? 'cursor-pointer' : ''}`}
-      whileHover={{ y: -5, scale: 1.02 }}
-      onClick={onClick}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <div className="text-3xl font-bold">{value}</div>
-      <div className="text-sm text-muted-foreground flex justify-between items-center">
-        <span>{label}</span>
-        {badgeText && (
-          <Badge variant="secondary" className="text-xs py-0 px-1.5 bg-purple-500/10 text-purple-500 border border-purple-500/20">
-            {badgeText}
-          </Badge>
-        )}
-      </div>
-    </motion.div>
-  );
+  return;
 };
