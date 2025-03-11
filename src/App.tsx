@@ -6,7 +6,6 @@ import { useEffect } from 'react';
 
 import Auth from '@/pages/Auth';
 import Profile from '@/pages/Profile';
-import Tools from '@/pages/Tools';
 import SocialOnboarding from '@/pages/onboarding/social';
 import OnboardingCongratulations from '@/pages/onboarding/congratulations';
 import ThankYou from '@/pages/ThankYou';
@@ -18,7 +17,6 @@ import Dashboard from '@/pages/Dashboard';
 import Projects from '@/pages/Projects';
 import PlanBuilder from '@/pages/PlanBuilder';
 import NewProject from '@/pages/NewProject';
-import ResourceHub from '@/pages/ResourceHub';
 import Portfolio from '@/pages/Portfolio';
 import Support from '@/pages/Support';
 import Notifications from '@/pages/Notifications';
@@ -58,12 +56,10 @@ function App() {
         <Route path="/plan-builder" element={<PlanBuilder />} />
         <Route path="/plan-builder/:projectId" element={<PlanBuilder />} />
         <Route path="/new-project" element={<NewProject />} />
-        <Route path="/resource-hub" element={<ResourceHub />} />
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/support" element={<Support />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/tools" element={<Tools />} />
         
         <Route path="/onboarding/social" element={<SocialOnboarding />} />
         <Route path="/onboarding/congratulations" element={<OnboardingCongratulations />} />
