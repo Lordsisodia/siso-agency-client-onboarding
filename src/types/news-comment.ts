@@ -8,5 +8,4 @@ export interface NewsComment {
   };
   text: string;
   timestamp: Date;
-  author?: string;
 }

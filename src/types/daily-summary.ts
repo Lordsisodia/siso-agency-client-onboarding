@@ -7,5 +7,4 @@ export interface DailySummaryData {
   key_points?: string[];
   practical_applications?: string[];
   created_at?: string;
-  generated_with?: string;
 }
