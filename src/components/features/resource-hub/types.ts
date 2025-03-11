@@ -25,7 +25,7 @@ export interface ResourceHubProps {
   tabs: ResourceTab[];
 }
 
-// Simplified types for core functionality
+// Added missing types that were referenced in other files
 export interface Tab {
   value: string;
   icon: ReactElement;
@@ -36,4 +36,24 @@ export interface Tab {
 export interface CardStats {
   label: string;
   value: string | number;
+}
+
+export interface EventCardProps {
+  title: string;
+  date: string;
+  description?: string;
+  importance?: 'high' | 'medium' | 'low';
+  type?: string;
+  category?: string;
+}
+
+export interface ProjectTypeInfoProps {
+  selectedType?: string;
+  selectedScale?: string;
+}
+
+export interface SummaryContentProps {
+  summaryData: any;
+  activeTab: string;
+  setActiveTab: React.Dispatch<React.SetStateAction<string>>;
 }
