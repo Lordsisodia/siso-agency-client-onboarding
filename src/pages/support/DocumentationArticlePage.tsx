@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
@@ -10,12 +9,9 @@ import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   fetchArticle, 
-  fetchCategory, 
-  DocArticle, 
-  DocCategory, 
-  DocSection, 
-  DocQuestion 
-} from '@/services/supabase-documentation.service';
+  fetchCategory 
+} from '@/services/static-documentation.service';
+import { DocArticle, DocCategory, DocSection, DocQuestion } from '@/types/documentation';
 
 const QuestionAccordion = ({ 
   question, 
@@ -122,7 +118,6 @@ const DocumentationArticlePage = () => {
           const articleData = await fetchArticle(categoryId, articleId);
           setArticle(articleData);
           
-          // Find next and previous articles
           if (categoryData.articles.length > 0) {
             const currentIndex = categoryData.articles.findIndex(a => a.slug === articleId);
             if (currentIndex > 0) {
@@ -180,7 +175,6 @@ const DocumentationArticlePage = () => {
     <MainLayout>
       <div className="container mx-auto py-8 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
-          {/* Breadcrumb navigation */}
           <div className="mb-6">
             <nav className="flex items-center text-sm">
               <Link to="/support" className="text-siso-text/70 hover:text-siso-text transition-colors">
@@ -195,7 +189,6 @@ const DocumentationArticlePage = () => {
             </nav>
           </div>
           
-          {/* Article header */}
           <div className="mb-8">
             <div className="flex justify-between items-start mb-4">
               <h1 className="text-3xl font-bold text-siso-text-bold">{article.title}</h1>
@@ -213,7 +206,6 @@ const DocumentationArticlePage = () => {
             </div>
           </div>
           
-          {/* Article content with collapsible sections */}
           <div className="mb-8">
             {article.sections.map((section) => (
               <SectionAccordion 
@@ -225,7 +217,6 @@ const DocumentationArticlePage = () => {
             ))}
           </div>
           
-          {/* Next/Previous navigation */}
           <div className="mt-12 grid grid-cols-2 gap-4">
             {prevArticle && (
               <Button 
@@ -258,7 +249,6 @@ const DocumentationArticlePage = () => {
           
           <Separator className="my-8" />
           
-          {/* Feedback section */}
           <div className="mt-8 text-center">
             <h3 className="text-lg font-medium mb-2">Was this article helpful?</h3>
             <div className="flex justify-center gap-4">
@@ -267,7 +257,6 @@ const DocumentationArticlePage = () => {
             </div>
           </div>
           
-          {/* Back to category */}
           <div className="mt-8 text-center">
             <Button variant="ghost" onClick={() => navigate(`/support/${categoryId}`)}>
               <ChevronLeft className="h-4 w-4 mr-2" />

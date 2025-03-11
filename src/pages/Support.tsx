@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { AiChatSection } from '@/components/support/AiChatSection';
@@ -7,8 +6,8 @@ import { MessagesSquare, Book, Search, Clock, ThumbsUp, ThumbsDown, Loader2 } fr
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { fetchCategories, searchDocumentation } from '@/services/supabase-documentation.service';
-import { DocCategory } from '@/services/supabase-documentation.service';
+import { fetchCategories, searchDocumentation } from '@/services/static-documentation.service';
+import { DocCategory } from '@/types/documentation';
 import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -66,7 +65,6 @@ const Support = () => {
     navigate(`/support/${categorySlug}`);
   };
 
-  // Define search placeholders related to documentation
   const searchPlaceholders = [
     "How do I create a new project?",
     "What are the features of the AI assistant?",
@@ -79,14 +77,12 @@ const Support = () => {
     <MainLayout>
       <div className="container mx-auto py-12 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
-          {/* Header with search */}
           <div className="mb-12 text-center">
             <h1 className="text-4xl font-bold mb-4 text-white">Help Center</h1>
             <p className="text-siso-text/70 mb-8 text-lg max-w-2xl mx-auto">
               Find answers to your questions and comprehensive guides to help you get started
             </p>
             
-            {/* Fancy animated search bar */}
             <div className={cn(
               "relative max-w-2xl mx-auto",
               activeTab === 'documentation' ? 'block' : 'hidden'
@@ -112,7 +108,6 @@ const Support = () => {
             </TabsList>
             
             <TabsContent value="documentation" className="mt-0">
-              {/* Documentation Categories */}
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-siso-text/50 mb-4" />
@@ -136,7 +131,7 @@ const Support = () => {
                             <p className="text-sm text-siso-text/70 mb-3 line-clamp-2">{category.description}</p>
                             <div className="flex items-center text-xs text-siso-text/50">
                               <Search className="h-3 w-3 mr-1" />
-                              {category.articleCount} articles
+                              {category.articles.length} articles
                             </div>
                           </div>
                         </div>
@@ -157,12 +152,7 @@ const Support = () => {
                   ) : (
                     <>
                       <p className="text-siso-text font-medium">No documentation found</p>
-                      <p className="text-siso-text/60 mt-2">
-                        Please import documentation data from the 
-                        <a href="/support/import" className="text-siso-blue ml-1 hover:underline">
-                          import page
-                        </a>
-                      </p>
+                      <p className="text-siso-text/60 mt-2">Please try refreshing the page or contact support</p>
                     </>
                   )}
                 </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
@@ -9,11 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { 
-  fetchCategory, 
-  DocCategory, 
-  DocArticle
-} from '@/services/supabase-documentation.service';
+import { fetchCategory } from '@/services/static-documentation.service';
+import { DocCategory } from '@/types/documentation';
 
 const DocumentationCategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
