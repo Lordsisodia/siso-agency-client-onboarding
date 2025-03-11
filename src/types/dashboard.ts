@@ -1,3 +1,4 @@
+
 export type NotificationType = 'alert' | 'success' | 'warning' | 'info';
 export type EventType = 'deadline' | 'meeting' | 'reminder';
 
@@ -48,13 +49,13 @@ export interface NetworkingResource {
   profile_image_url?: string;
   member_count?: number;
   join_url?: string;
-  created_at: string;  // Changed from optional to required
-  updated_at: string;  // Changed from optional to required
+  created_at: string;
+  updated_at: string;
 }
 
 export interface CategoryStats {
   category: string;
-  community_count: number;  // Added missing property
+  community_count: number;
 }
 
 export interface Assistant {
@@ -64,4 +65,42 @@ export interface Assistant {
   category: string;
   created_at: string;
   updated_at: string;
+}
+
+// Leaderboard related interfaces
+export interface LeaderboardUser {
+  id: string;
+  user_id: string;
+  fullName: string;
+  points: number;
+  rank: string;
+  sisoTokens: number;
+  avatarUrl: string;
+  bio: string;
+  updated: string;
+  contributionCount: number;
+  referralCount: number;
+  achievements: any[];
+  discord_url: string;
+  github_url: string;
+  linkedin_url: string;
+  twitter_url: string;
+}
+
+export interface UseLeaderboardResult {
+  loading: boolean;
+  error: Error | null;
+  leaderboardData: LeaderboardUser[];
+  filteredData: LeaderboardUser[];
+  setFilteredData: React.Dispatch<React.SetStateAction<LeaderboardUser[]>>;
+  totalUsersWithPoints: number;
+  totalPoints: number;
+  totalSisoTokens: number;
+}
+
+export interface UseNetworkingResourcesResult {
+  resources: NetworkingResource[];
+  categories: CategoryStats[];
+  loading: boolean;
+  error: Error | null;
 }

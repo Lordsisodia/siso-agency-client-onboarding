@@ -1,8 +1,7 @@
 
-// This file needs to be kept for imports in other files,
-// but we're removing education-related functionality
+// This file is a placeholder to satisfy imports
+// The AI Daily Summary functionality has been deprecated
 
-// Export a simple placeholder function to avoid breaking imports
 export const useAiDailySummary = () => {
   return {
     summary: null,
