@@ -3,10 +3,8 @@ import {
   Home,
   FileText,
   FolderKanban,
-  Briefcase,
   User,
-  HelpCircle,
-  ClipboardCheck
+  HelpCircle
 } from 'lucide-react';
 import { MenuSection } from './types';
 

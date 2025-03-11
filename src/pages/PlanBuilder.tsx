@@ -3,12 +3,11 @@ import { ChatInterface } from '@/components/chat/ChatInterface';
 import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';
 import { Button } from '@/components/ui/button';
 import { FileEdit, AlertCircle, History, PlusCircle, ArrowLeft } from 'lucide-react';
-import { usePlanChatAssistant } from '@/hooks/use-plan-chat-assistant';
+import { usePlanChatAssistant } from '@/hooks/core';
 import { useToast } from '@/hooks/use-toast';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PrePlanState } from '@/components/plan-builder/PrePlanState';
-import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
 import { Waves } from '@/components/ui/waves-background';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -124,7 +123,7 @@ export default function PlanBuilder() {
       });
       
       try {
-        await sendMessage(prompt, undefined, formData);
+        await sendMessage(prompt, formData);
         
         setIsManualInputOpen(false);
         setIsPlanStarted(true);

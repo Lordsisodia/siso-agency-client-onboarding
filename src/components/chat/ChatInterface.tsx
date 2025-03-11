@@ -1,7 +1,6 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useChatAssistant } from '@/hooks/core';
 import { usePlanChatAssistant } from '@/hooks/core';
 import { useChatInterfaceState } from './useChatInterfaceState';
 import { ChatHeader } from './ChatHeader';
@@ -35,24 +34,20 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   usePlanAssistant = false,
   projectId
 }) => {
-  // Choose which chat hook to use based on the usePlanAssistant prop
-  const regularChat = useChatAssistant();
-  const planChat = usePlanChatAssistant(projectId);
-  
-  // Use the appropriate chat hook
+  // Use the plan chat assistant hook (this is the only hook we'll use)
   const { 
     messages: rawMessages, 
     isLoading, 
     error, 
     sendMessage: hookSendMessage, 
     clearMessages 
-  } = usePlanAssistant ? planChat : regularChat;
+  } = usePlanChatAssistant(projectId);
   
   // Map messages to ensure they match our expected ChatMessage type
   const messages = (rawMessages || []).map(msg => ({
     ...msg,
     role: msg.role === "system" ? "system" : msg.role
-  })) as any[];
+  })) as ChatMessage[];
   
   // Use the custom hook for handling chat interface state
   const {
@@ -68,12 +63,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     welcomeMessage,
     systemPrompt,
     sendMessage: (message: string, formData?: Record<string, any>) => {
-      // Adapt the interface to work with both types of chat hooks
       if (usePlanAssistant) {
-        return hookSendMessage(message, formData);
+        return hookSendMessage(message, undefined, formData);
       } else {
-        // For regular chat, pass systemPrompt as second parameter
-        return hookSendMessage(message, systemPrompt || undefined);
+        return hookSendMessage(message, undefined, systemPrompt ? { systemPrompt } : undefined);
       }
     }
   });
@@ -94,7 +87,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       />
       
       <ChatMessageList 
-        messages={messages as any}
+        messages={messages}
         isLoading={isLoading}
         error={error}
         onlineStatus={onlineStatus}

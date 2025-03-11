@@ -6,8 +6,8 @@ export * from "../use-mobile";
 export * from "../use-pagination";
 export * from "../use-toast";
 
-// Explicitly re-export ChatMessage from use-chat-assistant to avoid ambiguity
-export { ChatMessage } from "../use-chat-assistant";
+// Resolve type ambiguities by using explicit exports
+export type { ChatMessage } from "../use-chat-assistant";
 export * from "../use-plan-chat-assistant";
 export * from "../use-project-planning";
 

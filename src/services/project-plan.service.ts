@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ProjectPlan {
@@ -47,10 +46,8 @@ class ProjectPlanService {
   /**
    * Creates a new project plan
    */
-  async createPlan(params: CreatePlanParams): Promise<ProjectPlan | null> {
+  async createProjectPlan(title: string, description?: string, status: string = 'draft'): Promise<string | null> {
     try {
-      const { title, description, status = 'draft' } = params;
-      
       const { data, error } = await supabase
         .from('project_plans')
         .insert({
@@ -70,24 +67,9 @@ class ProjectPlanService {
         return null;
       }
       
-      // Convert JSON strings to objects
-      return {
-        ...data,
-        requirements: typeof data.requirements === 'string' 
-          ? JSON.parse(data.requirements) 
-          : data.requirements || {},
-        features: typeof data.features === 'string' 
-          ? JSON.parse(data.features) 
-          : data.features || {},
-        technical_specs: typeof data.technical_specs === 'string' 
-          ? JSON.parse(data.technical_specs) 
-          : data.technical_specs || {},
-        timeline: typeof data.timeline === 'string' 
-          ? JSON.parse(data.timeline) 
-          : data.timeline || {}
-      };
+      return data.id;
     } catch (error) {
-      console.error('Error in createPlan:', error);
+      console.error('Error in createProjectPlan:', error);
       return null;
     }
   }
@@ -95,7 +77,7 @@ class ProjectPlanService {
   /**
    * Gets a project plan by ID
    */
-  async getPlanById(planId: string): Promise<ProjectPlan | null> {
+  async getProjectPlan(planId: string): Promise<ProjectPlan | null> {
     try {
       const { data, error } = await supabase
         .from('project_plans')
@@ -125,47 +107,15 @@ class ProjectPlanService {
           : data.timeline || {}
       };
     } catch (error) {
-      console.error('Error in getPlanById:', error);
+      console.error('Error in getProjectPlan:', error);
       return null;
-    }
-  }
-
-  /**
-   * Gets chat history for a plan
-   */
-  async getPlanChatHistory(planId: string): Promise<ProjectChatHistory[]> {
-    try {
-      const { data, error } = await supabase
-        .from('plan_chat_history')
-        .select('*')
-        .eq('plan_id', planId)
-        .order('created_at', { ascending: true });
-      
-      if (error) {
-        console.error('Error fetching plan chat history:', error);
-        return [];
-      }
-      
-      // Convert JSON strings to objects
-      return data.map(item => ({
-        ...item,
-        form_data: typeof item.form_data === 'string' 
-          ? JSON.parse(item.form_data) 
-          : item.form_data,
-        metadata: typeof item.metadata === 'string' 
-          ? JSON.parse(item.metadata) 
-          : item.metadata
-      }));
-    } catch (error) {
-      console.error('Error in getPlanChatHistory:', error);
-      return [];
     }
   }
 
   /**
    * Gets all project plans for the current user
    */
-  async getAllPlans(): Promise<ProjectPlan[]> {
+  async getAllUserProjects(): Promise<ProjectPlan[]> {
     try {
       const { data, error } = await supabase
         .from('project_plans')
@@ -194,7 +144,39 @@ class ProjectPlanService {
           : plan.timeline || {}
       }));
     } catch (error) {
-      console.error('Error in getAllPlans:', error);
+      console.error('Error in getAllUserProjects:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Gets chat history for a plan
+   */
+  async getProjectChatHistory(planId: string): Promise<ProjectChatHistory[]> {
+    try {
+      const { data, error } = await supabase
+        .from('plan_chat_history')
+        .select('*')
+        .eq('plan_id', planId)
+        .order('created_at', { ascending: true });
+      
+      if (error) {
+        console.error('Error fetching plan chat history:', error);
+        return [];
+      }
+      
+      // Convert JSON strings to objects
+      return data.map(item => ({
+        ...item,
+        form_data: typeof item.form_data === 'string' 
+          ? JSON.parse(item.form_data) 
+          : item.form_data,
+        metadata: typeof item.metadata === 'string' 
+          ? JSON.parse(item.metadata) 
+          : item.metadata
+      }));
+    } catch (error) {
+      console.error('Error in getProjectChatHistory:', error);
       return [];
     }
   }
@@ -202,7 +184,7 @@ class ProjectPlanService {
   /**
    * Updates a project plan
    */
-  async updatePlan(planId: string, params: UpdatePlanParams): Promise<ProjectPlan | null> {
+  async updateProjectPlan(planId: string, params: UpdatePlanParams): Promise<ProjectPlan | null> {
     try {
       const { data, error } = await supabase
         .from('project_plans')
@@ -233,7 +215,7 @@ class ProjectPlanService {
           : data.timeline || {}
       };
     } catch (error) {
-      console.error('Error in updatePlan:', error);
+      console.error('Error in updateProjectPlan:', error);
       return null;
     }
   }
@@ -241,7 +223,7 @@ class ProjectPlanService {
   /**
    * Deletes a project plan
    */
-  async deletePlan(planId: string): Promise<boolean> {
+  async deleteProject(planId: string): Promise<boolean> {
     try {
       const { error } = await supabase
         .from('project_plans')
@@ -255,40 +237,7 @@ class ProjectPlanService {
       
       return true;
     } catch (error) {
-      console.error('Error in deletePlan:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Saves a chat message to plan history
-   */
-  async saveChatMessage(
-    planId: string, 
-    userMessage: string, 
-    aiResponse: string,
-    formData?: Record<string, any> | null,
-    metadata?: Record<string, any> | null
-  ): Promise<boolean> {
-    try {
-      const { error } = await supabase
-        .from('plan_chat_history')
-        .insert({
-          plan_id: planId,
-          user_message: userMessage,
-          ai_response: aiResponse,
-          form_data: formData || null,
-          metadata: metadata || null
-        });
-      
-      if (error) {
-        console.error('Error saving chat message:', error);
-        return false;
-      }
-      
-      return true;
-    } catch (error) {
-      console.error('Error in saveChatMessage:', error);
+      console.error('Error in deleteProject:', error);
       return false;
     }
   }
@@ -297,19 +246,19 @@ class ProjectPlanService {
    * Chats with the plan builder assistant
    */
   async chatWithPlanAssistant(
-    message: string, 
-    thread_id?: string | null,
-    metadata?: Record<string, any>
-  ): Promise<{
-    thread_id: string;
-    message: string;
-  } | null> {
+    messages: ChatMessage[],
+    projectId?: string,
+    formData?: Record<string, any>
+  ): Promise<string | null> {
     try {
+      // Get the user's message (last message in the array)
+      const userMessage = messages[messages.length - 1];
+      
       const options: any = {
         body: { 
-          message,
-          thread_id: thread_id || null,
-          metadata: metadata || {}
+          messages,
+          projectId,
+          formData
         }
       };
 
@@ -320,12 +269,57 @@ class ProjectPlanService {
         return null;
       }
       
-      return response.data;
+      return response.data.response;
     } catch (error) {
       console.error('Error in chatWithPlanAssistant:', error);
       return null;
     }
   }
+
+  /**
+   * Stream responses from the plan builder assistant
+   */
+  streamChatWithPlanAssistant(
+    messages: any[],
+    projectId?: string,
+    formData?: Record<string, any>,
+    onChunk: (chunk: string) => void = () => {},
+    onComplete: (fullResponse: string) => void = () => {}
+  ): AbortController {
+    const controller = new AbortController();
+    
+    (async () => {
+      try {
+        // This is a simplified implementation that just calls the non-streaming version
+        // and simulates streaming by breaking up the response
+        const fullResponse = await this.chatWithPlanAssistant(messages, projectId, formData);
+        
+        if (fullResponse) {
+          // Simulate streaming by breaking the response into chunks
+          const chunks = fullResponse.match(/.{1,20}/g) || [];
+          
+          for (const chunk of chunks) {
+            if (controller.signal.aborted) break;
+            onChunk(chunk);
+            await new Promise(resolve => setTimeout(resolve, 50));
+          }
+          
+          onComplete(fullResponse);
+        }
+      } catch (error) {
+        console.error('Error in streamChatWithPlanAssistant:', error);
+      }
+    })();
+    
+    return controller;
+  }
 }
 
 export const projectPlanService = new ProjectPlanService();
+
+// Define ChatMessage type for the service
+type ChatMessage = {
+  role: "user" | "assistant" | "system";
+  content: string;
+  id?: string;
+};
