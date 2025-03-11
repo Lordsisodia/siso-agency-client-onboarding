@@ -4,6 +4,7 @@ import { showPointsEarnedToast } from '@/components/points/PointsEarnedToast';
 export const awardNavigationPoints = (path: string) => {
   // Only award points for certain pages
   const pointsMap: Record<string, number> = {
+    '/': 2, // Dashboard
     '/organization': 5,
     '/preferences': 5,
     '/tasks': 3,
@@ -13,7 +14,7 @@ export const awardNavigationPoints = (path: string) => {
   if (pointsMap[path]) {
     showPointsEarnedToast({ 
       points: pointsMap[path], 
-      action: `Visiting ${path.replace('/', '')}` 
+      action: path === '/' ? 'Visiting Dashboard' : `Visiting ${path.replace('/', '')}` 
     });
     
     // Could also save this to a user's profile in a real implementation

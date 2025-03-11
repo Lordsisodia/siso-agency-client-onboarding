@@ -1,5 +1,5 @@
 
-import { FileText, Briefcase, BookOpen, TrendingUp, BarChart3, ArrowRight } from 'lucide-react';
+import { FileText, Briefcase, BookOpen, TrendingUp, BarChart3, ArrowRight, Plus, PencilLine, Search, MessageSquare } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -16,32 +16,39 @@ export const QuickActionsPanel = () => {
   
   const actions = [
     {
+      title: 'New Project',
+      description: 'Start a project plan',
+      icon: Plus,
+      path: '/new-project',
+      tooltip: 'Create a new project plan'
+    },
+    {
       title: 'Plan Builder',
-      description: 'Create new app plans',
-      icon: FileText,
+      description: 'Design app plans',
+      icon: PencilLine,
       path: '/plan-builder',
-      tooltip: 'Start creating new application plans'
-    },
-    {
-      title: 'Portfolio',
-      description: 'View portfolio projects',
-      icon: Briefcase,
-      path: '/portfolio',
-      tooltip: 'Access your portfolio of projects'
-    },
-    {
-      title: 'Resource Hub',
-      description: 'Browse resources',
-      icon: BookOpen,
-      path: '/resource-hub',
-      tooltip: 'Find resources, tutorials and guides'
+      tooltip: 'Open the app plan builder'
     },
     {
       title: 'Competitive Analysis',
-      description: 'Analyze competitors',
-      icon: TrendingUp,
+      description: 'Research competitors',
+      icon: Search,
       path: '/competitive-analysis',
-      tooltip: 'Research and analyze your competitors'
+      tooltip: 'Analyze market competitors'
+    },
+    {
+      title: 'Portfolio',
+      description: 'View your showcase',
+      icon: BookOpen,
+      path: '/portfolio',
+      tooltip: 'Review your project portfolio'
+    },
+    {
+      title: 'Need Help?',
+      description: 'Ask our AI assistant',
+      icon: MessageSquare,
+      path: '/support',
+      tooltip: 'Get assistance from our AI helper'
     }
   ];
 
@@ -71,7 +78,7 @@ export const QuickActionsPanel = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <ScrollArea className="h-[220px]">
+          <ScrollArea className="h-[240px]">
             <div className="p-3 space-y-2">
               {actions.map((action, index) => (
                 <TooltipProvider key={action.title}>
