@@ -9,9 +9,11 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { useEvents } from '@/hooks/useEvents';
 import { awardNavigationPoints } from '@/utils/navigationPoints';
 import { useLocation } from 'react-router-dom';
+import { useBasicUserData } from '@/hooks/useBasicUserData';
 
 export default function Dashboard() {
   const { user, loading } = useAuthSession();
+  const { userData } = useBasicUserData();
   const { stats, fetchStats } = useDashboardStats();
   const { notifications } = useNotifications();
   const { events } = useEvents();
@@ -35,12 +37,19 @@ export default function Dashboard() {
     return 'Good Evening';
   };
 
+  // Get display name from user data
+  const getDisplayName = () => {
+    if (userData?.fullName) return userData.fullName;
+    if (user?.user_metadata?.full_name) return user.user_metadata.full_name;
+    return 'Friend';
+  };
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen bg-gradient-to-b from-[#0A0A0A] to-[#121212]">
         <Sidebar />
         <DashboardLayout 
-          userName={user?.user_metadata?.full_name || 'User'} 
+          userName={getDisplayName()} 
           greeting={getGreeting()}
           stats={stats}
           notifications={notifications}

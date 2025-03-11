@@ -1,11 +1,20 @@
 
-import React from 'react';
-import { Bell, Settings } from 'lucide-react';
+import React, { useState } from 'react';
+import { Bell, Settings, ChevronDown, UserCircle, LogOut, UserCog } from 'lucide-react';
 import { DashboardStats } from '@/types/dashboard';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useAuthSession } from '@/hooks/useAuthSession';
 
 interface DashboardHeaderProps {
   userName: string;
@@ -19,20 +28,37 @@ export const EnhancedDashboardHeader: React.FC<DashboardHeaderProps> = ({
   stats 
 }) => {
   const navigate = useNavigate();
+  const { handleSignOut } = useAuthSession();
+  const [showDropdown, setShowDropdown] = useState(false);
+  
+  // Enhanced greeting with emoji based on time of day
+  const getGreetingEmoji = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return '🌅'; // Morning
+    if (hour < 18) return '☀️'; // Afternoon
+    return '🌙'; // Evening
+  };
 
   return (
     <div className="flex flex-col space-y-6">
       <div className="flex justify-between items-center">
-        <motion.h1 
-          className="text-2xl md:text-3xl font-bold"
+        <motion.div 
+          className="flex flex-col"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {greeting}, {userName}!
-        </motion.h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-indigo-500">
+              {getGreetingEmoji()} {greeting}, {userName}!
+            </h1>
+          </div>
+          <p className="text-muted-foreground mt-1">
+            Here's what's happening with your projects today
+          </p>
+        </motion.div>
         
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-4">
           <Button 
             variant="ghost" 
             size="icon"
@@ -42,19 +68,62 @@ export const EnhancedDashboardHeader: React.FC<DashboardHeaderProps> = ({
             <Bell className="h-5 w-5" />
             <Badge 
               variant="destructive" 
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0"
+              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 animate-pulse shadow-glow"
+              glow
             >
               3
             </Badge>
           </Button>
           
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate('/preferences')}
-          >
-            <Settings className="h-5 w-5" />
-          </Button>
+          <DropdownMenu open={showDropdown} onOpenChange={setShowDropdown}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="flex items-center gap-2 border-border/40 bg-background/50 hover:bg-background/80">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src="/avatar-placeholder.png" alt={userName} />
+                  <AvatarFallback className="bg-gradient-to-br from-purple-500/30 to-indigo-500/30 text-xs">
+                    {userName.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm hidden md:inline">{userName}</span>
+                <ChevronDown className="h-4 w-4 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 bg-background/95 backdrop-blur-sm border-border/50">
+              <div className="flex items-center justify-start p-2 gap-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src="/avatar-placeholder.png" alt={userName} />
+                  <AvatarFallback className="bg-gradient-to-br from-purple-500/30 to-indigo-500/30">
+                    {userName.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span className="font-medium text-sm">{userName}</span>
+                  <span className="text-xs text-muted-foreground">Premium User</span>
+                </div>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/profile')}>
+                <UserCircle className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/preferences')}>
+                <UserCog className="mr-2 h-4 w-4" />
+                <span>Preferences</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/organization')}>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Organization</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                className="cursor-pointer text-destructive focus:text-destructive" 
+                onClick={handleSignOut}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Sign out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       
@@ -64,21 +133,25 @@ export const EnhancedDashboardHeader: React.FC<DashboardHeaderProps> = ({
             label="Active Projects" 
             value={stats.activeProjects || 0}
             onClick={() => navigate('/projects')}
+            color="indigo"
           />
           <StatCard 
             label="Pending Tasks" 
             value={stats.pendingTasks || 0} 
             onClick={() => navigate('/tasks')}
+            color="amber"
           />
           <StatCard 
             label="Upcoming Events" 
             value={stats.upcomingEvents || 0} 
             onClick={() => navigate('/calendar')}
+            color="emerald"
           />
           <StatCard 
             label="Login Streak" 
             value={stats.loginStreak || 0} 
             badgeText={stats.loginStreak && stats.loginStreak > 5 ? "Impressive!" : undefined}
+            color="purple"
           />
         </div>
       )}
@@ -86,7 +159,7 @@ export const EnhancedDashboardHeader: React.FC<DashboardHeaderProps> = ({
       <div className="flex justify-end">
         <Button 
           onClick={() => navigate('/new-project')}
-          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-300"
         >
           Start New Project
         </Button>
@@ -100,13 +173,22 @@ interface StatCardProps {
   value: number;
   badgeText?: string;
   onClick?: () => void;
+  color?: 'indigo' | 'amber' | 'emerald' | 'purple' | 'rose';
 }
 
-const StatCard: React.FC<StatCardProps> = ({ label, value, badgeText, onClick }) => {
+const StatCard: React.FC<StatCardProps> = ({ label, value, badgeText, onClick, color = 'indigo' }) => {
+  const colorClasses = {
+    indigo: 'from-indigo-500/20 to-indigo-600/10 hover:from-indigo-500/30 hover:to-indigo-600/20 text-indigo-500',
+    amber: 'from-amber-500/20 to-amber-600/10 hover:from-amber-500/30 hover:to-amber-600/20 text-amber-500',
+    emerald: 'from-emerald-500/20 to-emerald-600/10 hover:from-emerald-500/30 hover:to-emerald-600/20 text-emerald-500',
+    purple: 'from-purple-500/20 to-purple-600/10 hover:from-purple-500/30 hover:to-purple-600/20 text-purple-500',
+    rose: 'from-rose-500/20 to-rose-600/10 hover:from-rose-500/30 hover:to-rose-600/20 text-rose-500'
+  };
+
   return (
     <motion.div 
-      className={`bg-gradient-to-br from-background/80 to-background/40 p-4 rounded-lg border border-border 
-                  hover:shadow-md hover:border-primary/20 transition-all duration-300 ${onClick ? 'cursor-pointer' : ''}`}
+      className={`bg-gradient-to-br ${colorClasses[color]} p-4 rounded-lg border border-border/30 
+                  backdrop-blur-sm hover:shadow-md hover:border-border/50 transition-all duration-300 ${onClick ? 'cursor-pointer' : ''}`}
       whileHover={{ y: -5, scale: 1.02 }}
       onClick={onClick}
       initial={{ opacity: 0, y: 20 }}
@@ -117,7 +199,7 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, badgeText, onClick })
       <div className="text-sm text-muted-foreground flex justify-between items-center">
         <span>{label}</span>
         {badgeText && (
-          <Badge variant="secondary" className="text-xs py-0 px-1.5">
+          <Badge variant="secondary" className="text-xs py-0 px-1.5 bg-purple-500/10 text-purple-500 border border-purple-500/20">
             {badgeText}
           </Badge>
         )}
