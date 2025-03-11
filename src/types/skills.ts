@@ -32,3 +32,10 @@ export interface UserSkillProgress {
   times_completed: number;
   last_completed_at: string | null;
 }
+
+export interface SkillsListProps {
+  skills: Skill[];
+  userProgress: UserSkillProgress[];
+  skillPaths: SkillPath[];
+  onExternalLinkClick: (url: string) => void;
+}

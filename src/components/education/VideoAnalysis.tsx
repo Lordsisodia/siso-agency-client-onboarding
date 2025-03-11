@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { safeJsonArray } from '@/utils/json-helpers';
 import { Json } from '@/integrations/supabase/types';

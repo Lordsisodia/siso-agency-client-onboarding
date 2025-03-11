@@ -90,12 +90,15 @@ export interface LeaderboardUser {
 export interface UseLeaderboardResult {
   loading: boolean;
   error: Error | null;
+  users: LeaderboardUser[];
   leaderboardData: LeaderboardUser[];
   filteredData: LeaderboardUser[];
   setFilteredData: React.Dispatch<React.SetStateAction<LeaderboardUser[]>>;
   totalUsersWithPoints: number;
   totalPoints: number;
   totalSisoTokens: number;
+  selectedUser: LeaderboardUser | null;
+  setSelectedUser: (user: LeaderboardUser | null) => void;
 }
 
 export interface UseNetworkingResourcesResult {
