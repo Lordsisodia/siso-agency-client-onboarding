@@ -8,21 +8,15 @@ export * from "../use-toast";
 
 // Export chat assistant hooks
 export * from "../use-chat-assistant";
-export * from "../use-project-planning";
 
 // Export additional hooks
 export * from "../useAuthSession";
 export * from "../useBasicUserData";
 export * from "../useDashboardStats";
-export * from "../useEvents";
-export * from "../useGoogleAuth";
 export * from "../useNotifications";
 export * from "../useOnboardingAuth";
 export * from "../useOnboardingChat";
-export * from "../usePoints";
-export * from "../usePortfolio";
 export * from "../useProfileData";
 export * from "../useProfileImage";
-export * from "../useProjectDocumentation";
 export * from "../useUser";
 export * from "../useViewportLoading";

@@ -20,9 +20,6 @@ import NewProject from '@/pages/NewProject';
 import Support from '@/pages/Support';
 import Notifications from '@/pages/Notifications';
 
-// Feature pages (not in navigation but still accessible)
-import SisoAI from '@/pages/SisoAI';
-
 import { Toaster } from '@/components/ui/toaster';
 import { useAuthSession } from '@/hooks/core';
 
@@ -63,9 +60,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/home" element={<Dashboard />} />
         
-        {/* Feature routes - still accessible but not in navigation */}
-        <Route path="/siso-ai" element={<SisoAI />} />
-        
+        {/* Onboarding routes */}
         <Route path="/onboarding/social" element={<SocialOnboarding />} />
         <Route path="/onboarding/congratulations" element={<OnboardingCongratulations />} />
 

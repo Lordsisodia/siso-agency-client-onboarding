@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useChatAssistant } from '@/hooks/core';
 import { useChatInterfaceState } from './useChatInterfaceState';

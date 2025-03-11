@@ -23,15 +23,17 @@ export const useChatInterfaceState = ({
 }: UseChatInterfaceStateProps) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
-  const [onlineStatus, setOnlineStatus] = useState(navigator.onLine);
+  const [onlineStatus, setOnlineStatus] = useState<'online' | 'offline' | 'reconnecting'>(
+    navigator.onLine ? 'online' : 'offline'
+  );
   const [hasAutoRetried, setHasAutoRetried] = useState(false);
 
   // Monitor online status
   useEffect(() => {
     const handleOnline = () => {
-      setOnlineStatus(true);
+      setOnlineStatus('online');
       // If we were offline and now we're back online, consider auto-retrying the last message
-      if (!onlineStatus && !hasAutoRetried && messages.length > 0) {
+      if (onlineStatus === 'offline' && !hasAutoRetried && messages.length > 0) {
         const lastUserMessage = [...messages].reverse().find(m => m.role === 'user');
         if (lastUserMessage && error) {
           console.log('Auto-retrying last message after reconnection');
@@ -43,7 +45,7 @@ export const useChatInterfaceState = ({
         }
       }
     };
-    const handleOffline = () => setOnlineStatus(false);
+    const handleOffline = () => setOnlineStatus('offline');
     
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
@@ -92,7 +94,7 @@ export const useChatInterfaceState = ({
     setHasAutoRetried(false);
     
     // Check online status before sending
-    if (!onlineStatus) {
+    if (onlineStatus === 'offline') {
       return;
     }
     

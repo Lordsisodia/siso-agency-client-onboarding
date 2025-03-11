@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { AlertTriangle } from 'lucide-react';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
@@ -27,9 +27,9 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
   
   // Use our custom hook to scroll to bottom on new messages
   useAutoScroll({
-    scrollableRef: messagesEndRef,
     dependencies: [messages, isLoading, error],
     behavior: 'smooth',
+    targetRef: messagesEndRef
   });
 
   // Empty state when no messages
