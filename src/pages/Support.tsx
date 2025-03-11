@@ -3,13 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { AiChatSection } from '@/components/support/AiChatSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, MessagesSquare, Book } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { MessagesSquare, Book } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { fetchCategories, searchDocumentation } from '@/services/supabase-documentation.service';
 import { DocCategory } from '@/services/supabase-documentation.service';
+import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input';
+import { cn } from '@/lib/utils';
 
 const Support = () => {
   const [activeTab, setActiveTab] = useState('documentation');
@@ -43,9 +44,24 @@ const Support = () => {
     setSearchQuery(e.target.value);
   };
 
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // The search is already triggered by the onChange event
+    // This is just to handle the form submission
+  };
+
   const handleCategoryClick = (categorySlug: string) => {
     navigate(`/support/${categorySlug}`);
   };
+
+  // Define search placeholders related to documentation
+  const searchPlaceholders = [
+    "How do I create a new project?",
+    "What are the features of the AI assistant?",
+    "How to manage my account?",
+    "Troubleshooting login issues",
+    "How to add team members to a project?",
+  ];
 
   return (
     <MainLayout>
@@ -56,15 +72,15 @@ const Support = () => {
             <h1 className="text-3xl font-bold text-siso-text-bold mb-2">Help Center</h1>
             <p className="text-siso-text/70 mb-6">Find comprehensive guides and documentation to help you get started</p>
             
-            {/* Prominent search bar */}
-            <div className="relative max-w-2xl mx-auto mb-4">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-siso-text/60" />
-              <Input
-                type="search"
-                placeholder="Search documentation..."
-                className="pl-10 bg-siso-bg-card/20 border-siso-border w-full"
-                value={searchQuery}
+            {/* Fancy animated search bar */}
+            <div className={cn(
+              "relative max-w-2xl mx-auto mb-8",
+              activeTab === 'documentation' ? 'block' : 'hidden'
+            )}>
+              <PlaceholdersAndVanishInput
+                placeholders={searchPlaceholders}
                 onChange={handleSearch}
+                onSubmit={handleSearchSubmit}
               />
             </div>
           </div>

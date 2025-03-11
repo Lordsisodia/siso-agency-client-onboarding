@@ -1,37 +1,20 @@
+
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
-interface PlaceholdersAndVanishInputProps {
-  placeholders: string[];
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-  onFocus?: () => void; // Added as optional
-  onBlur?: () => void;  // Added as optional
-  className?: string;
-  value?: string;
-}
-
 export function PlaceholdersAndVanishInput({
   placeholders,
   onChange,
   onSubmit,
-  onFocus,
-  onBlur,
-  className,
-  value: externalValue,
-}: PlaceholdersAndVanishInputProps) {
+}: {
+  placeholders: string[];
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+}) {
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
-  const [value, setValue] = useState(externalValue || "");
-
-  // Update internal value when external value changes
-  useEffect(() => {
-    if (externalValue !== undefined) {
-      setValue(externalValue);
-    }
-  }, [externalValue]);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const startAnimation = () => {
@@ -41,10 +24,10 @@ export function PlaceholdersAndVanishInput({
   };
   const handleVisibilityChange = () => {
     if (document.visibilityState !== "visible" && intervalRef.current) {
-      clearInterval(intervalRef.current);
+      clearInterval(intervalRef.current); // Clear the interval when the tab is not visible
       intervalRef.current = null;
     } else if (document.visibilityState === "visible") {
-      startAnimation();
+      startAnimation(); // Restart the interval when the tab becomes visible
     }
   };
 
@@ -63,6 +46,7 @@ export function PlaceholdersAndVanishInput({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const newDataRef = useRef<any[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [value, setValue] = useState("");
   const [animating, setAnimating] = useState(false);
 
   const draw = useCallback(() => {
@@ -191,41 +175,34 @@ export function PlaceholdersAndVanishInput({
     vanishAndSubmit();
     onSubmit && onSubmit(e);
   };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!animating) {
-      setValue(e.target.value);
-      onChange && onChange(e);
-    }
-  };
-
   return (
     <form
       className={cn(
         "w-full relative max-w-xl mx-auto bg-white dark:bg-zinc-800 h-12 rounded-full overflow-hidden shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),_0px_1px_0px_0px_rgba(25,28,33,0.02),_0px_0px_0px_1px_rgba(25,28,33,0.08)] transition duration-200",
-        value && "bg-gray-50",
-        className
+        value && "bg-gray-50"
       )}
       onSubmit={handleSubmit}
     >
       <canvas
         className={cn(
-          "absolute pointer-events-none text-base transform scale-50 top-[20%] left-2 sm:left-8 origin-top-left filter invert dark:invert-0 pr-20",
+          "absolute pointer-events-none  text-base transform scale-50 top-[20%] left-2 sm:left-8 origin-top-left filter invert dark:invert-0 pr-20",
           !animating ? "opacity-0" : "opacity-100"
         )}
         ref={canvasRef}
       />
-
       <input
-        onChange={handleChange}
+        onChange={(e) => {
+          if (!animating) {
+            setValue(e.target.value);
+            onChange && onChange(e);
+          }
+        }}
         onKeyDown={handleKeyDown}
-        onFocus={onFocus}
-        onBlur={onBlur}
         ref={inputRef}
         value={value}
         type="text"
         className={cn(
-          "w-full relative text-base sm:text-xl z-50 border-none dark:text-white text-white bg-transparent h-full rounded-full focus:outline-none focus:ring-0 pl-8 sm:pl-10 pr-20",
+          "w-full relative text-sm sm:text-base z-50 border-none dark:text-white bg-transparent text-black h-full rounded-full focus:outline-none focus:ring-0 pl-4 sm:pl-10 pr-20",
           animating && "text-transparent dark:text-transparent"
         )}
       />
