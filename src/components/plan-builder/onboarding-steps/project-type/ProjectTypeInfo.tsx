@@ -1,58 +1,106 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { fadeInUp } from '@/components/ui/animations';
-import { ProjectTypeData } from './ProjectTypeData';
+import { cn } from '@/lib/utils';
+// Import projectTypes instead of ProjectTypeData
+import { projectTypes } from './ProjectTypeData';
 
-// Import as a type
-import type { ProjectTypeInfo as ProjectTypeInfoType } from './ProjectTypeData';
-
-interface ProjectTypeInfoProps {
-  selectedType: string | null;
+export interface ProjectTypeInfoProps {
+  selectedType: string;
+  selectedScale: string;
 }
 
-export const ProjectTypeInfo: React.FC<ProjectTypeInfoProps> = ({ selectedType }) => {
-  if (!selectedType) return null;
+const ProjectTypeInfo: React.FC<ProjectTypeInfoProps> = ({ 
+  selectedType,
+  selectedScale
+}) => {
+  // Find the selected project type data
+  const typeInfo = projectTypes.find(type => type.id === selectedType);
+  
+  if (!typeInfo) {
+    return (
+      <div className="bg-siso-bg-alt p-4 rounded-lg border border-siso-border">
+        <p className="text-siso-text">Please select a project type to see details.</p>
+      </div>
+    );
+  }
 
-  const projectInfo = ProjectTypeData.find(
-    (type) => type.id === selectedType
-  );
-
-  if (!projectInfo) return null;
+  // Get complexity level based on selected scale
+  const complexityLevel = selectedScale === 'small' 
+    ? 'Basic' 
+    : selectedScale === 'medium' 
+      ? 'Standard' 
+      : 'Advanced';
 
   return (
     <motion.div
-      className="mt-4 space-y-2 text-sm bg-gray-50 rounded-lg p-4 dark:bg-gray-800"
-      variants={fadeInUp}
-      initial="initial"
-      animate="animate"
-      exit="exit"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-siso-bg-alt p-6 rounded-lg border border-siso-border relative overflow-hidden"
     >
-      <h3 className="font-medium text-base mb-2">{projectInfo.title} Details</h3>
-      <p className="text-gray-600 dark:text-gray-300 mb-3">{projectInfo.description}</p>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <h4 className="font-medium text-sm mb-1">Typical Features:</h4>
-          <ul className="list-disc pl-5 space-y-1 text-gray-600 dark:text-gray-300">
-            {projectInfo.features.map((feature, index) => (
-              <li key={index}>{feature}</li>
-            ))}
-          </ul>
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent to-siso-orange/5 z-0"></div>
+      
+      <div className="relative z-10">
+        <h3 className="text-xl font-semibold text-siso-text-bold mb-2 flex items-center">
+          <span className={cn(
+            "w-6 h-6 inline-flex items-center justify-center rounded-full mr-2 text-white text-xs",
+            typeInfo.colorClass || "bg-siso-orange"
+          )}>
+            {typeInfo.icon || "🚀"}
+          </span>
+          {typeInfo.name}
+        </h3>
+        
+        <p className="text-siso-text-muted mb-4">{typeInfo.description}</p>
+        
+        <div className="mb-4">
+          <h4 className="text-sm font-medium text-siso-text-bold mb-1">Complexity: {complexityLevel}</h4>
+          <div className="h-2 bg-siso-bg-card rounded-full overflow-hidden">
+            <div 
+              className={cn(
+                "h-full rounded-full",
+                selectedScale === 'small' ? 'w-1/3 bg-green-500' :
+                selectedScale === 'medium' ? 'w-2/3 bg-yellow-500' :
+                'w-full bg-red-500'
+              )}
+            ></div>
+          </div>
         </div>
-
-        <div>
-          <h4 className="font-medium text-sm mb-1">Timeline Estimate:</h4>
-          <p className="text-gray-600 dark:text-gray-300">
-            {projectInfo.timelineEstimate}
-          </p>
-
-          <h4 className="font-medium text-sm mt-3 mb-1">Budget Range:</h4>
-          <p className="text-gray-600 dark:text-gray-300">
-            {projectInfo.budgetRange}
-          </p>
+        
+        <div className="space-y-3">
+          <div>
+            <h4 className="text-sm font-medium text-siso-text-bold mb-1">Typical Timeline</h4>
+            <p className="text-sm text-siso-text">
+              {selectedScale === 'small' ? typeInfo.timelineSmall :
+               selectedScale === 'medium' ? typeInfo.timelineMedium :
+               typeInfo.timelineLarge}
+            </p>
+          </div>
+          
+          <div>
+            <h4 className="text-sm font-medium text-siso-text-bold mb-1">Estimated Budget Range</h4>
+            <p className="text-sm text-siso-text">
+              {selectedScale === 'small' ? typeInfo.budgetSmall :
+               selectedScale === 'medium' ? typeInfo.budgetMedium :
+               typeInfo.budgetLarge}
+            </p>
+          </div>
+          
+          <div>
+            <h4 className="text-sm font-medium text-siso-text-bold mb-1">Key Features</h4>
+            <ul className="text-sm text-siso-text list-disc list-inside">
+              {(selectedScale === 'small' ? typeInfo.featuresSmall :
+                selectedScale === 'medium' ? typeInfo.featuresMedium :
+                typeInfo.featuresLarge).map((feature, index) => (
+                <li key={index}>{feature}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </motion.div>
   );
 };
+
+export default ProjectTypeInfo;

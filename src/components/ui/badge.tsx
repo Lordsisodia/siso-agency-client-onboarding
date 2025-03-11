@@ -31,11 +31,17 @@ const badgeVariants = cva(
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+    VariantProps<typeof badgeVariants> {
+  glow?: boolean;
+  animated?: boolean;
+}
 
-function Badge({ className, variant, ...props }: BadgeProps) {
+function Badge({ className, variant, glow, animated, ...props }: BadgeProps) {
+  const glowClasses = glow ? "shadow-md shadow-current/25" : "";
+  const animatedClasses = animated ? "animate-pulse" : "";
+  
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+    <div className={cn(badgeVariants({ variant }), glowClasses, animatedClasses, className)} {...props} />
   )
 }
 
