@@ -840,6 +840,197 @@ export type Database = {
         }
         Relationships: []
       }
+      documentation_articles: {
+        Row: {
+          category_id: string
+          content: string | null
+          created_at: string | null
+          difficulty: string | null
+          display_order: number | null
+          excerpt: string | null
+          id: string
+          last_updated: string | null
+          slug: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category_id: string
+          content?: string | null
+          created_at?: string | null
+          difficulty?: string | null
+          display_order?: number | null
+          excerpt?: string | null
+          id?: string
+          last_updated?: string | null
+          slug: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category_id?: string
+          content?: string | null
+          created_at?: string | null
+          difficulty?: string | null
+          display_order?: number | null
+          excerpt?: string | null
+          id?: string
+          last_updated?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentation_articles_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "documentation_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documentation_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          slug: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          slug: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          slug?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      documentation_feedback: {
+        Row: {
+          created_at: string | null
+          feedback_type: string
+          id: string
+          question_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          feedback_type: string
+          id?: string
+          question_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          feedback_type?: string
+          id?: string
+          question_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentation_feedback_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "documentation_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documentation_questions: {
+        Row: {
+          answer: string
+          created_at: string | null
+          display_order: number | null
+          id: string
+          question: string
+          section_id: string
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          answer: string
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          question: string
+          section_id: string
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          answer?: string
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          question?: string
+          section_id?: string
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentation_questions_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "documentation_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documentation_sections: {
+        Row: {
+          article_id: string
+          created_at: string | null
+          display_order: number | null
+          id: string
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          article_id: string
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          article_id?: string
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentation_sections_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "documentation_articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       education_creators: {
         Row: {
           channel_avatar_url: string | null

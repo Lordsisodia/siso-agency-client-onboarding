@@ -1,35 +1,50 @@
 
-import React, { useEffect, useState } from 'react';
-import { seedDemoData } from '@/utils/seedData';
+import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { AiChatSection } from '@/components/support/AiChatSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, MessagesSquare, Book } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { getCategories, searchDocumentation } from '@/services/documentation.service';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
+import { fetchCategories, searchDocumentation } from '@/services/supabase-documentation.service';
+import { DocCategory } from '@/services/supabase-documentation.service';
 
 const Support = () => {
   const [activeTab, setActiveTab] = useState('documentation');
   const [searchQuery, setSearchQuery] = useState('');
+  const [categories, setCategories] = useState<DocCategory[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   
-  const categories = searchQuery 
-    ? searchDocumentation(searchQuery) 
-    : getCategories();
-
   useEffect(() => {
-    seedDemoData();
-  }, []);
+    const loadCategories = async () => {
+      setIsLoading(true);
+      try {
+        if (searchQuery) {
+          const results = await searchDocumentation(searchQuery);
+          setCategories(results);
+        } else {
+          const allCategories = await fetchCategories();
+          setCategories(allCategories);
+        }
+      } catch (error) {
+        console.error('Error loading documentation categories:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadCategories();
+  }, [searchQuery]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  const handleCategoryClick = (categoryId: string) => {
-    navigate(`/support/${categoryId}`);
+  const handleCategoryClick = (categorySlug: string) => {
+    navigate(`/support/${categorySlug}`);
   };
 
   return (
@@ -68,42 +83,48 @@ const Support = () => {
             
             <TabsContent value="documentation" className="mt-0">
               {/* Documentation Categories */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {categories.map((category) => (
-                  <Card 
-                    key={category.id} 
-                    className="border border-siso-border hover:border-siso-border-hover cursor-pointer transition-all duration-300"
-                    onClick={() => handleCategoryClick(category.id)}
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="bg-siso-orange/10 p-2 rounded-full">
-                          <category.icon className="h-5 w-5" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex justify-between items-start mb-2">
-                            <h3 className="font-medium text-lg">{category.title}</h3>
-                            <Badge variant="secondary" className="text-xs">
-                              {category.articleCount} articles
-                            </Badge>
+              {isLoading ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-pulse h-6 w-24 bg-siso-bg-alt/50 rounded"></div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {categories.map((category) => (
+                    <Card 
+                      key={category.id} 
+                      className="border border-siso-border hover:border-siso-border-hover cursor-pointer transition-all duration-300"
+                      onClick={() => handleCategoryClick(category.slug)}
+                    >
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                          <div className="bg-siso-orange/10 p-2 rounded-full">
+                            <category.icon className="h-5 w-5" />
                           </div>
-                          <p className="text-sm text-siso-text/70">{category.description}</p>
-                          
-                          {/* Preview of top articles */}
-                          {category.articles.slice(0, 2).map((article) => (
-                            <div key={article.id} className="mt-3 border-t border-siso-border pt-2">
-                              <h4 className="text-sm font-medium">{article.title}</h4>
-                              <p className="text-xs text-siso-text/60">{article.excerpt}</p>
+                          <div className="flex-1">
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="font-medium text-lg">{category.title}</h3>
+                              <Badge variant="secondary" className="text-xs">
+                                {category.articleCount} articles
+                              </Badge>
                             </div>
-                          ))}
+                            <p className="text-sm text-siso-text/70">{category.description}</p>
+                            
+                            {/* Preview of top articles */}
+                            {category.articles.slice(0, 2).map((article) => (
+                              <div key={article.id} className="mt-3 border-t border-siso-border pt-2">
+                                <h4 className="text-sm font-medium">{article.title}</h4>
+                                <p className="text-xs text-siso-text/60">{article.excerpt}</p>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
               
-              {categories.length === 0 && (
+              {!isLoading && categories.length === 0 && (
                 <div className="text-center py-8">
                   <p className="text-siso-text/70">No results found for "{searchQuery}"</p>
                 </div>

@@ -1,23 +1,71 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
-import { getCategory } from '@/services/documentation.service';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, ChevronLeft, Search, Settings, ExternalLink } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Search, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { useViewportLoading } from '@/hooks/useViewportLoading';
+import { fetchCategory, DocCategory, DocArticle } from '@/services/supabase-documentation.service';
 
 const DocumentationCategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [category, setCategory] = useState<DocCategory | null>(null);
+  const [filteredArticles, setFilteredArticles] = useState<DocArticle[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
-  const category = categoryId ? getCategory(categoryId) : null;
+  useEffect(() => {
+    const loadCategory = async () => {
+      if (!categoryId) return;
+      
+      setIsLoading(true);
+      try {
+        const data = await fetchCategory(categoryId);
+        setCategory(data);
+        
+        if (data) {
+          setFilteredArticles(data.articles);
+        }
+      } catch (error) {
+        console.error('Error loading category:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadCategory();
+  }, [categoryId]);
   
+  useEffect(() => {
+    if (!category) return;
+    
+    if (searchQuery) {
+      const filtered = category.articles.filter(article => 
+        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.excerpt?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredArticles(filtered);
+    } else {
+      setFilteredArticles(category.articles);
+    }
+  }, [searchQuery, category]);
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto py-12 px-4">
+          <div className="flex justify-center">
+            <div className="animate-pulse h-8 w-36 bg-siso-bg-alt/50 rounded"></div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
   if (!category) {
     return (
       <MainLayout>
@@ -33,13 +81,6 @@ const DocumentationCategoryPage = () => {
       </MainLayout>
     );
   }
-  
-  const filteredArticles = searchQuery 
-    ? category.articles.filter(article => 
-        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : category.articles;
 
   return (
     <MainLayout>
@@ -60,7 +101,7 @@ const DocumentationCategoryPage = () => {
           <div className="mb-10">
             <div className="flex items-center mb-6">
               <div className="bg-gradient-to-r from-siso-red/20 to-siso-orange/20 p-3 rounded-full mr-4">
-                <Settings className="h-6 w-6 text-siso-orange" />
+                <category.icon className="h-6 w-6 text-siso-orange" />
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-siso-text-bold mb-1">{category.title}</h1>
@@ -91,7 +132,7 @@ const DocumentationCategoryPage = () => {
             </div>
           </div>
           
-          {/* Article list with clickable questions (not collapsible anymore) */}
+          {/* Article list with clickable questions */}
           <div>
             {filteredArticles.length === 0 ? (
               <div className="text-center py-8">
@@ -114,7 +155,7 @@ const DocumentationCategoryPage = () => {
                             {section.questions.map((question) => (
                               <Link
                                 key={question.id}
-                                to={`/support/${categoryId}/${article.id}/${question.id}`}
+                                to={`/support/${categoryId}/${article.slug}/${question.slug}`}
                                 className="flex items-center justify-between p-3 bg-siso-bg-alt/30 rounded-lg hover:bg-siso-bg-alt/50 transition-colors text-siso-text-bold"
                               >
                                 <span>{question.question}</span>

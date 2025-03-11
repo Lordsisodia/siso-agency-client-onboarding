@@ -1,14 +1,22 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
-import { getCategory, getArticle } from '@/services/documentation.service';
 import { ChevronRight, ChevronLeft, ArrowLeft, Clock, Sparkles, BookOpen, ThumbsUp, ThumbsDown, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { 
+  fetchQuestion, 
+  saveQuestionFeedback,
+  DocCategory,
+  DocArticle,
+  DocSection,
+  DocQuestion
+} from '@/services/supabase-documentation.service';
+import { useAuthSession } from '@/hooks/core'; 
 
 const DocumentationQuestionPage = () => {
   const { categoryId, articleId, questionId } = useParams<{ 
@@ -19,9 +27,82 @@ const DocumentationQuestionPage = () => {
   
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuthSession();
   const [feedbackGiven, setFeedbackGiven] = useState<'helpful' | 'not-helpful' | null>(null);
-  const category = categoryId ? getCategory(categoryId) : null;
-  const article = category && articleId ? getArticle(categoryId, articleId) : null;
+  const [isLoading, setIsLoading] = useState(true);
+  const [category, setCategory] = useState<DocCategory | null>(null);
+  const [article, setArticle] = useState<DocArticle | null>(null);
+  const [foundSection, setFoundSection] = useState<DocSection | null>(null);
+  const [foundQuestion, setFoundQuestion] = useState<DocQuestion | null>(null);
+  const [relatedQuestions, setRelatedQuestions] = useState<DocQuestion[]>([]);
+  
+  useEffect(() => {
+    const loadData = async () => {
+      if (!categoryId || !articleId || !questionId) return;
+      
+      setIsLoading(true);
+      try {
+        const data = await fetchQuestion(categoryId, articleId, questionId);
+        
+        setCategory(data.category);
+        setArticle(data.article);
+        setFoundSection(data.section);
+        setFoundQuestion(data.question);
+        
+        // Find related questions
+        if (data.section && data.question) {
+          const related = data.section.questions
+            .filter(q => q.id !== data.question?.id)
+            .slice(0, 5);
+          setRelatedQuestions(related);
+        }
+      } catch (error) {
+        console.error('Error loading question:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
+  }, [categoryId, articleId, questionId]);
+  
+  const handleFeedback = async (type: 'helpful' | 'not-helpful') => {
+    if (feedbackGiven || !foundQuestion) return;
+    
+    setFeedbackGiven(type);
+    
+    try {
+      await saveQuestionFeedback(foundQuestion.id, type, user?.id);
+      
+      toast({
+        title: type === 'helpful' ? "Thank you for your feedback!" : "We're sorry this wasn't helpful",
+        description: type === 'helpful' 
+          ? "We're glad this answer was useful to you." 
+          : "We'll use your feedback to improve our documentation.",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Error saving feedback:', error);
+      toast({
+        title: "Failed to submit feedback",
+        description: "Please try again later.",
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
+  };
+  
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto py-12 px-4">
+          <div className="flex justify-center">
+            <div className="animate-pulse h-8 w-36 bg-siso-bg-alt/50 rounded"></div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
   
   if (!category || !article) {
     return (
@@ -37,19 +118,6 @@ const DocumentationQuestionPage = () => {
         </div>
       </MainLayout>
     );
-  }
-  
-  // Find the specific question
-  let foundQuestion = null;
-  let foundSection = null;
-  
-  for (const section of article.sections) {
-    const question = section.questions.find(q => q.id === questionId);
-    if (question) {
-      foundQuestion = question;
-      foundSection = section;
-      break;
-    }
   }
   
   if (!foundQuestion || !foundSection) {
@@ -68,28 +136,6 @@ const DocumentationQuestionPage = () => {
     );
   }
 
-  // Find related questions (other questions in the same section)
-  const relatedQuestions = foundSection.questions
-    .filter(q => q.id !== questionId)
-    .slice(0, 5); // Show up to 5 related questions
-  
-  const handleFeedback = (type: 'helpful' | 'not-helpful') => {
-    if (feedbackGiven) return;
-    
-    setFeedbackGiven(type);
-    
-    toast({
-      title: type === 'helpful' ? "Thank you for your feedback!" : "We're sorry this wasn't helpful",
-      description: type === 'helpful' 
-        ? "We're glad this answer was useful to you." 
-        : "We'll use your feedback to improve our documentation.",
-      duration: 3000,
-    });
-    
-    // In a real app, you'd send this feedback to your backend
-    console.log(`User found answer ${type}`, { questionId, articleId, categoryId });
-  };
-  
   return (
     <MainLayout>
       <div className="container mx-auto py-8 px-4 sm:px-6">
@@ -143,10 +189,10 @@ const DocumentationQuestionPage = () => {
                   </Badge>
                 )}
                 <h1 className="text-2xl font-bold text-siso-text-bold mb-1">{foundQuestion.question}</h1>
-                {article.lastUpdated && (
+                {article.last_updated && (
                   <div className="flex items-center text-sm text-siso-text/60 mt-3">
                     <Clock className="h-3.5 w-3.5 mr-1" />
-                    <span>Updated: {article.lastUpdated}</span>
+                    <span>Updated: {new Date(article.last_updated).toLocaleDateString()}</span>
                   </div>
                 )}
               </div>
@@ -224,10 +270,10 @@ const DocumentationQuestionPage = () => {
                   {foundSection.questions.map(q => (
                     <li key={q.id}>
                       <Link 
-                        to={`/support/${categoryId}/${articleId}/${q.id}`}
+                        to={`/support/${categoryId}/${articleId}/${q.slug}`}
                         className={cn(
                           "block py-1.5 px-2 rounded-md transition-colors",
-                          q.id === questionId 
+                          q.id === foundQuestion.id 
                             ? "bg-siso-orange/10 text-siso-orange font-medium"
                             : "text-siso-text hover:bg-siso-bg-alt/50 hover:text-siso-text-bold"
                         )}
@@ -251,7 +297,7 @@ const DocumentationQuestionPage = () => {
                     {relatedQuestions.map(q => (
                       <li key={q.id} className="group">
                         <Link 
-                          to={`/support/${categoryId}/${articleId}/${q.id}`}
+                          to={`/support/${categoryId}/${articleId}/${q.slug}`}
                           className="block py-2 px-3 text-siso-text rounded-md group-hover:bg-siso-bg-alt/40 group-hover:text-siso-text-bold transition-colors"
                         >
                           {q.question}
@@ -283,4 +329,3 @@ const DocumentationQuestionPage = () => {
 };
 
 export default DocumentationQuestionPage;
-

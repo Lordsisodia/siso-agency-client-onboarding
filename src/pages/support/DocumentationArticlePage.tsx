@@ -1,52 +1,60 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
-import { getCategory, getArticle, DocSection, DocQuestion } from '@/services/documentation.service';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChevronRight, ChevronLeft, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  fetchArticle, 
+  fetchCategory, 
+  DocArticle, 
+  DocCategory, 
+  DocSection, 
+  DocQuestion 
+} from '@/services/supabase-documentation.service';
 
-const QuestionAccordion = ({ question }: { question: DocQuestion }) => {
+const QuestionAccordion = ({ 
+  question, 
+  categorySlug, 
+  articleSlug 
+}: { 
+  question: DocQuestion, 
+  categorySlug: string, 
+  articleSlug: string 
+}) => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+  
+  const handleQuestionClick = () => {
+    navigate(`/support/${categorySlug}/${articleSlug}/${question.slug}`);
+  };
   
   return (
     <div className="border-b border-siso-border/50 last:border-b-0">
       <button 
         className="w-full text-left py-4 flex justify-between items-center focus:outline-none"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleQuestionClick}
       >
         <h4 className="font-medium text-siso-text">{question.question}</h4>
-        {isOpen ? (
-          <ChevronUp className="h-5 w-5 text-siso-text/60" />
-        ) : (
-          <ChevronDown className="h-5 w-5 text-siso-text/60" />
-        )}
+        <ChevronRight className="h-5 w-5 text-siso-text/60" />
       </button>
-      
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="overflow-hidden"
-          >
-            <div className="pb-4 prose prose-invert max-w-none text-siso-text/80 text-sm">
-              {question.answer}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
 
-const SectionAccordion = ({ section }: { section: DocSection }) => {
+const SectionAccordion = ({ 
+  section, 
+  categorySlug, 
+  articleSlug 
+}: { 
+  section: DocSection, 
+  categorySlug: string, 
+  articleSlug: string 
+}) => {
   const [isOpen, setIsOpen] = useState(true);
   
   return (
@@ -76,7 +84,11 @@ const SectionAccordion = ({ section }: { section: DocSection }) => {
               <div className="divide-y divide-siso-border/20">
                 {section.questions.map((question) => (
                   <div key={question.id} className="px-6">
-                    <QuestionAccordion question={question} />
+                    <QuestionAccordion 
+                      question={question} 
+                      categorySlug={categorySlug} 
+                      articleSlug={articleSlug} 
+                    />
                   </div>
                 ))}
               </div>
@@ -91,10 +103,63 @@ const SectionAccordion = ({ section }: { section: DocSection }) => {
 const DocumentationArticlePage = () => {
   const { categoryId, articleId } = useParams<{ categoryId: string; articleId: string }>();
   const navigate = useNavigate();
+  const [category, setCategory] = useState<DocCategory | null>(null);
+  const [article, setArticle] = useState<DocArticle | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [prevArticle, setPrevArticle] = useState<DocArticle | null>(null);
+  const [nextArticle, setNextArticle] = useState<DocArticle | null>(null);
   
-  const category = categoryId ? getCategory(categoryId) : null;
-  const article = categoryId && articleId ? getArticle(categoryId, articleId) : null;
+  useEffect(() => {
+    const loadData = async () => {
+      if (!categoryId || !articleId) return;
+      
+      setIsLoading(true);
+      try {
+        const categoryData = await fetchCategory(categoryId);
+        setCategory(categoryData);
+        
+        if (categoryData) {
+          const articleData = await fetchArticle(categoryId, articleId);
+          setArticle(articleData);
+          
+          // Find next and previous articles
+          if (categoryData.articles.length > 0) {
+            const currentIndex = categoryData.articles.findIndex(a => a.slug === articleId);
+            if (currentIndex > 0) {
+              setPrevArticle(categoryData.articles[currentIndex - 1]);
+            } else {
+              setPrevArticle(null);
+            }
+            
+            if (currentIndex < categoryData.articles.length - 1) {
+              setNextArticle(categoryData.articles[currentIndex + 1]);
+            } else {
+              setNextArticle(null);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading article:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
+  }, [categoryId, articleId]);
   
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto py-12 px-4">
+          <div className="flex justify-center">
+            <div className="animate-pulse h-8 w-36 bg-siso-bg-alt/50 rounded"></div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
   if (!category || !article) {
     return (
       <MainLayout>
@@ -110,12 +175,6 @@ const DocumentationArticlePage = () => {
       </MainLayout>
     );
   }
-
-  // Find next and previous articles for navigation
-  const categoryArticles = category.articles;
-  const currentIndex = categoryArticles.findIndex(a => a.id === articleId);
-  const prevArticle = currentIndex > 0 ? categoryArticles[currentIndex - 1] : null;
-  const nextArticle = currentIndex < categoryArticles.length - 1 ? categoryArticles[currentIndex + 1] : null;
 
   return (
     <MainLayout>
@@ -140,22 +199,29 @@ const DocumentationArticlePage = () => {
           <div className="mb-8">
             <div className="flex justify-between items-start mb-4">
               <h1 className="text-3xl font-bold text-siso-text-bold">{article.title}</h1>
-              <Badge variant="outline" className="text-xs">
-                {article.difficulty}
-              </Badge>
+              {article.difficulty && (
+                <Badge variant="outline" className="text-xs">
+                  {article.difficulty}
+                </Badge>
+              )}
             </div>
             
             <p className="text-lg text-siso-text/80 mb-4">{article.excerpt}</p>
             
             <div className="text-xs text-siso-text/50">
-              Last updated: {article.lastUpdated}
+              Last updated: {new Date(article.last_updated).toLocaleDateString()}
             </div>
           </div>
           
           {/* Article content with collapsible sections */}
           <div className="mb-8">
             {article.sections.map((section) => (
-              <SectionAccordion key={section.id} section={section} />
+              <SectionAccordion 
+                key={section.id} 
+                section={section} 
+                categorySlug={categoryId} 
+                articleSlug={article.slug} 
+              />
             ))}
           </div>
           
@@ -165,7 +231,7 @@ const DocumentationArticlePage = () => {
               <Button 
                 variant="outline" 
                 className="justify-start"
-                onClick={() => navigate(`/support/${categoryId}/${prevArticle.id}`)}
+                onClick={() => navigate(`/support/${categoryId}/${prevArticle.slug}`)}
               >
                 <ChevronLeft className="h-4 w-4 mr-2" />
                 <div className="text-left">
@@ -179,7 +245,7 @@ const DocumentationArticlePage = () => {
               <Button 
                 variant="outline" 
                 className="justify-end ml-auto"
-                onClick={() => navigate(`/support/${categoryId}/${nextArticle.id}`)}
+                onClick={() => navigate(`/support/${categoryId}/${nextArticle.slug}`)}
               >
                 <div className="text-right">
                   <div className="text-xs text-siso-text/60">Next</div>
