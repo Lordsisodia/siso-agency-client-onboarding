@@ -12,3 +12,10 @@ export interface HomeMessage {
   assistantType?: string;
   isLoading?: boolean;
 }
+
+export interface Feature {
+  title: string;
+  description: string;
+  icon?: React.ReactNode;
+  link?: string;
+}

@@ -32,15 +32,34 @@ export function safeJsonProperty<T>(
   key: string, 
   defaultValue: T
 ): T {
-  if (!json || typeof json !== 'object' || json === null) {
+  if (!json || typeof json !== 'object' || json === null || Array.isArray(json)) {
     return defaultValue;
   }
   
   try {
-    const value = (json as Record<string, any>)[key];
-    return value !== undefined ? value as T : defaultValue;
+    const obj = json as Record<string, any>;
+    return (key in obj && obj[key] !== undefined) ? (obj[key] as T) : defaultValue;
   } catch (error) {
     console.error(`Error accessing JSON property ${key}:`, error);
     return defaultValue;
+  }
+}
+
+/**
+ * Safely converts a JSON value to a Record object
+ * @param json The JSON data
+ * @returns The object or an empty object if invalid
+ */
+export function safeJsonObject(json: Json | null | undefined): Record<string, any> {
+  if (!json) return {};
+  
+  try {
+    if (typeof json === 'object' && json !== null && !Array.isArray(json)) {
+      return json as Record<string, any>;
+    }
+    return {};
+  } catch (error) {
+    console.error('Error parsing JSON object:', error);
+    return {};
   }
 }

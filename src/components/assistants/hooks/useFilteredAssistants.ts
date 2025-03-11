@@ -1,41 +1,36 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAssistants } from './useAssistants';
 import { Assistant } from '../types';
 
-export const useFilteredAssistants = (category?: string, searchQuery?: string) => {
+export const useFilteredAssistants = (searchQuery: string, category?: string) => {
   const { assistants, loading, error } = useAssistants();
   const [filteredAssistants, setFilteredAssistants] = useState<Assistant[]>([]);
 
+  const filterAssistants = useMemo(() => {
+    return (assistants: Assistant[], search: string, category?: string) => {
+      return assistants.filter(assistant => {
+        // Filter by search query
+        const matchesSearch = search === '' || 
+          (assistant.name && assistant.name.toLowerCase().includes(search.toLowerCase())) ||
+          (assistant.description && assistant.description.toString().toLowerCase().includes(search.toLowerCase()));
+        
+        // Filter by category
+        const matchesCategory = !category || 
+          (assistant.category && assistant.category.toString().toLowerCase() === category.toLowerCase());
+        
+        return matchesSearch && matchesCategory;
+      });
+    };
+  }, []);
+
   useEffect(() => {
-    if (assistants.length) {
-      let filtered = [...assistants];
+    setFilteredAssistants(filterAssistants(assistants, searchQuery, category));
+  }, [assistants, searchQuery, category, filterAssistants]);
 
-      // Filter by category if provided
-      if (category && category !== 'all') {
-        filtered = filtered.filter(assistant => 
-          assistant.category?.toLowerCase() === category.toLowerCase()
-        );
-      }
-
-      // Filter by search query if provided
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(assistant =>
-          assistant.name?.toLowerCase().includes(query) ||
-          assistant.description?.toLowerCase().includes(query)
-        );
-      }
-
-      setFilteredAssistants(filtered);
-    } else {
-      setFilteredAssistants([]);
-    }
-  }, [assistants, category, searchQuery]);
-
-  return { 
-    assistants: filteredAssistants, 
-    loading, 
-    error 
+  return {
+    assistants: filteredAssistants,
+    isLoading: loading,
+    error
   };
 };
