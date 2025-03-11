@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 
 import Auth from '@/pages/Auth';
 import Profile from '@/pages/Profile';
+import Organization from '@/pages/Organization';
 import SocialOnboarding from '@/pages/onboarding/social';
 import OnboardingCongratulations from '@/pages/onboarding/congratulations';
 import ThankYou from '@/pages/ThankYou';
@@ -61,6 +62,7 @@ function App() {
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/tasks" element={<Tasks />} />
+        <Route path="/organization" element={<Organization />} />
         
         {/* Redirects for renamed/moved pages */}
         <Route path="/pending-tasks" element={<Navigate to="/tasks" replace />} />
