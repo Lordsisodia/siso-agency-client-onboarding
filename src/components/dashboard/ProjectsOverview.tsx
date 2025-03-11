@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,7 +29,6 @@ interface ProjectsOverviewProps {
 export const ProjectsOverview: React.FC<ProjectsOverviewProps> = ({ projects }) => {
   const navigate = useNavigate();
   
-  // Sample projects data - in a real app, these would come from an API
   const sampleProjects: Project[] = [
     {
       id: "1",
@@ -100,7 +98,7 @@ export const ProjectsOverview: React.FC<ProjectsOverviewProps> = ({ projects }) 
           variant="outline" 
           size="sm"
           onClick={() => navigate('/new-project')}
-          className="flex items-center gap-1"
+          className="flex items-center gap-1 bg-gradient-to-r from-siso-red to-siso-orange text-white border-none hover:opacity-90"
         >
           <PlusCircle className="h-4 w-4" />
           New Project
@@ -137,7 +135,7 @@ export const ProjectsOverview: React.FC<ProjectsOverviewProps> = ({ projects }) 
               <Button 
                 variant="ghost" 
                 size="sm"
-                className="flex items-center text-sm text-siso-text-muted hover:text-siso-text"
+                className="flex items-center text-sm text-siso-text hover:text-siso-text-bold"
                 onClick={() => navigate('/projects')}
               >
                 View All Projects

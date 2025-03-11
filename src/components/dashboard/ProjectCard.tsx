@@ -2,8 +2,16 @@
 import React from 'react';
 import { Project } from './ProjectsOverview';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Edit } from 'lucide-react';
+import { ExternalLink, Edit, TrendingUp, TrendingDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ProjectCardProps {
   project: Project;
@@ -60,12 +68,11 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
           <span>Progress</span>
           <span>{overallProgress}%</span>
         </div>
-        <div className="w-full bg-muted rounded-full h-2">
-          <div 
-            className="bg-primary rounded-full h-2" 
-            style={{ width: `${overallProgress}%` }}
-          />
-        </div>
+        <Progress 
+          value={overallProgress} 
+          className="h-1.5 bg-background/50" 
+          indicatorClassName="bg-primary"
+        />
       </div>
       
       {project.financials && (
@@ -91,12 +98,21 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
       
       <div className="grid grid-cols-5 gap-1 mb-3">
         {project.phases.map((phase, index) => (
-          <div key={index} className="flex flex-col items-center">
-            <div 
-              className={`w-4 h-4 rounded-full ${getStatusColor(phase.status)} mb-1`} 
-            />
-            <span className="text-xs text-center leading-tight">{phase.name}</span>
-          </div>
+          <TooltipProvider key={index}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex flex-col items-center">
+                  <div 
+                    className={`w-4 h-4 rounded-full ${getStatusColor(phase.status)} mb-1`} 
+                  />
+                  <span className="text-xs text-center leading-tight">{phase.name}</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{phase.name}: {phase.progress}% Complete</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         ))}
       </div>
       
