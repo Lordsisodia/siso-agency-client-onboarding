@@ -3,7 +3,7 @@ export interface VideoCategory {
   id: string;
   name: string;
   description: string;
-  slug: string;
+  slug?: string;
   created_at: string;
   updated_at: string;
 }

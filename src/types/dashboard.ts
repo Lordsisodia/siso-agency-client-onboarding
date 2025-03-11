@@ -67,6 +67,10 @@ export interface LeaderboardUser {
   contributionCount: number;
   referralCount: number;
   achievements: any[];
+  profile?: {
+    full_name: string;
+    avatar_url: string | null;
+  };
   discord_url: string;
   github_url: string;
   linkedin_url: string;
