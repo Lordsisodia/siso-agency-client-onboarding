@@ -6,10 +6,7 @@ import {
   Briefcase,
   User,
   HelpCircle,
-  ClipboardCheck,
-  Sparkles,
-  Trophy,
-  Coins
+  ClipboardCheck
 } from 'lucide-react';
 import { MenuSection } from './types';
 
@@ -47,24 +44,6 @@ export const menuSections: MenuSection[] = [
     href: '/portfolio',
     icon: Briefcase,
     label: 'My Portfolio',
-  },
-  {
-    type: 'main',
-    href: '/siso-ai',
-    icon: Sparkles,
-    label: 'SISO AI',
-  },
-  {
-    type: 'main',
-    href: '/leaderboards',
-    icon: Trophy,
-    label: 'Leaderboards',
-  },
-  {
-    type: 'main',
-    href: '/crypto',
-    icon: Coins,
-    label: 'Crypto Exchange',
   },
   {
     type: 'main',
