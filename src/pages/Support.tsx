@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { AiChatSection } from '@/components/support/AiChatSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MessagesSquare, Book } from 'lucide-react';
+import { MessagesSquare, Book, Search } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
@@ -65,16 +65,18 @@ const Support = () => {
 
   return (
     <MainLayout>
-      <div className="container mx-auto py-8 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto">
+      <div className="container mx-auto py-12 px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto">
           {/* Header with search */}
-          <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-siso-text-bold mb-2">Help Center</h1>
-            <p className="text-siso-text/70 mb-6">Find comprehensive guides and documentation to help you get started</p>
+          <div className="mb-12 text-center">
+            <h1 className="text-4xl font-bold mb-4 text-white">Help Center</h1>
+            <p className="text-siso-text/70 mb-8 text-lg max-w-2xl mx-auto">
+              Find answers to your questions and comprehensive guides to help you get started
+            </p>
             
             {/* Fancy animated search bar */}
             <div className={cn(
-              "relative max-w-2xl mx-auto mb-8",
+              "relative max-w-2xl mx-auto",
               activeTab === 'documentation' ? 'block' : 'hidden'
             )}>
               <PlaceholdersAndVanishInput
@@ -86,7 +88,7 @@ const Support = () => {
           </div>
 
           <Tabs defaultValue="documentation" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto mb-8">
+            <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto mb-10">
               <TabsTrigger value="documentation" className="flex items-center gap-2">
                 <Book className="h-4 w-4" />
                 Documentation
@@ -100,38 +102,29 @@ const Support = () => {
             <TabsContent value="documentation" className="mt-0">
               {/* Documentation Categories */}
               {isLoading ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-pulse h-6 w-24 bg-siso-bg-alt/50 rounded"></div>
+                <div className="flex justify-center py-12">
+                  <div className="animate-pulse h-6 w-32 bg-siso-bg-alt/50 rounded"></div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                   {categories.map((category) => (
                     <Card 
                       key={category.id} 
-                      className="border border-siso-border hover:border-siso-border-hover cursor-pointer transition-all duration-300"
+                      className="border border-siso-border hover:border-siso-border-hover cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
                       onClick={() => handleCategoryClick(category.slug)}
                     >
                       <CardContent className="p-6">
-                        <div className="flex items-start gap-4">
-                          <div className="bg-siso-orange/10 p-2 rounded-full">
-                            <category.icon className="h-5 w-5" />
+                        <div className="flex items-start gap-3">
+                          <div className="bg-siso-orange/10 p-2.5 rounded-lg">
+                            <category.icon className="h-5 w-5 text-siso-orange" />
                           </div>
-                          <div className="flex-1">
-                            <div className="flex justify-between items-start mb-2">
-                              <h3 className="font-medium text-lg">{category.title}</h3>
-                              <Badge variant="secondary" className="text-xs">
-                                {category.articleCount} articles
-                              </Badge>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-lg text-white mb-2 truncate">{category.title}</h3>
+                            <p className="text-sm text-siso-text/70 mb-3 line-clamp-2">{category.description}</p>
+                            <div className="flex items-center text-xs text-siso-text/50">
+                              <Search className="h-3 w-3 mr-1" />
+                              {category.articleCount} articles
                             </div>
-                            <p className="text-sm text-siso-text/70">{category.description}</p>
-                            
-                            {/* Preview of top articles */}
-                            {category.articles.slice(0, 2).map((article) => (
-                              <div key={article.id} className="mt-3 border-t border-siso-border pt-2">
-                                <h4 className="text-sm font-medium">{article.title}</h4>
-                                <p className="text-xs text-siso-text/60">{article.excerpt}</p>
-                              </div>
-                            ))}
                           </div>
                         </div>
                       </CardContent>
@@ -141,8 +134,10 @@ const Support = () => {
               )}
               
               {!isLoading && categories.length === 0 && (
-                <div className="text-center py-8">
-                  <p className="text-siso-text/70">No results found for "{searchQuery}"</p>
+                <div className="text-center py-16 bg-siso-bg-alt/20 rounded-lg border border-siso-border">
+                  <Search className="h-10 w-10 text-siso-text/30 mx-auto mb-4" />
+                  <p className="text-siso-text font-medium">No results found for "{searchQuery}"</p>
+                  <p className="text-siso-text/60 mt-2">Try adjusting your search terms or browse our categories</p>
                 </div>
               )}
             </TabsContent>
