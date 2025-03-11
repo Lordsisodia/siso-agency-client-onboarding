@@ -36,16 +36,17 @@ export const menuSections: MenuSection[] = [
         label: 'My Projects',
       },
       {
-        href: '/portfolio',
-        icon: BookOpen,
-        label: 'Portfolio',
-      },
-      {
         href: '/tasks',
         icon: ClipboardCheck,
         label: 'Tasks',
       }
     ]
+  },
+  {
+    type: 'main',
+    href: '/portfolio',
+    icon: BookOpen,
+    label: 'Portfolio',
   },
   {
     type: 'section',

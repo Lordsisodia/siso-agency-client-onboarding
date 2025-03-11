@@ -6,7 +6,8 @@ export const awardNavigationPoints = (path: string) => {
   const pointsMap: Record<string, number> = {
     '/organization': 5,
     '/preferences': 5,
-    '/tasks': 3
+    '/tasks': 3,
+    '/portfolio': 5
   };
   
   if (pointsMap[path]) {
