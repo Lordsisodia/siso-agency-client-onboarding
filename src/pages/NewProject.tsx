@@ -267,7 +267,9 @@ export default function NewProject() {
         <ManualInputSheet
           isOpen={isManualInputOpen}
           onClose={() => setIsManualInputOpen(false)}
-          onSubmitToAI={(prompt, formData) => sendMessage(prompt, undefined, formData)}
+          onSubmitToAI={(prompt, formData) => {
+            return sendMessage(prompt, undefined, formData);
+          }}
         />
       </div>
     </MainLayout>

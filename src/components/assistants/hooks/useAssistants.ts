@@ -19,7 +19,28 @@ export function useAssistants() {
       }
       
       console.log('Fetched assistants:', data);
-      return data as Assistant[];
+      
+      // Type casting to Assistant[] with proper type conversion
+      return data.map(item => ({
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        category: item.category,
+        assistant_type: item.assistant_type || null,
+        prompt_template: item.prompt_template || null,
+        use_cases: item.use_cases || null,
+        input_variables: item.input_variables || null,
+        model_type: item.model_type || null,
+        response_format: item.response_format || null,
+        rating: item.rating || null,
+        likes_count: item.likes_count || null,
+        downloads_count: item.downloads_count || null,
+        website_url: item.website_url || null,
+        gpt_url: item.gpt_url || null,
+        review_average: item.review_average || null,
+        review_count: item.review_count || null,
+        num_conversations_str: item.num_conversations_str || null
+      })) as Assistant[];
     },
   });
 }

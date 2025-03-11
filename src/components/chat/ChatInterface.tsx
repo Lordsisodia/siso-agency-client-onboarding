@@ -60,6 +60,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   });
 
+  // Convert onlineStatus to boolean for props that expect boolean values
+  const isOnline = onlineStatus === 'online';
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -69,7 +72,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     >
       <ChatHeader 
         title={title}
-        onlineStatus={onlineStatus}
+        onlineStatus={isOnline}
         isLoading={isLoading}
         messagesCount={messages.length}
         onClear={() => clearMessages()}
@@ -79,7 +82,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         messages={messages}
         isLoading={isLoading}
         error={error}
-        onlineStatus={onlineStatus}
+        onlineStatus={isOnline}
         onRetry={handleRetry}
         retryCount={retryCount}
       />
@@ -88,7 +91,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         onSubmit={handleSendMessage}
         isLoading={isLoading}
         inputPlaceholder={inputPlaceholder}
-        onlineStatus={onlineStatus}
+        onlineStatus={isOnline}
       />
     </motion.div>
   );

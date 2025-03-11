@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { AlertTriangle } from 'lucide-react';
@@ -10,7 +9,7 @@ interface ChatMessageListProps {
   messages: ChatMessage[];
   isLoading?: boolean;
   error?: string | null;
-  onlineStatus?: 'online' | 'offline' | 'reconnecting';
+  onlineStatus?: boolean;
   onRetry?: () => void;
   retryCount?: number;
 }
@@ -19,7 +18,7 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
   messages,
   isLoading,
   error,
-  onlineStatus = 'online',
+  onlineStatus = true,
   onRetry,
   retryCount = 0,
 }) => {
@@ -28,7 +27,6 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
   // Use our custom hook to scroll to bottom on new messages
   useAutoScroll({
     dependencies: [messages, isLoading, error],
-    behavior: 'smooth',
     targetRef: messagesEndRef
   });
 
@@ -37,7 +35,7 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
     return (
       <div className="flex-1 flex items-center justify-center p-6 text-siso-text-light">
         <p className="text-center max-w-md">
-          {onlineStatus === 'offline' 
+          {!onlineStatus 
             ? "You're currently offline. Please check your connection and try again."
             : "No messages yet. Start a conversation by typing below."}
         </p>
@@ -98,14 +96,14 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
       )}
       
       {/* Offline message */}
-      {onlineStatus === 'offline' && (
+      {!onlineStatus && (
         <div className="p-3 bg-gray-100 text-gray-700 rounded-lg text-sm mt-4">
           You're currently offline. Messages will be sent when you're back online.
         </div>
       )}
       
-      {/* Reconnecting message */}
-      {onlineStatus === 'reconnecting' && (
+      {/* Reconnecting message - we're keeping this for when onlineStatus has a third state in the future */}
+      {!onlineStatus && (
         <div className="p-3 bg-amber-50 text-amber-700 rounded-lg text-sm mt-4">
           Reconnecting to server...
         </div>
