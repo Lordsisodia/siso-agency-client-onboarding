@@ -3,7 +3,6 @@ import {
   Home,
   FileText,
   FolderKanban,
-  User,
   HelpCircle,
   ClipboardCheck,
   Briefcase,
@@ -51,11 +50,6 @@ export const menuSections: MenuSection[] = [
         href: '/organization',
         icon: Building2,
         label: 'Organization',
-      },
-      {
-        href: '/preferences',
-        icon: Settings,
-        label: 'Preferences',
       },
       {
         href: '/support',

@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useLocation } from 'react-router-dom';
@@ -68,7 +67,6 @@ function App() {
         <Route path="/pending-tasks" element={<Navigate to="/tasks" replace />} />
         <Route path="/profile" element={<Navigate to="/organization" replace />} />
         <Route path="/company-profile" element={<Navigate to="/organization" replace />} />
-        <Route path="/settings" element={<Navigate to="/preferences" replace />} />
         
         {/* Onboarding routes */}
         <Route path="/onboarding/social" element={<SocialOnboarding />} />

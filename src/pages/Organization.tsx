@@ -1,6 +1,5 @@
+
 import { useNavigate } from 'react-router-dom';
-import { Sidebar } from '@/components/Sidebar';
-import { SidebarProvider } from '@/components/ui/sidebar';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { motion } from 'framer-motion';
 import { useProfileData } from '@/hooks/useProfileData';
@@ -14,6 +13,7 @@ import { toast } from 'sonner';
 import { useEffect } from 'react';
 import { awardNavigationPoints } from '@/utils/navigationPoints';
 import { useLocation } from 'react-router-dom';
+import { MainLayout } from '@/components/assistants/layout/MainLayout';
 
 export default function Organization() {
   const navigate = useNavigate();
@@ -48,10 +48,8 @@ export default function Organization() {
 
   const toggleEditing = () => {
     if (isEditing) {
-      // If we're currently editing, save changes
       saveProfile();
     } else {
-      // Otherwise, enter edit mode
       setIsEditing(true);
     }
   };
@@ -59,93 +57,87 @@ export default function Organization() {
   // Show loading state while data is being fetched
   if (authLoading || profileLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-[#0A0A0A] to-[#121212]">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-siso-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-          <p className="mt-4 text-siso-text-muted">Loading organization profile...</p>
+      <MainLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-siso-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+            <p className="mt-4 text-siso-text-muted">Loading organization profile...</p>
+          </div>
         </div>
-      </div>
+      </MainLayout>
     );
   }
 
   return (
-    <SidebarProvider>
-      <motion.div 
-        className="flex min-h-screen bg-gradient-to-b from-[#0A0A0A] to-[#121212]"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-      >
-        <Sidebar />
-        <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
-          <div className="container mx-auto max-w-5xl">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold text-siso-text">Organization Settings</h1>
-              <Button 
-                onClick={toggleEditing}
-                disabled={isSaving}
-                className="bg-siso-orange hover:bg-siso-red text-white"
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : isEditing ? (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save
-                  </>
-                ) : (
-                  <>
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit
-                  </>
-                )}
-              </Button>
-            </div>
-
-            <div className="space-y-6">
-              <BasicInfo
-                email={user?.email || null}
-                fullName={profile?.full_name || null}
-                professionalRole={profile?.professional_role || null}
-                isEditing={isEditing}
-                formData={formData}
-                onFormChange={handleFormChange}
-              />
-              
-              <BusinessInfo
-                businessName={profile?.business_name || null}
-                businessType={profile?.business_type || null}
-                industry={profile?.industry || null}
-                isEditing={isEditing}
-                formData={formData}
-                onFormChange={handleFormChange}
-              />
-              
-              <InterestsBio
-                bio={profile?.bio || null}
-                interests={profile?.interests || null}
-                isEditing={isEditing}
-                formData={formData}
-                onFormChange={handleFormChange}
-              />
-              
-              <SocialMediaLinks
-                linkedinUrl={profile?.linkedin_url || null}
-                websiteUrl={profile?.website_url || null}
-                youtubeUrl={profile?.youtube_url || null}
-                instagramUrl={profile?.instagram_url || null}
-                twitterUrl={profile?.twitter_url || null}
-                isEditing={isEditing}
-                formData={formData}
-                onFormChange={handleFormChange}
-              />
-            </div>
+    <MainLayout>
+      <div className="p-4 md:p-6 lg:p-8">
+        <div className="container mx-auto max-w-5xl">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold text-siso-text">Organization Settings</h1>
+            <Button 
+              onClick={toggleEditing}
+              disabled={isSaving}
+              className="bg-siso-orange hover:bg-siso-red text-white"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : isEditing ? (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save
+                </>
+              ) : (
+                <>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit
+                </>
+              )}
+            </Button>
           </div>
-        </main>
-      </motion.div>
-    </SidebarProvider>
+
+          <div className="space-y-6">
+            <BasicInfo
+              email={user?.email || null}
+              fullName={profile?.full_name || null}
+              professionalRole={profile?.professional_role || null}
+              isEditing={isEditing}
+              formData={formData}
+              onFormChange={handleFormChange}
+            />
+            
+            <BusinessInfo
+              businessName={profile?.business_name || null}
+              businessType={profile?.business_type || null}
+              industry={profile?.industry || null}
+              isEditing={isEditing}
+              formData={formData}
+              onFormChange={handleFormChange}
+            />
+            
+            <InterestsBio
+              bio={profile?.bio || null}
+              interests={profile?.interests || null}
+              isEditing={isEditing}
+              formData={formData}
+              onFormChange={handleFormChange}
+            />
+            
+            <SocialMediaLinks
+              linkedinUrl={profile?.linkedin_url || null}
+              websiteUrl={profile?.website_url || null}
+              youtubeUrl={profile?.youtube_url || null}
+              instagramUrl={profile?.instagram_url || null}
+              twitterUrl={profile?.twitter_url || null}
+              isEditing={isEditing}
+              formData={formData}
+              onFormChange={handleFormChange}
+            />
+          </div>
+        </div>
+      </div>
+    </MainLayout>
   );
 }
