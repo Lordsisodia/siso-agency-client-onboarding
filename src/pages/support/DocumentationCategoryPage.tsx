@@ -5,7 +5,7 @@ import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { getCategory } from '@/services/documentation.service';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, ChevronLeft, Search, Settings, ChevronDown } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Search, Settings, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
@@ -15,7 +15,6 @@ const DocumentationCategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedQuestion, setExpandedQuestion] = useState<string | null>(null);
   
   const category = categoryId ? getCategory(categoryId) : null;
   
@@ -41,14 +40,6 @@ const DocumentationCategoryPage = () => {
         article.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : category.articles;
-
-  const toggleQuestion = (questionId: string) => {
-    if (expandedQuestion === questionId) {
-      setExpandedQuestion(null);
-    } else {
-      setExpandedQuestion(questionId);
-    }
-  };
 
   return (
     <MainLayout>
@@ -100,7 +91,7 @@ const DocumentationCategoryPage = () => {
             </div>
           </div>
           
-          {/* Article list with collapsible questions */}
+          {/* Article list with clickable questions (not collapsible anymore) */}
           <div>
             {filteredArticles.length === 0 ? (
               <div className="text-center py-8">
@@ -110,33 +101,30 @@ const DocumentationCategoryPage = () => {
               <div className="bg-siso-bg-alt/20 border border-siso-border rounded-xl overflow-hidden">
                 {filteredArticles.map((article) => (
                   <div key={article.id} className="border-b border-siso-border/40 last:border-b-0">
-                    {article.sections.map((section) => (
-                      <div key={section.id}>
-                        {section.questions.map((question, index) => (
-                          <div key={question.id} className={`border-b border-siso-border/20 last:border-b-0 ${
-                            expandedQuestion === question.id ? "bg-siso-bg-alt/30" : ""
-                          }`}>
-                            <button
-                              onClick={() => toggleQuestion(question.id)}
-                              className="w-full text-left py-5 px-6 flex items-center justify-between hover:bg-siso-bg-alt/40 transition-colors"
-                            >
-                              <span className="font-medium text-siso-text-bold">{question.question}</span>
-                              <ChevronDown
-                                className={`h-5 w-5 text-siso-orange transition-transform duration-300 ease-in-out ${
-                                  expandedQuestion === question.id ? "transform rotate-180" : ""
-                                }`}
-                              />
-                            </button>
-                            
-                            {expandedQuestion === question.id && (
-                              <div className="px-6 pb-5 pt-0 text-siso-text/90 leading-relaxed">
-                                <p>{question.answer}</p>
-                              </div>
-                            )}
+                    <div className="py-6 px-6">
+                      <h2 className="text-lg font-semibold text-siso-text-bold mb-4">{article.title}</h2>
+                      
+                      {article.sections.map((section) => (
+                        <div key={section.id} className="mb-5 last:mb-0">
+                          {section.title && (
+                            <h3 className="text-md font-medium text-siso-text-bold mb-3">{section.title}</h3>
+                          )}
+                          
+                          <div className="space-y-2">
+                            {section.questions.map((question) => (
+                              <Link
+                                key={question.id}
+                                to={`/support/${categoryId}/${article.id}/${question.id}`}
+                                className="flex items-center justify-between p-3 bg-siso-bg-alt/30 rounded-lg hover:bg-siso-bg-alt/50 transition-colors text-siso-text-bold"
+                              >
+                                <span>{question.question}</span>
+                                <ExternalLink className="h-4 w-4 text-siso-orange flex-shrink-0 ml-4" />
+                              </Link>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    ))}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>
