@@ -29,3 +29,14 @@ export interface Educator {
   channel_avatar_url?: string;
   number_of_subscribers?: number;
 }
+
+export interface VideoProgress {
+  id?: string;
+  video_id?: string;
+  user_id?: string;
+  progress?: number;
+  watched?: boolean;
+  completed?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}

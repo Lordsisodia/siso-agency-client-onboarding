@@ -24,7 +24,7 @@ export const useEducationChat = () => {
     return true;
   };
 
-  // Added to support the VideoAnalysis component
+  // Updated to support the VideoAnalysis component
   const getVideoAnalysis = (videoId: string) => {
     console.log('Getting analysis for video:', videoId);
     return {

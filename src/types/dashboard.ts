@@ -54,39 +54,28 @@ export interface Assistant {
   updated_at: string;
 }
 
-// Leaderboard related interfaces - updated to match database schema
+// Simplified LeaderboardUser interface to match database schema
 export interface LeaderboardUser {
   id: string;
   user_id: string;
-  fullName: string;
+  full_name: string;
   points: number;
   rank: string;
-  sisoTokens: number;
-  avatarUrl: string | null;
-  updated: string;
-  contributionCount: number;
-  referralCount: number;
+  siso_tokens: number;
+  avatar_url: string | null;
+  updated_at: string;
+  contribution_count: number;
+  referral_count: number;
   achievements: any[];
-  profile?: {
-    full_name: string;
-    avatar_url: string | null;
-  };
-  discord_url: string;
-  github_url: string;
-  linkedin_url: string;
-  twitter_url: string;
+  discord_url?: string;
+  github_url?: string;
+  linkedin_url?: string;
+  twitter_url?: string;
 }
 
+// Simplified leaderboard hook result
 export interface UseLeaderboardResult {
   loading: boolean;
   error: Error | null;
-  users: LeaderboardUser[];
   leaderboardData: LeaderboardUser[];
-  filteredData: LeaderboardUser[];
-  setFilteredData: React.Dispatch<React.SetStateAction<LeaderboardUser[]>>;
-  totalUsersWithPoints: number;
-  totalPoints: number;
-  totalSisoTokens: number;
-  selectedUser: LeaderboardUser | null;
-  setSelectedUser: (user: LeaderboardUser | null) => void;
 }
