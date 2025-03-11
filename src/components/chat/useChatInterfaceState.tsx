@@ -52,7 +52,7 @@ export const useChatInterfaceState = ({
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [onlineStatus, messages, error, hasAutoRetried, sendMessage, systemPrompt]);
+  }, [onlineStatus, messages, error, hasAutoRetried, sendMessage]);
 
   // Add welcome message on mount, but only if there are no existing messages
   useEffect(() => {

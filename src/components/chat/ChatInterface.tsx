@@ -36,7 +36,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     clearMessages 
   } = usePlanChatAssistant(projectId);
   
-  // Map messages to ensure they match our expected ChatMessage type
+  // Map messages to ensure they match our ChatMessage type
   const messages = (rawMessages || []).map(msg => ({
     ...msg,
     role: msg.role as "user" | "assistant" | "system"
@@ -56,11 +56,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     welcomeMessage,
     systemPrompt,
     sendMessage: (message: string) => {
-      if (usePlanAssistant) {
-        return hookSendMessage(message, undefined, {});
-      } else {
-        return hookSendMessage(message, systemPrompt, {});
-      }
+      return hookSendMessage(message, systemPrompt || undefined, {});
     }
   });
 

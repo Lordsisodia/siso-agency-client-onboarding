@@ -2,13 +2,8 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { ChatMessage } from '@/types/chat';
 import { showPointsEarnedToast } from '@/components/points/PointsEarnedToast';
-
-export type ChatMessage = {
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp?: Date;
-};
 
 export function useChatAssistant() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -72,8 +67,8 @@ export function useChatAssistant() {
       
       setMessages(prev => [...prev, assistantMessage]);
       
-      // Award points if user is logged in
-      if (userId) {
+      // Award points if user is logged in and the points feature is available
+      if (userId && typeof showPointsEarnedToast === 'function') {
         try {
           // Award points for chat interaction
           await supabase.from('points_log').insert([{

@@ -6,8 +6,8 @@ export * from "../use-mobile";
 export * from "../use-pagination";
 export * from "../use-toast";
 
-// Use explicit type exports to avoid isolatedModules errors
-export type { ChatMessage } from "../use-plan-chat-assistant";
+// Export chat assistant hooks
+export * from "../use-chat-assistant";
 export * from "../use-plan-chat-assistant";
 export * from "../use-project-planning";
 

@@ -44,7 +44,8 @@ export function usePlanChatAssistant(projectId?: string) {
           messages: [...messages, userMessage],
           projectId,
           formData,
-          threadId
+          threadId,
+          systemPrompt
         },
       });
 

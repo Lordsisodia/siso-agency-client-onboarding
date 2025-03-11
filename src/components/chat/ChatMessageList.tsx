@@ -1,7 +1,7 @@
 
 import React, { useRef, useEffect } from 'react';
-import { ChatMessage as ChatMessageType } from '@/hooks/use-chat-assistant';
-import { ChatMessage } from './ChatMessage';
+import { ChatMessage } from '@/types/chat';
+import { ChatMessage as ChatMessageComponent } from './ChatMessage';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AlertCircle, RefreshCw, WifiOff } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ChatMessageListProps {
-  messages: ChatMessageType[];
+  messages: ChatMessage[];
   isLoading: boolean;
   error: string | null;
   onlineStatus: boolean;
@@ -52,7 +52,7 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
                 ease: "easeOut" 
               }}
             >
-              <ChatMessage
+              <ChatMessageComponent
                 role={message.role}
                 content={message.content}
                 isLoading={isLoading && index === messages.length - 1 && message.role === 'assistant'}
@@ -96,7 +96,7 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <ChatMessage
+            <ChatMessageComponent
               role="assistant"
               content=""
               isLoading={true}

@@ -7,5 +7,10 @@ export interface ChatMessage {
   loading?: boolean;
 }
 
-// Removing unused types that were causing errors
-// AgentCategory and ProcessingStage were referenced but not defined
+// Export any additional types needed
+export interface ChatInputProps {
+  onSubmit: (message: string) => void;
+  isLoading: boolean;
+  placeholder?: string;
+  disabled?: boolean;
+}

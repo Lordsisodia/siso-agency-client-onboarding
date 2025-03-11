@@ -43,14 +43,14 @@ function App() {
       </Helmet>
 
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        {/* Public routes */}
         <Route path="/auth" element={<Auth />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/thank-you" element={<ThankYou />} />
         
-        {/* Home route - redirect to plan-builder */}
-        <Route path="/home" element={<Navigate to="/plan-builder" replace />} />
+        {/* Default route - show dashboard for both logged in and not logged in users */}
+        <Route path="/" element={<Dashboard />} />
         
         {/* Core routes */}
         <Route path="/dashboard" element={<Dashboard />} />
@@ -61,6 +61,7 @@ function App() {
         <Route path="/support" element={<Support />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/home" element={<Dashboard />} />
         
         {/* Feature routes - still accessible but not in navigation */}
         <Route path="/siso-ai" element={<SisoAI />} />
