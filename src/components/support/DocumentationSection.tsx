@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Book, UserCircle, FileText, FolderKanban, Sparkles, Code2, HelpCircle } from 'lucide-react';
+import { Book, UserCircle, FileText, FolderKanban, Sparkles, Code2, HelpCircle, ChevronDown, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface DocArticle {
   id: string;
@@ -28,7 +29,7 @@ interface DocumentationSectionProps {
 
 export const DocumentationSection = ({ searchQuery = '' }: DocumentationSectionProps) => {
   const [currentArticle, setCurrentArticle] = useState<DocArticle | null>(null);
-  const [currentCategory, setCurrentCategory] = useState<DocCategory | null>(null);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
 
   // Documentation categories with article counts
   const categories: DocCategory[] = [
@@ -280,39 +281,29 @@ export const DocumentationSection = ({ searchQuery = '' }: DocumentationSectionP
       })).filter(category => category.articles.length > 0)
     : categories;
 
-  const handleArticleSelect = (article: DocArticle, category: DocCategory) => {
+  const handleArticleSelect = (article: DocArticle) => {
     setCurrentArticle(article);
-    setCurrentCategory(category);
-  };
-
-  const handleBackToCategory = () => {
-    setCurrentArticle(null);
   };
 
   const handleBackToCategories = () => {
     setCurrentArticle(null);
-    setCurrentCategory(null);
+  };
+
+  const toggleCategory = (categoryId: string) => {
+    setExpandedCategories(prev => 
+      prev.includes(categoryId)
+        ? prev.filter(id => id !== categoryId)
+        : [...prev, categoryId]
+    );
   };
 
   // Render article content
   if (currentArticle) {
     return (
       <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-4">
-          <Button variant="ghost" onClick={handleBackToCategories} size="sm">
-            ← All Categories
-          </Button>
-          {currentCategory && (
-            <>
-              <span className="text-siso-text/50 mx-1">/</span>
-              <Button variant="ghost" onClick={handleBackToCategory} size="sm">
-                {currentCategory.title}
-              </Button>
-            </>
-          )}
-          <span className="text-siso-text/50 mx-1">/</span>
-          <span className="text-siso-text">{currentArticle.title}</span>
-        </div>
+        <Button variant="ghost" onClick={handleBackToCategories} className="mb-4">
+          ← Back to Categories
+        </Button>
         
         <div className="bg-siso-bg-card/20 backdrop-blur-sm border border-siso-border rounded-xl p-6">
           <div className="flex justify-between items-start mb-4">
@@ -334,78 +325,72 @@ export const DocumentationSection = ({ searchQuery = '' }: DocumentationSectionP
     );
   }
 
-  // Render category articles
-  if (currentCategory) {
-    return (
-      <div className="space-y-4">
-        <Button variant="ghost" onClick={handleBackToCategories} className="mb-4">
-          ← Back to Categories
-        </Button>
-        
-        <div>
-          <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
-            <span className="bg-siso-orange/10 p-2 rounded-full">{currentCategory.icon}</span>
-            {currentCategory.title}
-          </h2>
-          <p className="text-siso-text/70 mb-6">{currentCategory.description}</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {currentCategory.articles.map(article => (
-            <Card 
-              key={article.id} 
-              className="hover:bg-siso-bg-card/30 transition-colors cursor-pointer border-siso-border"
-              onClick={() => handleArticleSelect(article, currentCategory)}
-            >
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-semibold">{article.title}</h3>
-                  <Badge variant="outline" className="text-xs">
-                    {article.difficulty}
-                  </Badge>
-                </div>
-                <p className="text-siso-text/70 text-sm">{article.excerpt}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // Render main category grid
+  // Render collapsible category list
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {searchQuery && filteredCategories.length === 0 ? (
         <div className="text-center py-8">
           <p className="text-siso-text/70">No results found for "{searchQuery}"</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredCategories.map(category => (
-            <Card
-              key={category.id}
-              className="border border-siso-border hover:border-siso-orange/50 transition-all cursor-pointer bg-siso-bg-card/20 backdrop-blur-sm"
-              onClick={() => setCurrentCategory(category)}
-            >
-              <CardContent className="p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="bg-siso-orange/10 p-3 rounded-full">
-                    {category.icon}
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-lg">{category.title}</h3>
-                    <div className="flex items-center mt-1">
-                      <Badge variant="secondary" className="text-xs">
-                        {category.articleCount} articles
-                      </Badge>
+        <div className="space-y-2">
+          {filteredCategories.map((category) => {
+            const isExpanded = expandedCategories.includes(category.id);
+            
+            return (
+              <div key={category.id} className="border border-siso-border rounded-lg overflow-hidden">
+                <button
+                  onClick={() => toggleCategory(category.id)}
+                  className={cn(
+                    "w-full px-4 py-3 flex items-center justify-between transition-colors",
+                    isExpanded ? "bg-siso-bg-card/30" : "hover:bg-siso-bg-card/20"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="bg-siso-orange/10 p-2 rounded-full">
+                      {category.icon}
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-medium text-lg">{category.title}</h3>
+                      <p className="text-sm text-siso-text/70">{category.description}</p>
                     </div>
                   </div>
-                </div>
-                <p className="text-sm text-siso-text/70">{category.description}</p>
-              </CardContent>
-            </Card>
-          ))}
+                  <div className="flex items-center">
+                    <Badge variant="secondary" className="mr-3 text-xs">
+                      {category.articleCount} articles
+                    </Badge>
+                    {isExpanded ? (
+                      <ChevronDown className="h-5 w-5 text-siso-text/60" />
+                    ) : (
+                      <ChevronRight className="h-5 w-5 text-siso-text/60" />
+                    )}
+                  </div>
+                </button>
+                
+                {isExpanded && (
+                  <div className="animate-accordion-down">
+                    <div className="divide-y divide-siso-border">
+                      {category.articles.map((article) => (
+                        <button
+                          key={article.id}
+                          className="w-full text-left px-6 py-3 hover:bg-siso-bg-card/20 transition-colors border-l-2 border-l-transparent hover:border-l-siso-orange"
+                          onClick={() => handleArticleSelect(article)}
+                        >
+                          <div className="flex justify-between items-start">
+                            <h4 className="font-medium">{article.title}</h4>
+                            <Badge variant="outline" className="text-xs">
+                              {article.difficulty}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-siso-text/70 mt-1">{article.excerpt}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

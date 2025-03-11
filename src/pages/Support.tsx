@@ -23,14 +23,14 @@ const Support = () => {
   return (
     <MainLayout>
       <div className="container mx-auto py-8 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto">
-          {/* Simplified header */}
-          <div className="mb-10 text-center">
+        <div className="max-w-3xl mx-auto">
+          {/* Header with search */}
+          <div className="mb-8 text-center">
             <h1 className="text-3xl font-bold text-siso-text-bold mb-2">Help Center</h1>
             <p className="text-siso-text/70 mb-6">Find comprehensive guides and documentation to help you get started</p>
             
             {/* Prominent search bar */}
-            <div className="relative max-w-2xl mx-auto mb-8">
+            <div className="relative max-w-2xl mx-auto mb-4">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-siso-text/60" />
               <Input
                 type="search"
