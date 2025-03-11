@@ -40,39 +40,21 @@ export const menuSections: MenuSection[] = [
     ]
   },
   {
-    type: 'section',
-    title: 'Portfolio',
+    type: 'main',
+    href: '/portfolio',
     icon: Briefcase,
-    items: [
-      {
-        href: '/portfolio',
-        icon: Briefcase,
-        label: 'My Portfolio',
-      }
-    ]
+    label: 'My Portfolio',
   },
   {
-    type: 'section',
-    title: 'Account',
+    type: 'main',
+    href: '/profile',
     icon: User,
-    items: [
-      {
-        href: '/profile',
-        icon: User,
-        label: 'Profile & Settings',
-      }
-    ]
+    label: 'Profile & Settings',
   },
   {
-    type: 'section',
-    title: 'Help',
+    type: 'main',
+    href: '/support',
     icon: HelpCircle,
-    items: [
-      {
-        href: '/support',
-        icon: HelpCircle,
-        label: 'Help Center',
-      }
-    ]
+    label: 'Help Center',
   }
 ];
