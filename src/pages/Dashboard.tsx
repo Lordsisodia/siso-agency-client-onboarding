@@ -10,6 +10,7 @@ import { useEvents } from '@/hooks/useEvents';
 import { awardNavigationPoints } from '@/utils/navigationPoints';
 import { useLocation } from 'react-router-dom';
 import { useBasicUserData } from '@/hooks/useBasicUserData';
+import { motion } from 'framer-motion';
 
 export default function Dashboard() {
   const { user, loading } = useAuthSession();
@@ -46,7 +47,12 @@ export default function Dashboard() {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen bg-gradient-to-b from-[#0A0A0A] to-[#121212]">
+      <motion.div 
+        className="flex min-h-screen bg-gradient-to-b from-[#0A0A0A] to-[#121212]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         <Sidebar />
         <DashboardLayout 
           userName={getDisplayName()} 
@@ -55,7 +61,7 @@ export default function Dashboard() {
           notifications={notifications}
           events={events}
         />
-      </div>
+      </motion.div>
     </SidebarProvider>
   );
 }
