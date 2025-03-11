@@ -1,32 +1,40 @@
 
 import { useState } from 'react';
-
-export interface Video {
-  id: string;
-  title: string;
-  thumbnailUrl: string;
-  duration: string;
-  date: string;
-  url: string;
-  viewCount: number;
-  creator?: {
-    id: string;
-    name: string;
-    profileImageUrl: string;
-  };
-}
+import { Video } from '@/types/video';
 
 export const useVideos = () => {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-
-  // This is a stub implementation since we're not using video features
-  // Normally this would fetch videos from the API
+  
+  // Stub implementation with additional properties needed by VideoLibrary
+  const fetchNextPage = () => {
+    console.log('Would fetch next page of videos');
+  };
+  
+  const isFetchingNextPage = false;
+  const hasNextPage = false;
+  const isLoading = loading;
+  
+  // This is a stub implementation that would normally fetch videos from the API
+  const getVideosByCategory = (categoryId: string) => {
+    console.log('Would fetch videos for category:', categoryId);
+    return {
+      videos,
+      loading,
+      error
+    };
+  };
 
   return {
     videos,
     loading,
-    error
+    error,
+    data: { pages: [videos] },
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    getVideosByCategory
   };
 };

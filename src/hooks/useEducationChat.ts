@@ -8,9 +8,15 @@ interface ChatMessage {
   timestamp: Date;
 }
 
+interface VideoTopic {
+  title: string;
+  content: string;
+}
+
 export const useEducationChat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [topics, setTopics] = useState<VideoTopic[]>([]);
 
   const sendMessage = async (message: string) => {
     // Stub implementation
@@ -18,9 +24,20 @@ export const useEducationChat = () => {
     return true;
   };
 
+  // Added to support the VideoAnalysis component
+  const getVideoAnalysis = (videoId: string) => {
+    console.log('Getting analysis for video:', videoId);
+    return {
+      topics: [] as string[],
+      loading: false
+    };
+  };
+
   return {
     messages,
     isLoading,
-    sendMessage
+    topics,
+    sendMessage,
+    getVideoAnalysis
   };
 };

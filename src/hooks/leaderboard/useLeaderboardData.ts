@@ -25,6 +25,10 @@ export const useLeaderboardData = (): UseLeaderboardResult => {
         contributionCount: 25,
         referralCount: 5,
         achievements: [],
+        profile: {
+          full_name: 'John Doe',
+          avatar_url: null
+        },
         discord_url: '',
         github_url: '',
         linkedin_url: '',

@@ -30,3 +30,6 @@ export * from "../profile/useProfileForm";
 
 // Export leaderboard hooks
 export * from "../leaderboard/useLeaderboardData";
+
+// Export education hooks
+export * from "../education";
