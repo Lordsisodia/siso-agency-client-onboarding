@@ -6,22 +6,14 @@ import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { AIThinkingLoader } from '@/components/ui/ai-thinking-loader';
 import { useToast } from '@/hooks/use-toast';
+import { ChatMessage as ChatMessageType } from '@/types/chat';
 
 interface ChatMessageProps {
-  role: 'assistant' | 'user';
-  content: string;
-  assistantType?: string;
-  isLoading?: boolean;
-  timestamp?: Date;
+  message: ChatMessageType;
 }
 
-export const ChatMessage: React.FC<ChatMessageProps> = ({ 
-  role, 
-  content, 
-  assistantType = 'AI Assistant',
-  isLoading = false,
-  timestamp
-}) => {
+export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+  const { role, content, timestamp, loading } = message;
   const isAssistant = role === 'assistant';
   const { toast } = useToast();
   
@@ -70,7 +62,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
       <div className="flex-1 space-y-1">
         <div className="flex items-center justify-between">
           <div className="text-sm font-medium text-siso-text-muted">
-            {isAssistant ? assistantType : 'You'}
+            {isAssistant ? 'AI Assistant' : 'You'}
           </div>
           
           {timestamp && (
@@ -80,7 +72,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
           )}
         </div>
         
-        {isLoading ? (
+        {loading ? (
           <AIThinkingLoader variant="default" showStages={true} />
         ) : (
           <div className="relative group">

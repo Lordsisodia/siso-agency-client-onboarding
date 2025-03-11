@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
@@ -125,46 +124,46 @@ export default function NewProject() {
             - Description: ${websiteData.aiAnalysis.companyDescription || "Not detected"}
             
             Based on this analysis, I'll help you create an effective project plan.`;
-          }
-        } catch (err) {
-          console.error("Error analyzing website:", err);
-          analysisContent = `I tried to analyze your website (${data.websiteUrl}) but encountered an issue. Let's proceed with the information you've provided.`;
         }
+      } catch (err) {
+        console.error("Error analyzing website:", err);
+        analysisContent = `I tried to analyze your website (${data.websiteUrl}) but encountered an issue. Let's proceed with the information you've provided.`;
       }
-      
-      // Start chat with the constructed prompt
-      setShowOnboarding(false);
-      setShowChat(true);
-      
-      // Construct a prompt based on the user's input
-      const prompt = `
-      The user has provided the following information:
-      ${data.companyName ? `- Company Name: ${data.companyName}` : ''}
-      ${data.websiteUrl ? `- Website: ${data.websiteUrl}` : ''}
-      ${data.socialLinks.facebook ? `- Facebook: ${data.socialLinks.facebook}` : ''}
-      ${data.socialLinks.twitter ? `- Twitter: ${data.socialLinks.twitter}` : ''}
-      ${data.socialLinks.linkedin ? `- LinkedIn: ${data.socialLinks.linkedin}` : ''}
-      ${data.socialLinks.instagram ? `- Instagram: ${data.socialLinks.instagram}` : ''}
-      ${data.projectGoals ? `- Project Goals: ${data.projectGoals}` : ''}
-      ${data.targetAudience ? `- Target Audience: ${data.targetAudience}` : ''}
-      
-      ${analysisContent ? analysisContent : ''}
-      
-      Based on this information, please start helping them plan their project by asking relevant questions to gather any missing details.`;
-      
-      // Send the constructed prompt to the AI
-      await sendMessage(prompt, undefined, {});
-      
-      setIsWebsiteInputOpen(false);
-    } catch (error) {
-      console.error("Error processing website submission:", error);
-      toast({
-        title: "Error",
-        description: "There was a problem processing your website information. Please try again.",
-        variant: "destructive"
-      });
     }
-  };
+    
+    // Start chat with the constructed prompt
+    setShowOnboarding(false);
+    setShowChat(true);
+    
+    // Construct a prompt based on the user's input
+    const prompt = `
+    The user has provided the following information:
+    ${data.companyName ? `- Company Name: ${data.companyName}` : ''}
+    ${data.websiteUrl ? `- Website: ${data.websiteUrl}` : ''}
+    ${data.socialLinks.facebook ? `- Facebook: ${data.socialLinks.facebook}` : ''}
+    ${data.socialLinks.twitter ? `- Twitter: ${data.socialLinks.twitter}` : ''}
+    ${data.socialLinks.linkedin ? `- LinkedIn: ${data.socialLinks.linkedin}` : ''}
+    ${data.socialLinks.instagram ? `- Instagram: ${data.socialLinks.instagram}` : ''}
+    ${data.projectGoals ? `- Project Goals: ${data.projectGoals}` : ''}
+    ${data.targetAudience ? `- Target Audience: ${data.targetAudience}` : ''}
+    
+    ${analysisContent ? analysisContent : ''}
+    
+    Based on this information, please start helping them plan their project by asking relevant questions to gather any missing details.`;
+    
+    // Send the constructed prompt to the AI
+    await sendMessage(prompt);
+    
+    setIsWebsiteInputOpen(false);
+  } catch (error) {
+    console.error("Error processing website submission:", error);
+    toast({
+      title: "Error",
+      description: "There was a problem processing your website information. Please try again.",
+      variant: "destructive"
+    });
+  }
+};
 
   return (
     <MainLayout>
@@ -268,7 +267,7 @@ export default function NewProject() {
         <ManualInputSheet
           isOpen={isManualInputOpen}
           onClose={() => setIsManualInputOpen(false)}
-          onSubmitToAI={sendMessage}
+          onSubmitToAI={(prompt, formData) => sendMessage(prompt, undefined, formData)}
         />
       </div>
     </MainLayout>

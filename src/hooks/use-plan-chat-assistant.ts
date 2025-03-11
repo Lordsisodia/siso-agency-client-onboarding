@@ -101,12 +101,12 @@ export function usePlanChatAssistant(projectId?: string) {
         variant: "destructive"
       });
       
-      // Add error message as system message
+      // Add error message as assistant message with an error flag
       const errorSystemMessage: ChatMessage = {
-        role: 'system',
+        role: 'assistant',
         content: `Error: ${errorMessage}`,
         timestamp: new Date(),
-        id: `system-${Date.now()}`
+        id: `error-${Date.now()}`
       };
       
       setMessages(prev => [...prev, errorSystemMessage]);

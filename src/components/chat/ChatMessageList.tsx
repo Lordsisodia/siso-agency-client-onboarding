@@ -66,7 +66,11 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
           className="py-2"
         >
           <ChatMessageComponent 
-            message={{ role: 'assistant', content: '', loading: true }} 
+            message={{ 
+              role: 'assistant', 
+              content: '', 
+              loading: true 
+            }}
           />
         </motion.div>
       )}

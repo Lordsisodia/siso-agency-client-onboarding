@@ -27,10 +27,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   projectId,
   usePlanAssistant = false
 }) => {
-  // Use either the plan chat assistant hook or the regular chat assistant hook
-  const useChatHook = usePlanAssistant ? usePlanChatAssistant : useChatAssistant;
-  
-  // Use the chat assistant hook
+  // Use the chat assistant hook based on usePlanAssistant boolean
   const { 
     messages: rawMessages, 
     isLoading, 
