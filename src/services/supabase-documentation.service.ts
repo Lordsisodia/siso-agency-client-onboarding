@@ -466,6 +466,8 @@ export const saveQuestionFeedback = async (
 // Import test documentation data
 export const importTestDocumentation = async (useExpandedData: boolean = false): Promise<boolean> => {
   try {
+    console.log(`Requesting import with expanded=${useExpandedData}`);
+    
     const response = await fetch(`/api/import-documentation?expanded=${useExpandedData}`, {
       method: 'POST',
       headers: {
@@ -474,13 +476,16 @@ export const importTestDocumentation = async (useExpandedData: boolean = false):
     });
     
     if (!response.ok) {
-      throw new Error(`Failed to import documentation: ${response.statusText}`);
+      const errorData = await response.text();
+      console.error(`Failed to import documentation: ${response.status} ${response.statusText}`, errorData);
+      throw new Error(`HTTP Error: ${response.status} ${response.statusText} - ${errorData}`);
     }
     
     const result = await response.json();
-    return result.success;
+    console.log("Import result:", result);
+    return result.success === true;
   } catch (error) {
     console.error('Error importing documentation:', error);
-    return false;
+    throw error; // Rethrow to allow the calling component to handle it
   }
 };

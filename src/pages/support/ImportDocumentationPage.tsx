@@ -1,12 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { ArrowRight, CheckCircle, AlertCircle, LoaderCircle, Database } from 'lucide-react';
+import { ArrowRight, CheckCircle, AlertCircle, LoaderCircle, Database, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { importTestDocumentation } from '@/services/supabase-documentation.service';
 import { useToast } from '@/hooks/use-toast';
@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 const ImportDocumentationPage: React.FC = () => {
   const [isImporting, setIsImporting] = useState(false);
   const [importSuccess, setImportSuccess] = useState<boolean | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [useExpandedData, setUseExpandedData] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -21,19 +22,24 @@ const ImportDocumentationPage: React.FC = () => {
   const handleImportData = async () => {
     setIsImporting(true);
     setImportSuccess(null);
+    setErrorMessage(null);
     
     try {
+      console.log("Starting documentation import with expanded data:", useExpandedData);
       const success = await importTestDocumentation(useExpandedData);
       
       setImportSuccess(success);
       
       if (success) {
+        console.log("Import completed successfully");
         toast({
           title: "Import successful",
           description: `Documentation data has been imported successfully using the ${useExpandedData ? 'expanded' : 'standard'} dataset.`,
           variant: "default",
         });
       } else {
+        console.error("Import failed - returned false");
+        setErrorMessage("The import process returned a failure status. Please try again.");
         toast({
           title: "Import failed",
           description: "There was an error importing the documentation data.",
@@ -43,6 +49,7 @@ const ImportDocumentationPage: React.FC = () => {
     } catch (error) {
       console.error('Error importing documentation:', error);
       setImportSuccess(false);
+      setErrorMessage(error instanceof Error ? error.message : "Unknown error occurred during import");
       
       toast({
         title: "Import error",
@@ -52,6 +59,35 @@ const ImportDocumentationPage: React.FC = () => {
     } finally {
       setIsImporting(false);
     }
+  };
+
+  // Check if import has been attempted before
+  useEffect(() => {
+    const checkImportStatus = async () => {
+      try {
+        const response = await fetch('/api/import-documentation-status');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.hasImported) {
+            toast({
+              title: "Data already exists",
+              description: "Documentation data has already been imported. You can reimport to refresh the data.",
+              variant: "default",
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Failed to check import status:", error);
+      }
+    };
+    
+    // Uncomment this to add the check functionality later
+    // checkImportStatus();
+  }, [toast]);
+
+  const handleRetry = () => {
+    setImportSuccess(null);
+    setErrorMessage(null);
   };
 
   return (
@@ -108,7 +144,17 @@ const ImportDocumentationPage: React.FC = () => {
                   <AlertCircle className="h-4 w-4 text-red-500" />
                   <AlertTitle className="text-red-500">Import Failed</AlertTitle>
                   <AlertDescription className="text-siso-text/80">
-                    There was an error importing the documentation data. Please check the console for error details.
+                    <p>There was an error importing the documentation data.</p>
+                    {errorMessage && <p className="mt-1 font-mono text-xs">{errorMessage}</p>}
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleRetry}
+                      className="mt-2"
+                    >
+                      <RefreshCw className="mr-2 h-3 w-3" />
+                      Try Again
+                    </Button>
                   </AlertDescription>
                 </Alert>
               )}
