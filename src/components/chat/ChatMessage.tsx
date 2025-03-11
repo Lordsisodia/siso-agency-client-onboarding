@@ -7,7 +7,7 @@ export interface ChatMessageProps {
   message: ChatMessageType;
   assistantType?: string;
   isLoading?: boolean;
-  role?: 'user' | 'assistant' | string; // Updated to accept string roles
+  role?: 'user' | 'assistant' | string; // Accept any role as string
 }
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ 
