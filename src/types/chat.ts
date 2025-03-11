@@ -7,10 +7,15 @@ export interface ChatMessage {
   loading?: boolean;
 }
 
-// Export any additional types needed
 export interface ChatInputProps {
   onSubmit: (message: string) => void;
   isLoading: boolean;
   placeholder?: string;
   disabled?: boolean;
+}
+
+export interface ChatThreadProps {
+  messages: ChatMessage[];
+  isLoading?: boolean;
+  error?: string | null;
 }

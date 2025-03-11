@@ -8,7 +8,6 @@ export * from "../use-toast";
 
 // Export chat assistant hooks
 export * from "../use-chat-assistant";
-export * from "../use-plan-chat-assistant";
 export * from "../use-project-planning";
 
 // Export additional hooks

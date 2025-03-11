@@ -3,18 +3,19 @@ import { useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { useAuthSession } from '@/hooks/useAuthSession';
-import { useNavigate } from 'react-router-dom';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
 export default function Dashboard() {
   const { user, loading } = useAuthSession();
-  const navigate = useNavigate();
   const { stats, fetchStats } = useDashboardStats();
 
   useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
+    // Fetch stats if user is logged in
+    if (user) {
+      fetchStats();
+    }
+  }, [user, fetchStats]);
 
   return (
     <SidebarProvider>
