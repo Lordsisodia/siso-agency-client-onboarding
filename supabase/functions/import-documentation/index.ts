@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 import { documentationData } from "./staticDocumentation.ts";
+import { expandedDocumentationData } from "./expanded-documentation.ts";
 
 // CORS headers
 const corsHeaders = {
@@ -42,8 +43,15 @@ serve(async (req) => {
   try {
     console.log("Starting data import...");
     
+    // Check if we should use expanded data
+    const url = new URL(req.url);
+    const useExpanded = url.searchParams.get('expanded') === 'true';
+    
+    const dataToImport = useExpanded ? expandedDocumentationData : documentationData;
+    console.log(`Using ${useExpanded ? 'expanded' : 'standard'} documentation data`);
+
     // Import all categories first
-    for (const categoryData of documentationData) {
+    for (const categoryData of dataToImport) {
       console.log(`Processing category: ${categoryData.title}`);
       
       // Check if category exists already (by slug)
@@ -68,7 +76,7 @@ serve(async (req) => {
           title: categoryData.title,
           description: categoryData.description,
           icon: categoryData.icon.name,
-          display_order: documentationData.indexOf(categoryData) + 1
+          display_order: dataToImport.indexOf(categoryData) + 1
         })
         .select()
         .single();
@@ -159,10 +167,17 @@ serve(async (req) => {
       }
     }
     
-    return new Response(JSON.stringify({ success: true, message: "Documentation data imported successfully" }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        message: "Documentation data imported successfully",
+        expanded: useExpanded
+      }), 
+      {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   } catch (error) {
     console.error("Error importing documentation data:", error);
     

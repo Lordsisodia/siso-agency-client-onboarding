@@ -4,7 +4,9 @@ import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { ArrowRight, CheckCircle, AlertCircle, LoaderCircle } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { ArrowRight, CheckCircle, AlertCircle, LoaderCircle, Database } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { importTestDocumentation } from '@/services/supabase-documentation.service';
 import { useToast } from '@/hooks/use-toast';
@@ -12,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 const ImportDocumentationPage: React.FC = () => {
   const [isImporting, setIsImporting] = useState(false);
   const [importSuccess, setImportSuccess] = useState<boolean | null>(null);
+  const [useExpandedData, setUseExpandedData] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -20,14 +23,14 @@ const ImportDocumentationPage: React.FC = () => {
     setImportSuccess(null);
     
     try {
-      const success = await importTestDocumentation();
+      const success = await importTestDocumentation(useExpandedData);
       
       setImportSuccess(success);
       
       if (success) {
         toast({
           title: "Import successful",
-          description: "Documentation data has been imported successfully.",
+          description: `Documentation data has been imported successfully using the ${useExpandedData ? 'expanded' : 'standard'} dataset.`,
           variant: "default",
         });
       } else {
@@ -74,6 +77,22 @@ const ImportDocumentationPage: React.FC = () => {
                 </ul>
               </div>
               
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="expanded-mode" className="text-sm font-medium">
+                    Use expanded documentation dataset
+                  </Label>
+                  <span className="text-xs text-siso-text/60">
+                    Includes more categories and detailed Q&A content
+                  </span>
+                </div>
+                <Switch 
+                  id="expanded-mode" 
+                  checked={useExpandedData} 
+                  onCheckedChange={setUseExpandedData}
+                />
+              </div>
+              
               {importSuccess === true && (
                 <Alert className="bg-green-500/10 border-green-500/20">
                   <CheckCircle className="h-4 w-4 text-green-500" />
@@ -114,8 +133,8 @@ const ImportDocumentationPage: React.FC = () => {
                     </>
                   ) : (
                     <>
+                      <Database className="mr-2 h-4 w-4" />
                       Import Documentation
-                      <ArrowRight className="ml-2 h-4 w-4" />
                     </>
                   )}
                 </Button>

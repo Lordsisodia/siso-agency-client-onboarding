@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Book, UserCircle, FileText, FolderKanban, 
@@ -465,9 +464,9 @@ export const saveQuestionFeedback = async (
 };
 
 // Import test documentation data
-export const importTestDocumentation = async (): Promise<boolean> => {
+export const importTestDocumentation = async (useExpandedData: boolean = false): Promise<boolean> => {
   try {
-    const response = await fetch('/api/import-documentation', {
+    const response = await fetch(`/api/import-documentation?expanded=${useExpandedData}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -485,4 +484,3 @@ export const importTestDocumentation = async (): Promise<boolean> => {
     return false;
   }
 };
-
