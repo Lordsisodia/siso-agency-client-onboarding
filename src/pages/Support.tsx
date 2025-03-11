@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { AiChatSection } from '@/components/support/AiChatSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MessagesSquare, Book, Search, Clock, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { MessagesSquare, Book, Search, Clock, ThumbsUp, ThumbsDown, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -27,21 +27,30 @@ const Support = () => {
       setIsLoading(true);
       try {
         if (searchQuery) {
+          console.log("Searching documentation with query:", searchQuery);
           const results = await searchDocumentation(searchQuery);
+          console.log("Search results:", results);
           setCategories(results);
         } else {
+          console.log("Fetching all documentation categories");
           const allCategories = await fetchCategories();
+          console.log("Fetched categories:", allCategories);
           setCategories(allCategories);
         }
       } catch (error) {
         console.error('Error loading documentation categories:', error);
+        toast({
+          title: "Error loading documentation",
+          description: "There was a problem loading the documentation. Please try again.",
+          variant: "destructive",
+        });
       } finally {
         setIsLoading(false);
       }
     };
     
     loadCategories();
-  }, [searchQuery]);
+  }, [searchQuery, toast]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -105,8 +114,9 @@ const Support = () => {
             <TabsContent value="documentation" className="mt-0">
               {/* Documentation Categories */}
               {isLoading ? (
-                <div className="flex justify-center py-12">
-                  <div className="animate-pulse h-6 w-32 bg-siso-bg-alt/50 rounded"></div>
+                <div className="flex flex-col items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-siso-text/50 mb-4" />
+                  <p className="text-siso-text/70">Loading documentation...</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -139,8 +149,22 @@ const Support = () => {
               {!isLoading && categories.length === 0 && (
                 <div className="text-center py-16 bg-siso-bg-alt/20 rounded-lg border border-siso-border">
                   <Search className="h-10 w-10 text-siso-text/30 mx-auto mb-4" />
-                  <p className="text-siso-text font-medium">No results found for "{searchQuery}"</p>
-                  <p className="text-siso-text/60 mt-2">Try adjusting your search terms or browse our categories</p>
+                  {searchQuery ? (
+                    <>
+                      <p className="text-siso-text font-medium">No results found for "{searchQuery}"</p>
+                      <p className="text-siso-text/60 mt-2">Try adjusting your search terms or browse our categories</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-siso-text font-medium">No documentation found</p>
+                      <p className="text-siso-text/60 mt-2">
+                        Please import documentation data from the 
+                        <a href="/support/import" className="text-siso-blue ml-1 hover:underline">
+                          import page
+                        </a>
+                      </p>
+                    </>
+                  )}
                 </div>
               )}
             </TabsContent>
