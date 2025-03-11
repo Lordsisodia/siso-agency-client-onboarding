@@ -50,7 +50,7 @@ export function usePlanChatAssistant(projectId?: string) {
       if (systemPrompt && !messages.some(m => m.role === 'system')) {
         messagesArray.unshift({
           id: uuidv4(),
-          role: 'system' as MessageRole, // Explicitly type this as MessageRole
+          role: 'system',
           content: systemPrompt
         });
       }

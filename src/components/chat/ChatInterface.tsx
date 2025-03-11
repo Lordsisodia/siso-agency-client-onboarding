@@ -60,7 +60,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   });
 
-  // Convert onlineStatus to boolean for props that expect boolean values
+  // Convert onlineStatus string to boolean
   const isOnline = onlineStatus === 'online';
 
   return (
