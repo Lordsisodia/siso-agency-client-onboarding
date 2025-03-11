@@ -22,6 +22,11 @@ import Support from '@/pages/Support';
 import Notifications from '@/pages/Notifications';
 import PendingTasks from '@/pages/PendingTasks';
 
+// New pages
+import SisoAI from '@/pages/SisoAI';
+import Leaderboards from '@/pages/Leaderboards';
+import CryptoExchange from '@/pages/CryptoExchange';
+
 import { Toaster } from '@/components/ui/toaster';
 import { useAuthSession } from '@/hooks/useAuthSession';
 
@@ -62,6 +67,11 @@ function App() {
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/pending-tasks" element={<PendingTasks />} />
+        
+        {/* New feature routes */}
+        <Route path="/siso-ai" element={<SisoAI />} />
+        <Route path="/leaderboards" element={<Leaderboards />} />
+        <Route path="/crypto-exchange" element={<CryptoExchange />} />
         
         <Route path="/onboarding/social" element={<SocialOnboarding />} />
         <Route path="/onboarding/congratulations" element={<OnboardingCongratulations />} />
