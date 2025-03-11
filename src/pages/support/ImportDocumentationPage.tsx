@@ -1,15 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { ArrowRight, CheckCircle, AlertCircle, LoaderCircle, Database, RefreshCw, Info } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { importTestDocumentation } from '@/services/supabase-documentation.service';
 import { useToast } from '@/hooks/use-toast';
+
+// Import refactored components
+import { InfoBox } from '@/components/support/import/InfoBox';
+import { DatasetToggle } from '@/components/support/import/DatasetToggle';
+import { ImportStatusAlert } from '@/components/support/import/ImportStatusAlert';
+import { ActionButtons } from '@/components/support/import/ActionButtons';
 
 const ImportDocumentationPage: React.FC = () => {
   const [isImporting, setIsImporting] = useState(false);
@@ -17,7 +17,6 @@ const ImportDocumentationPage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [useExpandedData, setUseExpandedData] = useState(true);
   const [detailedErrorInfo, setDetailedErrorInfo] = useState<string | null>(null);
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleImportData = async () => {
@@ -101,6 +100,14 @@ const ImportDocumentationPage: React.FC = () => {
     setDetailedErrorInfo(null);
   };
 
+  // Content for the info box
+  const infoBoxItems = [
+    "Import predefined documentation categories",
+    "Create sample articles with sections and questions",
+    "Populate the help center with test content",
+    "Skip any existing categories to prevent duplicates"
+  ];
+
   return (
     <MainLayout>
       <div className="container mx-auto py-12 px-4 sm:px-6">
@@ -114,100 +121,24 @@ const ImportDocumentationPage: React.FC = () => {
             </CardHeader>
             
             <CardContent className="space-y-6">
-              <div className="bg-siso-bg-alt/20 rounded-lg p-4 border border-siso-border/40">
-                <h3 className="font-medium mb-2">What this will do:</h3>
-                <ul className="list-disc list-inside space-y-1 text-sm text-siso-text/70">
-                  <li>Import predefined documentation categories</li>
-                  <li>Create sample articles with sections and questions</li>
-                  <li>Populate the help center with test content</li>
-                  <li>Skip any existing categories to prevent duplicates</li>
-                </ul>
-              </div>
+              <InfoBox title="What this will do:" items={infoBoxItems} />
               
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="expanded-mode" className="text-sm font-medium">
-                    Use expanded documentation dataset
-                  </Label>
-                  <span className="text-xs text-siso-text/60">
-                    Includes more categories and detailed Q&A content
-                  </span>
-                </div>
-                <Switch 
-                  id="expanded-mode" 
-                  checked={useExpandedData} 
-                  onCheckedChange={setUseExpandedData}
-                />
-              </div>
+              <DatasetToggle 
+                useExpandedData={useExpandedData} 
+                onToggle={setUseExpandedData} 
+              />
               
-              {importSuccess === true && (
-                <Alert className="bg-green-500/10 border-green-500/20">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <AlertTitle className="text-green-500">Import Successful</AlertTitle>
-                  <AlertDescription className="text-siso-text/80">
-                    Documentation data has been imported successfully. You can now view the content in the help center.
-                  </AlertDescription>
-                </Alert>
-              )}
+              <ImportStatusAlert 
+                importSuccess={importSuccess}
+                errorMessage={errorMessage}
+                detailedErrorInfo={detailedErrorInfo}
+                onRetry={handleRetry}
+              />
               
-              {importSuccess === false && (
-                <Alert className="bg-red-500/10 border-red-500/20">
-                  <AlertCircle className="h-4 w-4 text-red-500" />
-                  <AlertTitle className="text-red-500">Import Failed</AlertTitle>
-                  <AlertDescription className="text-siso-text/80">
-                    <p>There was an error importing the documentation data.</p>
-                    {errorMessage && <p className="mt-1 text-sm">{errorMessage}</p>}
-                    
-                    {detailedErrorInfo && (
-                      <details className="mt-2">
-                        <summary className="cursor-pointer text-xs flex items-center">
-                          <Info className="h-3 w-3 mr-1" /> Technical details
-                        </summary>
-                        <pre className="mt-1 text-xs bg-black/10 p-2 rounded overflow-auto max-h-28">
-                          {detailedErrorInfo}
-                        </pre>
-                      </details>
-                    )}
-                    
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={handleRetry}
-                      className="mt-3"
-                    >
-                      <RefreshCw className="mr-2 h-3 w-3" />
-                      Try Again
-                    </Button>
-                  </AlertDescription>
-                </Alert>
-              )}
-              
-              <div className="flex justify-between">
-                <Button
-                  variant="outline"
-                  onClick={() => navigate('/support')}
-                >
-                  Back to Help Center
-                </Button>
-                
-                <Button
-                  onClick={handleImportData}
-                  disabled={isImporting}
-                  className="bg-siso-blue hover:bg-siso-blue/90"
-                >
-                  {isImporting ? (
-                    <>
-                      <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-                      Importing...
-                    </>
-                  ) : (
-                    <>
-                      <Database className="mr-2 h-4 w-4" />
-                      Import Documentation
-                    </>
-                  )}
-                </Button>
-              </div>
+              <ActionButtons 
+                isImporting={isImporting} 
+                onImport={handleImportData} 
+              />
             </CardContent>
           </Card>
         </div>
