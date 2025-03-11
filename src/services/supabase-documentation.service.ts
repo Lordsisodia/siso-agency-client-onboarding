@@ -1,303 +1,399 @@
 
-import { Database } from '@/integrations/supabase/types';
-import { supabase } from '@/integrations/supabase/client';
-import { AlertTriangle, Book, FileText, HelpCircle, Info, LifeBuoy, Settings, UserCog } from 'lucide-react';
+import { supabase } from "@/integrations/supabase/client";
+import { 
+  Book, UserCircle, FileText, FolderKanban, 
+  Sparkles, Code2, HelpCircle, LucideIcon
+} from 'lucide-react';
 
-// Type for the icon component
-type IconComponent = typeof Book | typeof Settings | typeof HelpCircle | typeof Info | typeof FileText | typeof UserCog | typeof LifeBuoy | typeof AlertTriangle;
-
-// Define the types for our documentation data
-export interface DocCategory {
-  id: number;
+// Type definitions for our documentation data structure
+export interface DocQuestion {
+  id: string;
   slug: string;
+  question: string;
+  answer: string;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DocSection {
+  id: string;
   title: string;
-  description: string;
-  icon: IconComponent;
-  articleCount: number;
-  articles: DocArticle[];
+  display_order: number;
+  questions: DocQuestion[];
+  created_at: string;
+  updated_at: string;
 }
 
 export interface DocArticle {
-  id: number;
+  id: string;
   slug: string;
   title: string;
   excerpt: string;
   content: string;
-  sections?: DocSection[];
+  difficulty?: 'beginner' | 'intermediate' | 'advanced';
+  display_order: number;
+  last_updated: string;
+  created_at: string;
+  updated_at: string;
+  sections: DocSection[];
 }
 
-export interface DocSection {
-  id: number;
-  title: string;
-  questions: DocQuestion[];
-}
-
-export interface DocQuestion {
-  id: number;
+export interface DocCategory {
+  id: string;
   slug: string;
-  question: string;
-  answer: string;
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  display_order: number;
+  articleCount: number;
+  articles: DocArticle[];
+  created_at: string;
+  updated_at: string;
 }
 
-// Map category slug to an icon component
-const categoryIcons: Record<string, IconComponent> = {
-  'getting-started': Book,
-  'account-profile': UserCog,
-  'plan-builder': Settings,
-  'projects-tasks': FileText,
-  'ai-features': Info,
-  'api-integration': HelpCircle,
-  'troubleshooting': LifeBuoy,
-  'faq': AlertTriangle
+// Icon mapping helper
+const getIconComponent = (iconName: string): LucideIcon => {
+  const iconMap: Record<string, LucideIcon> = {
+    'BookIcon': Book,
+    'UserCircleIcon': UserCircle,
+    'FileTextIcon': FileText,
+    'FolderKanbanIcon': FolderKanban,
+    'SparklesIcon': Sparkles,
+    'Code2Icon': Code2,
+    'HelpCircleIcon': HelpCircle
+  };
+  
+  return iconMap[iconName] || HelpCircle;
 };
 
-// Fetch all documentation categories with their articles
-export async function fetchCategories(): Promise<DocCategory[]> {
-  const { data: categories, error } = await supabase
-    .from('documentation_categories')
-    .select('id, slug, title, description, icon, display_order')
-    .order('display_order', { ascending: true });
-
-  if (error) {
-    console.error('Error fetching categories:', error);
-    return [];
-  }
-
-  // Now fetch articles for each category
-  const categoriesWithArticles: DocCategory[] = await Promise.all(
-    categories.map(async (category) => {
-      const { data: articles, error: articlesError } = await supabase
-        .from('documentation_articles')
-        .select('id, slug, title, excerpt, content')
-        .eq('category_id', category.id)
-        .order('display_order', { ascending: true })
-        .limit(5);  // Limit to 5 articles per category for preview
-
-      if (articlesError) {
-        console.error(`Error fetching articles for category ${category.slug}:`, articlesError);
+// Fetch all categories with article counts
+export const fetchCategories = async (): Promise<DocCategory[]> => {
+  try {
+    const { data: categoriesData, error: categoriesError } = await supabase
+      .from('documentation_categories')
+      .select('*')
+      .order('display_order', { ascending: true });
+    
+    if (categoriesError) {
+      console.error('Error fetching categories:', categoriesError);
+      return [];
+    }
+    
+    if (!categoriesData || categoriesData.length === 0) {
+      return [];
+    }
+    
+    // Get article counts for each category
+    const categoriesWithCounts = await Promise.all(
+      categoriesData.map(async (category) => {
+        const { count, error: countError } = await supabase
+          .from('documentation_articles')
+          .select('id', { count: 'exact', head: true })
+          .eq('category_id', category.id);
+        
+        if (countError) {
+          console.error(`Error fetching article count for category ${category.id}:`, countError);
+        }
+        
         return {
           ...category,
-          icon: categoryIcons[category.slug] || Book,
-          articleCount: 0,
-          articles: []
-        };
+          id: category.id,
+          slug: category.slug,
+          icon: getIconComponent(category.icon),
+          articleCount: count || 0,
+          articles: [] // Will be populated when needed
+        } as DocCategory;
+      })
+    );
+    
+    return categoriesWithCounts;
+  } catch (error) {
+    console.error('Error in fetchCategories:', error);
+    return [];
+  }
+};
+
+// Fetch a single category with its articles
+export const fetchCategory = async (categorySlug: string): Promise<DocCategory | null> => {
+  try {
+    // First, get the category
+    const { data: categoryData, error: categoryError } = await supabase
+      .from('documentation_categories')
+      .select('*')
+      .eq('slug', categorySlug)
+      .single();
+    
+    if (categoryError) {
+      console.error('Error fetching category:', categoryError);
+      return null;
+    }
+    
+    if (!categoryData) {
+      return null;
+    }
+    
+    // Then, get all articles for this category
+    const { data: articlesData, error: articlesError } = await supabase
+      .from('documentation_articles')
+      .select('*')
+      .eq('category_id', categoryData.id)
+      .order('display_order', { ascending: true });
+    
+    if (articlesError) {
+      console.error('Error fetching articles:', articlesError);
+      return null;
+    }
+    
+    const category: DocCategory = {
+      ...categoryData,
+      id: categoryData.id,
+      slug: categoryData.slug,
+      icon: getIconComponent(categoryData.icon),
+      articleCount: articlesData?.length || 0,
+      articles: articlesData || []
+    };
+    
+    return category;
+  } catch (error) {
+    console.error('Error in fetchCategory:', error);
+    return null;
+  }
+};
+
+// Fetch a single article with its sections and questions
+export const fetchArticle = async (categorySlug: string, articleSlug: string): Promise<DocArticle | null> => {
+  try {
+    // First, get the category ID
+    const { data: categoryData, error: categoryError } = await supabase
+      .from('documentation_categories')
+      .select('id')
+      .eq('slug', categorySlug)
+      .single();
+    
+    if (categoryError) {
+      console.error('Error fetching category:', categoryError);
+      return null;
+    }
+    
+    if (!categoryData) {
+      return null;
+    }
+    
+    // Then, get the article
+    const { data: articleData, error: articleError } = await supabase
+      .from('documentation_articles')
+      .select('*')
+      .eq('category_id', categoryData.id)
+      .eq('slug', articleSlug)
+      .single();
+    
+    if (articleError) {
+      console.error('Error fetching article:', articleError);
+      return null;
+    }
+    
+    if (!articleData) {
+      return null;
+    }
+    
+    // Get sections for this article
+    const { data: sectionsData, error: sectionsError } = await supabase
+      .from('documentation_sections')
+      .select('*')
+      .eq('article_id', articleData.id)
+      .order('display_order', { ascending: true });
+    
+    if (sectionsError) {
+      console.error('Error fetching sections:', sectionsError);
+      return null;
+    }
+    
+    // For each section, get its questions
+    const sectionsWithQuestions = await Promise.all(
+      (sectionsData || []).map(async (section) => {
+        const { data: questionsData, error: questionsError } = await supabase
+          .from('documentation_questions')
+          .select('*')
+          .eq('section_id', section.id)
+          .order('display_order', { ascending: true });
+        
+        if (questionsError) {
+          console.error(`Error fetching questions for section ${section.id}:`, questionsError);
+          return { ...section, questions: [] };
+        }
+        
+        return {
+          ...section,
+          questions: questionsData || []
+        } as DocSection;
+      })
+    );
+    
+    const article: DocArticle = {
+      ...articleData,
+      sections: sectionsWithQuestions
+    };
+    
+    return article;
+  } catch (error) {
+    console.error('Error in fetchArticle:', error);
+    return null;
+  }
+};
+
+// Fetch a single question with its related data
+export const fetchQuestion = async (categorySlug: string, articleSlug: string, questionSlug: string): Promise<{
+  category: DocCategory | null,
+  article: DocArticle | null,
+  section: DocSection | null,
+  question: DocQuestion | null
+}> => {
+  try {
+    // First, get the article
+    const article = await fetchArticle(categorySlug, articleSlug);
+    
+    if (!article) {
+      return { category: null, article: null, section: null, question: null };
+    }
+    
+    // Find the section and question
+    let foundSection: DocSection | null = null;
+    let foundQuestion: DocQuestion | null = null;
+    
+    for (const section of article.sections) {
+      const question = section.questions.find(q => q.slug === questionSlug);
+      if (question) {
+        foundSection = section;
+        foundQuestion = question;
+        break;
       }
-
-      return {
-        ...category,
-        icon: categoryIcons[category.slug] || Book,
-        articleCount: articles.length,
-        articles: articles || []
-      };
-    })
-  );
-
-  return categoriesWithArticles;
-}
-
-// Fetch a specific category by slug with its articles
-export async function fetchCategoryBySlug(slug: string): Promise<DocCategory | null> {
-  const { data: category, error } = await supabase
-    .from('documentation_categories')
-    .select('id, slug, title, description, icon')
-    .eq('slug', slug)
-    .single();
-
-  if (error) {
-    console.error('Error fetching category:', error);
-    return null;
+    }
+    
+    if (!foundSection || !foundQuestion) {
+      return { category: null, article, section: null, question: null };
+    }
+    
+    // Get the category
+    const category = await fetchCategory(categorySlug);
+    
+    return {
+      category,
+      article,
+      section: foundSection,
+      question: foundQuestion
+    };
+  } catch (error) {
+    console.error('Error in fetchQuestion:', error);
+    return { category: null, article: null, section: null, question: null };
   }
-
-  const { data: articles, error: articlesError } = await supabase
-    .from('documentation_articles')
-    .select('id, slug, title, excerpt, content')
-    .eq('category_id', category.id)
-    .order('display_order', { ascending: true });
-
-  if (articlesError) {
-    console.error('Error fetching articles:', articlesError);
-    return null;
-  }
-
-  return {
-    ...category,
-    icon: categoryIcons[category.slug] || Book,
-    articleCount: articles.length,
-    articles: articles || []
-  };
-}
-
-// Fetch an article by its slug with sections and questions
-export async function fetchArticleBySlug(categorySlug: string, articleSlug: string): Promise<DocArticle | null> {
-  // First get the category ID
-  const { data: category, error: categoryError } = await supabase
-    .from('documentation_categories')
-    .select('id')
-    .eq('slug', categorySlug)
-    .single();
-
-  if (categoryError) {
-    console.error('Error fetching category:', categoryError);
-    return null;
-  }
-
-  // Then get the article
-  const { data: article, error: articleError } = await supabase
-    .from('documentation_articles')
-    .select('id, slug, title, excerpt, content')
-    .eq('category_id', category.id)
-    .eq('slug', articleSlug)
-    .single();
-
-  if (articleError) {
-    console.error('Error fetching article:', articleError);
-    return null;
-  }
-
-  // Get sections with questions
-  const { data: sections, error: sectionsError } = await supabase
-    .from('documentation_sections')
-    .select('id, title, display_order')
-    .eq('article_id', article.id)
-    .order('display_order', { ascending: true });
-
-  if (sectionsError) {
-    console.error('Error fetching sections:', sectionsError);
-    return { ...article, sections: [] };
-  }
-
-  // Get questions for each section
-  const sectionsWithQuestions: DocSection[] = await Promise.all(
-    sections.map(async (section) => {
-      const { data: questions, error: questionsError } = await supabase
-        .from('documentation_questions')
-        .select('id, slug, question, answer')
-        .eq('section_id', section.id)
-        .order('display_order', { ascending: true });
-
-      if (questionsError) {
-        console.error(`Error fetching questions for section ${section.id}:`, questionsError);
-        return { ...section, questions: [] };
-      }
-
-      return { ...section, questions: questions || [] };
-    })
-  );
-
-  return { ...article, sections: sectionsWithQuestions };
-}
+};
 
 // Search documentation
-export async function searchDocumentation(query: string): Promise<DocCategory[]> {
-  if (!query) return fetchCategories();
-
-  // Search for articles that match the query
-  const { data: articles, error } = await supabase
-    .from('documentation_articles')
-    .select('id, slug, title, excerpt, content, category_id')
-    .or(`title.ilike.%${query}%,excerpt.ilike.%${query}%,content.ilike.%${query}%`);
-
-  if (error) {
-    console.error('Error searching documentation:', error);
-    return [];
-  }
-
-  if (articles.length === 0) {
-    return [];
-  }
-
-  // Group articles by category_id
-  const articlesByCategory: Record<number, DocArticle[]> = {};
-  articles.forEach(article => {
-    if (!articlesByCategory[article.category_id]) {
-      articlesByCategory[article.category_id] = [];
+export const searchDocumentation = async (query: string): Promise<DocCategory[]> => {
+  if (!query || query.trim() === '') return await fetchCategories();
+  
+  const lowercaseQuery = query.toLowerCase();
+  
+  try {
+    const { data: categoriesData, error: categoriesError } = await supabase
+      .from('documentation_categories')
+      .select('*')
+      .order('display_order', { ascending: true });
+    
+    if (categoriesError) {
+      console.error('Error fetching categories:', categoriesError);
+      return [];
     }
-    articlesByCategory[article.category_id].push(article);
-  });
-
-  // Fetch the categories for these articles
-  const categoryIds = Object.keys(articlesByCategory).map(Number);
-  const { data: categories, error: categoriesError } = await supabase
-    .from('documentation_categories')
-    .select('id, slug, title, description, icon')
-    .in('id', categoryIds);
-
-  if (categoriesError) {
-    console.error('Error fetching categories for search results:', categoriesError);
+    
+    const categories = await Promise.all(
+      (categoriesData || []).map(async (category) => {
+        // Search for articles that match the query
+        const { data: articlesData, error: articlesError } = await supabase
+          .from('documentation_articles')
+          .select('*')
+          .eq('category_id', category.id)
+          .or(`title.ilike.%${lowercaseQuery}%,excerpt.ilike.%${lowercaseQuery}%,content.ilike.%${lowercaseQuery}%`)
+          .order('display_order', { ascending: true });
+        
+        if (articlesError) {
+          console.error('Error searching articles:', articlesError);
+          return null;
+        }
+        
+        if (!articlesData || articlesData.length === 0) {
+          // No matches in articles, check if the category itself matches
+          if (
+            category.title.toLowerCase().includes(lowercaseQuery) ||
+            (category.description && category.description.toLowerCase().includes(lowercaseQuery))
+          ) {
+            // Category matches, get all its articles
+            const { data: allArticles, error: allArticlesError } = await supabase
+              .from('documentation_articles')
+              .select('*')
+              .eq('category_id', category.id)
+              .order('display_order', { ascending: true });
+            
+            if (allArticlesError) {
+              console.error('Error fetching all articles:', allArticlesError);
+              return null;
+            }
+            
+            return {
+              ...category,
+              id: category.id,
+              slug: category.slug,
+              icon: getIconComponent(category.icon),
+              articleCount: allArticles?.length || 0,
+              articles: allArticles || []
+            } as DocCategory;
+          }
+          
+          return null;
+        }
+        
+        return {
+          ...category,
+          id: category.id,
+          slug: category.slug,
+          icon: getIconComponent(category.icon),
+          articleCount: articlesData.length,
+          articles: articlesData
+        } as DocCategory;
+      })
+    );
+    
+    // Filter out null results
+    return categories.filter(Boolean) as DocCategory[];
+  } catch (error) {
+    console.error('Error in searchDocumentation:', error);
     return [];
   }
+};
 
-  // Combine the categories with their matching articles
-  return categories.map(category => ({
-    ...category,
-    icon: categoryIcons[category.slug] || Book,
-    articleCount: articlesByCategory[category.id].length,
-    articles: articlesByCategory[category.id] || []
-  }));
-}
-
-// Fetch a specific question by its slug
-export async function fetchQuestionBySlug(questionSlug: string): Promise<{
-  question: DocQuestion | null;
-  article: DocArticle | null;
-  category: DocCategory | null;
-}> {
-  // Get the question
-  const { data: question, error: questionError } = await supabase
-    .from('documentation_questions')
-    .select('id, slug, question, answer, section_id')
-    .eq('slug', questionSlug)
-    .single();
-
-  if (questionError) {
-    console.error('Error fetching question:', questionError);
-    return { question: null, article: null, category: null };
-  }
-
-  // Get the section and article
-  const { data: section, error: sectionError } = await supabase
-    .from('documentation_sections')
-    .select('id, title, article_id')
-    .eq('id', question.section_id)
-    .single();
-
-  if (sectionError) {
-    console.error('Error fetching section:', sectionError);
-    return { question, article: null, category: null };
-  }
-
-  // Get the article and category
-  const { data: article, error: articleError } = await supabase
-    .from('documentation_articles')
-    .select('id, slug, title, excerpt, content, category_id')
-    .eq('id', section.article_id)
-    .single();
-
-  if (articleError) {
-    console.error('Error fetching article:', articleError);
-    return { question, article: null, category: null };
-  }
-
-  // Get the category
-  const { data: category, error: categoryError } = await supabase
-    .from('documentation_categories')
-    .select('id, slug, title, description, icon')
-    .eq('id', article.category_id)
-    .single();
-
-  if (categoryError) {
-    console.error('Error fetching category:', categoryError);
-    return { question, article, category: null };
-  }
-
-  return {
-    question,
-    article,
-    category: {
-      ...category,
-      icon: categoryIcons[category.slug] || Book,
-      articleCount: 0,
-      articles: []
+// Save feedback for a question
+export const saveQuestionFeedback = async (
+  questionId: string,
+  feedbackType: 'helpful' | 'not-helpful',
+  userId?: string
+): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('documentation_feedback')
+      .insert({
+        question_id: questionId,
+        user_id: userId,
+        feedback_type: feedbackType
+      });
+    
+    if (error) {
+      console.error('Error saving feedback:', error);
+      return false;
     }
-  };
-}
+    
+    return true;
+  } catch (error) {
+    console.error('Error in saveQuestionFeedback:', error);
+    return false;
+  }
+};
