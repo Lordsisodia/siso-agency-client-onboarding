@@ -52,7 +52,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const messages = (rawMessages || []).map(msg => ({
     ...msg,
     role: msg.role === "system" ? "system" : msg.role
-  })) as any[];
+  })) as ChatMessage[];
   
   // Use the custom hook for handling chat interface state
   const {
@@ -68,7 +68,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     welcomeMessage,
     systemPrompt,
     sendMessage: (message: string, formData?: Record<string, any>) => {
-      return hookSendMessage(message, formData as any);
+      return hookSendMessage(message, formData);
     }
   });
 
@@ -88,7 +88,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       />
       
       <ChatMessageList 
-        messages={messages as any}
+        messages={messages}
         isLoading={isLoading}
         error={error}
         onlineStatus={onlineStatus}
