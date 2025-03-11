@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -13,7 +12,9 @@ import { useProfileData } from '@/hooks/useProfileData';
 import { useEffect } from 'react';
 import { awardNavigationPoints } from '@/utils/navigationPoints';
 import { useLocation } from 'react-router-dom';
-import { toast } from 'sonner';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { UserCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -125,12 +126,52 @@ const Profile = () => {
     return <ProfileSkeleton />;
   }
 
-  if (!user || !profile) {
+  if (!user) {
     return (
       <ProfileLayout>
-        <div className="text-center text-siso-text">
-          <h1 className="text-2xl font-bold mb-4">Profile Not Found</h1>
-          <p>Unable to load profile data. Please try again later.</p>
+        <div className="text-center p-8">
+          <Alert variant="destructive" className="max-w-md mx-auto">
+            <UserCircle className="h-6 w-6" />
+            <AlertTitle>Authentication Required</AlertTitle>
+            <AlertDescription>
+              Please sign in to view your profile.
+            </AlertDescription>
+          </Alert>
+          <Button 
+            className="mt-4 bg-siso-orange hover:bg-siso-red text-white"
+            onClick={() => navigate('/auth')}
+          >
+            Sign In
+          </Button>
+        </div>
+      </ProfileLayout>
+    );
+  }
+
+  // Even if profile is null/undefined, we should still show a profile setup screen, not a "not found" error
+  const isProfileEmpty = !profile || 
+    (!profile.full_name && 
+     !profile.business_name && 
+     !profile.bio && 
+     !profile.industry);
+
+  if (isProfileEmpty && !isEditing) {
+    return (
+      <ProfileLayout>
+        <div className="text-center p-8">
+          <Alert className="max-w-md mx-auto bg-siso-orange/10 border-siso-orange text-siso-text">
+            <UserCircle className="h-6 w-6 text-siso-orange" />
+            <AlertTitle>Welcome!</AlertTitle>
+            <AlertDescription className="text-siso-text">
+              Your profile is ready to be set up. Click the button below to get started.
+            </AlertDescription>
+          </Alert>
+          <Button 
+            className="mt-4 bg-siso-orange hover:bg-siso-red text-white"
+            onClick={() => setIsEditing(true)}
+          >
+            Set Up Profile
+          </Button>
         </div>
       </ProfileLayout>
     );

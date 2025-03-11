@@ -37,6 +37,7 @@ export const useProfileFetch = () => {
         
         if (sessionError) {
           console.error('[Profile] Session error:', sessionError);
+          setLoading(false);
           return;
         }
         
@@ -52,6 +53,29 @@ export const useProfileFetch = () => {
 
           if (profileError) {
             console.error('[Profile] Profile fetch error:', profileError);
+            
+            // Check if the error is "no rows returned" which means profile doesn't exist
+            if (profileError.code === 'PGRST116') {
+              // Create a default profile for the user
+              const { data: newProfile, error: createError } = await supabase
+                .from('profiles')
+                .insert([{ id: session.user.id }])
+                .select()
+                .single();
+                
+              if (createError) {
+                console.error('[Profile] Failed to create profile:', createError);
+                setLoading(false);
+                return;
+              }
+              
+              if (newProfile && isSubscribed) {
+                console.log('[Profile] Created new profile:', newProfile);
+                setProfile(newProfile);
+              }
+            }
+            
+            setLoading(false);
             return;
           }
 

@@ -48,6 +48,7 @@ export const useProfileForm = ({ userId, initialFormData }: UseProfileFormProps)
           instagram_url: formData.instagramUrl,
           twitter_url: formData.twitterUrl,
           professional_role: formData.professionalRole,
+          onboarding_completed: true
         })
         .eq('id', userId);
 
