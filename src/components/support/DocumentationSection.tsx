@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { Search, Book, UserCircle, FileText, FolderKanban, Sparkles, Code2, HelpCircle } from 'lucide-react';
+import { Book, UserCircle, FileText, FolderKanban, Sparkles, Code2, HelpCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface DocArticle {
   id: string;
@@ -24,10 +22,13 @@ interface DocCategory {
   articles: DocArticle[];
 }
 
-export const DocumentationSection = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('getting-started');
+interface DocumentationSectionProps {
+  searchQuery?: string;
+}
+
+export const DocumentationSection = ({ searchQuery = '' }: DocumentationSectionProps) => {
   const [currentArticle, setCurrentArticle] = useState<DocArticle | null>(null);
+  const [currentCategory, setCurrentCategory] = useState<DocCategory | null>(null);
 
   // Documentation categories with article counts
   const categories: DocCategory[] = [
@@ -269,110 +270,142 @@ export const DocumentationSection = () => {
     }
   ];
 
-  const filteredCategories = categories.map(category => ({
-    ...category,
-    articles: category.articles.filter(article => 
-      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  })).filter(category => category.articles.length > 0);
+  const filteredCategories = searchQuery 
+    ? categories.map(category => ({
+        ...category,
+        articles: category.articles.filter(article => 
+          article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          article.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      })).filter(category => category.articles.length > 0)
+    : categories;
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
-
-  const handleCategorySelect = (categoryId: string) => {
-    setSelectedCategory(categoryId);
-    setCurrentArticle(null);
-  };
-
-  const handleArticleSelect = (article: DocArticle) => {
+  const handleArticleSelect = (article: DocArticle, category: DocCategory) => {
     setCurrentArticle(article);
+    setCurrentCategory(category);
   };
 
-  const handleBackToList = () => {
+  const handleBackToCategory = () => {
     setCurrentArticle(null);
   };
 
-  const currentCategory = categories.find(cat => cat.id === selectedCategory);
+  const handleBackToCategories = () => {
+    setCurrentArticle(null);
+    setCurrentCategory(null);
+  };
 
-  return (
-    <div className="w-full space-y-6">
-      {/* Search bar */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-siso-text/60" />
-        <Input
-          type="search"
-          placeholder="Search documentation..."
-          className="pl-10 bg-siso-bg-card/20 border-siso-border"
-          value={searchQuery}
-          onChange={handleSearch}
-        />
-      </div>
-
-      {!currentArticle ? (
-        <div className="space-y-6">
-          <Tabs value={selectedCategory} onValueChange={handleCategorySelect} className="w-full">
-            <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full mb-6">
-              {categories.map(category => (
-                <TabsTrigger 
-                  key={category.id} 
-                  value={category.id}
-                  className="flex items-center gap-2 p-3"
-                >
-                  <div className="mr-2">{category.icon}</div>
-                  <div className="flex items-center gap-2">
-                    <span>{category.title}</span>
-                    <Badge variant="secondary" className="ml-1">
-                      {category.articleCount}
-                    </Badge>
-                  </div>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            {categories.map(category => (
-              <TabsContent key={category.id} value={category.id} className="space-y-4">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">{category.title}</h2>
-                  <p className="text-siso-text/70 mb-4">{category.description}</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {(searchQuery ? filteredCategories.find(c => c.id === category.id)?.articles : category.articles)?.map(article => (
-                    <Card 
-                      key={article.id} 
-                      className="hover:bg-siso-bg-card/30 transition-colors cursor-pointer border-siso-border"
-                      onClick={() => handleArticleSelect(article)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="font-semibold">{article.title}</h3>
-                          <Badge variant="outline" className="text-xs">
-                            {article.difficulty}
-                          </Badge>
-                        </div>
-                        <p className="text-siso-text/70 text-sm mb-2">{article.excerpt}</p>
-                        <div className="text-xs text-siso-text/50">
-                          Last updated: {article.lastUpdated}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
-            ))}
-          </Tabs>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <Button variant="ghost" onClick={handleBackToList} className="mb-4">
-            ← Back to {currentCategory?.title}
+  // Render article content
+  if (currentArticle) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Button variant="ghost" onClick={handleBackToCategories} size="sm">
+            ← All Categories
           </Button>
+          {currentCategory && (
+            <>
+              <span className="text-siso-text/50 mx-1">/</span>
+              <Button variant="ghost" onClick={handleBackToCategory} size="sm">
+                {currentCategory.title}
+              </Button>
+            </>
+          )}
+          <span className="text-siso-text/50 mx-1">/</span>
+          <span className="text-siso-text">{currentArticle.title}</span>
+        </div>
+        
+        <div className="bg-siso-bg-card/20 backdrop-blur-sm border border-siso-border rounded-xl p-6">
+          <div className="flex justify-between items-start mb-4">
+            <h2 className="text-2xl font-bold">{currentArticle.title}</h2>
+            <Badge variant="outline" className="text-xs">
+              {currentArticle.difficulty}
+            </Badge>
+          </div>
+          
+          <div className="text-xs text-siso-text/50 mb-4">
+            Last updated: {currentArticle.lastUpdated}
+          </div>
           
           <div className="prose prose-invert max-w-none">
             <div dangerouslySetInnerHTML={{ __html: currentArticle.content }} />
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Render category articles
+  if (currentCategory) {
+    return (
+      <div className="space-y-4">
+        <Button variant="ghost" onClick={handleBackToCategories} className="mb-4">
+          ← Back to Categories
+        </Button>
+        
+        <div>
+          <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
+            <span className="bg-siso-orange/10 p-2 rounded-full">{currentCategory.icon}</span>
+            {currentCategory.title}
+          </h2>
+          <p className="text-siso-text/70 mb-6">{currentCategory.description}</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {currentCategory.articles.map(article => (
+            <Card 
+              key={article.id} 
+              className="hover:bg-siso-bg-card/30 transition-colors cursor-pointer border-siso-border"
+              onClick={() => handleArticleSelect(article, currentCategory)}
+            >
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-semibold">{article.title}</h3>
+                  <Badge variant="outline" className="text-xs">
+                    {article.difficulty}
+                  </Badge>
+                </div>
+                <p className="text-siso-text/70 text-sm">{article.excerpt}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Render main category grid
+  return (
+    <div className="space-y-6">
+      {searchQuery && filteredCategories.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-siso-text/70">No results found for "{searchQuery}"</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredCategories.map(category => (
+            <Card
+              key={category.id}
+              className="border border-siso-border hover:border-siso-orange/50 transition-all cursor-pointer bg-siso-bg-card/20 backdrop-blur-sm"
+              onClick={() => setCurrentCategory(category)}
+            >
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="bg-siso-orange/10 p-3 rounded-full">
+                    {category.icon}
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-lg">{category.title}</h3>
+                    <div className="flex items-center mt-1">
+                      <Badge variant="secondary" className="text-xs">
+                        {category.articleCount} articles
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm text-siso-text/70">{category.description}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       )}
     </div>
