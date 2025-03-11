@@ -1,5 +1,6 @@
 
 import { ReactNode } from 'react';
+import { LucideIcon } from 'lucide-react';
 
 export interface DocQuestion {
   id: string;
@@ -30,7 +31,7 @@ export interface DocCategory {
   slug: string;
   title: string;
   description: string;
-  icon: ReactNode;
+  icon: LucideIcon; // Changed from ReactNode to LucideIcon
   articleCount: number;
   articles: DocArticle[];
 }
