@@ -1,110 +1,108 @@
 
+import { 
+  LucideIcon, 
+  Store, 
+  BarChart3, 
+  Bookmark,
+  GalleryHorizontal,
+  ShoppingBag, 
+  Globe,
+  Hammer, 
+  Layout, 
+  Share2
+} from 'lucide-react';
+
 export interface ProjectTypeInfo {
   id: string;
   name: string;
   description: string;
-  icon: string;
+  icon: LucideIcon;
   features: string[];
-  timelineSmall: string;
-  timelineMedium: string; 
-  timelineLarge: string;
+  timeline: string;
+  budget: string;
+  timeEstimate?: string;
+  costEstimate?: string;
 }
 
-// Sample project types data
 export const projectTypes: ProjectTypeInfo[] = [
   {
-    id: 'website',
-    name: 'Website',
-    description: 'Create an informational website to showcase your brand, products, or services.',
-    icon: 'Globe',
-    features: [
-      'Responsive design for all devices',
-      'Contact forms and integrations',
-      'Content management system',
-      'SEO optimization',
-      'Analytics integration',
-      'Performance optimization',
-      'Multiple language support',
-      'Advanced animations and interactions'
-    ],
-    timelineSmall: '2-4 weeks',
-    timelineMedium: '4-8 weeks',
-    timelineLarge: '8-12 weeks'
-  },
-  {
     id: 'ecommerce',
-    name: 'E-commerce',
-    description: 'Build an online store to sell products or services with secure payment processing.',
-    icon: 'ShoppingCart',
-    features: [
-      'Product catalog management',
-      'Shopping cart functionality',
-      'Secure payment processing',
-      'Inventory management',
-      'Order tracking system',
-      'Customer account management',
-      'Promotions and discount system',
-      'Multiple shipping options'
-    ],
-    timelineSmall: '4-6 weeks',
-    timelineMedium: '8-12 weeks',
-    timelineLarge: '12-16 weeks'
+    name: 'E-Commerce',
+    description: 'Sell products or services online',
+    icon: Store,
+    features: ['Product catalog', 'Shopping cart', 'Payment processing'],
+    timeline: '2-3 months',
+    budget: '$5,000 - $15,000',
+    timeEstimate: '2-3 months',
+    costEstimate: '$5,000 - $15,000'
   },
   {
-    id: 'webapp',
-    name: 'Web Application',
-    description: 'Develop a feature-rich application with user authentication and advanced functionality.',
-    icon: 'Layout',
-    features: [
-      'User authentication system',
-      'Dashboard interfaces',
-      'Data visualization',
-      'User permissions and roles',
-      'Real-time updates',
-      'Offline capabilities',
-      'Integration with third-party services',
-      'Comprehensive testing coverage'
-    ],
-    timelineSmall: '6-8 weeks',
-    timelineMedium: '10-14 weeks',
-    timelineLarge: '16-24 weeks'
+    id: 'portfolio',
+    name: 'Portfolio',
+    description: 'Showcase your work and skills',
+    icon: GalleryHorizontal,
+    features: ['Project gallery', 'About section', 'Contact form'],
+    timeline: '2-4 weeks',
+    budget: '$1,000 - $3,000',
+    timeEstimate: '2-4 weeks',
+    costEstimate: '$1,000 - $3,000'
   },
   {
-    id: 'portal',
-    name: 'Customer Portal',
-    description: 'Create a secure portal for customer account management and service delivery.',
-    icon: 'Users',
-    features: [
-      'Secure login system',
-      'Profile management',
-      'Document storage and sharing',
-      'Communication tools',
-      'Service request system',
-      'Billing and payment management',
-      'Appointment scheduling',
-      'Reporting and analytics'
-    ],
-    timelineSmall: '4-8 weeks',
-    timelineMedium: '8-12 weeks',
-    timelineLarge: '12-20 weeks'
+    id: 'business',
+    name: 'Business Website',
+    description: 'Professional online presence',
+    icon: Globe,
+    features: ['Company info', 'Services', 'Team profiles'],
+    timeline: '1-2 months',
+    budget: '$3,000 - $8,000',
+    timeEstimate: '1-2 months',
+    costEstimate: '$3,000 - $8,000'
   },
   {
-    id: 'mobile',
-    name: 'Mobile App',
-    description: 'Design and develop a native or cross-platform mobile application.',
-    icon: 'Smartphone',
-    features: [
-      'Cross-platform compatibility',
-      'Responsive UI for different device sizes',
-      'Push notifications',
-      'Offline capabilities',
-      'Device feature integration',
-      'App store optimization',
-      'Analytics and crash reporting',
-      'Continuous integration and deployment'
-    ],
-    timelineSmall: '6-10 weeks',
-    timelineMedium: '10-16 weeks',
-    timelineLarge: '16-24 weeks'
+    id: 'saas',
+    name: 'SaaS Application',
+    description: 'Subscription-based software',
+    icon: BarChart3,
+    features: ['User accounts', 'Subscriptions', 'Core functionality'],
+    timeline: '3-6 months',
+    budget: '$15,000 - $50,000+',
+    timeEstimate: '3-6 months',
+    costEstimate: '$15,000 - $50,000+'
+  }
+];
+
+export interface ScaleOptionType {
+  id: string;
+  name: string;
+  description: string;
+  features: string[];
+  timeline: string;
+  budget: string;
+}
+
+export const scaleOptions: ScaleOptionType[] = [
+  {
+    id: 'mvp',
+    name: 'MVP',
+    description: 'Minimal viable product with core features only',
+    features: ['Core functionality', 'Basic design', 'Essential features'],
+    timeline: 'Shortest',
+    budget: 'Lowest'
+  },
+  {
+    id: 'standard',
+    name: 'Standard',
+    description: 'Complete solution with standard features',
+    features: ['Full functionality', 'Professional design', 'Standard features'],
+    timeline: 'Medium',
+    budget: 'Average'
+  },
+  {
+    id: 'premium',
+    name: 'Premium',
+    description: 'Comprehensive solution with advanced features',
+    features: ['Full functionality', 'Premium design', 'Advanced features', 'Integrations'],
+    timeline: 'Longest',
+    budget: 'Highest'
   }
 ];

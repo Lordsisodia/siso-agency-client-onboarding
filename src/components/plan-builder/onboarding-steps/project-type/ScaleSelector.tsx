@@ -1,36 +1,26 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
-import { ScaleOption } from './ScaleOption';
 import { scaleOptions } from './ProjectTypeData';
-import { ProjectTypeInfo } from './ProjectTypeData';
+import ScaleOption from './ScaleOption';
 
-interface ScaleSelectorProps {
-  selectedScale: string;
-  setSelectedScale: (scale: string) => void;
-  getSelectedTypeInfo: () => ProjectTypeInfo | null;
+export interface ScaleSelectorProps {
+  selected: string;
+  onSelect: (scale: string) => void;
 }
 
-export function ScaleSelector({ selectedScale, setSelectedScale, getSelectedTypeInfo }: ScaleSelectorProps) {
+const ScaleSelector = ({ selected, onSelect }: ScaleSelectorProps) => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2, duration: 0.5 }}
-      className="mt-6"
-    >
-      <h3 className="text-lg font-semibold mb-3">Project Scale</h3>
-      <div className="grid grid-cols-3 gap-4">
-        {scaleOptions.map((scale) => (
-          <ScaleOption
-            key={scale.value}
-            scale={scale}
-            selectedScale={selectedScale}
-            setSelectedScale={setSelectedScale}
-            getSelectedTypeInfo={getSelectedTypeInfo}
-          />
-        ))}
-      </div>
-    </motion.div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+      {scaleOptions.map((option) => (
+        <ScaleOption
+          key={option.id}
+          option={option}
+          selected={selected === option.id}
+          onClick={() => onSelect(option.id)}
+        />
+      ))}
+    </div>
   );
-}
+};
+
+export default ScaleSelector;

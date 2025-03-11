@@ -1,102 +1,93 @@
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ProjectTypeGrid } from './project-type/ProjectTypeGrid';
-import { ProjectTypeInfo } from './project-type/ProjectTypeInfo';
-import { ScaleSelector } from './project-type/ScaleSelector';
-import { Badge } from '@/components/ui/badge';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import ProjectTypeGrid from './project-type/ProjectTypeGrid';
+import ScaleSelector from './project-type/ScaleSelector';
 import { projectTypes } from './project-type/ProjectTypeData';
+import { Sparkles } from 'lucide-react';
 
 export interface EnhancedProjectTypeProps {
   projectType: string;
   projectScale: string;
   updateProjectData: (key: string, value: any) => void;
+  onComplete?: () => void;
 }
 
-export const EnhancedProjectType: React.FC<EnhancedProjectTypeProps> = ({ 
-  projectType, 
-  projectScale, 
-  updateProjectData
-}) => {
-  const [selectedProjectType, setSelectedProjectType] = useState<string>(projectType || '');
-  const [selectedScale, setSelectedScale] = useState<string>(projectScale || 'medium');
-
-  // Find the currently selected project type info
-  const selectedTypeInfo = projectTypes.find(type => type.id === selectedProjectType);
-
-  // Handle project type selection
-  const handleProjectTypeSelect = (typeId: string) => {
-    setSelectedProjectType(typeId);
+const EnhancedProjectType = ({ 
+  projectType,
+  projectScale,
+  updateProjectData,
+  onComplete
+}: EnhancedProjectTypeProps) => {
+  const [selectedType, setSelectedType] = useState(projectType || '');
+  const [selectedScale, setSelectedScale] = useState(projectScale || 'standard');
+  
+  const handleTypeSelect = (typeId: string) => {
+    setSelectedType(typeId);
     updateProjectData('projectType', typeId);
   };
-
-  // Handle scale selection
+  
   const handleScaleSelect = (scale: string) => {
     setSelectedScale(scale);
     updateProjectData('projectScale', scale);
   };
 
+  const handleNext = () => {
+    if (onComplete) {
+      onComplete();
+    }
+  };
+
+  const selectedProjectType = projectTypes.find(type => type.id === selectedType);
+
   return (
-    <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <div className="space-y-2 mb-6">
-          <h2 className="text-2xl font-semibold text-siso-text">Project Type</h2>
-          <p className="text-siso-text-muted">
-            Select the type of project you want to create. This will help us tailor the planning process.
+    <div className="space-y-6 mt-4">
+      <div className="flex items-center gap-2">
+        <div className="bg-siso-orange p-1.5 rounded-md">
+          <Sparkles className="h-5 w-5 text-white" />
+        </div>
+        <h2 className="text-2xl font-bold">What type of project are you building?</h2>
+      </div>
+      
+      <CardDescription className="text-md max-w-3xl">
+        Choose the type of project you're looking to build. This helps us customize the planning process
+        to fit your specific needs and goals.
+      </CardDescription>
+      
+      <div className="my-6">
+        <h3 className="text-xl font-medium mb-4">Project Type</h3>
+        <ProjectTypeGrid
+          selectedType={selectedType}
+          onSelect={handleTypeSelect}
+        />
+      </div>
+      
+      {selectedType && (
+        <div className="mt-8">
+          <h3 className="text-xl font-medium mb-2">Project Scale</h3>
+          <p className="text-muted-foreground mb-4">
+            Choose the scale of your project based on your timeline and budget constraints.
           </p>
-        </div>
-
-        <div className="space-y-8">
-          {/* Project Type Selection Grid */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-medium text-siso-text">Choose Project Type</h3>
-              {selectedProjectType && (
-                <Badge variant="outline" className="text-xs">
-                  {selectedTypeInfo?.name || 'Selected'}
-                </Badge>
-              )}
-            </div>
-            
-            <ProjectTypeGrid
-              selectedType={selectedProjectType}
-              onSelect={handleProjectTypeSelect}
-            />
-          </div>
-
-          {/* Project Scale Selection */}
-          {selectedProjectType && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              transition={{ duration: 0.4 }}
-              className="space-y-4"
+          
+          <ScaleSelector
+            selected={selectedScale}
+            onSelect={handleScaleSelect}
+          />
+          
+          <div className="mt-8 flex justify-end">
+            <Button 
+              onClick={handleNext}
+              size="lg"
+              className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90 text-white"
             >
-              <div className="flex items-center justify-between">
-                <h3 className="text-base font-medium text-siso-text">Project Scale</h3>
-                <Badge variant="outline" className="text-xs">
-                  {selectedScale.charAt(0).toUpperCase() + selectedScale.slice(1)}
-                </Badge>
-              </div>
-              
-              <ScaleSelector
-                selected={selectedScale}
-                onSelect={handleScaleSelect}
-              />
-              
-              {/* Project Type Info Card */}
-              <ProjectTypeInfo
-                selectedType={selectedProjectType}
-                selectedScale={selectedScale}
-              />
-            </motion.div>
-          )}
+              Continue
+            </Button>
+          </div>
         </div>
-      </motion.div>
+      )}
     </div>
   );
 };
+
+export default EnhancedProjectType;
