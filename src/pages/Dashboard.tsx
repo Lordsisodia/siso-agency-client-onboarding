@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { Sidebar } from '@/components/Sidebar';
+import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -85,24 +85,25 @@ export default function Dashboard() {
   }
 
   return (
-    <motion.div 
-      className="flex min-h-screen w-full bg-gradient-to-b from-[#0A0A0A] to-[#121212]"
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-    >
-      <Sidebar />
-      <DashboardLayout 
-        userName={getDisplayName()} 
-        greeting={getGreeting()}
-        stats={stats}
-        statsLoading={statsLoading}
-        notifications={notifications}
-        events={events}
-        onNotificationRead={handleMarkAsRead}
-        onViewAllNotifications={handleViewAll}
-        onViewCalendar={handleViewCalendar}
-      />
-    </motion.div>
+    <MainLayout>
+      <motion.div 
+        className="flex-1 w-full"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        <DashboardLayout 
+          userName={getDisplayName()} 
+          greeting={getGreeting()}
+          stats={stats}
+          statsLoading={statsLoading}
+          notifications={notifications}
+          events={events}
+          onNotificationRead={handleMarkAsRead}
+          onViewAllNotifications={handleViewAll}
+          onViewCalendar={handleViewCalendar}
+        />
+      </motion.div>
+    </MainLayout>
   );
 }
