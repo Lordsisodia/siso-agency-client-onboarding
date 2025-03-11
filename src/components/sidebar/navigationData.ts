@@ -4,7 +4,9 @@ import {
   FileText,
   FolderKanban,
   User,
-  HelpCircle
+  HelpCircle,
+  ClipboardCheck,
+  Briefcase
 } from 'lucide-react';
 import { MenuSection } from './types';
 
@@ -29,6 +31,16 @@ export const menuSections: MenuSection[] = [
         href: '/projects',
         icon: FolderKanban,
         label: 'My Projects',
+      },
+      {
+        href: '/pending-tasks',
+        icon: ClipboardCheck,
+        label: 'Pending Tasks',
+      },
+      {
+        href: '/portfolio',
+        icon: Briefcase,
+        label: 'Portfolio',
       }
     ]
   },
