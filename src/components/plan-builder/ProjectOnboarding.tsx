@@ -65,11 +65,11 @@ export function ProjectOnboarding({ onComplete, onSkip }: ProjectOnboardingProps
   // Function to update project data
   const updateProjectData = useCallback((section: string, data: any) => {
     setProjectData(prev => {
-      // Fixed the spreading issue
-      if (typeof data === 'object' && !Array.isArray(data) && data !== null) {
+      // Fixed the spreading issue by checking if data is an object
+      if (typeof data === 'object' && data !== null && !Array.isArray(data)) {
         return { 
           ...prev, 
-          [section]: { ...prev[section as keyof typeof prev], ...data }
+          [section]: { ...prev[section as keyof typeof prev] as object, ...data }
         };
       } else {
         return {
