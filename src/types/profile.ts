@@ -46,4 +46,5 @@ export interface ProfileData {
   achievements?: Achievement[];
   contribution_count?: number;
   referral_count?: number;
+  // Removed solana_wallet_address field as it doesn't exist in the database
 }

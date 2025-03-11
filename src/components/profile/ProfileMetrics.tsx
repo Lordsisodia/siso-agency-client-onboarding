@@ -1,6 +1,7 @@
 
 import { LoginStreakTracker } from '@/components/points/LoginStreakTracker';
 import { PointsDisplay } from '@/components/points/PointsDisplay';
+import { PointsHistory } from '@/components/profile/PointsHistory';
 
 interface ProfileMetricsProps {
   userId: string;
@@ -17,6 +18,10 @@ export const ProfileMetrics = ({ userId }: ProfileMetricsProps) => {
         <div className="bg-black/20 rounded-xl p-6 backdrop-blur-sm border border-siso-text/10 hover:border-siso-orange/50 transition-colors">
           <PointsDisplay userId={userId} />
         </div>
+      </div>
+      
+      <div className="md:col-span-6">
+        <PointsHistory userId={userId} />
       </div>
     </>
   );

@@ -21,7 +21,12 @@ export * from "../useProfileData";
 export * from "../useProfileImage";
 export * from "../useUser";
 export * from "../useViewportLoading";
+export * from "../useVideos";
+export * from "../useEducationChat";
 
 // Export profile hooks
 export * from "../profile/useProfileFetch";
 export * from "../profile/useProfileForm";
+
+// Export leaderboard hooks
+export * from "../leaderboard/useLeaderboardData";
