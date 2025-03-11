@@ -65,6 +65,7 @@ export {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  SidebarProvider, // Add SidebarProvider to exports
   SidebarRail,
   SidebarRoot,
   SidebarSeparator,

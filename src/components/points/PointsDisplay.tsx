@@ -8,17 +8,17 @@ interface PointsDisplayProps {
 }
 
 export const PointsDisplay = ({ userId }: PointsDisplayProps) => {
-  const { points, rank, isLoading } = usePoints(userId);
+  const { points, rank, loading } = usePoints(userId);
   const [isAnimating, setIsAnimating] = useState(false);
   
   // Animate the points counter when it changes
   useEffect(() => {
-    if (!isLoading) {
+    if (!loading) {
       setIsAnimating(true);
       const timer = setTimeout(() => setIsAnimating(false), 1500);
       return () => clearTimeout(timer);
     }
-  }, [points, isLoading]);
+  }, [points, loading]);
   
   return (
     <div>
