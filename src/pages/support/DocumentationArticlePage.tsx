@@ -8,14 +8,12 @@ import { ChevronRight, ChevronLeft, ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 import { 
   fetchArticle, 
-  fetchCategory, 
-  DocArticle, 
-  DocCategory, 
-  DocSection, 
-  DocQuestion 
-} from '@/services/supabase-documentation.service';
+  fetchCategory
+} from '@/services/static-documentation.service';
+import { DocArticle, DocCategory, DocSection, DocQuestion } from '@/types/documentation';
 
 const QuestionAccordion = ({ 
   question, 
@@ -26,7 +24,6 @@ const QuestionAccordion = ({
   categorySlug: string, 
   articleSlug: string 
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   
   const handleQuestionClick = () => {
@@ -200,8 +197,13 @@ const DocumentationArticlePage = () => {
             <div className="flex justify-between items-start mb-4">
               <h1 className="text-3xl font-bold text-siso-text-bold">{article.title}</h1>
               {article.difficulty && (
-                <Badge variant="outline" className="text-xs">
-                  {article.difficulty}
+                <Badge variant="outline" className={cn(
+                  "text-xs",
+                  article.difficulty === 'beginner' && "bg-green-500/10 text-green-500 border-green-500/20",
+                  article.difficulty === 'intermediate' && "bg-blue-500/10 text-blue-500 border-blue-500/20", 
+                  article.difficulty === 'advanced' && "bg-purple-500/10 text-purple-500 border-purple-500/20"
+                )}>
+                  {article.difficulty.charAt(0).toUpperCase() + article.difficulty.slice(1)}
                 </Badge>
               )}
             </div>
@@ -209,7 +211,7 @@ const DocumentationArticlePage = () => {
             <p className="text-lg text-siso-text/80 mb-4">{article.excerpt}</p>
             
             <div className="text-xs text-siso-text/50">
-              Last updated: {new Date(article.last_updated).toLocaleDateString()}
+              Last updated: {new Date(article.lastUpdated).toLocaleDateString()}
             </div>
           </div>
           

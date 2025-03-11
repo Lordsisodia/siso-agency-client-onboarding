@@ -7,13 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { 
-  fetchCategory, 
-  DocCategory, 
-  DocArticle
-} from '@/services/supabase-documentation.service';
+import { fetchCategory } from '@/services/static-documentation.service';
+import { DocCategory, DocArticle } from '@/types/documentation';
 
 const DocumentationCategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -86,7 +82,9 @@ const DocumentationCategoryPage = () => {
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
               <div className="bg-siso-orange/10 p-3 rounded-lg">
-                <category.icon className="h-6 w-6 text-siso-orange" />
+                {React.createElement(category.icon as React.ElementType, { 
+                  className: "h-6 w-6 text-siso-orange" 
+                })}
               </div>
               <h1 className="text-3xl font-bold text-siso-text-bold">{category.title}</h1>
             </div>
@@ -149,7 +147,7 @@ const DocumentationCategoryPage = () => {
                     View full article
                   </Button>
                   <span className="text-xs text-siso-text/50">
-                    Updated: {new Date(article.last_updated).toLocaleDateString()}
+                    Updated: {new Date(article.lastUpdated).toLocaleDateString()}
                   </span>
                 </div>
               </Card>

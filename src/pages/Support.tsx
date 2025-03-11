@@ -3,12 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { AiChatSection } from '@/components/support/AiChatSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MessagesSquare, Book, Search, Clock, ThumbsUp, ThumbsDown, Loader2 } from 'lucide-react';
+import { MessagesSquare, Book, Search, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { fetchCategories, searchDocumentation } from '@/services/supabase-documentation.service';
-import { DocCategory } from '@/services/supabase-documentation.service';
+import { useNavigate } from 'react-router-dom';
+import { fetchCategories, searchDocumentation } from '@/services/static-documentation.service';
+import { DocCategory } from '@/types/documentation';
 import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -19,7 +18,6 @@ const Support = () => {
   const [categories, setCategories] = useState<DocCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
   
   useEffect(() => {
@@ -129,7 +127,9 @@ const Support = () => {
                       <CardContent className="p-6">
                         <div className="flex items-start gap-3">
                           <div className="bg-siso-orange/10 p-2.5 rounded-lg">
-                            <category.icon className="h-5 w-5 text-siso-orange" />
+                            {React.createElement(category.icon as React.ElementType, { 
+                              className: "h-5 w-5 text-siso-orange" 
+                            })}
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-lg text-white mb-2 truncate">{category.title}</h3>
@@ -157,12 +157,7 @@ const Support = () => {
                   ) : (
                     <>
                       <p className="text-siso-text font-medium">No documentation found</p>
-                      <p className="text-siso-text/60 mt-2">
-                        Please import documentation data from the 
-                        <a href="/support/import" className="text-siso-blue ml-1 hover:underline">
-                          import page
-                        </a>
-                      </p>
+                      <p className="text-siso-text/60 mt-2">Please check back later for documentation updates</p>
                     </>
                   )}
                 </div>

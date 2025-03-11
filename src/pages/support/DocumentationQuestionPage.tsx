@@ -2,21 +2,18 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
-import { ChevronRight, ChevronLeft, ArrowLeft, Clock, Sparkles, BookOpen, ThumbsUp, ThumbsDown, HelpCircle } from 'lucide-react';
+import { ChevronRight, ChevronLeft, ArrowLeft, Clock, Sparkles, ThumbsUp, ThumbsDown, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { 
-  fetchQuestion, 
-  saveQuestionFeedback,
-  DocCategory,
-  DocArticle,
-  DocSection,
-  DocQuestion
-} from '@/services/supabase-documentation.service';
-import { useAuthSession } from '@/hooks/core'; 
+  fetchQuestion,
+  saveQuestionFeedback
+} from '@/services/static-documentation.service';
+import { DocCategory, DocArticle, DocSection, DocQuestion } from '@/types/documentation';
+import { useAuthSession } from '@/hooks/core';
 
 const DocumentationQuestionPage = () => {
   const { categoryId, articleId, questionId } = useParams<{ 
@@ -189,10 +186,10 @@ const DocumentationQuestionPage = () => {
                   </Badge>
                 )}
                 <h1 className="text-2xl font-bold text-siso-text-bold mb-1">{foundQuestion.question}</h1>
-                {article.last_updated && (
+                {article.lastUpdated && (
                   <div className="flex items-center text-sm text-siso-text/60 mt-3">
                     <Clock className="h-3.5 w-3.5 mr-1" />
-                    <span>Updated: {new Date(article.last_updated).toLocaleDateString()}</span>
+                    <span>Updated: {new Date(article.lastUpdated).toLocaleDateString()}</span>
                   </div>
                 )}
               </div>
