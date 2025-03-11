@@ -1,8 +1,8 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useChatAssistant } from '@/hooks/use-chat-assistant';
-import { usePlanChatAssistant } from '@/hooks/use-plan-chat-assistant';
+import { useChatAssistant } from '@/hooks/core';
+import { usePlanChatAssistant } from '@/hooks/core';
 import { useChatInterfaceState } from './useChatInterfaceState';
 import { ChatHeader } from './ChatHeader';
 import { ChatMessageList } from './ChatMessageList';

@@ -28,7 +28,7 @@ import Leaderboards from '@/pages/Leaderboards';
 import CryptoExchange from '@/pages/CryptoExchange';
 
 import { Toaster } from '@/components/ui/toaster';
-import { useAuthSession } from '@/hooks/useAuthSession';
+import { useAuthSession } from '@/hooks/core';
 
 function App() {
   const location = useLocation();
