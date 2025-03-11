@@ -1,55 +1,41 @@
 
-import { useState } from 'react';
-import { Assistant } from '../types';
+import { useState, useEffect } from 'react';
 import { useAssistants } from './useAssistants';
+import { Assistant } from '../types';
 
-export function useFilteredAssistants() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const { assistants, loading: isLoading, error } = useAssistants();
+export const useFilteredAssistants = (category?: string, searchQuery?: string) => {
+  const { assistants, loading, error } = useAssistants();
+  const [filteredAssistants, setFilteredAssistants] = useState<Assistant[]>([]);
 
-  const categoryCounts = assistants?.reduce((acc, assistant) => {
-    const category = assistant.category === 'gpt builder' ? 'gpt' : (assistant.assistant_type || 'gpt');
-    acc[category] = (acc[category] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  useEffect(() => {
+    if (assistants.length) {
+      let filtered = [...assistants];
 
-  const filteredAssistants = assistants?.filter(assistant => {
-    const matchesSearch = !searchQuery || 
-      assistant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (assistant.description?.toLowerCase() || '').includes(searchQuery.toLowerCase());
-    
-    const matchesCategory = 
-      selectedCategory === 'all' || 
-      (selectedCategory === 'featured' && ((assistant.rating || 0) >= 4.5 || (assistant.review_average || 0) >= 4.5)) ||
-      (selectedCategory === 'gpt' && assistant.category === 'gpt builder') ||
-      (selectedCategory !== 'gpt' && assistant.assistant_type === selectedCategory);
+      // Filter by category if provided
+      if (category && category !== 'all') {
+        filtered = filtered.filter(assistant => 
+          assistant.category?.toLowerCase() === category.toLowerCase()
+        );
+      }
 
-    return matchesSearch && matchesCategory;
-  });
+      // Filter by search query if provided
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(assistant =>
+          assistant.name?.toLowerCase().includes(query) ||
+          assistant.description?.toLowerCase().includes(query)
+        );
+      }
 
-  const featuredCount = assistants?.filter(a => 
-    ((a.rating || 0) >= 4.5) || ((a.review_average || 0) >= 4.5)
-  ).length || 0;
-
-  const totalConversations = assistants?.reduce((sum, assistant) => {
-    if (assistant.num_conversations_str) {
-      const num = parseInt(assistant.num_conversations_str);
-      return isNaN(num) ? sum : sum + num;
+      setFilteredAssistants(filtered);
+    } else {
+      setFilteredAssistants([]);
     }
-    return sum;
-  }, 0) || 0;
+  }, [assistants, category, searchQuery]);
 
-  return {
-    searchQuery,
-    setSearchQuery,
-    selectedCategory,
-    setSelectedCategory,
-    filteredAssistants,
-    categoryCounts,
-    featuredCount,
-    totalConversations,
-    isLoading,
-    assistantsCount: assistants?.length || 0
+  return { 
+    assistants: filteredAssistants, 
+    loading, 
+    error 
   };
-}
+};

@@ -3,63 +3,71 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Assistant } from '../types';
 
-export function useAssistants() {
+export const useAssistants = () => {
   const [assistants, setAssistants] = useState<Assistant[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    async function fetchAssistants() {
+    const fetchAssistants = async () => {
       try {
+        setLoading(true);
         const { data, error } = await supabase
           .from('assistant_metadata')
-          .select('*')
-          .order('name', { ascending: true });
+          .select('*');
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
 
-        // Type assertion to handle missing properties safely
-        const mappedData = data.map(item => ({
-          id: item.id,
-          name: item.name,
-          description: item.description || '',
-          category: item.category || '',
-          created_at: item.created_at,
-          updated_at: item.updated_at,
-          assistant_id: item.assistant_id,
-          instructions: item.instructions,
-          metadata: item.metadata,
-          model: item.model,
-          tools: item.tools,
-          
-          // Default values for properties that might not exist in the database
-          assistant_type: item.assistant_type || '',
-          prompt_template: item.prompt_template || '',
-          use_cases: item.use_cases || [],
-          input_variables: item.input_variables || [],
-          model_type: item.model_type || '',
-          response_format: item.response_format || '',
-          rating: item.rating || 0,
-          likes_count: item.likes_count || 0,
-          downloads_count: item.downloads_count || 0,
-          website_url: item.website_url || '',
-          gpt_url: item.gpt_url || '',
-          review_average: item.review_average || 0,
-          review_count: item.review_count || 0,
-          num_conversations_str: item.num_conversations_str || ''
-        }) as Assistant);
+        if (data) {
+          // Map database records to Assistant interface
+          const mappedAssistants: Assistant[] = data.map(item => {
+            // Extract metadata values or use defaults
+            const metadata = item.metadata || {};
+            
+            return {
+              id: item.id,
+              name: item.name,
+              assistant_id: item.assistant_id,
+              instructions: item.instructions,
+              model: item.model,
+              tools: item.tools,
+              created_at: item.created_at,
+              updated_at: item.updated_at,
+              
+              // Properties from metadata with fallbacks
+              description: metadata.description || null,
+              category: metadata.category || null,
+              assistant_type: metadata.assistant_type || null,
+              prompt_template: metadata.prompt_template || null,
+              use_cases: metadata.use_cases || null,
+              input_variables: metadata.input_variables || null,
+              model_type: metadata.model_type || null,
+              response_format: metadata.response_format || null,
+              rating: metadata.rating || null,
+              likes_count: metadata.likes_count || null,
+              downloads_count: metadata.downloads_count || null,
+              website_url: metadata.website_url || null,
+              gpt_url: metadata.gpt_url || null,
+              review_average: metadata.review_average || null,
+              review_count: metadata.review_count || null,
+              num_conversations_str: metadata.num_conversations_str || null
+            };
+          });
 
-        setAssistants(mappedData);
-      } catch (error) {
-        console.error("Error fetching assistants:", error);
-        setError(error instanceof Error ? error.message : 'Failed to fetch assistants');
+          setAssistants(mappedAssistants);
+        }
+      } catch (err) {
+        console.error('Error fetching assistants:', err);
+        setError(err.message || 'Failed to fetch assistants');
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     fetchAssistants();
   }, []);
 
   return { assistants, loading, error };
-}
+};

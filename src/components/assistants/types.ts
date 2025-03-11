@@ -19,7 +19,7 @@ export interface Assistant {
   review_count: number | null;
   num_conversations_str: string | null;
   
-  // Added these properties from the database response
+  // Database fields
   assistant_id?: string;
   instructions?: string;
   metadata?: any;

@@ -5,9 +5,15 @@ import { ChatMessage as ChatMessageType } from '@/types/chat';
 
 export interface ChatMessageProps {
   message: ChatMessageType;
+  assistantType?: string;
+  isLoading?: boolean;
 }
 
-export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+export const ChatMessage: React.FC<ChatMessageProps> = ({ 
+  message, 
+  assistantType,
+  isLoading 
+}) => {
   const isUser = message.role === 'user';
   
   return (
@@ -21,10 +27,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         className={`
           px-4 py-3 rounded-lg max-w-[80%] shadow-sm
           ${isUser ? 'bg-siso-orange-100 text-siso-orange-800' : 'bg-white text-siso-text'}
-          ${message.loading ? 'animate-pulse' : ''}
+          ${message.loading || isLoading ? 'animate-pulse' : ''}
         `}
       >
-        {message.loading ? (
+        {message.loading || isLoading ? (
           <div className="flex items-center space-x-1">
             <div className="h-2 w-2 bg-siso-text/40 rounded-full animate-bounce delay-100"></div>
             <div className="h-2 w-2 bg-siso-text/40 rounded-full animate-bounce delay-200"></div>
