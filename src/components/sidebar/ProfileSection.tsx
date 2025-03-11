@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Star, ChevronDown, LogOut } from 'lucide-react';
@@ -27,16 +26,13 @@ export const ProfileSection = ({ collapsed, onOpenChange }: ProfileSectionProps)
   const { userData, loading } = useBasicUserData();
   const { points, rank } = usePoints(userData.id || '');
 
-  // [Analysis] Handle navigation with proper state updates
   const handleItemClick = (path: string) => {
-    // Save current location for back navigation
     const currentPath = window.location.pathname;
     
     navigate(path, {
       state: { from: currentPath }
     });
     
-    // Close dropdown after navigation
     onOpenChange(false);
   };
 
@@ -73,7 +69,6 @@ export const ProfileSection = ({ collapsed, onOpenChange }: ProfileSectionProps)
 
   const displayName = userData.fullName || userData.email?.split('@')[0] || 'User';
 
-  // [Analysis] For collapsed state, use direct navigation instead of dropdown
   if (collapsed) {
     return (
       <div className="px-2">

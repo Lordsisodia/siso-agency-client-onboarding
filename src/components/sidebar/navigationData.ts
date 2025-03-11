@@ -6,7 +6,7 @@ import {
   HelpCircle,
   ClipboardCheck,
   Briefcase,
-  Building2,
+  UserCircle,
   Settings,
   BookOpen
 } from 'lucide-react';
@@ -47,9 +47,9 @@ export const menuSections: MenuSection[] = [
     icon: Settings,
     items: [
       {
-        href: '/organization',
-        icon: Building2,
-        label: 'Organization',
+        href: '/profile',
+        icon: UserCircle,
+        label: 'Profile',
       },
       {
         href: '/support',

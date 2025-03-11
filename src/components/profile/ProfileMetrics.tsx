@@ -20,10 +20,6 @@ export const ProfileMetrics = ({ userId }: ProfileMetricsProps) => {
           <PointsDisplay userId={userId} />
         </div>
       </div>
-      
-      <div className="md:col-span-6">
-        <PointsHistory userId={userId} />
-      </div>
     </>
   );
 };

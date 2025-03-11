@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -9,9 +10,14 @@ import { ProfileSkeleton } from '@/components/profile/ProfileSkeleton';
 import { ProfileMetrics } from '@/components/profile/ProfileMetrics';
 import { AchievementsSection } from '@/components/profile/AchievementsSection';
 import { useProfileData } from '@/hooks/useProfileData';
+import { useEffect } from 'react';
+import { awardNavigationPoints } from '@/utils/navigationPoints';
+import { useLocation } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const Profile = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const {
     user,
@@ -26,6 +32,21 @@ const Profile = () => {
     handleAvatarUpload,
     handleBannerUpload
   } = useProfileData();
+
+  // Award points for visiting profile page
+  useEffect(() => {
+    awardNavigationPoints(location.pathname);
+  }, [location.pathname]);
+
+  // Show success toast after page loads
+  useEffect(() => {
+    if (!loading && user && profile) {
+      toast({
+        title: "Profile loaded",
+        description: "Your profile is ready to view or edit",
+      });
+    }
+  }, [loading, user, profile, toast]);
 
   // Sample data for achievements (would normally come from the database)
   const sampleAchievements = [
@@ -166,7 +187,7 @@ const Profile = () => {
         
         <div className="md:col-span-2">
           <AchievementsSection 
-            achievements={sampleAchievements}
+            achievements={profile?.achievements || sampleAchievements}
             pointsTotal={profile?.points || 0}
             pointsNextLevel={1000}
             rank={profile?.rank || 'Bronze'}
