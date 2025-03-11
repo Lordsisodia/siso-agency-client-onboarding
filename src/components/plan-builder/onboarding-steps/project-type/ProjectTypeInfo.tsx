@@ -40,6 +40,17 @@ export const ProjectTypeInfo: React.FC<ProjectTypeInfoProps> = ({
   };
 
   const features = getScaleFeatures(selectedScale);
+  
+  // Get timeline based on scale
+  const getTimelineForScale = (scale: string = 'medium') => {
+    if (scale === 'small') {
+      return typeInfo.timeEstimate ? typeInfo.timeEstimate.split('-')[0] + ' (faster)' : 'Quick';
+    } else if (scale === 'large') {
+      return typeInfo.timeEstimate ? typeInfo.timeEstimate.split('-')[1] + ' (comprehensive)' : 'Extended';
+    } else {
+      return typeInfo.timeEstimate || 'Standard timeline';
+    }
+  };
 
   return (
     <SlideIn direction="up" duration={0.4}>
@@ -75,9 +86,7 @@ export const ProjectTypeInfo: React.FC<ProjectTypeInfoProps> = ({
             <div className="pt-2">
               <h4 className="text-xs font-medium text-siso-text mb-2">Timeline Estimate:</h4>
               <p className="text-xs text-siso-text">
-                {selectedScale === 'small' ? typeInfo.timelineSmall : 
-                 selectedScale === 'large' ? typeInfo.timelineLarge : 
-                 typeInfo.timelineMedium}
+                {getTimelineForScale(selectedScale)}
               </p>
             </div>
             

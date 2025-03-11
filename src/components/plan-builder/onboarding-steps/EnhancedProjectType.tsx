@@ -2,44 +2,31 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import ProjectTypeGrid from './project-type/ProjectTypeGrid';
-import ScaleSelector from './project-type/ScaleSelector';
-import { projectTypes } from './project-type/ProjectTypeData';
 import { Sparkles } from 'lucide-react';
 
 export interface EnhancedProjectTypeProps {
   projectType: string;
   projectScale: string;
-  updateProjectData: (key: string, value: any) => void;
-  onComplete?: () => void;
+  updateProjectData: (data: Record<string, any>) => void;
 }
 
-const EnhancedProjectType = ({ 
+export const EnhancedProjectType = ({ 
   projectType,
   projectScale,
-  updateProjectData,
-  onComplete
+  updateProjectData
 }: EnhancedProjectTypeProps) => {
   const [selectedType, setSelectedType] = useState(projectType || '');
   const [selectedScale, setSelectedScale] = useState(projectScale || 'standard');
   
   const handleTypeSelect = (typeId: string) => {
     setSelectedType(typeId);
-    updateProjectData('projectType', typeId);
+    updateProjectData({ projectType: typeId });
   };
   
   const handleScaleSelect = (scale: string) => {
     setSelectedScale(scale);
-    updateProjectData('projectScale', scale);
+    updateProjectData({ projectScale: scale });
   };
-
-  const handleNext = () => {
-    if (onComplete) {
-      onComplete();
-    }
-  };
-
-  const selectedProjectType = projectTypes.find(type => type.id === selectedType);
 
   return (
     <div className="space-y-6 mt-4">
@@ -55,12 +42,22 @@ const EnhancedProjectType = ({
         to fit your specific needs and goals.
       </CardDescription>
       
+      {/* Placeholder for project type selection */}
       <div className="my-6">
         <h3 className="text-xl font-medium mb-4">Project Type</h3>
-        <ProjectTypeGrid
-          selectedType={selectedType}
-          onSelect={handleTypeSelect}
-        />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {['ecommerce', 'portfolio', 'business', 'saas'].map(type => (
+            <Card 
+              key={type}
+              className={`cursor-pointer ${selectedType === type ? 'border-primary' : ''}`}
+              onClick={() => handleTypeSelect(type)}
+            >
+              <CardContent className="p-4 text-center">
+                {type.charAt(0).toUpperCase() + type.slice(1)}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
       
       {selectedType && (
@@ -70,19 +67,18 @@ const EnhancedProjectType = ({
             Choose the scale of your project based on your timeline and budget constraints.
           </p>
           
-          <ScaleSelector
-            selected={selectedScale}
-            onSelect={handleScaleSelect}
-          />
-          
-          <div className="mt-8 flex justify-end">
-            <Button 
-              onClick={handleNext}
-              size="lg"
-              className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90 text-white"
-            >
-              Continue
-            </Button>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {['mvp', 'standard', 'premium'].map(scale => (
+              <Card 
+                key={scale}
+                className={`cursor-pointer ${selectedScale === scale ? 'border-primary' : ''}`}
+                onClick={() => handleScaleSelect(scale)}
+              >
+                <CardContent className="p-4 text-center">
+                  {scale.charAt(0).toUpperCase() + scale.slice(1)}
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       )}

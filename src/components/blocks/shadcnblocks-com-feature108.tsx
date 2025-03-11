@@ -1,8 +1,9 @@
 
-import { ResourceHub } from "../features/resource-hub";
+import React from 'react';
+import { ResourceHub, ResourceTabItem } from "../features/resource-hub";
 import { Bot, BookOpen, Users, Coins, Newspaper } from "lucide-react";
 
-const tabs = [
+const tabs: ResourceTabItem[] = [
   {
     value: "ai-tools",
     icon: <Bot className="h-auto w-4 shrink-0" />,

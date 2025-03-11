@@ -66,7 +66,8 @@ export function ProjectTypeCard({
           whileHover={{ scale: isSelected ? 1 : 1.05 }}
           transition={{ type: "spring", stiffness: 300, damping: 24 }}
         >
-          {typeInfo.icon}
+          {/* Render the icon as a React element */}
+          {React.createElement(typeInfo.icon, { className: "h-5 w-5" })}
         </motion.div>
         <span className="font-medium">{typeInfo.name}</span>
       </CardContent>

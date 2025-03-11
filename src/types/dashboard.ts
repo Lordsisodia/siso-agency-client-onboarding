@@ -23,6 +23,7 @@ export interface DashboardStats {
   activeProjects: number;
   pendingTasks: number;
   upcomingEvents: number;
+  loginStreak?: number;
 }
 
 export interface Phase {

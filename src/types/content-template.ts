@@ -1,5 +1,28 @@
-import { NewsItem } from './blog';
-import type { ContentCategory, TechnicalComplexity, ArticleImpact } from './blog';
+
+export interface ContentCategory {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface TechnicalComplexity {
+  level: 'beginner' | 'intermediate' | 'advanced';
+  value: number;
+}
+
+export interface ArticleImpact {
+  level: 'low' | 'medium' | 'high';
+  value: number;
+}
+
+export interface NewsItem {
+  id: string;
+  title: string;
+  content: string;
+  author: string;
+  date: string;
+}
+
 export interface ContentTemplate {
   id: string;
   name: string;
