@@ -22,7 +22,7 @@ import Support from '@/pages/Support';
 import Notifications from '@/pages/Notifications';
 import PendingTasks from '@/pages/PendingTasks';
 
-// New pages
+// Feature pages (not in navigation but still accessible)
 import SisoAI from '@/pages/SisoAI';
 import Leaderboards from '@/pages/Leaderboards';
 import CryptoExchange from '@/pages/CryptoExchange';
@@ -68,7 +68,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/pending-tasks" element={<PendingTasks />} />
         
-        {/* New feature routes */}
+        {/* Feature routes - still accessible but not in navigation */}
         <Route path="/siso-ai" element={<SisoAI />} />
         <Route path="/leaderboards" element={<Leaderboards />} />
         <Route path="/crypto-exchange" element={<CryptoExchange />} />
