@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,22 +6,9 @@ import { PlusCircle, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ProjectCard } from './ProjectCard';
-import { Phase } from '@/types/dashboard';
-
-export interface Project {
-  id: string;
-  title: string;
-  description: string;
-  deadline: string;
-  phases: Phase[];
-  tags: string[];
-  financials?: {
-    marketValue?: number;
-    costSavings?: number;
-    developmentCost?: number;
-    roi?: number;
-  };
-}
+import { Project, Phase } from '@/types/dashboard';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 
 interface ProjectsOverviewProps {
   projects?: Project[];
@@ -93,7 +81,7 @@ export const ProjectsOverview: React.FC<ProjectsOverviewProps> = ({ projects }) 
   return (
     <Card className="border border-siso-border/40 bg-siso-bg-card/50 backdrop-blur-sm">
       <CardHeader className="flex flex-row justify-between items-center pb-2">
-        <CardTitle className="text-lg">Projects Overview</CardTitle>
+        <CardTitle className="text-lg">Projects & Tasks Overview</CardTitle>
         <Button 
           variant="outline" 
           size="sm"
@@ -105,45 +93,89 @@ export const ProjectsOverview: React.FC<ProjectsOverviewProps> = ({ projects }) 
         </Button>
       </CardHeader>
       <CardContent>
-        {displayProjects.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <p>No projects to display.</p>
-            <p className="mt-2 text-sm">Start a new project to see it here.</p>
-            <Button 
-              className="mt-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-              onClick={() => navigate('/new-project')}
-            >
-              Create Your First Project
-            </Button>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {displayProjects.map((project, index) => (
-                <motion.div
-                  key={project.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-4">
+            <TabsTrigger value="all">All Projects</TabsTrigger>
+            <TabsTrigger value="active">Active</TabsTrigger>
+            <TabsTrigger value="completed">Completed</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="all" className="space-y-4">
+            {displayProjects.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No projects to display.</p>
+                <p className="mt-2 text-sm">Start a new project to see it here.</p>
+                <Button 
+                  className="mt-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                  onClick={() => navigate('/new-project')}
                 >
-                  <ProjectCard project={project} />
-                </motion.div>
-              ))}
+                  Create Your First Project
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 gap-4">
+                  {displayProjects.map((project, index) => (
+                    <motion.div
+                      key={project.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <ProjectCard project={project} />
+                    </motion.div>
+                  ))}
+                </div>
+                
+                <div className="mt-4 flex justify-end">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="flex items-center text-sm text-siso-text hover:text-siso-text-bold"
+                    onClick={() => navigate('/projects')}
+                  >
+                    View All Projects
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </>
+            )}
+          </TabsContent>
+
+          <TabsContent value="active">
+            <div className="grid grid-cols-1 gap-4">
+              {displayProjects
+                .filter(p => p.phases.some(phase => phase.status === 'in-progress'))
+                .map((project, index) => (
+                  <motion.div
+                    key={project.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <ProjectCard project={project} />
+                  </motion.div>
+                ))}
             </div>
-            
-            <div className="mt-4 flex justify-end">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="flex items-center text-sm text-siso-text hover:text-siso-text-bold"
-                onClick={() => navigate('/projects')}
-              >
-                View All Projects
-                <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
+          </TabsContent>
+
+          <TabsContent value="completed">
+            <div className="grid grid-cols-1 gap-4">
+              {displayProjects
+                .filter(p => p.phases.every(phase => phase.status === 'completed'))
+                .map((project, index) => (
+                  <motion.div
+                    key={project.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <ProjectCard project={project} />
+                  </motion.div>
+                ))}
             </div>
-          </>
-        )}
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );

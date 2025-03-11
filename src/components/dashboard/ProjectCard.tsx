@@ -2,7 +2,7 @@
 import React from 'react';
 import { Project } from './ProjectsOverview';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Edit, TrendingUp, TrendingDown } from 'lucide-react';
+import { ExternalLink, Edit, TrendingUp, TrendingDown, Check, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -31,17 +31,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
     day: 'numeric',
     year: 'numeric'
   });
-  
-  // Determine status color
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-green-500';
-      case 'in-progress': return 'bg-blue-500';
-      case 'pending': return 'bg-gray-300';
-      default: return 'bg-gray-300';
-    }
-  };
-  
+
   // Format currency
   const formatCurrency = (value?: number) => {
     if (value === undefined) return 'N/A';
@@ -52,98 +42,131 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
     }).format(value);
   };
 
+  // Get status color
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return 'bg-green-500';
+      case 'in-progress': return 'bg-blue-500';
+      case 'pending': return 'bg-gray-300';
+      default: return 'bg-gray-300';
+    }
+  };
+
   return (
-    <div className="border border-border rounded-lg p-4 bg-card/50 hover:bg-card/80 transition-colors h-full flex flex-col">
-      <div className="flex justify-between items-start mb-3">
-        <h3 className="font-semibold text-lg line-clamp-1">{project.title}</h3>
-        <div className="bg-primary/10 text-primary px-2 py-1 rounded text-xs font-medium">
-          {formattedDeadline}
-        </div>
-      </div>
-      
-      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{project.description}</p>
-      
-      <div className="mb-3">
-        <div className="flex justify-between text-sm mb-1">
-          <span>Progress</span>
-          <span>{overallProgress}%</span>
-        </div>
-        <Progress 
-          value={overallProgress} 
-          className="h-1.5 bg-background/50" 
-          indicatorClassName="bg-primary"
-        />
-      </div>
-      
-      {project.financials && (
-        <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
-          <div className="bg-green-500/10 p-2 rounded">
-            <div className="font-medium">Market Value</div>
-            <div className="font-bold">{formatCurrency(project.financials.marketValue)}</div>
+    <div className="border border-border rounded-lg p-6 bg-card/50 hover:bg-card/80 transition-all">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        {/* Project Info Section */}
+        <div className="md:col-span-4">
+          <div className="flex justify-between items-start mb-3">
+            <h3 className="font-semibold text-lg line-clamp-1">{project.title}</h3>
+            <Badge variant="outline" className="bg-primary/10 text-primary">
+              {formattedDeadline}
+            </Badge>
           </div>
-          <div className="bg-blue-500/10 p-2 rounded">
-            <div className="font-medium">Cost Savings</div>
-            <div className="font-bold">{formatCurrency(project.financials.costSavings)}</div>
-          </div>
-          <div className="bg-yellow-500/10 p-2 rounded">
-            <div className="font-medium">Dev Cost</div>
-            <div className="font-bold">{formatCurrency(project.financials.developmentCost)}</div>
-          </div>
-          <div className="bg-purple-500/10 p-2 rounded">
-            <div className="font-medium">ROI</div>
-            <div className="font-bold">{project.financials.roi}%</div>
+          
+          <p className="text-sm text-muted-foreground mb-3">{project.description}</p>
+          
+          <div className="flex flex-wrap gap-1 mb-3">
+            {project.tags.map((tag, index) => (
+              <Badge key={index} variant="secondary" className="bg-muted">
+                {tag}
+              </Badge>
+            ))}
           </div>
         </div>
-      )}
-      
-      <div className="grid grid-cols-5 gap-1 mb-3">
-        {project.phases.map((phase, index) => (
-          <TooltipProvider key={index}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex flex-col items-center">
-                  <div 
-                    className={`w-4 h-4 rounded-full ${getStatusColor(phase.status)} mb-1`} 
-                  />
-                  <span className="text-xs text-center leading-tight">{phase.name}</span>
+
+        {/* Progress & Phases Section */}
+        <div className="md:col-span-4">
+          <div className="mb-4">
+            <div className="flex justify-between text-sm mb-1">
+              <span>Overall Progress</span>
+              <span>{overallProgress}%</span>
+            </div>
+            <Progress value={overallProgress} className="h-2" />
+          </div>
+
+          <div className="space-y-2">
+            {project.phases.map((phase, index) => (
+              <TooltipProvider key={index}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${getStatusColor(phase.status)}`} />
+                      <div className="flex-1">
+                        <div className="flex justify-between text-sm">
+                          <span>{phase.name}</span>
+                          <span>{phase.progress}%</span>
+                        </div>
+                        <Progress value={phase.progress} className="h-1" />
+                      </div>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{phase.name}: {phase.progress}% Complete</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ))}
+          </div>
+        </div>
+
+        {/* Financial Metrics Section */}
+        <div className="md:col-span-4">
+          {project.financials && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-green-500/10 p-3 rounded-lg">
+                <div className="text-xs font-medium mb-1">Market Value</div>
+                <div className="font-bold text-sm flex items-center gap-1">
+                  {formatCurrency(project.financials.marketValue)}
+                  <TrendingUp className="h-4 w-4 text-green-500" />
                 </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{phase.name}: {phase.progress}% Complete</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ))}
-      </div>
-      
-      <div className="flex flex-wrap gap-1 mb-3">
-        {project.tags.map((tag, index) => (
-          <span 
-            key={index}
-            className="bg-muted px-2 py-0.5 rounded-md text-xs"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
-      
-      <div className="mt-auto flex justify-between gap-2 pt-2">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="flex-1 flex items-center justify-center gap-1"
-          onClick={() => navigate(`/projects/${project.id}`)}
-        >
-          <ExternalLink size={14} /> View
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="flex-1 flex items-center justify-center gap-1"
-          onClick={() => navigate(`/plan-builder/${project.id}`)}
-        >
-          <Edit size={14} /> Edit
-        </Button>
+              </div>
+              
+              <div className="bg-blue-500/10 p-3 rounded-lg">
+                <div className="text-xs font-medium mb-1">Cost Savings</div>
+                <div className="font-bold text-sm flex items-center gap-1">
+                  {formatCurrency(project.financials.costSavings)}
+                  <TrendingUp className="h-4 w-4 text-blue-500" />
+                </div>
+              </div>
+              
+              <div className="bg-red-500/10 p-3 rounded-lg">
+                <div className="text-xs font-medium mb-1">Dev Cost</div>
+                <div className="font-bold text-sm flex items-center gap-1">
+                  {formatCurrency(project.financials.developmentCost)}
+                  <TrendingDown className="h-4 w-4 text-red-500" />
+                </div>
+              </div>
+              
+              <div className="bg-purple-500/10 p-3 rounded-lg">
+                <div className="text-xs font-medium mb-1">ROI</div>
+                <div className="font-bold text-sm flex items-center gap-1">
+                  {project.financials.roi}%
+                  <TrendingUp className="h-4 w-4 text-purple-500" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-2 mt-4">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex-1 flex items-center justify-center gap-1"
+              onClick={() => navigate(`/projects/${project.id}`)}
+            >
+              <ExternalLink size={14} /> View
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex-1 flex items-center justify-center gap-1"
+              onClick={() => navigate(`/plan-builder/${project.id}`)}
+            >
+              <Edit size={14} /> Edit
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
