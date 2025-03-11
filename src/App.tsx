@@ -1,94 +1,89 @@
-
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
-import { useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
-
-import Auth from '@/pages/Auth';
-import Profile from '@/pages/Profile';
-import SocialOnboarding from '@/pages/onboarding/social';
-import OnboardingCongratulations from '@/pages/onboarding/congratulations';
-import ThankYou from '@/pages/ThankYou';
-import Terms from '@/pages/Terms';
-import PrivacyPolicy from '@/pages/PrivacyPolicy';
-
-// Core pages
-import Dashboard from '@/pages/Dashboard';
-import Projects from '@/pages/Projects';
-import PlanBuilder from '@/pages/PlanBuilder';
-import NewProject from '@/pages/NewProject';
-import Support from '@/pages/Support';
-import Notifications from '@/pages/Notifications';
-import Tasks from '@/pages/PendingTasks'; // Renamed for consistency
-import Portfolio from '@/pages/Portfolio';
-
-// Support documentation pages
-import DocumentationCategoryPage from '@/pages/support/DocumentationCategoryPage';
-import DocumentationArticlePage from '@/pages/support/DocumentationArticlePage';
-import DocumentationQuestionPage from '@/pages/support/DocumentationQuestionPage';
-
-import { Toaster } from '@/components/ui/toaster';
-import { useAuthSession } from '@/hooks/core';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { ThemeProvider } from "@/components/theme-provider"
+import { useTheme } from 'next-themes';
+import { Toaster } from "@/components/ui/toaster"
+import Home from './pages/Home';
+import Auth from './pages/Auth';
+import Profile from './pages/Profile';
+import OnboardingSocial from './pages/OnboardingSocial';
+import OnboardingInterests from './pages/OnboardingInterests';
+import Support from './pages/Support';
+import DocumentationCategory from './pages/DocumentationCategory';
+import DocumentationArticle from './pages/DocumentationArticle';
+import DocumentationQuestion from './pages/DocumentationQuestion';
+import Project from './pages/Project';
+import NewProject from './pages/NewProject';
+import EditProject from './pages/EditProject';
+import Plan from './pages/Plan';
+import NewPlan from './pages/NewPlan';
+import EditPlan from './pages/EditPlan';
+import Task from './pages/Task';
+import NewTask from './pages/NewTask';
+import EditTask from './pages/EditTask';
+import DailySummary from './pages/DailySummary';
+import { useAuthSession } from '@/hooks/useAuthSession';
+import { SidebarRoot } from '@/components/ui/sidebar';
+import { MainLayout } from '@/components/assistants/layout/MainLayout';
+import ImportDocumentation from './pages/ImportDocumentation';
 
 function App() {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { theme } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
   const { user } = useAuthSession();
+  const queryClient = new QueryClient();
 
-  // Simple route logging
   useEffect(() => {
-    console.info('Current pathname:', location.pathname);
-  }, [location]);
+    setIsDarkMode(theme === 'dark');
+  }, [theme]);
+
+  useEffect(() => {
+    // Check if the user is on the Auth page and has a session
+    if (location.pathname === '/auth' && user) {
+      // Redirect to the profile page
+      navigate('/profile');
+    }
+  }, [location, navigate, user]);
 
   return (
-    <SidebarProvider className="flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar">
-      <Helmet>
-        <title>SISO - Your business planning platform</title>
-        <meta name="description" content="SISO is the premier platform for business planning and resource management." />
-      </Helmet>
-
-      <div className="flex min-h-screen w-full bg-gradient-to-b from-gray-900 to-black">
-        <Routes>
-          {/* Public routes */}
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/thank-you" element={<ThankYou />} />
-          
-          {/* Default route - show dashboard for both logged in and not logged in users */}
-          <Route path="/" element={<Dashboard />} />
-          
-          {/* Core routes */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/plan-builder" element={<PlanBuilder />} />
-          <Route path="/plan-builder/:projectId" element={<PlanBuilder />} />
-          <Route path="/new-project" element={<NewProject />} />
-          <Route path="/support" element={<Support />} />
-          <Route path="/support/:categoryId" element={<DocumentationCategoryPage />} />
-          <Route path="/support/:categoryId/:articleId" element={<DocumentationArticlePage />} />
-          <Route path="/support/:categoryId/:articleId/:questionId" element={<DocumentationQuestionPage />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/portfolio" element={<Portfolio />} />
-          <Route path="/tasks" element={<Tasks />} />
-          <Route path="/profile" element={<Profile />} />
-          
-          {/* Redirects for renamed/moved pages */}
-          <Route path="/pending-tasks" element={<Navigate to="/tasks" replace />} />
-          <Route path="/organization" element={<Navigate to="/profile" replace />} />
-          <Route path="/company-profile" element={<Navigate to="/profile" replace />} />
-          
-          {/* Onboarding routes */}
-          <Route path="/onboarding/social" element={<SocialOnboarding />} />
-          <Route path="/onboarding/congratulations" element={<OnboardingCongratulations />} />
-
-          {/* Fallback route */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
+    <QueryClientProvider client={queryClient}>
+      <div className={`font-siso text-siso-text bg-siso-bg min-h-screen flex flex-col ${isDarkMode ? 'dark' : ''}`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Routes>
+            <Route element={<Home />} path="/" />
+            <Route element={<Auth />} path="/auth" />
+            <Route element={<OnboardingSocial />} path="/onboarding/social" />
+            <Route element={<OnboardingInterests />} path="/onboarding/interests" />
+            <Route element={<Profile />} path="/profile" />
+            <Route element={<Support />} path="/support" />
+            <Route element={<DocumentationCategory />} path="/support/:categorySlug" />
+            <Route element={<DocumentationArticle />} path="/support/:categorySlug/:articleSlug" />
+            <Route element={<DocumentationQuestion />} path="/support/question/:questionSlug" />
+            <Route element={<Project />} path="/project/:projectId" />
+            <Route element={<NewProject />} path="/project/new" />
+            <Route element={<EditProject />} path="/project/edit/:projectId" />
+            <Route element={<Plan />} path="/plan/:planId" />
+            <Route element={<NewPlan />} path="/plan/new/:projectId" />
+            <Route element={<EditPlan />} path="/plan/edit/:planId" />
+            <Route element={<Task />} path="/task/:taskId" />
+            <Route element={<NewTask />} path="/task/new/:planId" />
+            <Route element={<EditTask />} path="/task/edit/:taskId" />
+            <Route element={<DailySummary />} path="/daily-summary" />
+            {/* Add the new route for documentation import */}
+            <Route element={<ImportDocumentation />} path="/import-documentation" />
+          </Routes>
+        </ThemeProvider>
+        <Toaster />
       </div>
-
-      <Toaster />
-    </SidebarProvider>
+    </QueryClientProvider>
   );
 }
 
