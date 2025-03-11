@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { ArrowRight, CheckCircle, AlertCircle, LoaderCircle, Database, RefreshCw } from 'lucide-react';
+import { ArrowRight, CheckCircle, AlertCircle, LoaderCircle, Database, RefreshCw, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { importTestDocumentation } from '@/services/supabase-documentation.service';
 import { useToast } from '@/hooks/use-toast';
@@ -16,6 +16,7 @@ const ImportDocumentationPage: React.FC = () => {
   const [importSuccess, setImportSuccess] = useState<boolean | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [useExpandedData, setUseExpandedData] = useState(true);
+  const [detailedErrorInfo, setDetailedErrorInfo] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -23,6 +24,7 @@ const ImportDocumentationPage: React.FC = () => {
     setIsImporting(true);
     setImportSuccess(null);
     setErrorMessage(null);
+    setDetailedErrorInfo(null);
     
     try {
       console.log("Starting documentation import with expanded data:", useExpandedData);
@@ -49,7 +51,15 @@ const ImportDocumentationPage: React.FC = () => {
     } catch (error) {
       console.error('Error importing documentation:', error);
       setImportSuccess(false);
-      setErrorMessage(error instanceof Error ? error.message : "Unknown error occurred during import");
+      
+      // Provide more detailed error information
+      const errorMsg = error instanceof Error ? error.message : "Unknown error occurred during import";
+      setErrorMessage(errorMsg);
+      
+      // Extract and format the stack trace if available
+      if (error instanceof Error && error.stack) {
+        setDetailedErrorInfo(error.stack);
+      }
       
       toast({
         title: "Import error",
@@ -88,6 +98,7 @@ const ImportDocumentationPage: React.FC = () => {
   const handleRetry = () => {
     setImportSuccess(null);
     setErrorMessage(null);
+    setDetailedErrorInfo(null);
   };
 
   return (
@@ -145,12 +156,24 @@ const ImportDocumentationPage: React.FC = () => {
                   <AlertTitle className="text-red-500">Import Failed</AlertTitle>
                   <AlertDescription className="text-siso-text/80">
                     <p>There was an error importing the documentation data.</p>
-                    {errorMessage && <p className="mt-1 font-mono text-xs">{errorMessage}</p>}
+                    {errorMessage && <p className="mt-1 text-sm">{errorMessage}</p>}
+                    
+                    {detailedErrorInfo && (
+                      <details className="mt-2">
+                        <summary className="cursor-pointer text-xs flex items-center">
+                          <Info className="h-3 w-3 mr-1" /> Technical details
+                        </summary>
+                        <pre className="mt-1 text-xs bg-black/10 p-2 rounded overflow-auto max-h-28">
+                          {detailedErrorInfo}
+                        </pre>
+                      </details>
+                    )}
+                    
                     <Button 
                       variant="outline" 
                       size="sm"
                       onClick={handleRetry}
-                      className="mt-2"
+                      className="mt-3"
                     >
                       <RefreshCw className="mr-2 h-3 w-3" />
                       Try Again

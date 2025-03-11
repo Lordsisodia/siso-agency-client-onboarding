@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Book, UserCircle, FileText, FolderKanban, 
@@ -468,22 +469,24 @@ export const importTestDocumentation = async (useExpandedData: boolean = false):
   try {
     console.log(`Requesting import with expanded=${useExpandedData}`);
     
-    const response = await fetch(`/api/import-documentation?expanded=${useExpandedData}`, {
+    // Use Supabase Edge Function directly instead of a relative API path
+    const { data, error } = await supabase.functions.invoke('import-documentation', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      body: { expanded: useExpandedData }
     });
     
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error(`Failed to import documentation: ${response.status} ${response.statusText}`, errorData);
-      throw new Error(`HTTP Error: ${response.status} ${response.statusText} - ${errorData}`);
+    if (error) {
+      console.error(`Failed to import documentation: ${error.message}`, error);
+      throw new Error(`Supabase Edge Function Error: ${error.message}`);
     }
     
-    const result = await response.json();
-    console.log("Import result:", result);
-    return result.success === true;
+    if (!data) {
+      console.error('No data returned from import function');
+      throw new Error('No data returned from import function');
+    }
+    
+    console.log("Import result:", data);
+    return data.success === true;
   } catch (error) {
     console.error('Error importing documentation:', error);
     throw error; // Rethrow to allow the calling component to handle it
