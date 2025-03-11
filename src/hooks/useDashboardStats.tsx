@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { DashboardStats } from '@/types/dashboard';
 
 export function useDashboardStats() {
@@ -11,23 +11,38 @@ export function useDashboardStats() {
   });
   
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchStats = useCallback(() => {
-    // This is a mock implementation
-    // In a real application, you would fetch this data from your API
     setIsLoading(true);
+    setError(null);
     
     // Simulate network request
     setTimeout(() => {
-      setStats({
-        activeProjects: 5,
-        pendingTasks: 12,
-        upcomingEvents: 3,
-        loginStreak: 7
-      });
-      setIsLoading(false);
-    }, 500);
+      try {
+        // Simulate some randomness in the data
+        setStats({
+          activeProjects: Math.floor(Math.random() * 3) + 4, // 4-6
+          pendingTasks: Math.floor(Math.random() * 5) + 10, // 10-14
+          upcomingEvents: Math.floor(Math.random() * 3) + 2, // 2-4
+          loginStreak: Math.floor(Math.random() * 3) + 6 // 6-8
+        });
+        setIsLoading(false);
+      } catch (err) {
+        setError('Failed to fetch dashboard stats');
+        setIsLoading(false);
+      }
+    }, 800);
   }, []);
 
-  return { stats, fetchStats, isLoading };
+  // Auto-refresh stats every 5 minutes
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      fetchStats();
+    }, 5 * 60 * 1000);
+    
+    return () => clearInterval(intervalId);
+  }, [fetchStats]);
+
+  return { stats, fetchStats, isLoading, error };
 }

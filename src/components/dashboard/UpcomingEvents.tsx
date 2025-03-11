@@ -72,9 +72,15 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({
           <CalendarDays className="h-4 w-4" />
           Upcoming Events
         </CardTitle>
-        <Badge variant="outline" className="bg-siso-primary/10 text-siso-primary border-siso-primary/20">
-          {events.length} Event{events.length !== 1 ? 's' : ''}
-        </Badge>
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Badge variant="outline" className="bg-siso-primary/10 text-siso-primary border-siso-primary/20">
+            {events.length} Event{events.length !== 1 ? 's' : ''}
+          </Badge>
+        </motion.div>
       </CardHeader>
       <CardContent>
         {events.length === 0 ? (

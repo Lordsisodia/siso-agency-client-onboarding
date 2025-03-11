@@ -1,24 +1,9 @@
 
-import React from 'react';
-import { DashboardStats } from '@/types/dashboard';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  AlertTriangle, 
-  CheckCircle2,
-  Clock,
-  Sparkles
-} from 'lucide-react';
+import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { motion } from 'framer-motion';
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Briefcase, ClipboardCheck, Calendar, Award, Loader2 } from 'lucide-react';
+import { DashboardStats } from '@/types/dashboard';
 
 interface QuickStatsPanelProps {
   stats: DashboardStats;
@@ -27,207 +12,111 @@ interface QuickStatsPanelProps {
 }
 
 export const EnhancedQuickStatsPanel: React.FC<QuickStatsPanelProps> = ({ 
-  stats, 
+  stats,
   loading = false,
-  onClick 
+  onClick
 }) => {
-  // Define status thresholds for color coding
-  const getProjectStatus = (count: number) => {
-    if (count <= 2) return "low";
-    if (count <= 5) return "medium";
-    return "high";
-  };
+  const [hoveredStat, setHoveredStat] = useState<string | null>(null);
 
-  const getTaskStatus = (count: number) => {
-    if (count <= 5) return "low";
-    if (count <= 10) return "medium";
-    return "high";
-  };
-
-  const getEventStatus = (count: number) => {
-    if (count <= 1) return "low";
-    if (count <= 3) return "medium";
-    return "high";
-  };
-
-  const getStreakStatus = (count: number) => {
-    if (count <= 3) return "low";
-    if (count <= 7) return "medium";
-    return "high";
-  };
-
-  // Define progress values
-  const getProjectProgress = () => Math.min(stats.activeProjects * 12, 100);
-  const getTaskProgress = () => Math.min(stats.pendingTasks * 5, 100);
-  const getEventProgress = () => Math.min(stats.upcomingEvents * 20, 100);
-  const getStreakProgress = () => Math.min((stats.loginStreak || 0) * 10, 100);
-
-  // Get status icon based on level
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "low":
-        return <CheckCircle2 className="h-4 w-4 text-emerald-500" />;
-      case "medium":
-        return <AlertTriangle className="h-4 w-4 text-amber-500" />;
-      case "high":
-        return <Clock className="h-4 w-4 text-rose-500" />;
-      default:
-        return null;
-    }
-  };
-
-  // Define the stats data
-  const statsData = [
+  const statItems = [
     {
-      id: "projects",
-      label: "Active Projects",
+      title: 'Active Projects',
       value: stats.activeProjects,
-      status: getProjectStatus(stats.activeProjects),
-      progress: getProjectProgress(),
-      trend: 1, // positive trend
-      trendText: "Up 1 from last week",
-      bgGradient: "from-indigo-500/10 to-indigo-700/5",
-      progressColor: "bg-indigo-500",
-      hoverGradient: "hover:from-indigo-500/20 hover:to-indigo-700/10",
-      borderColor: "border-indigo-500/20",
-      icon: <Sparkles className="h-4 w-4 text-indigo-400" />
+      icon: <Briefcase size={18} />,
+      color: 'bg-gradient-to-br from-blue-500/10 to-blue-600/5',
+      borderColor: 'border-blue-500/20',
+      textColor: 'text-blue-400',
+      iconColor: 'text-blue-400',
+      hoverBorderColor: 'hover:border-blue-500/40',
+      type: 'projects'
     },
     {
-      id: "tasks",
-      label: "Pending Tasks",
+      title: 'Pending Tasks',
       value: stats.pendingTasks,
-      status: getTaskStatus(stats.pendingTasks),
-      progress: getTaskProgress(),
-      trend: -2, // negative trend
-      trendText: "Down 2 from yesterday",
-      bgGradient: "from-amber-500/10 to-amber-700/5",
-      progressColor: "bg-amber-500",
-      hoverGradient: "hover:from-amber-500/20 hover:to-amber-700/10",
-      borderColor: "border-amber-500/20",
-      icon: <Clock className="h-4 w-4 text-amber-400" />
+      icon: <ClipboardCheck size={18} />,
+      color: 'bg-gradient-to-br from-amber-500/10 to-amber-600/5',
+      borderColor: 'border-amber-500/20',
+      textColor: 'text-amber-400',
+      iconColor: 'text-amber-400',
+      hoverBorderColor: 'hover:border-amber-500/40',
+      type: 'tasks'
     },
     {
-      id: "events",
-      label: "Upcoming Events",
+      title: 'Upcoming Events',
       value: stats.upcomingEvents,
-      status: getEventStatus(stats.upcomingEvents),
-      progress: getEventProgress(),
-      trend: 1, // positive trend
-      trendText: "1 new event this week",
-      bgGradient: "from-emerald-500/10 to-emerald-700/5",
-      progressColor: "bg-emerald-500",
-      hoverGradient: "hover:from-emerald-500/20 hover:to-emerald-700/10",
-      borderColor: "border-emerald-500/20",
-      icon: <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+      icon: <Calendar size={18} />,
+      color: 'bg-gradient-to-br from-purple-500/10 to-purple-600/5',
+      borderColor: 'border-purple-500/20',
+      textColor: 'text-purple-400',
+      iconColor: 'text-purple-400', 
+      hoverBorderColor: 'hover:border-purple-500/40',
+      type: 'events'
     },
     {
-      id: "streak",
-      label: "Login Streak",
-      value: stats.loginStreak || 0,
-      status: getStreakStatus(stats.loginStreak || 0),
-      progress: getStreakProgress(),
-      trend: 0, // neutral trend
-      trendText: "Keep it up!",
-      bgGradient: "from-purple-500/10 to-purple-700/5",
-      progressColor: "bg-purple-500",
-      hoverGradient: "hover:from-purple-500/20 hover:to-purple-700/10",
-      borderColor: "border-purple-500/20",
-      badgeText: stats.loginStreak && stats.loginStreak > 5 ? "Impressive!" : undefined,
-      icon: <TrendingUp className="h-4 w-4 text-purple-400" />
-    }
+      title: 'Login Streak',
+      value: stats.loginStreak,
+      icon: <Award size={18} />,
+      color: 'bg-gradient-to-br from-siso-red/10 to-siso-orange/5',
+      borderColor: 'border-siso-orange/20',
+      textColor: 'text-siso-orange',
+      iconColor: 'text-siso-orange',
+      hoverBorderColor: 'hover:border-siso-orange/40',
+      type: 'streak'
+    },
   ];
 
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="rounded-xl border border-white/5 p-4 backdrop-blur-sm">
-            <div className="flex items-start justify-between mb-2">
-              <div>
-                <Skeleton className="h-4 w-24 mb-2" />
-                <Skeleton className="h-8 w-12" />
-              </div>
-              <Skeleton className="h-4 w-4 rounded-full" />
-            </div>
-            <div className="mt-4">
-              <Skeleton className="h-3 w-full mb-1" />
-              <Skeleton className="h-1.5 w-full" />
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
+  const handleClick = (type: string) => {
+    if (onClick) {
+      onClick(type);
+    }
+  };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {statsData.map((stat, index) => (
-        <TooltipProvider key={stat.id}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <motion.div 
-                className={`relative rounded-xl bg-gradient-to-br ${stat.bgGradient} ${stat.hoverGradient} 
-                  border ${stat.borderColor} p-4 shadow-lg backdrop-blur-sm 
-                  transition-all duration-300 hover:shadow-xl cursor-pointer group`}
-                whileHover={{ y: -5, scale: 1.02 }}
-                onClick={() => onClick && onClick(stat.id)}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1, duration: 0.3 }}
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-1 flex items-center gap-1">
-                      {stat.icon}
-                      {stat.label}
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl font-bold group-hover:text-white transition-colors">{stat.value}</span>
-                      {stat.badgeText && (
-                        <Badge variant="secondary" className="bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                          {stat.badgeText}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    {getStatusIcon(stat.status)}
-                    {stat.trend !== 0 && (
-                      stat.trend > 0 ? (
-                        <TrendingUp className="h-4 w-4 text-emerald-500" />
-                      ) : (
-                        <TrendingDown className="h-4 w-4 text-rose-500" />
-                      )
-                    )}
-                  </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {statItems.map((item, index) => (
+        <motion.div
+          key={item.title}
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: index * 0.1, duration: 0.4 }}
+          whileHover={{ 
+            y: -4, 
+            transition: { duration: 0.2 } 
+          }}
+          className="h-full"
+        >
+          <Card 
+            className={`relative border ${item.borderColor} ${item.hoverBorderColor} ${item.color} backdrop-blur-sm transition-all duration-300 overflow-hidden cursor-pointer h-full`}
+            onClick={() => handleClick(item.type)}
+            onMouseEnter={() => setHoveredStat(item.type)}
+            onMouseLeave={() => setHoveredStat(null)}
+          >
+            {/* Background gradient that fades in on hover */}
+            <motion.div 
+              className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 transition-opacity"
+              animate={{ opacity: hoveredStat === item.type ? 0.2 : 0 }}
+              transition={{ duration: 0.3 }}
+            />
+            
+            <CardContent className="p-4 flex flex-col items-center text-center space-y-2">
+              <div className={`rounded-full p-2 ${item.color} ${item.iconColor} mt-1`}>
+                {item.icon}
+              </div>
+              
+              <h3 className="text-sm font-medium text-gray-400">{item.title}</h3>
+              
+              {loading ? (
+                <div className="flex justify-center my-1">
+                  <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
                 </div>
-                
-                <div className="mt-3">
-                  <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                    <span>{stat.trendText}</span>
-                    <span>{stat.progress}%</span>
-                  </div>
-                  <Progress 
-                    value={stat.progress} 
-                    className="h-1.5 bg-background/50" 
-                    indicatorClassName={stat.progressColor}
-                  />
+              ) : (
+                <div className={`text-2xl font-semibold ${item.textColor}`}>
+                  {item.value}
                 </div>
-                
-                {/* Glow effect overlay */}
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-br opacity-0 
-                  group-hover:opacity-5 transition-opacity duration-300 pointer-events-none"
-                  style={{
-                    background: `radial-gradient(circle at center, ${stat.progressColor.replace('bg-', '')} 0%, transparent 70%)`
-                  }}
-                ></div>
-              </motion.div>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="bg-black/80 border-white/10 text-white">
-              <p>Click to view details</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
       ))}
     </div>
   );

@@ -9,7 +9,8 @@ import { TasksPreview } from './TasksPreview';
 import { EnhancedQuickStatsPanel } from './EnhancedQuickStatsPanel';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface DashboardLayoutProps {
   userName: string;
@@ -64,7 +65,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     visible: { 
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
+        staggerChildren: 0.1,
+        delayChildren: 0.2
       }
     }
   };
@@ -96,9 +98,21 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         
         {stats && (
           <motion.div variants={itemVariants} className="space-y-2">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-medium">Quick Stats</h2>
-              <Sparkles className="h-4 w-4 text-siso-orange/70" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-medium">Quick Stats</h2>
+                <Sparkles className="h-4 w-4 text-siso-orange/70" />
+              </div>
+              
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-xs text-siso-text-muted hover:text-white flex items-center gap-1"
+                onClick={() => window.location.reload()}
+              >
+                <RefreshCw className="h-3 w-3" />
+                Refresh
+              </Button>
             </div>
             <EnhancedQuickStatsPanel 
               stats={stats}
@@ -120,18 +134,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           </motion.div>
           
           <motion.div variants={itemVariants} className="md:col-span-4 space-y-6">
-            {notifications && notifications.length > 0 && (
+            {notifications && (
               <NotificationsPanel 
                 notifications={notifications} 
                 onViewAll={onViewAllNotifications}
                 onMarkAsRead={onNotificationRead}
+                loading={statsLoading}
               />
             )}
             
-            {events && events.length > 0 && (
+            {events && (
               <UpcomingEvents 
                 events={events} 
                 onViewCalendar={onViewCalendar}
+                loading={statsLoading}
               />
             )}
           </motion.div>
