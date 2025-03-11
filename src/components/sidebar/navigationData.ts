@@ -61,13 +61,12 @@ export const menuSections: MenuSection[] = [
         href: '/preferences',
         icon: Settings,
         label: 'Preferences',
+      },
+      {
+        href: '/support',
+        icon: HelpCircle,
+        label: 'Help Center',
       }
     ]
-  },
-  {
-    type: 'main',
-    href: '/support',
-    icon: HelpCircle,
-    label: 'Help Center',
   }
 ];
