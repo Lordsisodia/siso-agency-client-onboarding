@@ -1,5 +1,5 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { Connection, PublicKey } from "npm:@solana/web3.js"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,36 +15,11 @@ serve(async (req) => {
   }
 
   try {
-    const { walletAddress } = await req.json()
-    console.log("Fetching NFTs for wallet:", walletAddress)
-
-    if (!walletAddress) {
-      throw new Error("Wallet address is required")
-    }
-
-    // Connect to Solana
-    const connection = new Connection("https://api.mainnet-beta.solana.com")
-    const owner = new PublicKey(walletAddress)
-
-    // For now, return mock data
-    // In a production environment, you would use the Metaplex SDK to fetch real NFTs
-    const mockNFTs = [
-      {
-        name: "Sample NFT #1",
-        image: "https://via.placeholder.com/300",
-        description: "This is a sample NFT"
-      },
-      {
-        name: "Sample NFT #2",
-        image: "https://via.placeholder.com/300",
-        description: "Another sample NFT"
-      }
-    ]
-
-    console.log("Returning mock NFTs for development")
-
+    console.log("This function is deprecated as crypto features have been removed")
+    
+    // Return empty array as crypto features are removed
     return new Response(
-      JSON.stringify(mockNFTs),
+      JSON.stringify([]),
       { 
         headers: { 
           ...corsHeaders,
