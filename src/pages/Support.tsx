@@ -55,6 +55,6 @@ const Support = () => {
       </div>
     </MainLayout>
   );
-};
+}
 
 export default Support;

@@ -37,7 +37,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   // Map messages to ensure they match our ChatMessage type
   const messages = (rawMessages || []).map(msg => ({
     ...msg,
-    role: msg.role as "user" | "assistant" | "system"
+    role: msg.role as "user" | "assistant"
   })) as ChatMessage[];
   
   // Use the custom hook for handling chat interface state
