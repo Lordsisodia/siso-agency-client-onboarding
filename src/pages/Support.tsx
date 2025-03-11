@@ -6,7 +6,7 @@ import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Waves } from '@/components/ui/waves-background';
 import { DocumentationSection } from '@/components/support/DocumentationSection';
 import { AiChatSection } from '@/components/support/AiChatSection';
-import { Book, Search, MessagesSquare, BookOpen, Zap, Sparkles } from 'lucide-react';
+import { Book, Search, MessagesSquare, BookOpen, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
@@ -14,7 +14,6 @@ const Support = () => {
   const [activeTab, setActiveTab] = useState('documentation');
 
   useEffect(() => {
-    // Seed demo data when the Support page loads
     seedDemoData();
   }, []);
 
@@ -34,7 +33,7 @@ const Support = () => {
           <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
             <div>
               <h1 className="text-3xl font-bold text-siso-text-bold mb-2">Help Center</h1>
-              <p className="text-siso-text/70">Find answers, resources, and get help with your project</p>
+              <p className="text-siso-text/70">Find comprehensive guides and documentation to help you get started</p>
             </div>
             <div className="flex space-x-3">
               <Button variant="outline" className="flex items-center gap-2">
@@ -56,19 +55,8 @@ const Support = () => {
                   <BookOpen className="h-5 w-5 text-siso-orange" />
                 </div>
                 <div>
-                  <h3 className="font-medium">Documentation</h3>
-                  <p className="text-sm text-siso-text/70">Browse guides and tutorials</p>
-                </div>
-              </div>
-            </Card>
-            <Card className="p-4 bg-siso-bg-card/20 backdrop-blur-sm border border-siso-border hover:border-siso-orange/50 transition-all cursor-pointer">
-              <div className="flex items-center gap-3">
-                <div className="bg-siso-orange/10 p-2 rounded-full">
-                  <Sparkles className="h-5 w-5 text-siso-orange" />
-                </div>
-                <div>
-                  <h3 className="font-medium">AI Assistant</h3>
-                  <p className="text-sm text-siso-text/70">Get personalized help</p>
+                  <h3 className="font-medium">Browse Documentation</h3>
+                  <p className="text-sm text-siso-text/70">Explore guides and tutorials</p>
                 </div>
               </div>
             </Card>
@@ -78,8 +66,19 @@ const Support = () => {
                   <MessagesSquare className="h-5 w-5 text-siso-orange" />
                 </div>
                 <div>
-                  <h3 className="font-medium">Community</h3>
-                  <p className="text-sm text-siso-text/70">Connect with other users</p>
+                  <h3 className="font-medium">Ask AI Assistant</h3>
+                  <p className="text-sm text-siso-text/70">Get instant help</p>
+                </div>
+              </div>
+            </Card>
+            <Card className="p-4 bg-siso-bg-card/20 backdrop-blur-sm border border-siso-border hover:border-siso-orange/50 transition-all cursor-pointer">
+              <div className="flex items-center gap-3">
+                <div className="bg-siso-orange/10 p-2 rounded-full">
+                  <Book className="h-5 w-5 text-siso-orange" />
+                </div>
+                <div>
+                  <h3 className="font-medium">API Reference</h3>
+                  <p className="text-sm text-siso-text/70">Technical documentation</p>
                 </div>
               </div>
             </Card>

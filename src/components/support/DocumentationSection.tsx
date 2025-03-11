@@ -1,24 +1,27 @@
-
 import React, { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Book, UserCircle, FileText, FolderKanban, Sparkles, Code2, HelpCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-interface DocCategory {
-  id: string;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  articles: DocArticle[];
-}
+import { Badge } from '@/components/ui/badge';
 
 interface DocArticle {
   id: string;
   title: string;
   excerpt: string;
   content: string;
+  lastUpdated?: string;
+  difficulty?: 'beginner' | 'intermediate' | 'advanced';
+}
+
+interface DocCategory {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  articleCount: number;
+  articles: DocArticle[];
 }
 
 export const DocumentationSection = () => {
@@ -26,18 +29,46 @@ export const DocumentationSection = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('getting-started');
   const [currentArticle, setCurrentArticle] = useState<DocArticle | null>(null);
 
-  // Documentation categories
+  // Documentation categories with article counts
   const categories: DocCategory[] = [
     {
       id: 'getting-started',
       title: 'Getting Started',
-      description: 'Learn the basics of using the platform',
-      icon: <span className="text-2xl">👋</span>,
+      description: 'Learn the basics and get up to speed quickly',
+      icon: <Book className="h-5 w-5" />,
+      articleCount: 6,
       articles: [
+        {
+          id: 'welcome',
+          title: 'Welcome to the Platform',
+          excerpt: 'Get an overview of what our platform offers',
+          content: `
+            <h2>Welcome to the Platform</h2>
+            <p>Welcome to the platform! This guide will help you get started with creating your first project.</p>
+            
+            <h3>What Our Platform Offers</h3>
+            <p>Our platform provides a comprehensive suite of tools to help you plan, execute, and track your projects efficiently.</p>
+            
+            <h3>Key Features</h3>
+            <p>Some of the key features include:</p>
+            <ul>
+              <li>Intuitive Plan Builder for project planning</li>
+              <li>Task management and tracking</li>
+              <li>AI-powered assistance</li>
+              <li>Collaboration tools</li>
+              <li>Analytics and reporting</li>
+            </ul>
+            
+            <h3>Getting Started</h3>
+            <p>To get started, we recommend checking out the Quick Start Guide next, which will walk you through creating your first project.</p>
+          `,
+          difficulty: 'beginner',
+          lastUpdated: '2024-03-28'
+        },
         {
           id: 'quick-start',
           title: 'Quick Start Guide',
-          excerpt: 'Get up and running with your first project',
+          excerpt: 'Get up and running in minutes',
           content: `
             <h2>Quick Start Guide</h2>
             <p>Welcome to the platform! This guide will help you get started with creating your first project.</p>
@@ -53,8 +84,19 @@ export const DocumentationSection = () => {
             
             <h3>Need More Help?</h3>
             <p>If you need additional assistance, you can ask our AI assistant for help or browse through more detailed documentation.</p>
-          `
-        },
+          `,
+          difficulty: 'beginner',
+          lastUpdated: '2024-03-27'
+        }
+      ]
+    },
+    {
+      id: 'account-profile',
+      title: 'Account & Profile',
+      description: 'Manage your account settings and profile',
+      icon: <UserCircle className="h-5 w-5" />,
+      articleCount: 10,
+      articles: [
         {
           id: 'account-setup',
           title: 'Account Setup',
@@ -71,15 +113,50 @@ export const DocumentationSection = () => {
             
             <h3>Security Settings</h3>
             <p>Review your security settings and enable two-factor authentication for added protection.</p>
-          `
+          `,
+          difficulty: 'beginner',
+          lastUpdated: '2024-03-25'
         }
       ]
     },
     {
-      id: 'projects',
-      title: 'Projects',
-      description: 'Learn how to create and manage projects',
-      icon: <span className="text-2xl">📁</span>,
+      id: 'plan-builder',
+      title: 'Plan Builder',
+      description: 'Create and manage project plans effectively',
+      icon: <FileText className="h-5 w-5" />,
+      articleCount: 15,
+      articles: [
+        {
+          id: 'plan-builder-intro',
+          title: 'Introduction to Plan Builder',
+          excerpt: 'Learn the basics of the Plan Builder tool',
+          content: `
+            <h2>Introduction to Plan Builder</h2>
+            <p>The Plan Builder is a powerful tool that helps you define your project's scope, features, and specifications.</p>
+            
+            <h3>Starting the Plan Builder</h3>
+            <p>Access the Plan Builder from your project dashboard or when creating a new project. The builder will guide you through a step-by-step process.</p>
+            
+            <h3>Defining Requirements</h3>
+            <p>Start by outlining your project requirements. Be as specific as possible to ensure your plan addresses all necessary aspects.</p>
+            
+            <h3>Adding Features</h3>
+            <p>Next, define the features your project needs. The platform provides suggestions based on your requirements.</p>
+            
+            <h3>Technical Specifications</h3>
+            <p>Finally, specify technical details and constraints. This helps ensure your project plan is comprehensive and realistic.</p>
+          `,
+          difficulty: 'intermediate',
+          lastUpdated: '2024-03-20'
+        }
+      ]
+    },
+    {
+      id: 'projects-tasks',
+      title: 'Projects & Tasks',
+      description: 'Organize and track your work',
+      icon: <FolderKanban className="h-5 w-5" />,
+      articleCount: 20,
       articles: [
         {
           id: 'creating-projects',
@@ -97,36 +174,18 @@ export const DocumentationSection = () => {
             
             <h3>Project Settings</h3>
             <p>After creating a project, visit the Project Settings to configure collaboration options, visibility, and other parameters.</p>
-          `
-        },
-        {
-          id: 'plan-builder',
-          title: 'Using the Plan Builder',
-          excerpt: 'Create detailed project plans and specifications',
-          content: `
-            <h2>Using the Plan Builder</h2>
-            <p>The Plan Builder helps you define your project's scope, features, and specifications.</p>
-            
-            <h3>Starting the Plan Builder</h3>
-            <p>Access the Plan Builder from your project dashboard or when creating a new project. The builder will guide you through a step-by-step process.</p>
-            
-            <h3>Defining Requirements</h3>
-            <p>Start by outlining your project requirements. Be as specific as possible to ensure your plan addresses all necessary aspects.</p>
-            
-            <h3>Adding Features</h3>
-            <p>Next, define the features your project needs. The platform provides suggestions based on your requirements.</p>
-            
-            <h3>Technical Specifications</h3>
-            <p>Finally, specify technical details and constraints. This helps ensure your project plan is comprehensive and realistic.</p>
-          `
+          `,
+          difficulty: 'beginner',
+          lastUpdated: '2024-03-18'
         }
       ]
     },
     {
-      id: 'ai-assistant',
-      title: 'AI Assistant',
-      description: 'Learn how to use the AI assistant effectively',
-      icon: <span className="text-2xl">🤖</span>,
+      id: 'ai-features',
+      title: 'AI Features',
+      description: 'Leverage AI capabilities',
+      icon: <Sparkles className="h-5 w-5" />,
+      articleCount: 12,
       articles: [
         {
           id: 'assistant-basics',
@@ -144,33 +203,47 @@ export const DocumentationSection = () => {
             
             <h3>Context-Aware Help</h3>
             <p>The assistant understands your current context, so you can ask page-specific questions without providing additional details.</p>
-          `
-        },
+          `,
+          difficulty: 'beginner',
+          lastUpdated: '2024-03-15'
+        }
+      ]
+    },
+    {
+      id: 'api-integration',
+      title: 'API & Integration',
+      description: 'Connect and extend the platform',
+      icon: <Code2 className="h-5 w-5" />,
+      articleCount: 8,
+      articles: [
         {
-          id: 'advanced-assistant-features',
-          title: 'Advanced Assistant Features',
-          excerpt: 'Using the AI assistant for complex tasks',
+          id: 'api-overview',
+          title: 'API Overview',
+          excerpt: 'Introduction to our API capabilities',
           content: `
-            <h2>Advanced Assistant Features</h2>
-            <p>Beyond answering simple questions, our AI assistant can help with complex tasks and project planning.</p>
+            <h2>API Overview</h2>
+            <p>Our platform provides a comprehensive API that allows you to integrate with other tools and extend functionality.</p>
             
-            <h3>Project Recommendations</h3>
-            <p>Ask the assistant for recommendations based on your project needs. It can suggest features, approaches, and best practices.</p>
+            <h3>Authentication</h3>
+            <p>All API requests require authentication using API keys. You can generate and manage your API keys in the Account Settings.</p>
             
-            <h3>Code Explanations</h3>
-            <p>If you're working with code, the assistant can explain snippets, suggest improvements, and help troubleshoot issues.</p>
+            <h3>Rate Limits</h3>
+            <p>Be aware of rate limits to ensure your applications function properly. Standard accounts have limits of 100 requests per minute.</p>
             
-            <h3>Process Assistance</h3>
-            <p>The assistant can guide you through complex processes like setting up integrations, configuring advanced features, or optimizing your workflow.</p>
-          `
+            <h3>Endpoints</h3>
+            <p>Our API provides endpoints for projects, tasks, users, and more. Each endpoint is documented with examples and parameter descriptions.</p>
+          `,
+          difficulty: 'advanced',
+          lastUpdated: '2024-03-10'
         }
       ]
     },
     {
       id: 'troubleshooting',
       title: 'Troubleshooting',
-      description: 'Resolve common issues and errors',
-      icon: <span className="text-2xl">🔧</span>,
+      description: 'Solve common issues and get help',
+      icon: <HelpCircle className="h-5 w-5" />,
+      articleCount: 15,
       articles: [
         {
           id: 'common-errors',
@@ -188,31 +261,14 @@ export const DocumentationSection = () => {
             
             <h3>Performance Issues</h3>
             <p>If the platform seems slow, try clearing your browser cache and cookies. Using the latest version of Chrome, Firefox, or Edge can also help improve performance.</p>
-          `
-        },
-        {
-          id: 'contact-support',
-          title: 'Contacting Support',
-          excerpt: 'How to reach our support team for additional help',
-          content: `
-            <h2>Contacting Support</h2>
-            <p>When you need personalized assistance, our support team is ready to help.</p>
-            
-            <h3>AI Assistant</h3>
-            <p>Start by asking our AI assistant. It can solve many common problems instantly and save you time.</p>
-            
-            <h3>Email Support</h3>
-            <p>For more complex issues, email support@example.com with details about your problem. Include screenshots if possible.</p>
-            
-            <h3>Live Chat</h3>
-            <p>During business hours, you can access live chat support by clicking the "Chat with Support" button in the bottom right corner of the Help Center.</p>
-          `
+          `,
+          difficulty: 'beginner',
+          lastUpdated: '2024-03-05'
         }
       ]
     }
   ];
 
-  // Filter articles based on search query
   const filteredCategories = categories.map(category => ({
     ...category,
     articles: category.articles.filter(article => 
@@ -238,7 +294,6 @@ export const DocumentationSection = () => {
     setCurrentArticle(null);
   };
 
-  // Get the current category
   const currentCategory = categories.find(cat => cat.id === selectedCategory);
 
   return (
@@ -255,20 +310,23 @@ export const DocumentationSection = () => {
         />
       </div>
 
-      {/* Display categories or article details */}
       {!currentArticle ? (
         <div className="space-y-6">
-          {/* Category tabs */}
           <Tabs value={selectedCategory} onValueChange={handleCategorySelect} className="w-full">
-            <TabsList className="grid grid-cols-4 w-full mb-6">
+            <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full mb-6">
               {categories.map(category => (
                 <TabsTrigger 
                   key={category.id} 
                   value={category.id}
-                  className="flex flex-col items-center gap-2 p-3 data-[state=active]:bg-siso-red/10"
+                  className="flex items-center gap-2 p-3"
                 >
-                  <div className="mb-1">{category.icon}</div>
-                  {category.title}
+                  <div className="mr-2">{category.icon}</div>
+                  <div className="flex items-center gap-2">
+                    <span>{category.title}</span>
+                    <Badge variant="secondary" className="ml-1">
+                      {category.articleCount}
+                    </Badge>
+                  </div>
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -282,10 +340,22 @@ export const DocumentationSection = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {(searchQuery ? filteredCategories.find(c => c.id === category.id)?.articles : category.articles)?.map(article => (
-                    <Card key={article.id} className="hover:bg-siso-bg-card/30 transition-colors cursor-pointer" onClick={() => handleArticleSelect(article)}>
+                    <Card 
+                      key={article.id} 
+                      className="hover:bg-siso-bg-card/30 transition-colors cursor-pointer border-siso-border"
+                      onClick={() => handleArticleSelect(article)}
+                    >
                       <CardContent className="p-4">
-                        <h3 className="font-semibold mb-2">{article.title}</h3>
-                        <p className="text-siso-text/70 text-sm">{article.excerpt}</p>
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="font-semibold">{article.title}</h3>
+                          <Badge variant="outline" className="text-xs">
+                            {article.difficulty}
+                          </Badge>
+                        </div>
+                        <p className="text-siso-text/70 text-sm mb-2">{article.excerpt}</p>
+                        <div className="text-xs text-siso-text/50">
+                          Last updated: {article.lastUpdated}
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
