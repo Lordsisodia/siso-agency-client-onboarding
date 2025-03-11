@@ -36,36 +36,31 @@ export const menuSections: MenuSection[] = [
         label: 'My Projects',
       },
       {
-        href: '/pending-tasks',
-        icon: ClipboardCheck,
-        label: 'Pending Tasks',
+        href: '/portfolio',
+        icon: BookOpen,
+        label: 'Portfolio',
       },
       {
-        href: '/portfolio',
-        icon: Briefcase,
-        label: 'Portfolio',
+        href: '/tasks',
+        icon: ClipboardCheck,
+        label: 'Tasks',
       }
     ]
   },
   {
     type: 'section',
-    title: 'Account',
-    icon: User,
+    title: 'Settings',
+    icon: Settings,
     items: [
       {
-        href: '/profile',
-        icon: User,
-        label: 'Profile',
-      },
-      {
-        href: '/company-profile',
+        href: '/organization',
         icon: Building2,
-        label: 'Company Profile',
+        label: 'Organization',
       },
       {
-        href: '/settings',
+        href: '/preferences',
         icon: Settings,
-        label: 'Settings',
+        label: 'Preferences',
       }
     ]
   },

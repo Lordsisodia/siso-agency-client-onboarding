@@ -19,7 +19,7 @@ import PlanBuilder from '@/pages/PlanBuilder';
 import NewProject from '@/pages/NewProject';
 import Support from '@/pages/Support';
 import Notifications from '@/pages/Notifications';
-import PendingTasks from '@/pages/PendingTasks';
+import Tasks from '@/pages/PendingTasks'; // Renamed for consistency
 import Portfolio from '@/pages/Portfolio';
 
 import { Toaster } from '@/components/ui/toaster';
@@ -59,10 +59,14 @@ function App() {
         <Route path="/new-project" element={<NewProject />} />
         <Route path="/support" element={<Support />} />
         <Route path="/notifications" element={<Notifications />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/home" element={<Dashboard />} />
-        <Route path="/pending-tasks" element={<PendingTasks />} />
         <Route path="/portfolio" element={<Portfolio />} />
+        <Route path="/tasks" element={<Tasks />} />
+        
+        {/* Redirects for renamed/moved pages */}
+        <Route path="/pending-tasks" element={<Navigate to="/tasks" replace />} />
+        <Route path="/profile" element={<Navigate to="/organization" replace />} />
+        <Route path="/company-profile" element={<Navigate to="/organization" replace />} />
+        <Route path="/settings" element={<Navigate to="/preferences" replace />} />
         
         {/* Onboarding routes */}
         <Route path="/onboarding/social" element={<SocialOnboarding />} />

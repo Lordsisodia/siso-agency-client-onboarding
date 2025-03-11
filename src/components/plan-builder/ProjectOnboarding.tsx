@@ -8,7 +8,6 @@ import { BackgroundSparkles } from './components/BackgroundSparkles';
 import { OnboardingStyles } from './components/OnboardingStyles';
 import { NavigationButtons } from './components/NavigationButtons';
 
-// Define component props types
 interface OnboardingWelcomeProps {
   onNext: () => void;
   onSkip?: () => void;
@@ -25,14 +24,6 @@ interface FeatureSelectionProps {
   updateFeatures: (features: Record<string, { selected: boolean; priority: string }>) => void;
 }
 
-// Onboarding Steps
-import { OnboardingWelcome } from './onboarding-steps/OnboardingWelcome';
-import { ProjectType } from './onboarding-steps/ProjectType';
-import { BusinessContext } from './onboarding-steps/BusinessContext';
-import { TimelineBudget } from './onboarding-steps/TimelineBudget';
-import { FeatureSelection } from './onboarding-steps/FeatureSelection';
-import { OnboardingSummary } from './onboarding-steps/OnboardingSummary';
-
 interface ProjectOnboardingProps {
   onComplete: (data: any) => void;
   onSkip: () => void;
@@ -43,7 +34,6 @@ export function ProjectOnboarding({ onComplete, onSkip }: ProjectOnboardingProps
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   
-  // Project data state
   const [projectData, setProjectData] = useState({
     projectType: '',
     projectScale: 'medium',
@@ -61,10 +51,8 @@ export function ProjectOnboarding({ onComplete, onSkip }: ProjectOnboardingProps
     features: {} as Record<string, { selected: boolean; priority: string }>,
   });
   
-  // Function to update project data
   const updateProjectData = useCallback((section: string, data: any) => {
     setProjectData(prev => {
-      // Fixed the spreading issue by checking if data is an object
       if (typeof data === 'object' && data !== null && !Array.isArray(data)) {
         return { 
           ...prev, 
@@ -79,7 +67,6 @@ export function ProjectOnboarding({ onComplete, onSkip }: ProjectOnboardingProps
     });
   }, []);
   
-  // Steps configuration
   const steps = [
     { title: 'Welcome', icon: <WandSparkles className="w-4 h-4" /> },
     { title: 'Project Type', icon: <PencilLine className="w-4 h-4" /> },
@@ -89,11 +76,9 @@ export function ProjectOnboarding({ onComplete, onSkip }: ProjectOnboardingProps
     { title: 'Summary', icon: <CheckCircle2 className="w-4 h-4" /> },
   ];
   
-  // Navigation functions
   const handleNext = useCallback(() => {
     if (step < steps.length - 1) {
       setStep(prev => prev + 1);
-      // Scroll to top
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [step, steps.length]);
@@ -101,7 +86,6 @@ export function ProjectOnboarding({ onComplete, onSkip }: ProjectOnboardingProps
   const handleBack = useCallback(() => {
     if (step > 0) {
       setStep(prev => prev - 1);
-      // Scroll to top
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [step]);
@@ -110,7 +94,6 @@ export function ProjectOnboarding({ onComplete, onSkip }: ProjectOnboardingProps
     try {
       setLoading(true);
       
-      // Call the onComplete callback with project data
       onComplete(projectData);
       
       toast({
@@ -129,10 +112,8 @@ export function ProjectOnboarding({ onComplete, onSkip }: ProjectOnboardingProps
     }
   }, [projectData, onComplete, toast]);
   
-  // Calculate progress percentage
   const progressPercentage = ((step) / (steps.length - 1)) * 100;
   
-  // Render current step content
   const renderStepContent = () => {
     switch (step) {
       case 0:
@@ -188,17 +169,14 @@ export function ProjectOnboarding({ onComplete, onSkip }: ProjectOnboardingProps
   
   return (
     <div className="relative bg-card rounded-xl shadow-lg overflow-hidden">
-      {/* Progress Indicator */}
       <ProgressIndicator
         steps={steps}
         currentStep={step}
         progressPercentage={progressPercentage}
       />
       
-      {/* Background Sparkles */}
       <BackgroundSparkles />
       
-      {/* Main Content */}
       <Card className="border-0 bg-transparent shadow-none">
         <CardContent className="pt-6 px-6 pb-6">
           <motion.div
@@ -212,7 +190,6 @@ export function ProjectOnboarding({ onComplete, onSkip }: ProjectOnboardingProps
             {renderStepContent()}
           </motion.div>
           
-          {/* Navigation Buttons - Not shown on welcome and render custom on last step */}
           {step > 0 && step < steps.length - 1 && (
             <NavigationButtons
               onNext={handleNext}
@@ -233,7 +210,6 @@ export function ProjectOnboarding({ onComplete, onSkip }: ProjectOnboardingProps
         </CardContent>
       </Card>
       
-      {/* Global styles for the component */}
       <OnboardingStyles />
     </div>
   );

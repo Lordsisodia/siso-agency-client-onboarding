@@ -10,6 +10,7 @@ import { MobileSidebarButton } from './sidebar/MobileSidebarButton';
 import { SidebarOverlay } from './sidebar/SidebarOverlay';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AnimatePresence } from 'framer-motion';
+import { awardNavigationPoints } from '@/utils/navigationPoints';
 
 // Sidebar state persistence key
 const SIDEBAR_STATE_KEY = 'siso-sidebar-state';
@@ -32,6 +33,11 @@ export const Sidebar = () => {
   useEffect(() => {
     localStorage.setItem(SIDEBAR_STATE_KEY, JSON.stringify(isExpanded));
   }, [isExpanded]);
+  
+  // Award points for visiting certain pages
+  useEffect(() => {
+    awardNavigationPoints(location.pathname);
+  }, [location.pathname]);
   
   // Handle navigation with improved external link support
   const handleItemClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
