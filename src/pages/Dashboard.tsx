@@ -11,11 +11,12 @@ import { awardNavigationPoints } from '@/utils/navigationPoints';
 import { useLocation } from 'react-router-dom';
 import { useBasicUserData } from '@/hooks/useBasicUserData';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 export default function Dashboard() {
   const { user, loading } = useAuthSession();
   const { userData } = useBasicUserData();
-  const { stats, fetchStats } = useDashboardStats();
+  const { stats, fetchStats, isLoading: statsLoading } = useDashboardStats();
   const { notifications, handleMarkAsRead, handleViewAll } = useNotifications();
   const { events, handleViewCalendar } = useEvents();
   const location = useLocation();
@@ -24,6 +25,7 @@ export default function Dashboard() {
     // Fetch stats if user is logged in
     if (user) {
       fetchStats();
+      toast.success("Dashboard refreshed");
     }
     
     // Award points for visiting dashboard
@@ -45,21 +47,36 @@ export default function Dashboard() {
     return 'Friend';
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        duration: 0.5
+      }
+    }
+  };
+
   return (
     <SidebarProvider>
       <motion.div 
         className="flex min-h-screen bg-gradient-to-b from-[#0A0A0A] to-[#121212]"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
       >
         <Sidebar />
         <DashboardLayout 
           userName={getDisplayName()} 
           greeting={getGreeting()}
           stats={stats}
+          statsLoading={statsLoading}
           notifications={notifications}
           events={events}
+          onNotificationRead={handleMarkAsRead}
+          onViewAllNotifications={handleViewAll}
+          onViewCalendar={handleViewCalendar}
         />
       </motion.div>
     </SidebarProvider>

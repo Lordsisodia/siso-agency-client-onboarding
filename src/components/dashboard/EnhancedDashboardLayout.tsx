@@ -8,21 +8,31 @@ import { ProjectsOverview } from './ProjectsOverview';
 import { TasksPreview } from './TasksPreview';
 import { EnhancedQuickStatsPanel } from './EnhancedQuickStatsPanel';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Sparkles } from 'lucide-react';
 
 interface DashboardLayoutProps {
   userName: string;
   greeting: string;
   stats?: DashboardStats;
+  statsLoading?: boolean;
   notifications?: Notification[];
   events?: Event[];
+  onNotificationRead?: (id: string) => void;
+  onViewAllNotifications?: () => void;
+  onViewCalendar?: () => void;
 }
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
   userName, 
   greeting, 
   stats,
+  statsLoading = false,
   notifications = [],
-  events = []
+  events = [],
+  onNotificationRead,
+  onViewAllNotifications,
+  onViewCalendar
 }) => {
   const navigate = useNavigate();
 
@@ -45,44 +55,88 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     }
   };
 
+  const handleViewAllTasks = () => {
+    navigate('/tasks');
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { duration: 0.4, ease: "easeOut" }
+    }
+  };
+
   return (
-    <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl space-y-8">
-        <EnhancedDashboardHeader 
-          userName={userName} 
-          greeting={greeting} 
-          stats={stats}
-        />
+    <motion.main 
+      className="flex-1 overflow-auto p-4 md:p-6 lg:p-8 bg-gradient-to-br from-[#0A0A0A]/90 to-[#121212]"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <div className="mx-auto max-w-7xl space-y-6">
+        <motion.div variants={itemVariants}>
+          <EnhancedDashboardHeader 
+            userName={userName} 
+            greeting={greeting} 
+            stats={stats}
+          />
+        </motion.div>
         
         {stats && (
-          <div className="space-y-2">
-            <h2 className="text-lg font-medium">Quick Stats</h2>
+          <motion.div variants={itemVariants} className="space-y-2">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-medium">Quick Stats</h2>
+              <Sparkles className="h-4 w-4 text-siso-orange/70" />
+            </div>
             <EnhancedQuickStatsPanel 
-              stats={stats} 
+              stats={stats}
+              loading={statsLoading}
               onClick={handleStatClick}
             />
-          </div>
+          </motion.div>
         )}
         
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          <div className="md:col-span-8">
+          <motion.div variants={itemVariants} className="md:col-span-8">
             <ProjectsOverview />
             <div className="mt-6">
-              <TasksPreview />
+              <TasksPreview 
+                pendingTasks={stats?.pendingTasks || 0} 
+                onViewAll={handleViewAllTasks} 
+              />
             </div>
-          </div>
+          </motion.div>
           
-          <div className="md:col-span-4 space-y-6">
+          <motion.div variants={itemVariants} className="md:col-span-4 space-y-6">
             {notifications && notifications.length > 0 && (
-              <NotificationsPanel notifications={notifications} />
+              <NotificationsPanel 
+                notifications={notifications} 
+                onViewAll={onViewAllNotifications}
+                onMarkAsRead={onNotificationRead}
+              />
             )}
             
             {events && events.length > 0 && (
-              <UpcomingEvents events={events} />
+              <UpcomingEvents 
+                events={events} 
+                onViewCalendar={onViewCalendar}
+              />
             )}
-          </div>
+          </motion.div>
         </div>
       </div>
-    </main>
+    </motion.main>
   );
 };

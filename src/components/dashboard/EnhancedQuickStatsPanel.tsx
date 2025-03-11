@@ -6,11 +6,13 @@ import {
   TrendingDown, 
   AlertTriangle, 
   CheckCircle2,
-  Clock
+  Clock,
+  Sparkles
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Tooltip,
   TooltipContent,
@@ -20,11 +22,13 @@ import {
 
 interface QuickStatsPanelProps {
   stats: DashboardStats;
+  loading?: boolean;
   onClick?: (statType: string) => void;
 }
 
 export const EnhancedQuickStatsPanel: React.FC<QuickStatsPanelProps> = ({ 
   stats, 
+  loading = false,
   onClick 
 }) => {
   // Define status thresholds for color coding
@@ -84,7 +88,9 @@ export const EnhancedQuickStatsPanel: React.FC<QuickStatsPanelProps> = ({
       trendText: "Up 1 from last week",
       bgGradient: "from-indigo-500/10 to-indigo-700/5",
       progressColor: "bg-indigo-500",
-      hoverGradient: "hover:from-indigo-500/20 hover:to-indigo-700/10"
+      hoverGradient: "hover:from-indigo-500/20 hover:to-indigo-700/10",
+      borderColor: "border-indigo-500/20",
+      icon: <Sparkles className="h-4 w-4 text-indigo-400" />
     },
     {
       id: "tasks",
@@ -96,7 +102,9 @@ export const EnhancedQuickStatsPanel: React.FC<QuickStatsPanelProps> = ({
       trendText: "Down 2 from yesterday",
       bgGradient: "from-amber-500/10 to-amber-700/5",
       progressColor: "bg-amber-500",
-      hoverGradient: "hover:from-amber-500/20 hover:to-amber-700/10"
+      hoverGradient: "hover:from-amber-500/20 hover:to-amber-700/10",
+      borderColor: "border-amber-500/20",
+      icon: <Clock className="h-4 w-4 text-amber-400" />
     },
     {
       id: "events",
@@ -108,7 +116,9 @@ export const EnhancedQuickStatsPanel: React.FC<QuickStatsPanelProps> = ({
       trendText: "1 new event this week",
       bgGradient: "from-emerald-500/10 to-emerald-700/5",
       progressColor: "bg-emerald-500",
-      hoverGradient: "hover:from-emerald-500/20 hover:to-emerald-700/10"
+      hoverGradient: "hover:from-emerald-500/20 hover:to-emerald-700/10",
+      borderColor: "border-emerald-500/20",
+      icon: <CheckCircle2 className="h-4 w-4 text-emerald-400" />
     },
     {
       id: "streak",
@@ -121,9 +131,33 @@ export const EnhancedQuickStatsPanel: React.FC<QuickStatsPanelProps> = ({
       bgGradient: "from-purple-500/10 to-purple-700/5",
       progressColor: "bg-purple-500",
       hoverGradient: "hover:from-purple-500/20 hover:to-purple-700/10",
-      badgeText: stats.loginStreak && stats.loginStreak > 5 ? "Impressive!" : undefined
+      borderColor: "border-purple-500/20",
+      badgeText: stats.loginStreak && stats.loginStreak > 5 ? "Impressive!" : undefined,
+      icon: <TrendingUp className="h-4 w-4 text-purple-400" />
     }
   ];
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="rounded-xl border border-white/5 p-4 backdrop-blur-sm">
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <Skeleton className="h-4 w-24 mb-2" />
+                <Skeleton className="h-8 w-12" />
+              </div>
+              <Skeleton className="h-4 w-4 rounded-full" />
+            </div>
+            <div className="mt-4">
+              <Skeleton className="h-3 w-full mb-1" />
+              <Skeleton className="h-1.5 w-full" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -133,8 +167,8 @@ export const EnhancedQuickStatsPanel: React.FC<QuickStatsPanelProps> = ({
             <TooltipTrigger asChild>
               <motion.div 
                 className={`relative rounded-xl bg-gradient-to-br ${stat.bgGradient} ${stat.hoverGradient} 
-                  border border-white/10 p-4 shadow-lg backdrop-blur-sm 
-                  transition-all duration-300 hover:shadow-xl cursor-pointer`}
+                  border ${stat.borderColor} p-4 shadow-lg backdrop-blur-sm 
+                  transition-all duration-300 hover:shadow-xl cursor-pointer group`}
                 whileHover={{ y: -5, scale: 1.02 }}
                 onClick={() => onClick && onClick(stat.id)}
                 initial={{ opacity: 0, y: 20 }}
@@ -143,9 +177,12 @@ export const EnhancedQuickStatsPanel: React.FC<QuickStatsPanelProps> = ({
               >
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-1">{stat.label}</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1 flex items-center gap-1">
+                      {stat.icon}
+                      {stat.label}
+                    </h3>
                     <div className="flex items-center gap-2">
-                      <span className="text-2xl font-bold">{stat.value}</span>
+                      <span className="text-2xl font-bold group-hover:text-white transition-colors">{stat.value}</span>
                       {stat.badgeText && (
                         <Badge variant="secondary" className="bg-purple-500/10 text-purple-400 border border-purple-500/20">
                           {stat.badgeText}
@@ -178,11 +215,15 @@ export const EnhancedQuickStatsPanel: React.FC<QuickStatsPanelProps> = ({
                 </div>
                 
                 {/* Glow effect overlay */}
-                <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${stat.bgGradient} opacity-0 
-                  hover:opacity-10 transition-opacity duration-300 pointer-events-none`}></div>
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-br opacity-0 
+                  group-hover:opacity-5 transition-opacity duration-300 pointer-events-none"
+                  style={{
+                    background: `radial-gradient(circle at center, ${stat.progressColor.replace('bg-', '')} 0%, transparent 70%)`
+                  }}
+                ></div>
               </motion.div>
             </TooltipTrigger>
-            <TooltipContent side="bottom">
+            <TooltipContent side="bottom" className="bg-black/80 border-white/10 text-white">
               <p>Click to view details</p>
             </TooltipContent>
           </Tooltip>

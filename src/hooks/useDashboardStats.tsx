@@ -9,17 +9,25 @@ export function useDashboardStats() {
     upcomingEvents: 0,
     loginStreak: 0
   });
+  
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchStats = useCallback(() => {
     // This is a mock implementation
     // In a real application, you would fetch this data from your API
-    setStats({
-      activeProjects: 5,
-      pendingTasks: 12,
-      upcomingEvents: 3,
-      loginStreak: 7
-    });
+    setIsLoading(true);
+    
+    // Simulate network request
+    setTimeout(() => {
+      setStats({
+        activeProjects: 5,
+        pendingTasks: 12,
+        upcomingEvents: 3,
+        loginStreak: 7
+      });
+      setIsLoading(false);
+    }, 500);
   }, []);
 
-  return { stats, fetchStats };
+  return { stats, fetchStats, isLoading };
 }
