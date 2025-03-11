@@ -22,6 +22,10 @@ import Notifications from '@/pages/Notifications';
 import Tasks from '@/pages/PendingTasks'; // Renamed for consistency
 import Portfolio from '@/pages/Portfolio';
 
+// Support documentation pages
+import DocumentationCategoryPage from '@/pages/support/DocumentationCategoryPage';
+import DocumentationArticlePage from '@/pages/support/DocumentationArticlePage';
+
 import { Toaster } from '@/components/ui/toaster';
 import { useAuthSession } from '@/hooks/core';
 import { SidebarProvider } from '@/components/ui/sidebar';
@@ -60,6 +64,8 @@ function App() {
           <Route path="/plan-builder/:projectId" element={<PlanBuilder />} />
           <Route path="/new-project" element={<NewProject />} />
           <Route path="/support" element={<Support />} />
+          <Route path="/support/:categoryId" element={<DocumentationCategoryPage />} />
+          <Route path="/support/:categoryId/:articleId" element={<DocumentationArticlePage />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/tasks" element={<Tasks />} />
