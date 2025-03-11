@@ -8,7 +8,8 @@ import {
   Briefcase,
   UserCircle,
   Settings,
-  BookOpen
+  BookOpen,
+  LifeBuoy
 } from 'lucide-react';
 import { MenuSection } from './types';
 
@@ -53,7 +54,7 @@ export const menuSections: MenuSection[] = [
       },
       {
         href: '/support',
-        icon: HelpCircle,
+        icon: LifeBuoy,
         label: 'Help Center',
       }
     ]
