@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -138,7 +137,6 @@ const Profile = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
         <ProfileMetrics 
           userId={user.id}
-          solanaWalletAddress={profile?.solana_wallet_address}
         />
 
         <div className="md:col-span-2">

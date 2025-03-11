@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -48,7 +49,6 @@ export interface ProfileData {
   instagram_url: string | null;
   twitter_url: string | null;
   professional_role: string | null;
-  solana_wallet_address: string | null;
   achievements?: Achievement[];
   contribution_count?: number;
   referral_count?: number;
