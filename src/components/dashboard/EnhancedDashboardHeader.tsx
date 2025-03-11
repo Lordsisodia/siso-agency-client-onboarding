@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Bell, Settings, ChevronDown, UserCircle, LogOut, UserCog } from 'lucide-react';
 import { DashboardStats } from '@/types/dashboard';
@@ -8,11 +9,13 @@ import { motion } from 'framer-motion';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuthSession } from '@/hooks/useAuthSession';
+
 interface DashboardHeaderProps {
   userName: string;
   greeting: string;
   stats?: DashboardStats;
 }
+
 export const EnhancedDashboardHeader: React.FC<DashboardHeaderProps> = ({
   userName,
   greeting,
@@ -31,7 +34,9 @@ export const EnhancedDashboardHeader: React.FC<DashboardHeaderProps> = ({
     if (hour < 18) return '☀️'; // Afternoon
     return '🌙'; // Evening
   };
-  return <div className="flex flex-col space-y-6">
+
+  return (
+    <div className="flex flex-col space-y-6">
       <div className="flex justify-between items-center">
         <motion.div className="flex flex-col" initial={{
         opacity: 0,
@@ -115,10 +120,10 @@ export const EnhancedDashboardHeader: React.FC<DashboardHeaderProps> = ({
           <StatCard label="Upcoming Events" value={stats.upcomingEvents || 0} onClick={() => navigate('/calendar')} color="emerald" />
           <StatCard label="Login Streak" value={stats.loginStreak || 0} badgeText={stats.loginStreak && stats.loginStreak > 5 ? "Impressive!" : undefined} color="purple" />
         </div>}
-      
-      
-    </div>;
+    </div>
+  );
 };
+
 interface StatCardProps {
   label: string;
   value: number;
@@ -126,6 +131,7 @@ interface StatCardProps {
   onClick?: () => void;
   color?: 'indigo' | 'amber' | 'emerald' | 'purple' | 'rose';
 }
+
 const StatCard: React.FC<StatCardProps> = ({
   label,
   value,
@@ -140,5 +146,19 @@ const StatCard: React.FC<StatCardProps> = ({
     purple: 'from-purple-500/20 to-purple-600/10 hover:from-purple-500/30 hover:to-purple-600/20 text-purple-500',
     rose: 'from-rose-500/20 to-rose-600/10 hover:from-rose-500/30 hover:to-rose-600/20 text-rose-500'
   };
-  return;
+  
+  return (
+    <div
+      className={`bg-gradient-to-br ${colorClasses[color]} p-4 rounded-lg border border-border/30 cursor-pointer transition-all duration-200 hover:shadow-md`}
+      onClick={onClick}
+    >
+      <div className="font-semibold text-2xl">{value}</div>
+      <div className="text-sm text-gray-600">{label}</div>
+      {badgeText && (
+        <Badge variant="outline" className="mt-2 bg-background/60 border-none text-xs">
+          {badgeText}
+        </Badge>
+      )}
+    </div>
+  );
 };

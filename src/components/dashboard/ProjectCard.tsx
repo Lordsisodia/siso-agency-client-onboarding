@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Project } from './ProjectsOverview';
+import { Project } from '@/types/dashboard';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Edit, TrendingUp, TrendingDown, Check, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

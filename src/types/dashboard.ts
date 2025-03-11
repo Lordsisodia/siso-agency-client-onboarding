@@ -32,6 +32,21 @@ export interface Phase {
   progress: number;
 }
 
+export interface Project {
+  id: string;
+  title: string;
+  description: string;
+  deadline: string;
+  phases: Phase[];
+  tags: string[];
+  financials?: {
+    marketValue: number;
+    costSavings: number;
+    developmentCost: number;
+    roi: number;
+  };
+}
+
 export interface ProjectDoc {
   id: string;
   section: string;

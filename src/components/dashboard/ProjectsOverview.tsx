@@ -1,14 +1,30 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, ArrowRight } from 'lucide-react';
+import { PlusCircle, ArrowRight, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ProjectCard } from './ProjectCard';
-import { Project, Phase } from '@/types/dashboard';
+import { Phase } from '@/types/dashboard';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+
+// Defining the Project type to resolve the TS error
+export interface Project {
+  id: string;
+  title: string;
+  description: string;
+  deadline: string;
+  phases: Phase[];
+  tags: string[];
+  financials?: {
+    marketValue: number;
+    costSavings: number;
+    developmentCost: number;
+    roi: number;
+  };
+}
 
 interface ProjectsOverviewProps {
   projects?: Project[];
@@ -16,6 +32,7 @@ interface ProjectsOverviewProps {
 
 export const ProjectsOverview: React.FC<ProjectsOverviewProps> = ({ projects }) => {
   const navigate = useNavigate();
+  const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
   
   const sampleProjects: Project[] = [
     {
@@ -77,6 +94,14 @@ export const ProjectsOverview: React.FC<ProjectsOverviewProps> = ({ projects }) 
   ];
   
   const displayProjects = projects || sampleProjects;
+  
+  const handleNextProject = () => {
+    setCurrentProjectIndex((prev) => (prev + 1) % displayProjects.length);
+  };
+  
+  const handlePrevProject = () => {
+    setCurrentProjectIndex((prev) => (prev - 1 + displayProjects.length) % displayProjects.length);
+  };
 
   return (
     <Card className="border border-siso-border/40 bg-siso-bg-card/50 backdrop-blur-sm">
@@ -114,18 +139,43 @@ export const ProjectsOverview: React.FC<ProjectsOverviewProps> = ({ projects }) 
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 gap-4">
-                  {displayProjects.map((project, index) => (
-                    <motion.div
-                      key={project.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
+                <div className="flex justify-between items-center mb-2">
+                  <div className="text-sm text-muted-foreground">
+                    Project {currentProjectIndex + 1} of {displayProjects.length}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handlePrevProject}
+                      className="h-8 w-8"
+                      disabled={displayProjects.length <= 1}
                     >
-                      <ProjectCard project={project} />
-                    </motion.div>
-                  ))}
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleNextProject}
+                      className="h-8 w-8"
+                      disabled={displayProjects.length <= 1}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
+                
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={displayProjects[currentProjectIndex].id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ProjectCard project={displayProjects[currentProjectIndex]} />
+                  </motion.div>
+                </AnimatePresence>
                 
                 <div className="mt-4 flex justify-end">
                   <Button 
@@ -143,37 +193,111 @@ export const ProjectsOverview: React.FC<ProjectsOverviewProps> = ({ projects }) 
           </TabsContent>
 
           <TabsContent value="active">
-            <div className="grid grid-cols-1 gap-4">
-              {displayProjects
-                .filter(p => p.phases.some(phase => phase.status === 'in-progress'))
-                .map((project, index) => (
-                  <motion.div
-                    key={project.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <ProjectCard project={project} />
-                  </motion.div>
-                ))}
-            </div>
+            {displayProjects.filter(p => p.phases.some(phase => phase.status === 'in-progress')).length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No active projects to display.</p>
+              </div>
+            ) : (
+              <>
+                <div className="flex justify-between items-center mb-2">
+                  <div className="text-sm text-muted-foreground">
+                    Active Project
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handlePrevProject}
+                      className="h-8 w-8"
+                      disabled={displayProjects.filter(p => p.phases.some(phase => phase.status === 'in-progress')).length <= 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleNextProject}
+                      className="h-8 w-8"
+                      disabled={displayProjects.filter(p => p.phases.some(phase => phase.status === 'in-progress')).length <= 1}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                
+                <AnimatePresence mode="wait">
+                  {displayProjects
+                    .filter(p => p.phases.some(phase => phase.status === 'in-progress'))
+                    .map((project, index) => (
+                      index === currentProjectIndex % displayProjects.filter(p => p.phases.some(phase => phase.status === 'in-progress')).length && (
+                        <motion.div
+                          key={project.id}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <ProjectCard project={project} />
+                        </motion.div>
+                      )
+                    ))}
+                </AnimatePresence>
+              </>
+            )}
           </TabsContent>
 
           <TabsContent value="completed">
-            <div className="grid grid-cols-1 gap-4">
-              {displayProjects
-                .filter(p => p.phases.every(phase => phase.status === 'completed'))
-                .map((project, index) => (
-                  <motion.div
-                    key={project.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <ProjectCard project={project} />
-                  </motion.div>
-                ))}
-            </div>
+            {displayProjects.filter(p => p.phases.every(phase => phase.status === 'completed')).length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No completed projects to display.</p>
+              </div>
+            ) : (
+              <>
+                <div className="flex justify-between items-center mb-2">
+                  <div className="text-sm text-muted-foreground">
+                    Completed Project
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handlePrevProject}
+                      className="h-8 w-8"
+                      disabled={displayProjects.filter(p => p.phases.every(phase => phase.status === 'completed')).length <= 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleNextProject}
+                      className="h-8 w-8"
+                      disabled={displayProjects.filter(p => p.phases.every(phase => phase.status === 'completed')).length <= 1}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                
+                <AnimatePresence mode="wait">
+                  {displayProjects
+                    .filter(p => p.phases.every(phase => phase.status === 'completed'))
+                    .map((project, index) => (
+                      index === currentProjectIndex % displayProjects.filter(p => p.phases.every(phase => phase.status === 'completed')).length && (
+                        <motion.div
+                          key={project.id}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <ProjectCard project={project} />
+                        </motion.div>
+                      )
+                    ))}
+                </AnimatePresence>
+              </>
+            )}
           </TabsContent>
         </Tabs>
       </CardContent>
