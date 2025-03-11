@@ -1,14 +1,12 @@
 
 export interface NewsComment {
   id: string;
-  user?: {
+  user: {
     id: string;
     name: string;
     avatar?: string;
   };
+  text: string;
+  timestamp: Date;
   author?: string;
-  content?: string;
-  text?: string;
-  timestamp?: string;
-  created_at?: string;
 }

@@ -49,10 +49,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   } = usePlanAssistant ? planChat : regularChat;
   
   // Map messages to ensure they match our expected ChatMessage type
-  const messages = (rawMessages as any[]).map(msg => ({
+  const messages = (rawMessages || []).map(msg => ({
     ...msg,
     role: msg.role === "system" ? "system" : msg.role
-  })) as ChatMessage[];
+  })) as any[];
   
   // Use the custom hook for handling chat interface state
   const {
@@ -68,7 +68,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     welcomeMessage,
     systemPrompt,
     sendMessage: (message: string, formData?: Record<string, any>) => {
-      return hookSendMessage(message, formData);
+      return hookSendMessage(message, formData as any);
     }
   });
 
@@ -88,7 +88,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       />
       
       <ChatMessageList 
-        messages={messages}
+        messages={messages as any}
         isLoading={isLoading}
         error={error}
         onlineStatus={onlineStatus}
