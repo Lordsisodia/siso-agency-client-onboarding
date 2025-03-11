@@ -16,8 +16,8 @@ export default function Dashboard() {
   const { user, loading } = useAuthSession();
   const { userData } = useBasicUserData();
   const { stats, fetchStats } = useDashboardStats();
-  const { notifications } = useNotifications();
-  const { events } = useEvents();
+  const { notifications, handleMarkAsRead, handleViewAll } = useNotifications();
+  const { events, handleViewCalendar } = useEvents();
   const location = useLocation();
 
   useEffect(() => {

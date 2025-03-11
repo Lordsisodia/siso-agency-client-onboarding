@@ -8,7 +8,7 @@ import { Notification } from '@/types/dashboard';
 
 interface NotificationsPanelProps {
   notifications: Notification[];
-  onViewAll: () => void;
+  onViewAll?: () => void;
   onMarkAsRead?: (id: string) => void;
 }
 

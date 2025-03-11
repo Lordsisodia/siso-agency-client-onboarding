@@ -5,7 +5,7 @@ import {
   TrendingUp, 
   TrendingDown, 
   AlertTriangle, 
-  CheckCircle,
+  CheckCircle2,
   Clock
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -62,7 +62,7 @@ export const EnhancedQuickStatsPanel: React.FC<QuickStatsPanelProps> = ({
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "low":
-        return <CheckCircle className="h-4 w-4 text-emerald-500" />;
+        return <CheckCircle2 className="h-4 w-4 text-emerald-500" />;
       case "medium":
         return <AlertTriangle className="h-4 w-4 text-amber-500" />;
       case "high":
