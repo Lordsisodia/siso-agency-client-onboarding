@@ -8,7 +8,7 @@ import { ChatHeader } from './ChatHeader';
 import { ChatMessageList } from './ChatMessageList';
 import { ChatFooter } from './ChatFooter';
 
-// Define a common ChatMessage type that works with both hooks
+// Define a unified ChatMessage type
 export type ChatMessage = {
   role: "user" | "assistant" | "system";
   content: string;
@@ -48,11 +48,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     clearMessages 
   } = usePlanAssistant ? planChat : regularChat;
   
-  // Map messages to ensure they match our expected ChatMessage type
-  const messages = (rawMessages || []).map(msg => ({
-    ...msg,
-    role: msg.role === "system" ? "system" : msg.role
-  })) as ChatMessage[];
+  // Create a wrapper for the sendMessage function to handle different parameter types
+  const adaptedSendMessage = useCallback((message: string, formData?: Record<string, any>) => {
+    if (usePlanAssistant) {
+      return planChat.sendMessage(message, systemPrompt, formData);
+    } else {
+      return regularChat.sendMessage(message, systemPrompt);
+    }
+  }, [usePlanAssistant, planChat, regularChat, systemPrompt]);
   
   // Use the custom hook for handling chat interface state
   const {
@@ -61,15 +64,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     handleRetry,
     handleSendMessage
   } = useChatInterfaceState({
-    messages,
+    messages: rawMessages as ChatMessage[], // Cast the messages to our unified type
     isLoading,
     error,
     clearMessages,
     welcomeMessage,
     systemPrompt,
-    sendMessage: (message: string, formData?: Record<string, any>) => {
-      return hookSendMessage(message, formData);
-    }
+    sendMessage: adaptedSendMessage
   });
 
   return (
@@ -83,12 +84,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         title={title}
         onlineStatus={onlineStatus}
         isLoading={isLoading}
-        messagesCount={messages.length}
+        messagesCount={rawMessages?.length || 0}
         onClear={() => clearMessages()}
       />
       
       <ChatMessageList 
-        messages={messages}
+        messages={rawMessages as ChatMessage[]} // Cast the messages to our unified type
         isLoading={isLoading}
         error={error}
         onlineStatus={onlineStatus}
