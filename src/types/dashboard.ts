@@ -43,12 +43,7 @@ export interface ProjectDoc {
 export interface NetworkingResource {
   id: string;
   name: string;
-  description?: string;
   category: string;
-  platform?: string;
-  profile_image_url?: string;
-  member_count?: number;
-  join_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -67,7 +62,7 @@ export interface Assistant {
   updated_at: string;
 }
 
-// Leaderboard related interfaces
+// Leaderboard related interfaces - updated to match database schema
 export interface LeaderboardUser {
   id: string;
   user_id: string;
@@ -75,8 +70,7 @@ export interface LeaderboardUser {
   points: number;
   rank: string;
   sisoTokens: number;
-  avatarUrl: string;
-  bio: string;
+  avatarUrl: string | null;
   updated: string;
   contributionCount: number;
   referralCount: number;
@@ -99,11 +93,4 @@ export interface UseLeaderboardResult {
   totalSisoTokens: number;
   selectedUser: LeaderboardUser | null;
   setSelectedUser: (user: LeaderboardUser | null) => void;
-}
-
-export interface UseNetworkingResourcesResult {
-  resources: NetworkingResource[];
-  categories: CategoryStats[];
-  loading: boolean;
-  error: Error | null;
 }

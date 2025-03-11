@@ -171,15 +171,6 @@ export const ProfileSection = ({ collapsed, onOpenChange }: ProfileSectionProps)
             className="text-siso-text hover:text-siso-text-bold hover:bg-siso-text/5 cursor-pointer"
             onSelect={(e) => {
               e.preventDefault();
-              handleItemClick('/leaderboards');
-            }}
-          >
-            Leaderboard
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="text-siso-text hover:text-siso-text-bold hover:bg-siso-text/5 cursor-pointer"
-            onSelect={(e) => {
-              e.preventDefault();
               handleItemClick('/how-to-earn');
             }}
           >
