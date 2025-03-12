@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
@@ -186,18 +185,7 @@ const DocumentationQuestionPage = () => {
               </div>
             </div>
             
-            {/* Contact Support Card */}
-            <div className="bg-gradient-to-br from-siso-red/10 to-siso-orange/10 border border-siso-orange/20 rounded-xl p-6 mb-6">
-              <h3 className="flex items-center text-md font-medium text-siso-text-bold mb-2">
-                Need more help?
-              </h3>
-              <p className="text-sm text-siso-text/80 mb-3">
-                If you couldn't find what you're looking for, our support team is ready to assist.
-              </p>
-              <Button className="w-full bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90">
-                Contact Support
-              </Button>
-            </div>
+            {/* Contact Support Card removed as requested */}
           </div>
           
           {/* Sidebar (1/4 width on desktop) */}
