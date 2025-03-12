@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Share2 } from 'lucide-react';
 
 interface SocialMediaStepProps {
   socialLinks: {
@@ -20,14 +21,24 @@ export const SocialMediaStep: React.FC<SocialMediaStepProps> = ({
   onSocialLinkChange, 
   onNext 
 }) => {
+  const hasSocialLinks = Object.values(socialLinks).some(link => link.trim() !== '');
+
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-xl font-semibold mb-1">Any social media to share?</h3>
-        <p className="text-muted-foreground">Add your platforms or skip if you're not online yet</p>
+        <p className="text-muted-foreground">Your social profiles help us understand your online presence and audience</p>
       </div>
       
       <div className="space-y-4">
+        <div className="bg-muted/50 p-4 rounded-lg flex items-start gap-3">
+          <Share2 className="w-5 h-5 text-siso-orange mt-0.5" />
+          <div>
+            <p className="text-sm font-medium">Why this matters</p>
+            <p className="text-xs text-muted-foreground">We can analyze your social media presence to better understand your brand voice, audience engagement, and content strategy.</p>
+          </div>
+        </div>
+
         <div className="grid gap-4">
           <div>
             <Label htmlFor="twitter" className="text-base">Twitter/X</Label>
@@ -79,7 +90,7 @@ export const SocialMediaStep: React.FC<SocialMediaStepProps> = ({
             onClick={onNext}
             className="w-full"
           >
-            Next
+            {hasSocialLinks ? 'Next' : 'Skip Social Media'}
           </Button>
         </div>
       </div>

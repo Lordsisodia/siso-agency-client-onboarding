@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Building } from 'lucide-react';
 
 interface CompanyNameStepProps {
   companyName: string;
@@ -21,10 +22,18 @@ export const CompanyNameStep: React.FC<CompanyNameStepProps> = ({
     <div className="space-y-6">
       <div>
         <h3 className="text-xl font-semibold mb-1">What's your company called?</h3>
-        <p className="text-muted-foreground">Let's start with the basics to personalize your experience</p>
+        <p className="text-muted-foreground">This helps us personalize your project plan and recommendations</p>
       </div>
       
       <div className="space-y-4">
+        <div className="bg-muted/50 p-4 rounded-lg flex items-start gap-3">
+          <Building className="w-5 h-5 text-siso-orange mt-0.5" />
+          <div>
+            <p className="text-sm font-medium">Why this matters</p>
+            <p className="text-xs text-muted-foreground">Your company name helps us tailor our recommendations to your brand identity and business needs.</p>
+          </div>
+        </div>
+
         <Label htmlFor="companyName" className="text-base">Company Name</Label>
         <Input
           id="companyName"
