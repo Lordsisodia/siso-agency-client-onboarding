@@ -75,14 +75,7 @@ export const ModernArticleList = ({ articles, categoryId }: ModernArticleListPro
             </div>
           </div>
           
-          <div className="border-t border-siso-border/30 py-3 px-6 flex justify-between items-center bg-siso-bg-alt/5">
-            <div 
-              className="text-sm font-medium text-siso-orange/80 hover:text-siso-orange cursor-pointer flex items-center"
-              onClick={() => handleArticleClick(article.slug)}
-            >
-              View full article
-              <ArrowRight className="h-4 w-4 ml-1" />
-            </div>
+          <div className="border-t border-siso-border/30 py-3 px-6 flex justify-end items-center bg-siso-bg-alt/5">
             <span className="text-xs text-siso-text/50">
               Updated: {new Date(article.lastUpdated).toLocaleDateString()}
             </span>
