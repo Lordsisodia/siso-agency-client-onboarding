@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
@@ -35,11 +36,7 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
       targetAudience: ''
     },
     projectType: '',
-    timelineBudget: {
-      timeline: '',
-      budget: '',
-      goals: '',
-    },
+    goals: '',
     features: {} as Record<string, { selected: boolean; priority: string }>,
   });
   
@@ -332,14 +329,11 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
             {goals.map(goal => (
               <Button
                 key={goal}
-                variant={projectData.timelineBudget.goals === goal ? "default" : "outline"}
+                variant={projectData.goals === goal ? "default" : "outline"}
                 onClick={() => {
                   setProjectData(prev => ({
                     ...prev,
-                    timelineBudget: {
-                      ...prev.timelineBudget,
-                      goals: goal
-                    }
+                    goals: goal
                   }));
                 }}
                 className="h-auto py-3 text-left justify-start"
@@ -353,18 +347,15 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
             <Label htmlFor="customGoal" className="text-base">Or enter a custom goal:</Label>
             <Input
               id="customGoal"
-              value={projectData.timelineBudget.goals.startsWith("Custom: ") 
-                ? projectData.timelineBudget.goals.substring(8) 
-                : goals.includes(projectData.timelineBudget.goals) ? "" : projectData.timelineBudget.goals}
+              value={projectData.goals.startsWith("Custom: ") 
+                ? projectData.goals.substring(8) 
+                : goals.includes(projectData.goals) ? "" : projectData.goals}
               onChange={(e) => {
                 const value = e.target.value;
                 if (value.trim()) {
                   setProjectData(prev => ({
                     ...prev,
-                    timelineBudget: {
-                      ...prev.timelineBudget,
-                      goals: value.startsWith("Custom: ") ? value : `Custom: ${value}`
-                    }
+                    goals: value.startsWith("Custom: ") ? value : `Custom: ${value}`
                   }));
                 }
               }}
@@ -376,7 +367,7 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
           <div className="pt-4">
             <Button 
               onClick={handleNext}
-              disabled={!projectData.timelineBudget.goals}
+              disabled={!projectData.goals}
               className="w-full"
             >
               Next
@@ -429,7 +420,7 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
             )}
             
             <div>
-              <span className="font-medium">Main Goal:</span> {projectData.timelineBudget.goals || "Not specified"}
+              <span className="font-medium">Main Goal:</span> {projectData.goals || "Not specified"}
             </div>
           </div>
         </div>

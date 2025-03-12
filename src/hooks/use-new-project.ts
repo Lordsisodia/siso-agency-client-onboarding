@@ -60,7 +60,7 @@ export const useNewProject = () => {
         prompt += `
         Industry: ${projectData.businessContext.industry || 'Not specified'}
         Target Audience: ${projectData.businessContext.targetAudience || 'Not specified'}
-        Main Goal: ${projectData.timelineBudget.goals || 'Not specified'}
+        Main Goal: ${projectData.goals || 'Not specified'}
         `;
         
         if (projectData.projectType) {
