@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye } from 'lucide-react';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { Separator } from '@/components/ui/separator';
 
@@ -97,6 +97,14 @@ export default function Auth() {
       });
       setIsGoogleLoading(false);
     }
+  };
+
+  const handleContinueAsGuest = () => {
+    toast({
+      title: "Demo mode activated",
+      description: "You're now browsing in demo mode with sample data."
+    });
+    navigate('/projects');
   };
 
   return (
@@ -263,6 +271,20 @@ export default function Auth() {
                   </form>
                 </TabsContent>
               </Tabs>
+              
+              <div className="mt-6 pt-6 border-t border-siso-border/20">
+                <Button 
+                  variant="outline" 
+                  className="w-full flex items-center justify-center"
+                  onClick={handleContinueAsGuest}
+                >
+                  <Eye className="mr-2 h-4 w-4" />
+                  Continue in Demo Mode
+                </Button>
+                <p className="text-xs text-center mt-2 text-muted-foreground">
+                  Try the app with sample data without creating an account
+                </p>
+              </div>
             </CardContent>
             <CardFooter className="text-center text-sm text-muted-foreground">
               By continuing, you agree to our Terms of Service and Privacy Policy.

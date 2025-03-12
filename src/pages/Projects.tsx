@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Waves } from '@/components/ui/waves-background';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Plus, Edit, Trash2, MessageCircle, Calendar, Loader2, ExternalLink } from 'lucide-react';
+import { Plus, Edit, Trash2, MessageCircle, Calendar, Loader2, ExternalLink, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -14,6 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { format } from 'date-fns';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface Project {
   id: string;
@@ -29,9 +31,73 @@ interface Project {
   };
 }
 
+// Sample demo projects data
+const demoProjects: Project[] = [
+  {
+    id: "demo-1",
+    title: "E-Commerce Mobile App",
+    description: "A feature-rich mobile shopping application with personalized recommendations and secure payment processing.",
+    created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
+    updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+    status: "active",
+    details: {
+      business_context: {
+        industry: "Retail",
+        companyName: "ShopSmart",
+        scale: "Medium"
+      },
+      goals: "Create a seamless shopping experience for users with personalized product recommendations",
+      features: {
+        core: ["Product search", "Wishlist", "Secure checkout"],
+        extras: ["AR product preview", "Voice search"]
+      }
+    }
+  },
+  {
+    id: "demo-2",
+    title: "Task Management Dashboard",
+    description: "A comprehensive task management system with team collaboration features and progress analytics.",
+    created_at: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(), // 45 days ago
+    updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
+    status: "active",
+    details: {
+      business_context: {
+        industry: "Productivity",
+        companyName: "TaskFlow",
+        scale: "Small"
+      },
+      goals: "Increase team productivity and project transparency",
+      features: {
+        core: ["Task assignment", "Due dates", "Progress tracking"],
+        extras: ["Time tracking", "Automated reminders", "Integration with calendar"]
+      }
+    }
+  },
+  {
+    id: "demo-3",
+    title: "Health & Fitness Tracker",
+    description: "A mobile application for tracking fitness goals, nutrition, and overall wellness metrics.",
+    created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(), // 15 days ago
+    updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+    status: "active",
+    details: {
+      business_context: {
+        industry: "Health & Wellness",
+        companyName: "FitLife",
+        scale: "Startup"
+      },
+      goals: "Help users maintain healthy habits and achieve fitness goals",
+      features: {
+        core: ["Workout tracking", "Meal planning", "Progress visualization"],
+        extras: ["Social sharing", "Coach connection", "Wearable integration"]
+      }
+    }
+  }
+];
+
 export default function Projects() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isDemo } = useAuth();
   const { toast } = useToast();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,17 +108,34 @@ export default function Projects() {
   const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
 
   const handleCreateNewProject = () => {
+    if (isDemo) {
+      toast({
+        title: "Demo Mode",
+        description: "Sign in to create new projects.",
+        variant: "default"
+      });
+      navigate('/auth');
+      return;
+    }
     navigate('/plan-builder');
   };
 
   const fetchProjects = async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
+      
+      if (isDemo) {
+        // If in demo mode, use the demo projects data
+        setProjects(demoProjects);
+        setLoading(false);
+        return;
+      }
+      
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
       const { data: projectsData, error } = await supabase
         .from('projects')
         .select('*')
@@ -96,6 +179,15 @@ export default function Projects() {
   };
 
   const handleEditProject = (project: Project) => {
+    if (isDemo) {
+      toast({
+        title: "Demo Mode",
+        description: "Sign in to edit projects.",
+        variant: "default"
+      });
+      return;
+    }
+    
     setEditProject(project);
     setFormTitle(project.title);
     setFormDescription(project.description || "");
@@ -169,6 +261,14 @@ export default function Projects() {
   };
 
   const continuePlanning = (projectId: string) => {
+    if (isDemo) {
+      toast({
+        title: "Demo Mode",
+        description: "Sign in to continue planning.",
+        variant: "default"
+      });
+      return;
+    }
     navigate(`/new-project?projectId=${projectId}`);
   };
 
@@ -178,7 +278,7 @@ export default function Projects() {
 
   useEffect(() => {
     fetchProjects();
-  }, [user]);
+  }, [user, isDemo]);
 
   return (
     <MainLayout>
@@ -199,6 +299,30 @@ export default function Projects() {
         </div>
         
         <div className="relative z-10 container px-4 py-16 mx-auto">
+          {isDemo && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mb-6"
+            >
+              <Alert variant="warning" className="bg-amber-500/10 border-amber-500/50">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Demo Mode</AlertTitle>
+                <AlertDescription>
+                  You're viewing sample projects in demo mode. 
+                  <Button 
+                    variant="link" 
+                    className="p-0 h-auto font-semibold text-amber-500 hover:text-amber-600"
+                    onClick={() => navigate('/auth')}
+                  >
+                    Sign in
+                  </Button> to create and manage your own projects.
+                </AlertDescription>
+              </Alert>
+            </motion.div>
+          )}
+
           <div className="flex justify-between items-center mb-8">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -231,25 +355,6 @@ export default function Projects() {
             <div className="flex justify-center items-center py-20">
               <Loader2 className="h-8 w-8 animate-spin text-siso-orange" />
             </div>
-          ) : !user ? (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex flex-col items-center justify-center p-12 rounded-xl border border-siso-orange/20 bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-sm"
-            >
-              <div className="text-center max-w-md">
-                <h3 className="text-xl font-semibold mb-4 text-siso-text-bold">Sign In to View Projects</h3>
-                <p className="mb-6 text-siso-text/70">
-                  Please sign in to view and manage your projects. Creating an account allows you to save your work and access it from anywhere.
-                </p>
-                <Button 
-                  onClick={() => navigate('/auth')}
-                  className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90">
-                  Sign In
-                </Button>
-              </div>
-            </motion.div>
           ) : projects.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -330,7 +435,11 @@ export default function Projects() {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => setDeleteProjectId(project.id)}
+                          onClick={() => isDemo ? toast({
+                            title: "Demo Mode",
+                            description: "Sign in to delete projects.",
+                            variant: "default"
+                          }) : setDeleteProjectId(project.id)}
                           className="text-xs h-8 text-red-500 hover:text-red-600"
                         >
                           <Trash2 className="mr-1 h-3 w-3" />

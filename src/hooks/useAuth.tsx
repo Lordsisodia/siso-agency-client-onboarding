@@ -7,6 +7,7 @@ type AuthContextType = {
   session: Session | null;
   user: User | null;
   loading: boolean;
+  isDemo: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string) => Promise<{ error: any, data: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
@@ -19,6 +20,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isDemo, setIsDemo] = useState(false);
 
   useEffect(() => {
     const getSession = async () => {
@@ -28,6 +30,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       setSession(session);
       setUser(session?.user || null);
+      setIsDemo(!session);
       setLoading(false);
     };
 
@@ -37,6 +40,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       (_event, session) => {
         setSession(session);
         setUser(session?.user || null);
+        setIsDemo(!session);
         setLoading(false);
       }
     );
@@ -76,6 +80,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       session, 
       user, 
       loading, 
+      isDemo,
       signIn, 
       signUp, 
       signInWithGoogle, 
