@@ -1,3 +1,4 @@
+
 interface Project {
   id: string;
   title: string;
@@ -8,19 +9,19 @@ interface Project {
   user_id: string;
   details?: {
     business_context?: {
-      industry?: string;
-      companyName?: string;
-      scale?: string;
-      target_audience?: string[];
+      industry: string;
+      companyName: string;
+      scale: string;
+      target_audience: string[];
     };
     goals?: string;
     features?: {
-      core?: string[];
-      extras?: string[];
+      core: string[];
+      extras: string[];
     };
     timeline?: {
-      estimated_weeks?: number;
-      phases?: {
+      estimated_weeks: number;
+      phases: {
         name: string;
         duration: string;
         tasks: string[];

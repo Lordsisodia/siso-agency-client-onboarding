@@ -59,12 +59,12 @@ export const fetchProjectData = async (projectId: string, isDemo: boolean): Prom
     }
 
     parsedDetails = {
-      business_context: {
+      business_context: businessContext ? {
         industry: safeJsonProperty<string>(businessContext, 'industry', ''),
         companyName: safeJsonProperty<string>(businessContext, 'companyName', ''),
         scale: safeJsonProperty<string>(businessContext, 'scale', ''),
         target_audience: safeJsonArray<string>(businessContext.target_audience)
-      },
+      } : undefined,
       goals: detailsData.goals,
       features,
       timeline
