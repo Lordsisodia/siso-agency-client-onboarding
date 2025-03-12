@@ -40,7 +40,6 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
       industry: '',
       targetAudience: ''
     },
-    projectType: '',
     goals: '',
     features: {} as Record<string, { selected: boolean; priority: string }>,
   });
