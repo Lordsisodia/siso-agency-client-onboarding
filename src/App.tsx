@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
 import './App.css';
 
@@ -33,12 +33,25 @@ import DocumentationQuestionPage from '@/pages/support/DocumentationQuestionPage
 import ImportDocumentationPage from '@/pages/support/ImportDocumentationPage';
 
 import { Toaster } from '@/components/ui/toaster';
-import { useAuthSession } from '@/hooks/core';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+// Create a React Query client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      retry: 1,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    },
+  },
+});
 
 const AppRoutes = () => {
   const location = useLocation();
-  const { user } = useAuthSession();
 
   // Simple route logging
   useEffect(() => {
@@ -63,12 +76,12 @@ const AppRoutes = () => {
           {/* Default route - show dashboard for both logged in and not logged in users */}
           <Route path="/" element={<Dashboard />} />
           
-          {/* Core routes */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/plan-builder" element={<PlanBuilder />} />
-          <Route path="/plan-builder/:projectId" element={<PlanBuilder />} />
-          <Route path="/new-project" element={<NewProject />} />
+          {/* Core routes - protected */}
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+          <Route path="/plan-builder" element={<ProtectedRoute><PlanBuilder /></ProtectedRoute>} />
+          <Route path="/plan-builder/:projectId" element={<ProtectedRoute><PlanBuilder /></ProtectedRoute>} />
+          <Route path="/new-project" element={<ProtectedRoute><NewProject /></ProtectedRoute>} />
           
           {/* Support routes - properly nested */}
           <Route path="/support" element={<Support />} />
@@ -77,10 +90,10 @@ const AppRoutes = () => {
           <Route path="/support/:categoryId/:articleId" element={<DocumentationArticlePage />} />
           <Route path="/support/:categoryId/:articleId/:questionId" element={<DocumentationQuestionPage />} />
           
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/portfolio" element={<Portfolio />} />
-          <Route path="/tasks" element={<Tasks />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+          <Route path="/portfolio" element={<ProtectedRoute><Portfolio /></ProtectedRoute>} />
+          <Route path="/tasks" element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           
           {/* Redirects for renamed/moved pages */}
           <Route path="/pending-tasks" element={<Navigate to="/tasks" replace />} />
@@ -105,7 +118,11 @@ const AppRoutes = () => {
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <AppRoutes />
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </QueryClientProvider>
     </AuthProvider>
   );
 };

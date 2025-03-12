@@ -11,7 +11,7 @@ export * from "../use-plan-chat-assistant";
 export * from "../use-chat-assistant";
 
 // Export additional hooks
-export * from "../useAuthSession";
+export * from "../useAuth";
 export * from "../useBasicUserData";
 export * from "../useDashboardStats";
 export * from "../useNotifications";

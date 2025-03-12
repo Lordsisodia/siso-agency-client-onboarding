@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePlanChatAssistant } from '@/hooks/use-plan-chat-assistant';
 import { useToast } from '@/hooks/use-toast';
@@ -10,6 +9,11 @@ import { useAuth } from '@/hooks/useAuth';
 export const useNewProject = () => {
   // Create a new project ID for this session
   const [projectId] = useState<string>(() => {
+    // Try to recover existing project ID first
+    const existingId = sessionStorage.getItem('planProjectId');
+    if (existingId) return existingId;
+    
+    // Otherwise create a new one
     const newId = `plan-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     sessionStorage.setItem('planProjectId', newId);
     return newId;
@@ -27,6 +31,11 @@ export const useNewProject = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
+  // Log important state for debugging
+  useEffect(() => {
+    console.log('useNewProject hook - user:', !!user, 'projectId:', projectId);
+  }, [user, projectId]);
+
   const handleGoBack = () => {
     navigate('/plan-builder');
   };
@@ -35,6 +44,7 @@ export const useNewProject = () => {
   const saveProject = async (projectData: any) => {
     try {
       if (!user) {
+        console.log('User not authenticated, cannot save project');
         toast({
           title: "Authentication required",
           description: "Please sign in to save your project",
@@ -42,6 +52,8 @@ export const useNewProject = () => {
         });
         return null;
       }
+
+      console.log('Saving project for user:', user.id);
 
       // First, create the project record
       const { data: insertedProject, error: projectError } = await supabase
@@ -84,6 +96,7 @@ export const useNewProject = () => {
         return null;
       }
 
+      console.log('Project saved successfully with ID:', insertedProject.id);
       setSavedProjectId(insertedProject.id);
       return insertedProject.id;
     } catch (error) {

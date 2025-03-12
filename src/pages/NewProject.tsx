@@ -1,5 +1,5 @@
 
-import React, { Suspense, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Waves } from '@/components/ui/waves-background';
 import { WebsiteInputSheet } from '@/components/plan-builder/WebsiteInputSheet';
@@ -8,10 +8,12 @@ import { ProjectHeader } from '@/components/project/ProjectHeader';
 import { ProjectContent } from '@/components/project/ProjectContent';
 import { useNewProject } from '@/hooks/use-new-project';
 import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 export default function NewProject() {
   const [isReady, setIsReady] = useState(false);
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
   
   const {
     projectId,
@@ -23,7 +25,7 @@ export default function NewProject() {
     showChat,
     connectionError,
     messages,
-    isLoading,
+    isLoading: chatLoading,
     chatError,
     handleGoBack,
     startChatInterface,
@@ -31,20 +33,25 @@ export default function NewProject() {
     sendMessage
   } = useNewProject();
 
-  // Add effect to ensure auth is initialized before rendering content
+  // Effect to ensure auth is initialized and user is logged in
   useEffect(() => {
-    // Set a small delay to ensure auth state is properly initialized
-    const timer = setTimeout(() => {
-      setIsReady(true);
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, [user]);
+    // Wait for auth to initialize and then set ready state
+    if (!loading) {
+      console.log('NewProject: Auth loaded, user:', !!user);
+      
+      // Set a small delay to ensure transitions are smooth
+      const timer = setTimeout(() => {
+        setIsReady(true);
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [loading, user, navigate]);
 
-  console.log("NewProject render - showOnboarding:", showOnboarding, "showChat:", showChat, "isReady:", isReady, "user:", !!user);
+  console.log("NewProject render - showOnboarding:", showOnboarding, "showChat:", showChat, "isReady:", isReady, "user:", !!user, "loading:", loading);
 
   // Show loading state while components initialize
-  if (!isReady) {
+  if (loading || !isReady) {
     return (
       <MainLayout>
         <div className="container max-w-6xl mx-auto py-6 px-4 min-h-screen relative flex items-center justify-center">
@@ -86,7 +93,7 @@ export default function NewProject() {
           connectionError={connectionError}
           projectId={projectId}
           messages={messages}
-          isLoading={isLoading}
+          isLoading={chatLoading}
           onStartChat={startChatInterface}
           onSkipOnboarding={() => startChatInterface()}
         />
