@@ -4,7 +4,7 @@
  */
 export const saveQuestionFeedback = (
   questionId: string, 
-  feedbackType: 'helpful' | 'not-helpful',
+  feedbackType: 'helpful' | 'neutral' | 'not-helpful',
   userId?: string
 ): Promise<boolean> => {
   console.log(`Feedback saved: ${feedbackType} for question ${questionId} by user ${userId || 'anonymous'}`);

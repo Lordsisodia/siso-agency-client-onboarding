@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
-import { ChevronRight, ChevronLeft, ArrowLeft, Clock, Sparkles, ThumbsUp, ThumbsDown, HelpCircle } from 'lucide-react';
+import { ChevronRight, ChevronLeft, ArrowLeft, Clock, HelpCircle, Frown, Meh, Smile } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -25,7 +26,7 @@ const DocumentationQuestionPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuthSession();
-  const [feedbackGiven, setFeedbackGiven] = useState<'helpful' | 'not-helpful' | null>(null);
+  const [feedbackGiven, setFeedbackGiven] = useState<'helpful' | 'neutral' | 'not-helpful' | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [category, setCategory] = useState<DocCategory | null>(null);
   const [article, setArticle] = useState<DocArticle | null>(null);
@@ -62,7 +63,7 @@ const DocumentationQuestionPage = () => {
     loadData();
   }, [categoryId, articleId, questionId]);
   
-  const handleFeedback = async (type: 'helpful' | 'not-helpful') => {
+  const handleFeedback = async (type: 'helpful' | 'neutral' | 'not-helpful') => {
     if (feedbackGiven || !foundQuestion) return;
     
     setFeedbackGiven(type);
@@ -71,10 +72,8 @@ const DocumentationQuestionPage = () => {
       await saveQuestionFeedback(foundQuestion.id, type, user?.id);
       
       toast({
-        title: type === 'helpful' ? "Thank you for your feedback!" : "We're sorry this wasn't helpful",
-        description: type === 'helpful' 
-          ? "We're glad this answer was useful to you." 
-          : "We'll use your feedback to improve our documentation.",
+        title: "Thank you for your feedback!",
+        description: "We'll use this to improve our documentation.",
         duration: 3000,
       });
     } catch (error) {
@@ -184,53 +183,67 @@ const DocumentationQuestionPage = () => {
                 </div>
               </div>
               
-              <div className="bg-siso-bg-alt/30 border border-siso-border rounded-xl p-6 mb-8">
-                <h3 className="text-lg font-medium text-center mb-4">Did this answer your question?</h3>
-                <div className="flex justify-center gap-6">
-                  <Button
-                    onClick={() => handleFeedback('helpful')}
-                    variant={feedbackGiven === 'helpful' ? 'default' : 'outline'}
-                    className={cn(
-                      "flex flex-col items-center gap-2 py-6 px-8 transition-all duration-300",
-                      feedbackGiven === 'helpful' ? "bg-green-500/20 border-green-500/30 text-green-400" : "hover:bg-siso-bg-alt/50",
-                      feedbackGiven === 'not-helpful' && "opacity-50"
-                    )}
-                    disabled={feedbackGiven !== null}
-                  >
-                    <ThumbsUp className={cn(
-                      "h-8 w-8",
-                      feedbackGiven === 'helpful' ? "text-green-400" : "text-siso-text"
-                    )} />
-                    <span>Yes, it helped</span>
-                  </Button>
-                  
+              <div className="bg-siso-bg-alt/10 border border-siso-border/50 rounded-xl p-6 mb-8">
+                <h3 className="text-lg font-medium text-center mb-5">Did this answer your question?</h3>
+                <div className="flex justify-center gap-8">
                   <Button
                     onClick={() => handleFeedback('not-helpful')}
-                    variant={feedbackGiven === 'not-helpful' ? 'default' : 'outline'}
+                    variant="ghost"
+                    size="lg"
                     className={cn(
-                      "flex flex-col items-center gap-2 py-6 px-8 transition-all duration-300",
-                      feedbackGiven === 'not-helpful' ? "bg-red-500/20 border-red-500/30 text-red-400" : "hover:bg-siso-bg-alt/50",
-                      feedbackGiven === 'helpful' && "opacity-50"
+                      "flex flex-col items-center gap-2 py-4 transition-all duration-200 hover:bg-siso-bg-alt/30",
+                      feedbackGiven === 'not-helpful' ? "bg-siso-bg-alt/30 ring-1 ring-red-500/30" : "",
+                      feedbackGiven !== null && feedbackGiven !== 'not-helpful' ? "opacity-50" : ""
                     )}
                     disabled={feedbackGiven !== null}
                   >
-                    <ThumbsDown className={cn(
+                    <Frown className={cn(
                       "h-8 w-8",
                       feedbackGiven === 'not-helpful' ? "text-red-400" : "text-siso-text"
                     )} />
-                    <span>No, I need more info</span>
+                    <span className="text-sm">Not helpful</span>
+                  </Button>
+                  
+                  <Button
+                    onClick={() => handleFeedback('neutral')}
+                    variant="ghost"
+                    size="lg"
+                    className={cn(
+                      "flex flex-col items-center gap-2 py-4 transition-all duration-200 hover:bg-siso-bg-alt/30",
+                      feedbackGiven === 'neutral' ? "bg-siso-bg-alt/30 ring-1 ring-yellow-500/30" : "",
+                      feedbackGiven !== null && feedbackGiven !== 'neutral' ? "opacity-50" : ""
+                    )}
+                    disabled={feedbackGiven !== null}
+                  >
+                    <Meh className={cn(
+                      "h-8 w-8",
+                      feedbackGiven === 'neutral' ? "text-yellow-400" : "text-siso-text"
+                    )} />
+                    <span className="text-sm">Somewhat helpful</span>
+                  </Button>
+                  
+                  <Button
+                    onClick={() => handleFeedback('helpful')}
+                    variant="ghost"
+                    size="lg"
+                    className={cn(
+                      "flex flex-col items-center gap-2 py-4 transition-all duration-200 hover:bg-siso-bg-alt/30",
+                      feedbackGiven === 'helpful' ? "bg-siso-bg-alt/30 ring-1 ring-green-500/30" : "",
+                      feedbackGiven !== null && feedbackGiven !== 'helpful' ? "opacity-50" : ""
+                    )}
+                    disabled={feedbackGiven !== null}
+                  >
+                    <Smile className={cn(
+                      "h-8 w-8",
+                      feedbackGiven === 'helpful' ? "text-green-400" : "text-siso-text"
+                    )} />
+                    <span className="text-sm">Very helpful</span>
                   </Button>
                 </div>
                 
-                {feedbackGiven === 'not-helpful' && (
-                  <div className="mt-4 text-center text-siso-text/80">
-                    <p>We're sorry this wasn't helpful. Try checking the related questions or contacting support.</p>
-                  </div>
-                )}
-                
-                {feedbackGiven === 'helpful' && (
-                  <div className="mt-4 text-center text-siso-text/80">
-                    <p>Great! We're glad this was helpful.</p>
+                {feedbackGiven && (
+                  <div className="mt-5 text-center text-siso-text/80">
+                    <p>Thank you for your feedback!</p>
                   </div>
                 )}
               </div>
@@ -239,23 +252,26 @@ const DocumentationQuestionPage = () => {
             <div className="lg:col-span-1">
               <div className="bg-siso-bg-alt/20 border border-siso-border rounded-xl p-5 mb-5">
                 <h3 className="flex items-center text-md font-medium text-siso-text-bold mb-3">
-                  <Sparkles className="h-4 w-4 mr-2 text-siso-orange" />
+                  <HelpCircle className="h-4 w-4 mr-2 text-siso-orange" />
                   {foundSection.title || "In this article"}
                 </h3>
                 <Separator className="bg-siso-border/30 mb-3" />
-                <ul className="space-y-2">
+                <ul className="space-y-1">
                   {foundSection.questions.map(q => (
                     <li key={q.id}>
                       <Link 
                         to={`/support/${categoryId}/${articleId}/${q.slug}`}
                         className={cn(
-                          "block py-1.5 px-2 rounded-md transition-colors",
+                          "block py-2 px-3 rounded-md transition-colors flex justify-between items-center",
                           q.id === foundQuestion.id 
                             ? "bg-siso-orange/10 text-siso-orange font-medium"
-                            : "text-siso-text hover:bg-siso-bg-alt/50 hover:text-siso-text-bold"
+                            : "text-siso-text hover:bg-siso-bg-alt/40 hover:text-siso-text-bold"
                         )}
                       >
-                        {q.question}
+                        <span className="line-clamp-1">{q.question}</span>
+                        {q.id !== foundQuestion.id && (
+                          <ChevronRight className="h-4 w-4 flex-shrink-0 ml-2 text-siso-text/50" />
+                        )}
                       </Link>
                     </li>
                   ))}
@@ -266,17 +282,18 @@ const DocumentationQuestionPage = () => {
                 <div className="bg-siso-bg-alt/20 border border-siso-border rounded-xl p-5">
                   <h3 className="flex items-center text-md font-medium text-siso-text-bold mb-3">
                     <HelpCircle className="h-4 w-4 mr-2 text-siso-orange" />
-                    Related Questions
+                    Related Articles
                   </h3>
                   <Separator className="bg-siso-border/30 mb-3" />
-                  <ul className="space-y-2">
+                  <ul className="space-y-1">
                     {relatedQuestions.map(q => (
-                      <li key={q.id} className="group">
+                      <li key={q.id}>
                         <Link 
                           to={`/support/${categoryId}/${articleId}/${q.slug}`}
-                          className="block py-2 px-3 text-siso-text rounded-md group-hover:bg-siso-bg-alt/40 group-hover:text-siso-text-bold transition-colors"
+                          className="block py-2 px-3 text-siso-text rounded-md hover:bg-siso-bg-alt/40 hover:text-siso-text-bold transition-colors flex justify-between items-center"
                         >
-                          {q.question}
+                          <span className="line-clamp-1">{q.question}</span>
+                          <ChevronRight className="h-4 w-4 flex-shrink-0 ml-2 text-siso-text/50" />
                         </Link>
                       </li>
                     ))}
