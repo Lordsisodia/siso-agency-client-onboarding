@@ -36,7 +36,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { useAuthSession } from '@/hooks/core';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
-const App: React.FC = () => {
+const AppRoutes = () => {
   const location = useLocation();
   const { user } = useAuthSession();
 
@@ -99,6 +99,14 @@ const App: React.FC = () => {
 
       <Toaster />
     </SidebarProvider>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
 };
 

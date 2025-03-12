@@ -1,10 +1,24 @@
 
-import React from 'react';
+import React, { ErrorBoundary } from 'react';
 import { motion } from 'framer-motion';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { SmartProjectOnboarding } from '@/components/plan-builder/SmartProjectOnboarding';
 import { ChatMessage } from '@/types/chat';
 import { ConnectionErrorAlert } from './ConnectionErrorAlert';
+
+// Simple error fallback component
+const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetErrorBoundary: () => void }) => (
+  <div className="p-4 border border-red-500 bg-red-50 rounded-lg">
+    <h3 className="text-red-800 font-medium">Something went wrong:</h3>
+    <p className="text-red-600">{error.message}</p>
+    <button 
+      onClick={resetErrorBoundary}
+      className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+    >
+      Try again
+    </button>
+  </div>
+);
 
 interface ProjectContentProps {
   showOnboarding: boolean;
@@ -27,6 +41,8 @@ export const ProjectContent: React.FC<ProjectContentProps> = ({
   onStartChat,
   onSkipOnboarding
 }) => {
+  console.log("ProjectContent render - showOnboarding:", showOnboarding, "showChat:", showChat);
+  
   return (
     <div className="grid grid-cols-1 gap-4 relative z-10">
       <ConnectionErrorAlert errorMessage={connectionError} />
@@ -38,10 +54,12 @@ export const ProjectContent: React.FC<ProjectContentProps> = ({
           transition={{ duration: 0.5 }}
           className="z-10 relative"
         >
-          <SmartProjectOnboarding 
-            onComplete={onStartChat} 
-            onSkip={onSkipOnboarding} 
-          />
+          <ErrorBoundary FallbackComponent={ErrorFallback}>
+            <SmartProjectOnboarding 
+              onComplete={onStartChat} 
+              onSkip={onSkipOnboarding} 
+            />
+          </ErrorBoundary>
         </motion.div>
       )}
       
