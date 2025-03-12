@@ -42,19 +42,15 @@ export function useDashboardStats() {
 
       if (tasksError) throw tasksError;
 
-      // Fetch upcoming events (next 7 days)
-      const nextWeek = new Date();
-      nextWeek.setDate(nextWeek.getDate() + 7);
-      
+      // Fetch upcoming events count (next 7 days)
       const { data: eventsData, error: eventsError } = await supabase
         .from('events')
         .select('*')
         .eq('user_id', user.id)
-        .gte('date', new Date().toISOString())
-        .lte('date', nextWeek.toISOString());
-
-      // If the events table doesn't exist yet, we'll just use 0
-      const eventsCount = eventsError ? 0 : eventsData?.length || 0;
+        .gte('date', 'Today')
+        .lte('date', 'Tomorrow');
+        
+      if (eventsError) throw eventsError;
 
       // Fetch login streak
       const { data: streakData, error: streakError } = await supabase
@@ -63,14 +59,16 @@ export function useDashboardStats() {
         .eq('user_id', user.id)
         .single();
 
-      // Default to 1 for the streak if not found or error
-      const loginStreak = streakError ? 1 : streakData?.current_streak || 1;
+      if (streakError && streakError.code !== 'PGRST116') {
+        // PGRST116 is "no rows returned" error, which is expected if user has no streak
+        throw streakError;
+      }
 
       setStats({
         activeProjects: projectsCount || 0,
         pendingTasks: tasksCount || 0,
-        upcomingEvents: eventsCount,
-        loginStreak: loginStreak
+        upcomingEvents: eventsData?.length || 0,
+        loginStreak: streakData?.current_streak || 1
       });
       
       setIsLoading(false);
@@ -124,22 +122,29 @@ export function useDashboardStats() {
         () => fetchStats()
       )
       .subscribe();
+      
+    // Subscribe to changes in the events table
+    const eventsChannel = supabase
+      .channel('dashboard-events-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'events',
+          filter: `user_id=eq.${user.id}`
+        },
+        () => fetchStats()
+      )
+      .subscribe();
 
     // Return cleanup function to remove channels when component unmounts
     return () => {
       supabase.removeChannel(projectsChannel);
       supabase.removeChannel(tasksChannel);
+      supabase.removeChannel(eventsChannel);
     };
   }, [user, fetchStats]);
-
-  // Auto-refresh stats every 5 minutes as a fallback
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      fetchStats();
-    }, 5 * 60 * 1000);
-    
-    return () => clearInterval(intervalId);
-  }, [fetchStats]);
 
   return { stats, fetchStats, isLoading, error };
 }

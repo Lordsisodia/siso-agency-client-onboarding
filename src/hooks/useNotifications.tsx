@@ -45,7 +45,7 @@ export function useNotifications() {
     setIsLoading(true);
     
     try {
-      // Try to fetch real notifications from Supabase
+      // Fetch real notifications from Supabase
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
@@ -82,40 +82,17 @@ export function useNotifications() {
             title: notification.title,
             message: notification.message,
             time: timeString,
-            type: notification.type || 'info',
-            read: notification.read || false
+            type: notification.type,
+            read: notification.read
           };
         });
         
         setNotifications(formattedNotifications);
       } else {
-        // Fallback to demo data if no notifications found
-        setNotifications([
-          {
-            id: '1',
-            title: 'Project Update',
-            message: 'Your project "E-Commerce App" has been updated.',
-            time: '2 hours ago',
-            type: 'info',
-            read: false
-          },
-          {
-            id: '2',
-            title: 'Task Deadline',
-            message: 'The "User Authentication" task is due tomorrow.',
-            time: '5 hours ago',
-            type: 'warning',
-            read: false
-          },
-          {
-            id: '3',
-            title: 'New Comment',
-            message: 'John added a comment to your task.',
-            time: 'Yesterday',
-            type: 'info',
-            read: true
-          }
-        ]);
+        // If no notifications found, insert demo data for a better user experience
+        await createDemoNotifications(user.id);
+        // Then fetch again
+        await fetchNotifications();
       }
     } catch (err) {
       console.error('Error fetching notifications:', err);
@@ -151,6 +128,39 @@ export function useNotifications() {
       setIsLoading(false);
     }
   }, [user]);
+
+  // Helper function to create demo notifications for new users
+  const createDemoNotifications = async (userId: string) => {
+    try {
+      const demoNotifications = [
+        {
+          user_id: userId,
+          title: 'Welcome to Dashboard',
+          message: 'Thanks for joining! Explore your new dashboard.',
+          type: 'info',
+          read: false
+        },
+        {
+          user_id: userId,
+          title: 'Complete Your Profile',
+          message: 'Add more details to your profile to get personalized recommendations.',
+          type: 'alert',
+          read: false
+        },
+        {
+          user_id: userId,
+          title: 'Try Creating a Project',
+          message: 'Start tracking your work by creating your first project.',
+          type: 'success',
+          read: false
+        }
+      ];
+
+      await supabase.from('notifications').insert(demoNotifications);
+    } catch (error) {
+      console.error('Error creating demo notifications:', error);
+    }
+  };
 
   useEffect(() => {
     fetchNotifications();

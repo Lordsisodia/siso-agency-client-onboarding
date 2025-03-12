@@ -45,7 +45,7 @@ export function useEvents() {
     setError(null);
 
     try {
-      // Try to fetch real events from Supabase
+      // Fetch real events from Supabase
       const { data, error } = await supabase
         .from('events')
         .select('*')
@@ -57,67 +57,20 @@ export function useEvents() {
 
       if (data && data.length > 0) {
         // Transform the data to match the Event interface
-        const formattedEvents: Event[] = data.map(event => {
-          const eventDate = new Date(event.date);
-          const today = new Date();
-          const tomorrow = new Date();
-          tomorrow.setDate(today.getDate() + 1);
-          
-          // Format date as "Today", "Tomorrow", or full date
-          let formattedDate: string;
-          if (eventDate.toDateString() === today.toDateString()) {
-            formattedDate = 'Today';
-          } else if (eventDate.toDateString() === tomorrow.toDateString()) {
-            formattedDate = 'Tomorrow';
-          } else {
-            formattedDate = eventDate.toLocaleDateString('en-US', { 
-              weekday: 'short', 
-              month: 'short', 
-              day: 'numeric' 
-            });
-          }
-          
-          // Extract time portion if available
-          const time = event.time || new Date(event.date).toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-
-          return {
-            id: event.id,
-            title: event.title,
-            date: formattedDate,
-            time,
-            type: event.type || 'reminder'
-          };
-        });
+        const formattedEvents: Event[] = data.map(event => ({
+          id: event.id,
+          title: event.title,
+          date: event.date,
+          time: event.time,
+          type: event.type
+        }));
         
         setEvents(formattedEvents);
       } else {
-        // Fallback to demo data if no events found
-        setEvents([
-          {
-            id: '1',
-            title: 'Client Meeting',
-            date: 'Today',
-            time: '2:00 PM',
-            type: 'meeting'
-          },
-          {
-            id: '2',
-            title: 'Project Deadline',
-            date: 'Tomorrow',
-            time: '11:59 PM',
-            type: 'deadline'
-          },
-          {
-            id: '3',
-            title: 'Team Standup',
-            date: 'Wed, Sep 28',
-            time: '10:00 AM',
-            type: 'meeting'
-          }
-        ]);
+        // If no events found, insert demo events
+        await createDemoEvents(user.id);
+        // Then fetch again
+        await fetchEvents();
       }
     } catch (err) {
       console.error('Error fetching events:', err);
@@ -152,6 +105,42 @@ export function useEvents() {
     }
   }, [user]);
 
+  // Helper function to create demo events for new users
+  const createDemoEvents = async (userId: string) => {
+    try {
+      const demoEvents = [
+        {
+          user_id: userId,
+          title: 'Client Meeting',
+          description: 'Discuss project requirements with client',
+          date: 'Today',
+          time: '2:00 PM',
+          type: 'meeting'
+        },
+        {
+          user_id: userId,
+          title: 'Project Deadline',
+          description: 'Submit project proposal',
+          date: 'Tomorrow',
+          time: '11:59 PM',
+          type: 'deadline'
+        },
+        {
+          user_id: userId,
+          title: 'Team Standup',
+          description: 'Weekly team sync meeting',
+          date: 'Wed, Sep 28',
+          time: '10:00 AM',
+          type: 'meeting'
+        }
+      ];
+
+      await supabase.from('events').insert(demoEvents);
+    } catch (error) {
+      console.error('Error creating demo events:', error);
+    }
+  };
+
   useEffect(() => {
     fetchEvents();
     
@@ -177,7 +166,7 @@ export function useEvents() {
     }
   }, [user, fetchEvents]);
   
-  // Mock implementation of view calendar
+  // Navigate to calendar page
   const handleViewCalendar = () => {
     navigate('/calendar');
   };
