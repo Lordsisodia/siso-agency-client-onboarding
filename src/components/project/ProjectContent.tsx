@@ -28,7 +28,7 @@ export const ProjectContent: React.FC<ProjectContentProps> = ({
   onSkipOnboarding
 }) => {
   return (
-    <div className="grid grid-cols-1 gap-4 relative">
+    <div className="grid grid-cols-1 gap-4 relative z-10">
       <ConnectionErrorAlert errorMessage={connectionError} />
       
       {showOnboarding && (
@@ -36,7 +36,6 @@ export const ProjectContent: React.FC<ProjectContentProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-card/90 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg"
         >
           <SmartProjectOnboarding 
             onComplete={onStartChat} 
