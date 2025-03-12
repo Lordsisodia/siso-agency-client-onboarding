@@ -16,6 +16,7 @@ import { fetchProjectData } from '@/components/project-details/utils';
 import { Project } from '@/components/project-details/types';
 import { ProjectDetailsDashboard } from '@/components/projects/ProjectDetailsDashboard';
 import { ProjectTimelineView } from '@/components/projects/ProjectTimelineView';
+import { ProjectResources } from '@/components/project-details/ProjectResources';
 import { convertToTaskProject } from '@/utils/projectUtils';
 
 export default function ProjectDetails() {

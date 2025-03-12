@@ -1,10 +1,11 @@
 
 import { PhaseInfo } from '@/types/task';
 import { ClipboardCheck, FileSearch, Lightbulb, Code, CheckCircle } from 'lucide-react';
+import React from 'react';
 
-// Create icon components factory functions instead of direct JSX
+// Create proper icon components instead of factory functions
 const createIconElement = (IconComponent: any) => {
-  return () => IconComponent({ className: "w-4 h-4" });
+  return React.createElement(IconComponent, { className: "w-4 h-4" });
 };
 
 export const phaseConfig: Record<string, PhaseInfo> = {
