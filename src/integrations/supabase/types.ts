@@ -1651,6 +1651,44 @@ export type Database = {
         }
         Relationships: []
       }
+      project_details: {
+        Row: {
+          business_context: Json | null
+          created_at: string
+          features: Json | null
+          goals: string | null
+          id: string
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          business_context?: Json | null
+          created_at?: string
+          features?: Json | null
+          goals?: string | null
+          id?: string
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          business_context?: Json | null
+          created_at?: string
+          features?: Json | null
+          goals?: string | null
+          id?: string
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_details_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_documentation: {
         Row: {
           content: string
@@ -1766,6 +1804,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      projects: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          status: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          status?: string | null
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          status?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       resource_categories: {
         Row: {

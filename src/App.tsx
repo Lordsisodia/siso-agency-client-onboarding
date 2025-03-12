@@ -1,5 +1,8 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './hooks/useAuth';
+import './App.css';
 
-import { Routes, Route, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -32,7 +35,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { useAuthSession } from '@/hooks/core';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
-function App() {
+const App: React.FC = () => {
   const location = useLocation();
   const { user } = useAuthSession();
 
@@ -96,6 +99,6 @@ function App() {
       <Toaster />
     </SidebarProvider>
   );
-}
+};
 
 export default App;

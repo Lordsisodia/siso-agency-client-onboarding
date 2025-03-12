@@ -1,9 +1,11 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePlanChatAssistant } from '@/hooks/use-plan-chat-assistant';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { WebsiteInputData } from '@/components/plan-builder/WebsiteInputSheet';
+import { useAuth } from '@/hooks/useAuth';
 
 export const useNewProject = () => {
   // Create a new project ID for this session
@@ -18,13 +20,81 @@ export const useNewProject = () => {
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [showChat, setShowChat] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
   
   const { sendMessage, messages, isLoading, error: chatError } = usePlanChatAssistant(projectId);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleGoBack = () => {
     navigate('/plan-builder');
+  };
+
+  // Save project data to the database
+  const saveProject = async (projectData: any) => {
+    try {
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to save your project",
+          variant: "destructive"
+        });
+        return null;
+      }
+
+      // First, create the project record
+      const { data: projectData, error: projectError } = await supabase
+        .from('projects')
+        .insert({
+          user_id: user.id,
+          title: projectData.businessContext.companyName || 'New Project',
+          description: projectData.goals || 'Project created via onboarding wizard'
+        })
+        .select('id')
+        .single();
+
+      if (projectError) {
+        console.error("Error saving project:", projectError);
+        toast({
+          title: "Error",
+          description: "There was a problem saving your project. Please try again.",
+          variant: "destructive"
+        });
+        return null;
+      }
+
+      // Then, save the project details
+      const { error: detailsError } = await supabase
+        .from('project_details')
+        .insert({
+          project_id: projectData.id,
+          business_context: projectData.businessContext || {},
+          goals: projectData.goals || '',
+          features: projectData.features || {}
+        });
+
+      if (detailsError) {
+        console.error("Error saving project details:", detailsError);
+        toast({
+          title: "Error",
+          description: "There was a problem saving your project details. Please try again.",
+          variant: "destructive"
+        });
+        return null;
+      }
+
+      setSavedProjectId(projectData.id);
+      return projectData.id;
+    } catch (error) {
+      console.error("Error in saveProject:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while saving your project.",
+        variant: "destructive"
+      });
+      return null;
+    }
   };
 
   // If we choose to skip onboarding or complete it, this function will be called
@@ -35,6 +105,9 @@ export const useNewProject = () => {
       setShowChat(true);
       
       if (projectData) {
+        // Save the project data to Supabase
+        await saveProject(projectData);
+        
         // Prepare a message based on the collected data
         let prompt = `
         I've completed the onboarding process and provided the following information:
@@ -137,9 +210,27 @@ export const useNewProject = () => {
         }
       }
       
+      // Prepare project data to save later
+      const projectData = {
+        businessContext: {
+          companyName: data.companyName || '',
+          website: data.websiteUrl || '',
+          socialLinks: data.socialLinks || {},
+          industry: '', // Will be updated later through chat
+          targetAudience: data.targetAudience || ''
+        },
+        goals: data.projectGoals || '',
+        features: {}
+      };
+      
       // Start chat with the constructed prompt
       setShowOnboarding(false);
       setShowChat(true);
+      
+      // Save to database
+      if (user) {
+        await saveProject(projectData);
+      }
       
       // Construct a prompt based on the user's input
       const prompt = `
@@ -173,6 +264,7 @@ export const useNewProject = () => {
 
   return {
     projectId,
+    savedProjectId,
     isWebsiteInputOpen,
     setIsWebsiteInputOpen,
     isManualInputOpen,
@@ -186,6 +278,7 @@ export const useNewProject = () => {
     handleGoBack,
     startChatInterface,
     handleWebsiteSubmit,
-    sendMessage
+    sendMessage,
+    saveProject
   };
 };

@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { BackgroundSparkles } from './components/BackgroundSparkles';
 import { OnboardingStyles } from './components/OnboardingStyles';
 import { saveQuestionFeedback } from '@/services/documentation-feedback.service';
+import { useAuth } from '@/hooks/useAuth';
 
 // Import step components
 import { CompanyNameStep } from './steps/CompanyNameStep';
@@ -26,6 +27,7 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
   
   const [projectData, setProjectData] = useState({
     businessContext: {
@@ -115,6 +117,13 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
         }
       };
       
+      if (!user) {
+        toast({
+          title: "Not logged in",
+          description: "Your project data will be saved temporarily, but you'll need to log in to access it later.",
+        });
+      }
+      
       onComplete(finalData);
       
       toast({
@@ -131,7 +140,7 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
     } finally {
       setLoading(false);
     }
-  }, [projectData, onComplete, toast]);
+  }, [projectData, onComplete, toast, user]);
   
   const renderStepContent = () => {
     switch (step) {
