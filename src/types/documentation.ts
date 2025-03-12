@@ -33,5 +33,6 @@ export interface DocCategory {
   description: string;
   icon: LucideIcon; // Changed from ReactNode to LucideIcon
   articleCount: number;
+  questionCount: number; // Added questionCount property
   articles: DocArticle[];
 }

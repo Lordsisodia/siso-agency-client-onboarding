@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { AiChatSection } from '@/components/support/AiChatSection';
@@ -136,30 +135,13 @@ const Support = () => {
                             <p className="text-sm text-siso-text/70 mb-3 line-clamp-2">{category.description}</p>
                             <div className="flex items-center text-xs text-siso-text/50">
                               <Search className="h-3 w-3 mr-1" />
-                              {category.articleCount} articles
+                              {category.questionCount} questions
                             </div>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
                   ))}
-                </div>
-              )}
-              
-              {!isLoading && categories.length === 0 && (
-                <div className="text-center py-16 bg-siso-bg-alt/20 rounded-lg border border-siso-border">
-                  <Search className="h-10 w-10 text-siso-text/30 mx-auto mb-4" />
-                  {searchQuery ? (
-                    <>
-                      <p className="text-siso-text font-medium">No results found for "{searchQuery}"</p>
-                      <p className="text-siso-text/60 mt-2">Try adjusting your search terms or browse our categories</p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-siso-text font-medium">No documentation found</p>
-                      <p className="text-siso-text/60 mt-2">Please check back later for documentation updates</p>
-                    </>
-                  )}
                 </div>
               )}
             </TabsContent>

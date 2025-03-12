@@ -9,6 +9,15 @@ import { supportArticles } from './support';
 import { billingArticles } from './billing';
 import { collaborationArticles } from './collaboration';
 
+// Helper function to count total questions in a category
+const countQuestions = (articles) => {
+  return articles.reduce((total, article) => {
+    return total + article.sections.reduce((sectionTotal, section) => {
+      return sectionTotal + section.questions.length;
+    }, 0);
+  }, 0);
+};
+
 export const documentationCategories: DocCategory[] = [
   {
     id: 'getting-started',
@@ -17,6 +26,7 @@ export const documentationCategories: DocCategory[] = [
     description: 'Learn the basics of our platform and how to set up your account',
     icon: Book,
     articleCount: gettingStartedArticles.length,
+    questionCount: countQuestions(gettingStartedArticles),
     articles: gettingStartedArticles
   },
   {
@@ -26,6 +36,7 @@ export const documentationCategories: DocCategory[] = [
     description: 'Manage your account settings, profile, and security preferences',
     icon: UserCircle,
     articleCount: accountProfileArticles.length,
+    questionCount: countQuestions(accountProfileArticles),
     articles: accountProfileArticles
   },
   {
@@ -35,6 +46,7 @@ export const documentationCategories: DocCategory[] = [
     description: 'Create, manage, and collaborate on projects',
     icon: Globe,
     articleCount: projectsArticles.length,
+    questionCount: countQuestions(projectsArticles),
     articles: projectsArticles
   },
   {
@@ -44,6 +56,7 @@ export const documentationCategories: DocCategory[] = [
     description: 'Discover the powerful features and capabilities of our platform',
     icon: Settings,
     articleCount: featuresArticles.length,
+    questionCount: countQuestions(featuresArticles),
     articles: featuresArticles
   },
   {
@@ -53,6 +66,7 @@ export const documentationCategories: DocCategory[] = [
     description: 'Find solutions to common issues and get help when you need it',
     icon: BadgeHelp,
     articleCount: supportArticles.length,
+    questionCount: countQuestions(supportArticles),
     articles: supportArticles
   },
   {
@@ -62,6 +76,7 @@ export const documentationCategories: DocCategory[] = [
     description: 'Manage your billing information, subscription plans, and payments',
     icon: ShieldAlert,
     articleCount: billingArticles.length,
+    questionCount: countQuestions(billingArticles),
     articles: billingArticles
   },
   {
@@ -71,6 +86,7 @@ export const documentationCategories: DocCategory[] = [
     description: 'Work together with team members and manage collaborative projects',
     icon: MessageSquare,
     articleCount: collaborationArticles.length,
+    questionCount: countQuestions(collaborationArticles),
     articles: collaborationArticles
   }
 ];
