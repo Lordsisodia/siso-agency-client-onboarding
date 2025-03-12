@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { AiChatSection } from '@/components/support/AiChatSection';
@@ -29,12 +30,16 @@ const Support = () => {
           console.log("Searching documentation with query:", searchQuery);
           const results = await searchDocumentation(searchQuery);
           console.log("Search results:", results);
-          setCategories(results);
+          // Filter out the Support category from search results
+          const filteredResults = results.filter(category => category.id !== 'support');
+          setCategories(filteredResults);
         } else {
           console.log("Fetching all documentation categories");
           const allCategories = await fetchCategories();
           console.log("Fetched categories:", allCategories);
-          setCategories(allCategories);
+          // Filter out the Support category
+          const filteredCategories = allCategories.filter(category => category.id !== 'support');
+          setCategories(filteredCategories);
         }
       } catch (error) {
         console.error('Error loading documentation categories:', error);
