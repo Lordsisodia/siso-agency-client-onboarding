@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
@@ -12,7 +13,7 @@ import { WebsiteInputSheet, WebsiteInputData } from '@/components/plan-builder/W
 import { supabase } from '@/integrations/supabase/client';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';
-import { ProjectOnboarding } from '@/components/plan-builder/ProjectOnboarding';
+import { ChatbotOnboarding, OnboardingData } from '@/components/plan-builder/ChatbotOnboarding';
 
 export default function NewProject() {
   const [projectId, setProjectId] = useState<string>(() => {
@@ -41,39 +42,31 @@ export default function NewProject() {
       
       if (projectData) {
         // Prepare a message based on the collected data
-        const selectedFeatures = Object.entries(projectData.features || {})
-          .filter(([_, value]: [string, any]) => value.selected)
-          .map(([id, value]: [string, any]) => {
-            const feature = id;
-            return `${feature} (${value.priority})`;
-          }).join(', ');
-        
         const prompt = `
         I've completed the onboarding process and provided the following information:
         
-        Project Type: ${projectData.projectType}
-        Project Scale: ${projectData.projectScale}
+        Company Name: ${projectData.companyName || 'Not specified'}
+        Website URL: ${projectData.websiteUrl || 'Not specified'}
         
-        Company Name: ${projectData.businessContext.companyName || 'Not specified'}
-        Industry: ${projectData.businessContext.industry || 'Not specified'}
-        Target Audience: ${projectData.businessContext.targetAudience || 'Not specified'}
-        Team Size: ${projectData.businessContext.teamSize || 'Not specified'}
+        Social Links:
+        ${Object.entries(projectData.socialLinks || {})
+          .filter(([_, value]) => value)
+          .map(([platform, value]) => `- ${platform}: ${value}`)
+          .join('\n') || 'None provided'}
         
-        Timeline: ${projectData.timelineBudget.timeline}
-        Budget: ${projectData.timelineBudget.budget}
-        Goals: ${projectData.timelineBudget.goals || 'Not specified'}
-        
-        Selected Features: ${selectedFeatures || 'None selected'}
+        Industry: ${projectData.industry || 'Not specified'}
+        Target Audience: ${projectData.targetAudience?.join(', ') || 'Not specified'}
+        Main Goal: ${projectData.mainGoal || 'Not specified'}
         
         Based on this information, could you please create a project plan that includes:
-        1. Project scope and objectives
-        2. Technical requirements
+        1. Project scope and objectives aligned with my main goal
+        2. Technical requirements 
         3. Timeline with key milestones
-        4. Budget breakdown
+        4. Budget considerations
         5. Suggested team structure
         6. Recommended approach
         
-        Please help me refine this plan and provide any additional advice.`;
+        Please help me refine this plan and provide any additional advice for my ${projectData.industry || ''} project.`;
         
         await sendMessage(prompt);
       } else {
@@ -124,46 +117,54 @@ export default function NewProject() {
             - Description: ${websiteData.aiAnalysis.companyDescription || "Not detected"}
             
             Based on this analysis, I'll help you create an effective project plan.`;
+          }
+        } catch (err) {
+          console.error("Error analyzing website:", err);
+          analysisContent = `I tried to analyze your website (${data.websiteUrl}) but encountered an issue. Let's proceed with the information you've provided.`;
         }
-      } catch (err) {
-        console.error("Error analyzing website:", err);
-        analysisContent = `I tried to analyze your website (${data.websiteUrl}) but encountered an issue. Let's proceed with the information you've provided.`;
       }
+      
+      // Start chat with the constructed prompt
+      setShowOnboarding(false);
+      setShowChat(true);
+      
+      // Construct a prompt based on the user's input
+      const prompt = `
+      The user has provided the following information:
+      ${data.companyName ? `- Company Name: ${data.companyName}` : ''}
+      ${data.websiteUrl ? `- Website: ${data.websiteUrl}` : ''}
+      ${data.socialLinks.facebook ? `- Facebook: ${data.socialLinks.facebook}` : ''}
+      ${data.socialLinks.twitter ? `- Twitter: ${data.socialLinks.twitter}` : ''}
+      ${data.socialLinks.linkedin ? `- LinkedIn: ${data.socialLinks.linkedin}` : ''}
+      ${data.socialLinks.instagram ? `- Instagram: ${data.socialLinks.instagram}` : ''}
+      ${data.projectGoals ? `- Project Goals: ${data.projectGoals}` : ''}
+      ${data.targetAudience ? `- Target Audience: ${data.targetAudience}` : ''}
+      
+      ${analysisContent ? analysisContent : ''}
+      
+      Based on this information, please start helping them plan their project by asking relevant questions to gather any missing details.`;
+      
+      // Send the constructed prompt to the AI
+      await sendMessage(prompt);
+      
+      setIsWebsiteInputOpen(false);
+    } catch (error) {
+      console.error("Error processing website submission:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem processing your website information. Please try again.",
+        variant: "destructive"
+      });
     }
-    
-    // Start chat with the constructed prompt
-    setShowOnboarding(false);
-    setShowChat(true);
-    
-    // Construct a prompt based on the user's input
-    const prompt = `
-    The user has provided the following information:
-    ${data.companyName ? `- Company Name: ${data.companyName}` : ''}
-    ${data.websiteUrl ? `- Website: ${data.websiteUrl}` : ''}
-    ${data.socialLinks.facebook ? `- Facebook: ${data.socialLinks.facebook}` : ''}
-    ${data.socialLinks.twitter ? `- Twitter: ${data.socialLinks.twitter}` : ''}
-    ${data.socialLinks.linkedin ? `- LinkedIn: ${data.socialLinks.linkedin}` : ''}
-    ${data.socialLinks.instagram ? `- Instagram: ${data.socialLinks.instagram}` : ''}
-    ${data.projectGoals ? `- Project Goals: ${data.projectGoals}` : ''}
-    ${data.targetAudience ? `- Target Audience: ${data.targetAudience}` : ''}
-    
-    ${analysisContent ? analysisContent : ''}
-    
-    Based on this information, please start helping them plan their project by asking relevant questions to gather any missing details.`;
-    
-    // Send the constructed prompt to the AI
-    await sendMessage(prompt);
-    
-    setIsWebsiteInputOpen(false);
-  } catch (error) {
-    console.error("Error processing website submission:", error);
+  };
+
+  const handleChatbotOnboardingComplete = (data: OnboardingData) => {
     toast({
-      title: "Error",
-      description: "There was a problem processing your website information. Please try again.",
-      variant: "destructive"
+      title: "Information Collected",
+      description: "Thanks for sharing your details. We're generating your personalized project plan now.",
     });
-  }
-};
+    startChatInterface(data);
+  };
 
   return (
     <MainLayout>
@@ -229,8 +230,8 @@ export default function NewProject() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <ProjectOnboarding 
-                onComplete={startChatInterface} 
+              <ChatbotOnboarding 
+                onComplete={handleChatbotOnboardingComplete} 
                 onSkip={() => startChatInterface()} 
               />
             </motion.div>
