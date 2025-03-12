@@ -1,3 +1,4 @@
+
 interface Project {
   id: string;
   title: string;
@@ -26,6 +27,12 @@ interface Project {
         tasks: string[];
       }[];
     };
+    resources?: {
+      id: string;
+      name: string;
+      type: string;
+      url: string;
+    }[];
   };
 }
 
