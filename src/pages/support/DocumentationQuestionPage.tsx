@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
@@ -14,6 +13,7 @@ import {
 } from '@/services/static-documentation.service';
 import { DocCategory, DocArticle, DocSection, DocQuestion } from '@/types/documentation';
 import { useAuthSession } from '@/hooks/core';
+import { Breadcrumb } from '@/components/support/documentation/CategoryPage';
 
 const DocumentationQuestionPage = () => {
   const { categoryId, articleId, questionId } = useParams<{ 
@@ -137,25 +137,14 @@ const DocumentationQuestionPage = () => {
     <MainLayout>
       <div className="container mx-auto py-8 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
-          {/* Breadcrumb navigation */}
-          <div className="mb-6">
-            <nav className="flex items-center flex-wrap text-sm">
-              <Link to="/support" className="text-siso-text/70 hover:text-siso-text transition-colors">
-                Help Center
-              </Link>
-              <ChevronRight className="h-4 w-4 mx-2 text-siso-text/50" />
-              <Link 
-                to={`/support/${categoryId}`} 
-                className="text-siso-text/70 hover:text-siso-text transition-colors"
-              >
-                {category.title}
-              </Link>
-              <ChevronRight className="h-4 w-4 mx-2 text-siso-text/50" />
-              <span className="font-medium text-siso-text-bold">{article.title}</span>
-            </nav>
-          </div>
+          <Breadcrumb 
+            categoryTitle={category.title}
+            categorySlug={categoryId}
+            articleTitle={article.title}
+            articleSlug={articleId}
+            questionTitle={foundQuestion.question}
+          />
           
-          {/* Back to category button */}
           <div className="mb-6">
             <Button 
               variant="ghost" 
@@ -167,10 +156,8 @@ const DocumentationQuestionPage = () => {
             </Button>
           </div>
           
-          {/* Main content area */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              {/* Article info */}
               <div className="mb-6">
                 {article.difficulty && (
                   <Badge 
@@ -194,14 +181,12 @@ const DocumentationQuestionPage = () => {
                 )}
               </div>
               
-              {/* Question answer - main content */}
               <div className="bg-siso-bg-alt/20 border border-siso-border rounded-xl p-6 mb-8">
                 <div className="prose prose-invert max-w-none">
                   <p className="text-siso-text leading-relaxed text-lg">{foundQuestion.answer}</p>
                 </div>
               </div>
               
-              {/* Feedback section */}
               <div className="bg-siso-bg-alt/30 border border-siso-border rounded-xl p-6 mb-8">
                 <h3 className="text-lg font-medium text-center mb-4">Did this answer your question?</h3>
                 <div className="flex justify-center gap-6">
@@ -254,9 +239,7 @@ const DocumentationQuestionPage = () => {
               </div>
             </div>
             
-            {/* Sidebar */}
             <div className="lg:col-span-1">
-              {/* Section information */}
               <div className="bg-siso-bg-alt/20 border border-siso-border rounded-xl p-5 mb-5">
                 <h3 className="flex items-center text-md font-medium text-siso-text-bold mb-3">
                   <Sparkles className="h-4 w-4 mr-2 text-siso-orange" />
@@ -282,7 +265,6 @@ const DocumentationQuestionPage = () => {
                 </ul>
               </div>
               
-              {/* Related questions */}
               {relatedQuestions.length > 0 && (
                 <div className="bg-siso-bg-alt/20 border border-siso-border rounded-xl p-5">
                   <h3 className="flex items-center text-md font-medium text-siso-text-bold mb-3">
@@ -305,7 +287,6 @@ const DocumentationQuestionPage = () => {
                 </div>
               )}
               
-              {/* Contact support card */}
               <div className="mt-5 bg-gradient-to-br from-siso-red/10 to-siso-orange/10 border border-siso-orange/20 rounded-xl p-5">
                 <h3 className="flex items-center text-md font-medium text-siso-text-bold mb-2">
                   Need more help?

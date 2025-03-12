@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
@@ -14,6 +13,8 @@ import {
   fetchCategory
 } from '@/services/static-documentation.service';
 import { DocArticle, DocCategory, DocSection, DocQuestion } from '@/types/documentation';
+import { SectionAccordion } from '@/components/support/documentation/CategoryPage';
+import { Breadcrumb } from '@/components/support/documentation/CategoryPage';
 
 const QuestionAccordion = ({ 
   question, 
@@ -43,60 +44,6 @@ const QuestionAccordion = ({
   );
 };
 
-const SectionAccordion = ({ 
-  section, 
-  categorySlug, 
-  articleSlug 
-}: { 
-  section: DocSection, 
-  categorySlug: string, 
-  articleSlug: string 
-}) => {
-  const [isOpen, setIsOpen] = useState(true);
-  
-  return (
-    <Card className="mb-6 border border-siso-border overflow-hidden">
-      <div 
-        className="p-4 cursor-pointer flex justify-between items-center bg-siso-bg-card/20"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <h3 className="text-lg font-semibold">{section.title}</h3>
-        {isOpen ? (
-          <ChevronUp className="h-5 w-5 text-siso-text/60" />
-        ) : (
-          <ChevronDown className="h-5 w-5 text-siso-text/60" />
-        )}
-      </div>
-      
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="overflow-hidden"
-          >
-            <CardContent className="p-0">
-              <div className="divide-y divide-siso-border/20">
-                {section.questions.map((question) => (
-                  <div key={question.id} className="px-6">
-                    <QuestionAccordion 
-                      question={question} 
-                      categorySlug={categorySlug} 
-                      articleSlug={articleSlug} 
-                    />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </Card>
-  );
-};
-
 const DocumentationArticlePage = () => {
   const { categoryId, articleId } = useParams<{ categoryId: string; articleId: string }>();
   const navigate = useNavigate();
@@ -119,7 +66,6 @@ const DocumentationArticlePage = () => {
           const articleData = await fetchArticle(categoryId, articleId);
           setArticle(articleData);
           
-          // Find next and previous articles
           if (categoryData.articles.length > 0) {
             const currentIndex = categoryData.articles.findIndex(a => a.slug === articleId);
             if (currentIndex > 0) {
@@ -177,22 +123,12 @@ const DocumentationArticlePage = () => {
     <MainLayout>
       <div className="container mx-auto py-8 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
-          {/* Breadcrumb navigation */}
-          <div className="mb-6">
-            <nav className="flex items-center text-sm">
-              <Link to="/support" className="text-siso-text/70 hover:text-siso-text transition-colors">
-                Help Center
-              </Link>
-              <ChevronRight className="h-4 w-4 mx-2 text-siso-text/50" />
-              <Link to={`/support/${categoryId}`} className="text-siso-text/70 hover:text-siso-text transition-colors">
-                {category.title}
-              </Link>
-              <ChevronRight className="h-4 w-4 mx-2 text-siso-text/50" />
-              <span className="text-siso-text-bold">{article.title}</span>
-            </nav>
-          </div>
+          <Breadcrumb 
+            categoryTitle={category.title}
+            categorySlug={categoryId}
+            articleTitle={article.title}
+          />
           
-          {/* Article header */}
           <div className="mb-8">
             <div className="flex justify-between items-start mb-4">
               <h1 className="text-3xl font-bold text-siso-text-bold">{article.title}</h1>
@@ -215,7 +151,6 @@ const DocumentationArticlePage = () => {
             </div>
           </div>
           
-          {/* Article content with collapsible sections */}
           <div className="mb-8">
             {article.sections.map((section) => (
               <SectionAccordion 
@@ -227,7 +162,6 @@ const DocumentationArticlePage = () => {
             ))}
           </div>
           
-          {/* Next/Previous navigation */}
           <div className="mt-12 grid grid-cols-2 gap-4">
             {prevArticle && (
               <Button 
@@ -260,7 +194,6 @@ const DocumentationArticlePage = () => {
           
           <Separator className="my-8" />
           
-          {/* Feedback section */}
           <div className="mt-8 text-center">
             <h3 className="text-lg font-medium mb-2">Was this article helpful?</h3>
             <div className="flex justify-center gap-4">
@@ -269,7 +202,6 @@ const DocumentationArticlePage = () => {
             </div>
           </div>
           
-          {/* Back to category */}
           <div className="mt-8 text-center">
             <Button variant="ghost" onClick={() => navigate(`/support/${categoryId}`)}>
               <ChevronLeft className="h-4 w-4 mr-2" />
