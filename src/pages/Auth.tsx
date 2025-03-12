@@ -10,12 +10,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
+import { Separator } from '@/components/ui/separator';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const { signIn, signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -76,6 +79,26 @@ export default function Auth() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsGoogleLoading(true);
+      const { error } = await signInWithGoogle();
+      
+      if (error) throw error;
+      
+      // Don't navigate or show toast here since OAuth will redirect the page
+    } catch (error: any) {
+      console.error('Error signing in with Google:', error);
+      
+      toast({
+        title: "Google sign in failed",
+        description: error.message || "There was a problem signing in with Google. Please try again.",
+        variant: "destructive"
+      });
+      setIsGoogleLoading(false);
+    }
+  };
+
   return (
     <MainLayout>
       <div className="relative min-h-screen flex items-center justify-center">
@@ -107,6 +130,24 @@ export default function Auth() {
                 </TabsList>
                 
                 <TabsContent value="sign-in">
+                  <div className="mb-4">
+                    <GoogleSignInButton 
+                      onClick={handleGoogleSignIn}
+                      disabled={isGoogleLoading}
+                    />
+                  </div>
+                  
+                  <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center">
+                      <Separator className="w-full" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-siso-bg-card px-2 text-muted-foreground">
+                        Or continue with
+                      </span>
+                    </div>
+                  </div>
+                  
                   <form onSubmit={handleSignIn} className="space-y-4">
                     <div className="space-y-2">
                       <label htmlFor="email" className="text-sm font-medium">Email</label>
@@ -157,6 +198,24 @@ export default function Auth() {
                 </TabsContent>
                 
                 <TabsContent value="sign-up">
+                  <div className="mb-4">
+                    <GoogleSignInButton 
+                      onClick={handleGoogleSignIn}
+                      disabled={isGoogleLoading}
+                    />
+                  </div>
+                  
+                  <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center">
+                      <Separator className="w-full" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-siso-bg-card px-2 text-muted-foreground">
+                        Or continue with
+                      </span>
+                    </div>
+                  </div>
+                  
                   <form onSubmit={handleSignUp} className="space-y-4">
                     <div className="space-y-2">
                       <label htmlFor="signup-email" className="text-sm font-medium">Email</label>
