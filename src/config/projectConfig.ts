@@ -2,33 +2,38 @@
 import { PhaseInfo } from '@/types/task';
 import { ClipboardCheck, FileSearch, Lightbulb, Code, CheckCircle } from 'lucide-react';
 
+// Create icon components factory functions instead of direct JSX
+const createIconElement = (IconComponent: any) => {
+  return () => IconComponent({ className: "w-4 h-4" });
+};
+
 export const phaseConfig: Record<string, PhaseInfo> = {
   'setup': {
-    icon: <ClipboardCheck className="w-4 h-4" />,
+    icon: createIconElement(ClipboardCheck),
     color: 'bg-blue-500 text-white',
     title: 'Project Setup',
     description: 'Initial project configuration and resource allocation'
   },
   'review': {
-    icon: <FileSearch className="w-4 h-4" />,
+    icon: createIconElement(FileSearch),
     color: 'bg-purple-500 text-white',
     title: 'Review & Analysis',
     description: 'Requirements gathering and feasibility assessment'
   },
   'initiation': {
-    icon: <Lightbulb className="w-4 h-4" />,
+    icon: createIconElement(Lightbulb),
     color: 'bg-pink-500 text-white',
     title: 'Project Initiation',
     description: 'Kickoff and initial planning phase'
   },
   'development': {
-    icon: <Code className="w-4 h-4" />,
+    icon: createIconElement(Code),
     color: 'bg-amber-500 text-white',
     title: 'Development',
     description: 'Active development and implementation'
   },
   'completion': {
-    icon: <CheckCircle className="w-4 h-4" />,
+    icon: createIconElement(CheckCircle),
     color: 'bg-green-500 text-white',
     title: 'Completion',
     description: 'Final review, delivery, and project closure'
