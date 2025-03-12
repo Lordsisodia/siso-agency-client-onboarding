@@ -1,10 +1,11 @@
 
-import React, { ErrorBoundary } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { SmartProjectOnboarding } from '@/components/plan-builder/SmartProjectOnboarding';
 import { ChatMessage } from '@/types/chat';
 import { ConnectionErrorAlert } from './ConnectionErrorAlert';
+import { ErrorBoundary } from 'react-error-boundary';
 
 // Simple error fallback component
 const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetErrorBoundary: () => void }) => (
