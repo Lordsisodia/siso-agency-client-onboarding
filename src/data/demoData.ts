@@ -1,4 +1,3 @@
-
 interface Project {
   id: string;
   title: string;
@@ -6,6 +5,7 @@ interface Project {
   created_at: string;
   updated_at: string;
   status: string;
+  user_id: string;
   details?: {
     business_context?: {
       industry?: string;
@@ -38,6 +38,7 @@ export const demoProjects: Project[] = [
     created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
     updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
     status: "active",
+    user_id: "demo-user",
     details: {
       business_context: {
         industry: "Retail",
@@ -120,6 +121,7 @@ export const demoProjects: Project[] = [
     created_at: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(), // 45 days ago
     updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
     status: "active",
+    user_id: "demo-user",
     details: {
       business_context: {
         industry: "Productivity",
@@ -204,6 +206,7 @@ export const demoProjects: Project[] = [
     created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(), // 15 days ago
     updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
     status: "active",
+    user_id: "demo-user",
     details: {
       business_context: {
         industry: "Health & Wellness",
@@ -293,5 +296,3 @@ export const demoProjects: Project[] = [
     }
   }
 ];
-
-// Add more demo data as needed for other entities (users, profiles, etc.)
