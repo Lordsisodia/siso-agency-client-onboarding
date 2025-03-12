@@ -44,10 +44,14 @@ export const fetchProjectData = async (projectId: string, isDemo: boolean): Prom
       extras: safeJsonArray<string>(featuresJson.extras)
     };
     
-    // Parse timeline - check if timeline exists in detailsData first
+    // We need to check if the timeline property exists in the database response
     let timeline = undefined;
-    if (detailsData.timeline) {
-      const timelineJson = safeJsonObject(detailsData.timeline);
+    
+    // The timeline data might be stored in a JSON column or might not exist at all
+    // Let's check if it exists in detailsData first
+    const timelineData = detailsData.timeline;
+    if (timelineData) {
+      const timelineJson = safeJsonObject(timelineData);
       timeline = {
         estimated_weeks: safeJsonProperty<number>(timelineJson, 'estimated_weeks', 0),
         phases: safeJsonArray<{name: string; duration: string; tasks: string[]}>(timelineJson.phases)
