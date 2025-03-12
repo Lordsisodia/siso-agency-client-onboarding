@@ -22,7 +22,7 @@ import {
   Play,
   Code,
   Settings,
-  FlagCheckered,
+  Flag,
   Trophy
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -38,8 +38,8 @@ type Task = {
   dueDate: string;
   priority: 'low' | 'medium' | 'high';
   status: TaskStatus;
-  phase: TaskPhase;
-  phaseOrder: number;
+  phase?: TaskPhase;
+  phaseOrder?: number;
   completedDate?: string;
   dependsOn?: string[];
   assignedTo?: string;
@@ -48,6 +48,7 @@ type Task = {
   requiresApproval?: boolean;
   approvedBy?: string;
   approvedAt?: string;
+  category?: string;
 };
 
 const phaseConfig = {
@@ -76,7 +77,7 @@ const phaseConfig = {
     description: 'Project development and implementation'
   },
   'completion': {
-    icon: <FlagCheckered className="w-4 h-4" />,
+    icon: <Flag className="w-4 h-4" />,
     color: 'text-green-500 bg-green-500/10 border-green-500/20',
     title: 'Completion',
     description: 'Final review and project delivery'
@@ -800,7 +801,7 @@ export default function Tasks() {
                 <Code className="h-4 w-4 mr-1" /> Development
               </TabsTrigger>
               <TabsTrigger value="completion" className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-500">
-                <FlagCheckered className="h-4 w-4 mr-1" /> Completion
+                <Flag className="h-4 w-4 mr-1" /> Completion
               </TabsTrigger>
             </TabsList>
             
@@ -851,3 +852,4 @@ export default function Tasks() {
     </MainLayout>
   );
 }
+
