@@ -12,6 +12,7 @@ import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-van
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { GradientHeading } from '@/components/ui/gradient-heading';
+import { GradientText } from '@/components/ui/gradient-text';
 
 const Support = () => {
   const [activeTab, setActiveTab] = useState('documentation');
@@ -81,9 +82,12 @@ const Support = () => {
           {/* Header with search */}
           <div className="mb-12">
             <div className="text-center mb-6">
-              <GradientHeading asChild variant="rainbow" size="lg" weight="bold" className="mb-3">
-                <h1>Help Center</h1>
-              </GradientHeading>
+              <GradientText 
+                colors={["#9b87f5", "#D946EF", "#F97316"]} 
+                className="text-4xl sm:text-5xl font-bold mb-3"
+              >
+                Help Center
+              </GradientText>
               <p className="text-siso-text/70 text-lg max-w-2xl mx-auto">
                 Find answers to your questions and comprehensive guides to help you get started
               </p>

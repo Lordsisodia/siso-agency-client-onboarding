@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
-import { GradientHeading } from '@/components/ui/gradient-heading';
+import { GradientText } from '@/components/ui/gradient-text';
 
 export const LoadingState = () => {
   return (
@@ -9,9 +9,12 @@ export const LoadingState = () => {
       <div className="container mx-auto py-12 px-4">
         <div className="flex flex-col items-center max-w-5xl mx-auto">
           <div className="w-full text-center mb-8">
-            <GradientHeading asChild variant="rainbow" size="lg" weight="bold" className="mb-3">
+            <GradientText 
+              colors={["#9b87f5", "#D946EF", "#F97316"]} 
+              className="text-4xl sm:text-5xl font-bold mb-3"
+            >
               <div className="animate-pulse h-10 w-64 bg-siso-bg-alt/50 rounded-lg mx-auto"></div>
-            </GradientHeading>
+            </GradientText>
             <div className="animate-pulse h-4 w-96 bg-siso-bg-alt/40 rounded mx-auto mt-4"></div>
           </div>
           

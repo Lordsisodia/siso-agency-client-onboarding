@@ -1,9 +1,22 @@
+
 import { cn } from "@/lib/utils"
 import * as React from "react"
 
 interface GradientTextProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Array of colors for the gradient
+   * @default ["#ffaa40", "#9c40ff", "#ffaa40"]
+   */
   colors?: string[]
+  /**
+   * Animation duration in seconds
+   * @default 8
+   */
   animationSpeed?: number
+  /**
+   * Show animated border
+   * @default false
+   */
   showBorder?: boolean
 }
 
