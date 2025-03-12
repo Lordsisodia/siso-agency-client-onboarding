@@ -137,9 +137,12 @@ const TasksPage: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
 
+  console.log("TasksPage rendered, isDemo:", isDemo, "user:", user);
+
   // Fetch tasks from Supabase
   useEffect(() => {
     if (isDemo) {
+      console.log("Using demo tasks");
       setTasks(demoTasks);
       setIsLoading(false);
       return;
@@ -149,12 +152,26 @@ const TasksPage: React.FC = () => {
       try {
         setIsLoading(true);
         
+        if (!user) {
+          console.log("No user, skipping fetch");
+          setTasks([]);
+          setIsLoading(false);
+          return;
+        }
+        
+        console.log("Fetching tasks for user:", user.id);
         const { data, error } = await supabase
           .from('tasks')
           .select('*')
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase error:", error);
+          throw error;
+        }
+
+        console.log("Tasks fetched:", data);
 
         // Make sure to set default priority if it's missing from the database
         const tasksWithPriority: Task[] = (data as TaskData[] || []).map(task => ({
@@ -172,7 +189,7 @@ const TasksPage: React.FC = () => {
     };
 
     fetchTasks();
-  }, [isDemo]);
+  }, [isDemo, user]);
 
   // Create a new task
   const createTask = async () => {
@@ -195,6 +212,8 @@ const TasksPage: React.FC = () => {
         user_id: user?.id,
       };
 
+      console.log("Creating task:", taskToCreate);
+
       if (isDemo) {
         const mockTask: Task = {
           ...taskToCreate,
@@ -210,12 +229,26 @@ const TasksPage: React.FC = () => {
         return;
       }
 
+      if (!user) {
+        toast({
+          title: 'Error',
+          description: 'You must be logged in to create tasks',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const { data, error } = await supabase
         .from('tasks')
         .insert([taskToCreate])
         .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+
+      console.log("Task created:", data);
 
       // Add the priority field explicitly to make TypeScript happy
       const newTasks: Task[] = (data as TaskData[] || []).map(task => ({
@@ -250,6 +283,8 @@ const TasksPage: React.FC = () => {
         priority: selectedTask.priority,
       };
 
+      console.log("Updating task:", taskToUpdate);
+
       if (isDemo) {
         setTasks((prev) =>
           prev.map((task) =>
@@ -261,12 +296,25 @@ const TasksPage: React.FC = () => {
         return;
       }
 
+      if (!user) {
+        toast({
+          title: 'Error',
+          description: 'You must be logged in to update tasks',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('tasks')
         .update(taskToUpdate)
-        .eq('id', selectedTask.id);
+        .eq('id', selectedTask.id)
+        .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
 
       setTasks((prev) =>
         prev.map((task) =>
@@ -288,6 +336,8 @@ const TasksPage: React.FC = () => {
   // Delete a task
   const deleteTask = async (id: string) => {
     try {
+      console.log("Deleting task:", id);
+
       if (isDemo) {
         setTasks((prev) => prev.filter((task) => task.id !== id));
         toast({ title: 'Success', description: 'Task deleted successfully' });
@@ -295,9 +345,25 @@ const TasksPage: React.FC = () => {
         return;
       }
 
-      const { error } = await supabase.from('tasks').delete().eq('id', id);
+      if (!user) {
+        toast({
+          title: 'Error',
+          description: 'You must be logged in to delete tasks',
+          variant: 'destructive',
+        });
+        return;
+      }
 
-      if (error) throw error;
+      const { error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
 
       setTasks((prev) => prev.filter((task) => task.id !== id));
       toast({ title: 'Success', description: 'Task deleted successfully' });
@@ -391,75 +457,89 @@ const TasksPage: React.FC = () => {
         </Alert>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* To Do Column */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold pb-2 border-b">{getStatusDisplayName('pending')} ({getTasksByStatus('pending').length})</h2>
-          {getTasksByStatus('pending').map((task) => (
-            <Card key={task.id} className="p-4 cursor-pointer hover:shadow-md transition-shadow" onClick={() => openEditDialog(task)}>
-              <h3 className="font-medium">{task.title}</h3>
-              {task.description && <p className="text-sm text-gray-500 mt-2 line-clamp-2">{task.description}</p>}
-              <div className="flex justify-between mt-4">
-                <span className={`text-xs font-medium ${getPriorityColor(task.priority)}`}>
-                  {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                </span>
-                {task.due_date && <span className="text-xs text-gray-500">{task.due_date}</span>}
-              </div>
-            </Card>
-          ))}
+      {tasks.length === 0 ? (
+        <div className="text-center p-8 bg-gray-50 rounded-lg">
+          <h3 className="text-xl font-semibold mb-2">No tasks found</h3>
+          <p className="text-gray-500 mb-4">
+            {isDemo 
+              ? "There was an error loading demo tasks. Please try refreshing the page."
+              : "You don't have any tasks yet. Create a new task to get started."}
+          </p>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Create Your First Task
+          </Button>
         </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* To Do Column */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold pb-2 border-b">{getStatusDisplayName('pending')} ({getTasksByStatus('pending').length})</h2>
+            {getTasksByStatus('pending').map((task) => (
+              <Card key={task.id} className="p-4 cursor-pointer hover:shadow-md transition-shadow" onClick={() => openEditDialog(task)}>
+                <h3 className="font-medium">{task.title}</h3>
+                {task.description && <p className="text-sm text-gray-500 mt-2 line-clamp-2">{task.description}</p>}
+                <div className="flex justify-between mt-4">
+                  <span className={`text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                    {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                  </span>
+                  {task.due_date && <span className="text-xs text-gray-500">{task.due_date}</span>}
+                </div>
+              </Card>
+            ))}
+          </div>
 
-        {/* In Progress Column */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold pb-2 border-b">{getStatusDisplayName('in_progress')} ({getTasksByStatus('in_progress').length})</h2>
-          {getTasksByStatus('in_progress').map((task) => (
-            <Card key={task.id} className="p-4 cursor-pointer hover:shadow-md transition-shadow" onClick={() => openEditDialog(task)}>
-              <h3 className="font-medium">{task.title}</h3>
-              {task.description && <p className="text-sm text-gray-500 mt-2 line-clamp-2">{task.description}</p>}
-              <div className="flex justify-between mt-4">
-                <span className={`text-xs font-medium ${getPriorityColor(task.priority)}`}>
-                  {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                </span>
-                {task.due_date && <span className="text-xs text-gray-500">{task.due_date}</span>}
-              </div>
-            </Card>
-          ))}
-        </div>
+          {/* In Progress Column */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold pb-2 border-b">{getStatusDisplayName('in_progress')} ({getTasksByStatus('in_progress').length})</h2>
+            {getTasksByStatus('in_progress').map((task) => (
+              <Card key={task.id} className="p-4 cursor-pointer hover:shadow-md transition-shadow" onClick={() => openEditDialog(task)}>
+                <h3 className="font-medium">{task.title}</h3>
+                {task.description && <p className="text-sm text-gray-500 mt-2 line-clamp-2">{task.description}</p>}
+                <div className="flex justify-between mt-4">
+                  <span className={`text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                    {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                  </span>
+                  {task.due_date && <span className="text-xs text-gray-500">{task.due_date}</span>}
+                </div>
+              </Card>
+            ))}
+          </div>
 
-        {/* Completed Column */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold pb-2 border-b">{getStatusDisplayName('completed')} ({getTasksByStatus('completed').length})</h2>
-          {getTasksByStatus('completed').map((task) => (
-            <Card key={task.id} className="p-4 cursor-pointer hover:shadow-md transition-shadow" onClick={() => openEditDialog(task)}>
-              <h3 className="font-medium">{task.title}</h3>
-              {task.description && <p className="text-sm text-gray-500 mt-2 line-clamp-2">{task.description}</p>}
-              <div className="flex justify-between mt-4">
-                <span className={`text-xs font-medium ${getPriorityColor(task.priority)}`}>
-                  {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                </span>
-                {task.due_date && <span className="text-xs text-gray-500">{task.due_date}</span>}
-              </div>
-            </Card>
-          ))}
-        </div>
+          {/* Completed Column */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold pb-2 border-b">{getStatusDisplayName('completed')} ({getTasksByStatus('completed').length})</h2>
+            {getTasksByStatus('completed').map((task) => (
+              <Card key={task.id} className="p-4 cursor-pointer hover:shadow-md transition-shadow" onClick={() => openEditDialog(task)}>
+                <h3 className="font-medium">{task.title}</h3>
+                {task.description && <p className="text-sm text-gray-500 mt-2 line-clamp-2">{task.description}</p>}
+                <div className="flex justify-between mt-4">
+                  <span className={`text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                    {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                  </span>
+                  {task.due_date && <span className="text-xs text-gray-500">{task.due_date}</span>}
+                </div>
+              </Card>
+            ))}
+          </div>
 
-        {/* Failed Column */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold pb-2 border-b">{getStatusDisplayName('failed')} ({getTasksByStatus('failed').length})</h2>
-          {getTasksByStatus('failed').map((task) => (
-            <Card key={task.id} className="p-4 cursor-pointer hover:shadow-md transition-shadow" onClick={() => openEditDialog(task)}>
-              <h3 className="font-medium">{task.title}</h3>
-              {task.description && <p className="text-sm text-gray-500 mt-2 line-clamp-2">{task.description}</p>}
-              <div className="flex justify-between mt-4">
-                <span className={`text-xs font-medium ${getPriorityColor(task.priority)}`}>
-                  {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                </span>
-                {task.due_date && <span className="text-xs text-gray-500">{task.due_date}</span>}
-              </div>
-            </Card>
-          ))}
+          {/* Failed Column */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold pb-2 border-b">{getStatusDisplayName('failed')} ({getTasksByStatus('failed').length})</h2>
+            {getTasksByStatus('failed').map((task) => (
+              <Card key={task.id} className="p-4 cursor-pointer hover:shadow-md transition-shadow" onClick={() => openEditDialog(task)}>
+                <h3 className="font-medium">{task.title}</h3>
+                {task.description && <p className="text-sm text-gray-500 mt-2 line-clamp-2">{task.description}</p>}
+                <div className="flex justify-between mt-4">
+                  <span className={`text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                    {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                  </span>
+                  {task.due_date && <span className="text-xs text-gray-500">{task.due_date}</span>}
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Create Task Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
