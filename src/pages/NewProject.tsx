@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
-import { Waves } from '@/components/ui/waves-background';
+import { Waves } from '@/components/ui/waves';
 import { FloatingOrbs } from '@/components/effects/FloatingOrbs';
 import { WebsiteInputSheet } from '@/components/plan-builder/WebsiteInputSheet';
 import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';

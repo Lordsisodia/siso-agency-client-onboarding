@@ -2,13 +2,14 @@
 import React, { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
-import { Building, Globe, Share2, BarChart, Target, CheckCircle2 } from 'lucide-react';
+import { Building, Globe, Share2, BarChart, Target, CheckCircle2, Rocket } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { BackgroundSparkles } from './components/BackgroundSparkles';
 import { OnboardingStyles } from './components/OnboardingStyles';
 import { saveQuestionFeedback } from '@/services/documentation-feedback.service';
 
 // Import step components
+import { OnboardingWelcomeStep } from './steps/OnboardingWelcomeStep';
 import { CompanyNameStep } from './steps/CompanyNameStep';
 import { WebsiteStep } from './steps/WebsiteStep';
 import { SocialMediaStep } from './steps/SocialMediaStep';
@@ -75,6 +76,7 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
   }, []);
   
   const steps = [
+    { title: 'Welcome', icon: <Rocket className="w-4 h-4" /> },
     { title: 'Company Name', icon: <Building className="w-4 h-4" /> },
     { title: 'Website URL', icon: <Globe className="w-4 h-4" /> },
     { title: 'Social Media', icon: <Share2 className="w-4 h-4" /> },
@@ -137,6 +139,13 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
     switch (step) {
       case 0:
         return (
+          <OnboardingWelcomeStep
+            onNext={handleNext}
+            onSkip={onSkip}
+          />
+        );
+      case 1:
+        return (
           <CompanyNameStep
             companyName={projectData.businessContext.companyName}
             onChange={(value) => updateBusinessContext('companyName', value)}
@@ -144,7 +153,7 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
             onSkip={onSkip}
           />
         );
-      case 1:
+      case 2:
         return (
           <WebsiteStep
             website={projectData.businessContext.website}
@@ -152,7 +161,7 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
             onNext={handleNext}
           />
         );
-      case 2:
+      case 3:
         return (
           <SocialMediaStep
             socialLinks={projectData.businessContext.socialLinks}
@@ -160,7 +169,7 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
             onNext={handleNext}
           />
         );
-      case 3:
+      case 4:
         return (
           <IndustryAudienceStep
             industry={projectData.businessContext.industry}
@@ -170,7 +179,7 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
             onNext={handleNext}
           />
         );
-      case 4:
+      case 5:
         return (
           <GoalStep
             goal={projectData.goals}
@@ -178,7 +187,7 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
             onNext={handleNext}
           />
         );
-      case 5:
+      case 6:
         return (
           <SummaryStep
             projectData={projectData}
