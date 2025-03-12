@@ -9,13 +9,14 @@ import { Waves } from '@/components/ui/waves-background';
 import { ProjectDetailsHeader } from '@/components/project-details/ProjectDetailsHeader';
 import { ProjectOverview } from '@/components/project-details/ProjectOverview';
 import { ProjectFeatures } from '@/components/project-details/ProjectFeatures';
-import { ProjectTimeline } from '@/components/project-details/ProjectTimeline';
-import { ProjectResources } from '@/components/project-details/ProjectResources';
 import { ProjectNotFound } from '@/components/project-details/ProjectNotFound';
 import { ProjectLoader } from '@/components/project-details/ProjectLoader';
 import { DemoModeAlert } from '@/components/project-details/DemoModeAlert';
 import { fetchProjectData } from '@/components/project-details/utils';
 import { Project } from '@/components/project-details/types';
+import { ProjectDetailsDashboard } from '@/components/projects/ProjectDetailsDashboard';
+import { ProjectTimelineView } from '@/components/projects/ProjectTimelineView';
+import { convertToTaskProject } from '@/utils/projectUtils';
 
 export default function ProjectDetails() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -70,6 +71,9 @@ export default function ProjectDetails() {
     );
   }
 
+  // Convert the project data to the format needed by our dashboard components
+  const taskProject = convertToTaskProject(project);
+
   return (
     <MainLayout>
       <div className="relative min-h-screen">
@@ -88,6 +92,9 @@ export default function ProjectDetails() {
           
           <ProjectDetailsHeader project={project} isDemo={isDemo} />
           
+          {/* Add the new dashboard overview at the top */}
+          <ProjectDetailsDashboard project={taskProject} />
+          
           <Tabs defaultValue="overview" className="space-y-6">
             <TabsList className="bg-background/50 backdrop-blur-sm">
               <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -105,7 +112,7 @@ export default function ProjectDetails() {
             </TabsContent>
             
             <TabsContent value="timeline" className="space-y-6">
-              <ProjectTimeline project={project} isDemo={isDemo} />
+              <ProjectTimelineView project={taskProject} />
             </TabsContent>
             
             <TabsContent value="resources" className="space-y-6">

@@ -29,3 +29,23 @@ export interface PhaseInfo {
   title: string;
   description: string;
 }
+
+export interface TaskProject {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  deadline: string;
+  phases: {
+    name: string;
+    status: 'completed' | 'in-progress' | 'pending';
+    progress: number;
+  }[];
+  tags: string[];
+  financials?: {
+    marketValue: number;
+    costSavings: number;
+    developmentCost: number;
+    roi: number;
+  };
+}
