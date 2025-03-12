@@ -44,11 +44,11 @@ export const useNewProject = () => {
       }
 
       // First, create the project record
-      const { data: projectData, error: projectError } = await supabase
+      const { data: insertedProject, error: projectError } = await supabase
         .from('projects')
         .insert({
           user_id: user.id,
-          title: projectData.businessContext.companyName || 'New Project',
+          title: projectData.businessContext?.companyName || 'New Project',
           description: projectData.goals || 'Project created via onboarding wizard'
         })
         .select('id')
@@ -68,7 +68,7 @@ export const useNewProject = () => {
       const { error: detailsError } = await supabase
         .from('project_details')
         .insert({
-          project_id: projectData.id,
+          project_id: insertedProject.id,
           business_context: projectData.businessContext || {},
           goals: projectData.goals || '',
           features: projectData.features || {}
@@ -84,8 +84,8 @@ export const useNewProject = () => {
         return null;
       }
 
-      setSavedProjectId(projectData.id);
-      return projectData.id;
+      setSavedProjectId(insertedProject.id);
+      return insertedProject.id;
     } catch (error) {
       console.error("Error in saveProject:", error);
       toast({
@@ -112,15 +112,15 @@ export const useNewProject = () => {
         let prompt = `
         I've completed the onboarding process and provided the following information:
         
-        Company Name: ${projectData.businessContext.companyName || 'Not specified'}
+        Company Name: ${projectData.businessContext?.companyName || 'Not specified'}
         `;
         
-        if (projectData.businessContext.website) {
+        if (projectData.businessContext?.website) {
           prompt += `Website: ${projectData.businessContext.website}\n`;
         }
         
         // Add social links if any
-        const socialLinks = Object.entries(projectData.businessContext.socialLinks || {})
+        const socialLinks = Object.entries(projectData.businessContext?.socialLinks || {})
           .filter(([_, value]) => value && typeof value === 'string' && value.trim() !== '')
           .map(([platform, url]) => `${platform}: ${url}`)
           .join('\n');
@@ -130,8 +130,8 @@ export const useNewProject = () => {
         }
         
         prompt += `
-        Industry: ${projectData.businessContext.industry || 'Not specified'}
-        Target Audience: ${projectData.businessContext.targetAudience || 'Not specified'}
+        Industry: ${projectData.businessContext?.industry || 'Not specified'}
+        Target Audience: ${projectData.businessContext?.targetAudience || 'Not specified'}
         Main Goal: ${projectData.goals || 'Not specified'}
         `;
         
