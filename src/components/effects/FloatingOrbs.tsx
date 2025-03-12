@@ -203,7 +203,7 @@ export function FloatingOrbs() {
     <motion.canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-auto"
-      style={{ zIndex: -10 }} // Lower z-index to ensure it sits behind the Waves component
+      style={{ zIndex: 0 }} // Set to 0 to be behind everything
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 1 }}

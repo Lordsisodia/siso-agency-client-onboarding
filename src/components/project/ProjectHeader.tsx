@@ -17,7 +17,7 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
   showActionButtons
 }) => {
   return (
-    <div className="mb-4 flex items-center justify-between relative z-10">
+    <div className="mb-6 flex items-center justify-between relative backdrop-blur-sm bg-card/30 p-3 rounded-lg">
       <Button 
         onClick={onGoBack}
         variant="outline"
