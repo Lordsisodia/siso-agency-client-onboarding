@@ -12,7 +12,7 @@ import { WebsiteInputSheet, WebsiteInputData } from '@/components/plan-builder/W
 import { supabase } from '@/integrations/supabase/client';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';
-import { ProjectOnboarding } from '@/components/plan-builder/ProjectOnboarding';
+import { SmartProjectOnboarding } from '@/components/plan-builder/SmartProjectOnboarding';
 
 export default function NewProject() {
   const [projectId, setProjectId] = useState<string>(() => {
@@ -41,30 +41,53 @@ export default function NewProject() {
       
       if (projectData) {
         // Prepare a message based on the collected data
+        let prompt = `
+        I've completed the onboarding process and provided the following information:
+        
+        Company Name: ${projectData.businessContext.companyName || 'Not specified'}
+        `;
+        
+        if (projectData.businessContext.website) {
+          prompt += `Website: ${projectData.businessContext.website}\n`;
+        }
+        
+        // Add social links if any
+        const socialLinks = Object.entries(projectData.businessContext.socialLinks || {})
+          .filter(([_, value]) => value && typeof value === 'string' && value.trim() !== '')
+          .map(([platform, url]) => `${platform}: ${url}`)
+          .join('\n');
+          
+        if (socialLinks) {
+          prompt += `\nSocial Media:\n${socialLinks}\n`;
+        }
+        
+        prompt += `
+        Industry: ${projectData.businessContext.industry || 'Not specified'}
+        Target Audience: ${projectData.businessContext.targetAudience || 'Not specified'}
+        Main Goal: ${projectData.timelineBudget.goals || 'Not specified'}
+        `;
+        
+        if (projectData.projectType) {
+          prompt += `Project Type: ${projectData.projectType}\n`;
+        }
+        
+        if (projectData.projectScale) {
+          prompt += `Project Scale: ${projectData.projectScale}\n`;
+        }
+        
+        // Add selected features if any
         const selectedFeatures = Object.entries(projectData.features || {})
           .filter(([_, value]: [string, any]) => value.selected)
           .map(([id, value]: [string, any]) => {
             const feature = id;
             return `${feature} (${value.priority})`;
           }).join(', ');
+          
+        if (selectedFeatures) {
+          prompt += `\nSelected Features: ${selectedFeatures}\n`;
+        }
         
-        const prompt = `
-        I've completed the onboarding process and provided the following information:
-        
-        Project Type: ${projectData.projectType}
-        Project Scale: ${projectData.projectScale}
-        
-        Company Name: ${projectData.businessContext.companyName || 'Not specified'}
-        Industry: ${projectData.businessContext.industry || 'Not specified'}
-        Target Audience: ${projectData.businessContext.targetAudience || 'Not specified'}
-        Team Size: ${projectData.businessContext.teamSize || 'Not specified'}
-        
-        Timeline: ${projectData.timelineBudget.timeline}
-        Budget: ${projectData.timelineBudget.budget}
-        Goals: ${projectData.timelineBudget.goals || 'Not specified'}
-        
-        Selected Features: ${selectedFeatures || 'None selected'}
-        
+        prompt += `
         Based on this information, could you please create a project plan that includes:
         1. Project scope and objectives
         2. Technical requirements
@@ -229,7 +252,7 @@ export default function NewProject() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <ProjectOnboarding 
+              <SmartProjectOnboarding 
                 onComplete={startChatInterface} 
                 onSkip={() => startChatInterface()} 
               />
