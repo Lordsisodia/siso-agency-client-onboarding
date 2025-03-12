@@ -142,7 +142,13 @@ const TasksPage: React.FC = () => {
 
         if (error) throw error;
 
-        setTasks(data || []);
+        // Make sure to set default priority if it's missing from the database
+        const tasksWithPriority: Task[] = (data || []).map(task => ({
+          ...task,
+          priority: task.priority || 'medium'
+        })) as Task[];
+
+        setTasks(tasksWithPriority);
       } catch (err: any) {
         console.error('Error fetching tasks:', err.message);
         setError(err.message);
@@ -197,7 +203,13 @@ const TasksPage: React.FC = () => {
 
       if (error) throw error;
 
-      setTasks((prev) => [...(data || []), ...prev]);
+      // Add the priority field explicitly to make TypeScript happy
+      const newTasks = (data || []).map(task => ({
+        ...task,
+        priority: task.priority || newTask.priority
+      })) as Task[];
+
+      setTasks((prev) => [...newTasks, ...prev]);
       toast({ title: 'Success', description: 'Task created successfully' });
       setIsCreateDialogOpen(false);
       resetNewTask();
