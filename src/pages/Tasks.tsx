@@ -41,6 +41,20 @@ interface Task {
   updated_at: string;
 }
 
+// Extend the Supabase returned data type to correctly type the mapping
+interface TaskData {
+  id: string;
+  title: string;
+  description?: string;
+  due_date?: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  priority?: 'low' | 'medium' | 'high'; // Make priority optional in the DB response
+  project_id?: string;
+  user_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // Mock data for demo mode
 const demoTasks: Task[] = [
   {
@@ -143,10 +157,10 @@ const TasksPage: React.FC = () => {
         if (error) throw error;
 
         // Make sure to set default priority if it's missing from the database
-        const tasksWithPriority: Task[] = (data || []).map(task => ({
+        const tasksWithPriority: Task[] = (data as TaskData[] || []).map(task => ({
           ...task,
           priority: task.priority || 'medium'
-        })) as Task[];
+        }));
 
         setTasks(tasksWithPriority);
       } catch (err: any) {
@@ -204,10 +218,10 @@ const TasksPage: React.FC = () => {
       if (error) throw error;
 
       // Add the priority field explicitly to make TypeScript happy
-      const newTasks = (data || []).map(task => ({
+      const newTasks: Task[] = (data as TaskData[] || []).map(task => ({
         ...task,
         priority: task.priority || newTask.priority
-      })) as Task[];
+      }));
 
       setTasks((prev) => [...newTasks, ...prev]);
       toast({ title: 'Success', description: 'Task created successfully' });

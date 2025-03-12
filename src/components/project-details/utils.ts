@@ -73,6 +73,7 @@ export const fetchProjectData = async (projectId: string, isDemo: boolean): Prom
 
   return {
     ...projectData,
+    user_id: projectData.user_id || '', // Ensure user_id is always present
     details: parsedDetails
   };
 };
