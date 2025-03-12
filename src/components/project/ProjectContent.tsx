@@ -36,6 +36,7 @@ export const ProjectContent: React.FC<ProjectContentProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
+          className="z-10 relative"
         >
           <SmartProjectOnboarding 
             onComplete={onStartChat} 
@@ -49,6 +50,7 @@ export const ProjectContent: React.FC<ProjectContentProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
+          className="z-10 relative"
         >
           <div className="p-0.5 bg-gradient-to-r from-siso-red/40 to-siso-orange/40 rounded-xl shadow-lg">
             <ChatInterface 

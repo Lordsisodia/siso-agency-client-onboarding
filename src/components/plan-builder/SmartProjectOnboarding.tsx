@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
@@ -9,13 +8,13 @@ import { OnboardingStyles } from './components/OnboardingStyles';
 import { saveQuestionFeedback } from '@/services/documentation-feedback.service';
 import { useAuth } from '@/hooks/useAuth';
 
-// Import step components
-import { CompanyNameStep } from './steps/CompanyNameStep';
-import { WebsiteStep } from './steps/WebsiteStep';
-import { SocialMediaStep } from './steps/SocialMediaStep';
-import { IndustryAudienceStep } from './steps/IndustryAudienceStep';
-import { GoalStep } from './steps/GoalStep';
-import { SummaryStep } from './steps/SummaryStep';
+// Import step components with absolute paths to ensure correct resolution
+import { CompanyNameStep } from '@/components/plan-builder/steps/CompanyNameStep';
+import { WebsiteStep } from '@/components/plan-builder/steps/WebsiteStep';
+import { SocialMediaStep } from '@/components/plan-builder/steps/SocialMediaStep';
+import { IndustryAudienceStep } from '@/components/plan-builder/steps/IndustryAudienceStep';
+import { GoalStep } from '@/components/plan-builder/steps/GoalStep';
+import { SummaryStep } from '@/components/plan-builder/steps/SummaryStep';
 import { OnboardingProgress } from './OnboardingProgress';
 
 interface SmartProjectOnboardingProps {

@@ -27,6 +27,8 @@ export default function NewProject() {
     sendMessage
   } = useNewProject();
 
+  console.log("NewProject render - showOnboarding:", showOnboarding, "showChat:", showChat);
+
   return (
     <MainLayout>
       <div className="container max-w-6xl mx-auto py-6 px-4 min-h-screen relative">
