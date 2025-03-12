@@ -46,7 +46,6 @@ const DocumentationQuestionPage = () => {
         setFoundSection(data.section);
         setFoundQuestion(data.question);
         
-        // Find related questions
         if (data.section && data.question) {
           const related = data.section.questions
             .filter(q => q.id !== data.question?.id)
@@ -140,8 +139,6 @@ const DocumentationQuestionPage = () => {
           <Breadcrumb 
             categoryTitle={category.title}
             categorySlug={categoryId}
-            articleTitle={article.title}
-            articleSlug={articleId}
             questionTitle={foundQuestion.question}
           />
           

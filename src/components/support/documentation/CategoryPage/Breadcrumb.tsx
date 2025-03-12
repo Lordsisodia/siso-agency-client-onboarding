@@ -31,7 +31,7 @@ export const Breadcrumb = ({
         
         <ChevronRight className="h-3 w-3 mx-2 text-siso-text/50 flex-shrink-0" />
         
-        {articleTitle && categorySlug ? (
+        {questionTitle && categorySlug ? (
           <Link 
             to={`/support/${categorySlug}`} 
             className="text-siso-text/70 hover:text-siso-text transition-colors max-w-[150px] md:max-w-xs truncate"
@@ -42,26 +42,17 @@ export const Breadcrumb = ({
           <span className="text-siso-text-bold max-w-[200px] md:max-w-xs truncate">{categoryTitle}</span>
         )}
         
-        {articleTitle && articleSlug && (
-          <>
-            <ChevronRight className="h-3 w-3 mx-2 text-siso-text/50 flex-shrink-0" />
-            {questionTitle ? (
-              <Link 
-                to={`/support/${categorySlug}/${articleSlug}`}
-                className="text-siso-text/70 hover:text-siso-text transition-colors max-w-[150px] md:max-w-xs truncate"
-              >
-                {articleTitle}
-              </Link>
-            ) : (
-              <span className="text-siso-text-bold max-w-[200px] md:max-w-xs truncate">{articleTitle}</span>
-            )}
-          </>
-        )}
-        
         {questionTitle && (
           <>
             <ChevronRight className="h-3 w-3 mx-2 text-siso-text/50 flex-shrink-0" />
             <span className="text-siso-text-bold max-w-[200px] md:max-w-xs truncate">{questionTitle}</span>
+          </>
+        )}
+        
+        {articleTitle && articleSlug && !questionTitle && (
+          <>
+            <ChevronRight className="h-3 w-3 mx-2 text-siso-text/50 flex-shrink-0" />
+            <span className="text-siso-text-bold max-w-[200px] md:max-w-xs truncate">{articleTitle}</span>
           </>
         )}
       </nav>
