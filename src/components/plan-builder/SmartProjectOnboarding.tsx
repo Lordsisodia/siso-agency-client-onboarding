@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
@@ -81,7 +80,6 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
       setStep(prev => prev + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
-      // Log feedback for analytics
       const stepId = `onboarding_step_${step}`;
       saveQuestionFeedback(stepId, 'helpful');
     }
@@ -98,10 +96,8 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
     try {
       setLoading(true);
       
-      // Clean up data before sending
       const finalData = {
         ...projectData,
-        // Remove empty social links
         businessContext: {
           ...projectData.businessContext,
           socialLinks: Object.fromEntries(
@@ -110,9 +106,6 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
           )
         }
       };
-      
-      // Remove project scale as requested
-      delete finalData.projectScale;
       
       onComplete(finalData);
       
@@ -134,7 +127,6 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
   
   const progressPercentage = ((step) / (steps.length - 1)) * 100;
   
-  // Company Name Step
   const renderCompanyNameStep = () => {
     return (
       <div className="space-y-6">
@@ -174,7 +166,6 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
     );
   };
   
-  // Website URL Step
   const renderWebsiteStep = () => {
     return (
       <div className="space-y-6">
@@ -206,7 +197,6 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
     );
   };
   
-  // Social Media Step
   const renderSocialMediaStep = () => {
     return (
       <div className="space-y-6">
@@ -275,7 +265,6 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
     );
   };
   
-  // Industry & Audience Step
   const renderIndustryAudienceStep = () => {
     return (
       <div className="space-y-6">
@@ -321,7 +310,6 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
     );
   };
   
-  // Main Goal Step
   const renderMainGoalStep = () => {
     const goals = [
       "Increase Sales",
@@ -399,7 +387,6 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
     );
   };
   
-  // Summary Step
   const renderSummaryStep = () => {
     const hasSocialLinks = Object.values(projectData.businessContext.socialLinks).some(link => link.trim() !== '');
     
@@ -490,7 +477,6 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
 
   return (
     <div className="relative bg-card rounded-xl shadow-lg overflow-hidden">
-      {/* Progress bar */}
       <div className="bg-muted h-2 w-full">
         <div 
           className="bg-gradient-to-r from-siso-red to-siso-orange h-full transition-all duration-300" 
