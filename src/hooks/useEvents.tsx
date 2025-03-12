@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Event } from '@/types/dashboard';
+import { Event, EventType } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthSession } from '@/hooks/useAuthSession';
 
@@ -62,7 +62,7 @@ export function useEvents() {
           title: event.title,
           date: event.date,
           time: event.time,
-          type: event.type
+          type: event.type as EventType // Cast the string to EventType
         }));
         
         setEvents(formattedEvents);

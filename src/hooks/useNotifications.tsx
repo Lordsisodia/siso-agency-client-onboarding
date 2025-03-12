@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { Notification } from '@/types/dashboard';
+import { Notification, NotificationType } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { toast } from 'sonner';
@@ -82,7 +82,7 @@ export function useNotifications() {
             title: notification.title,
             message: notification.message,
             time: timeString,
-            type: notification.type,
+            type: notification.type as NotificationType, // Cast the string to NotificationType
             read: notification.read
           };
         });
