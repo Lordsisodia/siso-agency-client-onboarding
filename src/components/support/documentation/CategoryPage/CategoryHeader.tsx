@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { DocCategory } from '@/types/documentation';
+import { GradientText } from '@/components/ui/gradient-text';
 
 interface CategoryHeaderProps {
   category: DocCategory;
@@ -8,17 +9,21 @@ interface CategoryHeaderProps {
 
 export const CategoryHeader = ({ category }: CategoryHeaderProps) => {
   return (
-    <div className="mb-8">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="bg-siso-orange/10 p-3 rounded-lg">
-          {React.createElement(category.icon as React.ElementType, { 
-            className: "h-6 w-6 text-siso-orange" 
-          })}
-        </div>
-        <h1 className="text-3xl font-bold text-siso-text-bold">{category.title}</h1>
+    <div className="mb-12 text-center">
+      <div className="bg-siso-orange/10 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+        {React.createElement(category.icon as React.ElementType, { 
+          className: "h-8 w-8 text-siso-orange" 
+        })}
       </div>
       
-      <p className="text-lg text-siso-text/80 mb-6">{category.description}</p>
+      <GradientText 
+        colors={["#F97316", "#ea384c", "#F97316"]} 
+        className="text-3xl sm:text-4xl font-bold mb-4"
+      >
+        {category.title}
+      </GradientText>
+      
+      <p className="text-lg text-siso-text/80 max-w-xl mx-auto">{category.description}</p>
     </div>
   );
 };

@@ -3,14 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { fetchCategory } from '@/services/static-documentation.service';
-import { DocCategory } from '@/types/documentation';
+import { DocCategory, DocArticle } from '@/types/documentation';
 import {
-  ArticlesList,
   BackButton,
   Breadcrumb,
   CategoryHeader,
   LoadingState,
-  NotFoundState
+  NotFoundState,
+  ModernArticleList
 } from '@/components/support/documentation/CategoryPage';
 
 const DocumentationCategoryPage = () => {
@@ -47,10 +47,10 @@ const DocumentationCategoryPage = () => {
   return (
     <MainLayout>
       <div className="container mx-auto py-8 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <Breadcrumb categoryTitle={category.title} />
           <CategoryHeader category={category} />
-          <ArticlesList articles={category.articles} categoryId={categoryId || ''} />
+          <ModernArticleList articles={category.articles} categoryId={categoryId || ''} />
           <BackButton />
         </div>
       </div>

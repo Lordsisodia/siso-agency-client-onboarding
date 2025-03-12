@@ -8,8 +8,12 @@ export const BackButton = () => {
   const navigate = useNavigate();
   
   return (
-    <div className="mt-8">
-      <Button variant="ghost" onClick={() => navigate('/support')}>
+    <div className="mt-12 text-center">
+      <Button 
+        variant="ghost" 
+        onClick={() => navigate('/support')}
+        className="text-siso-text/70 hover:text-siso-orange"
+      >
         <ChevronLeft className="h-4 w-4 mr-2" />
         Back to Help Center
       </Button>

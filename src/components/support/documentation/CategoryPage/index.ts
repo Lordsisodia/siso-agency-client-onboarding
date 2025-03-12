@@ -8,3 +8,4 @@ export * from './LoadingState';
 export * from './NotFoundState';
 export * from './QuestionAccordion';
 export * from './SectionAccordion';
+export * from './ModernArticleList';
