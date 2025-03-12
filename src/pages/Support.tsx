@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { AiChatSection } from '@/components/support/AiChatSection';
@@ -83,13 +82,13 @@ const Support = () => {
           <div className="mb-12">
             <div className="text-center mb-6">
               <GradientText 
-                colors={["#9b87f5", "#D946EF", "#F97316"]} 
+                colors={["#F97316", "#ea384c", "#F97316"]} 
                 className="text-4xl sm:text-5xl font-bold mb-3"
               >
                 Help Center
               </GradientText>
               <p className="text-siso-text/70 text-lg max-w-2xl mx-auto">
-                Find answers to your questions and comprehensive guides to help you get started
+                Get quick answers and guides for our platform
               </p>
             </div>
             

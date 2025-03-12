@@ -10,7 +10,7 @@ export const LoadingState = () => {
         <div className="flex flex-col items-center max-w-5xl mx-auto">
           <div className="w-full text-center mb-8">
             <GradientText 
-              colors={["#9b87f5", "#D946EF", "#F97316"]} 
+              colors={["#F97316", "#ea384c", "#F97316"]} 
               className="text-4xl sm:text-5xl font-bold mb-3"
             >
               <div className="animate-pulse h-10 w-64 bg-siso-bg-alt/50 rounded-lg mx-auto"></div>
