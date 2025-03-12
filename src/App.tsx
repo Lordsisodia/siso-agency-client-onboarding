@@ -12,6 +12,8 @@ import ProjectDetails from '@/pages/ProjectDetails';
 import Calendar from '@/pages/Calendar';
 import Tasks from '@/pages/Tasks';
 import Support from '@/pages/Support';
+import Profile from '@/pages/Profile';
+import Portfolio from '@/pages/Portfolio';
 import { AuthProvider } from '@/hooks/useAuth';
 import DocumentationCategoryPage from '@/pages/support/DocumentationCategoryPage';
 import DocumentationArticlePage from '@/pages/support/DocumentationArticlePage';
@@ -41,6 +43,8 @@ function App() {
           <Route path="/support/:categorySlug" element={<DocumentationCategoryPage />} />
           <Route path="/support/:categorySlug/:articleSlug" element={<DocumentationArticlePage />} />
           <Route path="/support/:categorySlug/:articleSlug/:questionSlug" element={<DocumentationQuestionPage />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/portfolio" element={<Portfolio />} />
         </Routes>
       </AuthProvider>
     </Router>
