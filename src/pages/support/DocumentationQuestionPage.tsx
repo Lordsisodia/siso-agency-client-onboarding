@@ -12,7 +12,7 @@ import {
   saveQuestionFeedback
 } from '@/services/static-documentation.service';
 import { DocCategory, DocArticle, DocSection, DocQuestion } from '@/types/documentation';
-import { useAuthSession } from '@/hooks/core';
+import { useAuth } from '@/hooks/useAuth';
 import { Breadcrumb } from '@/components/support/documentation/CategoryPage';
 
 const DocumentationQuestionPage = () => {
@@ -24,7 +24,7 @@ const DocumentationQuestionPage = () => {
   
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuthSession();
+  const { user } = useAuth();
   const [feedbackGiven, setFeedbackGiven] = useState<'helpful' | 'neutral' | 'not-helpful' | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [category, setCategory] = useState<DocCategory | null>(null);

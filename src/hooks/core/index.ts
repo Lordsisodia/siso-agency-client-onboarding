@@ -10,7 +10,7 @@ export * from "../use-plan-chat-assistant";
 // Export chat assistant hooks
 export * from "../use-chat-assistant";
 
-// Export additional hooks
+// Export additional hooks - now using useAuth instead of useAuthSession
 export * from "../useAuth";
 export * from "../useBasicUserData";
 export * from "../useDashboardStats";
