@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePlanChatAssistant } from '@/hooks/use-plan-chat-assistant';
@@ -67,9 +66,7 @@ export const useNewProject = () => {
           prompt += `Project Type: ${projectData.projectType}\n`;
         }
         
-        if (projectData.projectScale) {
-          prompt += `Project Scale: ${projectData.projectScale}\n`;
-        }
+        // Removed project scale from the prompt
         
         // Add selected features if any
         const selectedFeatures = Object.entries(projectData.features || {})

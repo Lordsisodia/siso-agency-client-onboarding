@@ -36,7 +36,6 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
       targetAudience: ''
     },
     projectType: '',
-    projectScale: 'medium',
     timelineBudget: {
       timeline: '',
       budget: '',
@@ -111,6 +110,9 @@ export function SmartProjectOnboarding({ onComplete, onSkip }: SmartProjectOnboa
           )
         }
       };
+      
+      // Remove project scale as requested
+      delete finalData.projectScale;
       
       onComplete(finalData);
       
