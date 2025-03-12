@@ -20,6 +20,7 @@ export interface Task {
   approvedBy?: string;
   approvedAt?: string;
   category?: string;
+  favorite?: boolean;
 }
 
 export interface PhaseInfo {

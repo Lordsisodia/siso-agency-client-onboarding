@@ -6,22 +6,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { Filter, Plus, Package, CheckSquare, Rocket, Code, Flag } from 'lucide-react';
+import { Filter, Plus, Package, CheckSquare, Rocket, Code, Flag, Star } from 'lucide-react';
 import { TaskLifecycle } from '@/components/tasks/TaskLifecycle';
 import { TaskTimeline } from '@/components/tasks/TaskTimeline';
 import { Task, TaskStatus } from '@/types/task';
+import { sortTasksByFavorites } from '@/utils/taskUtils';
 import { projectLifecycleTasks, sampleTasks } from '@/data/taskData';
 
 export default function Tasks() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [tasks, setTasks] = useState<Task[]>([...projectLifecycleTasks, ...sampleTasks]);
+  const [sortByFavorites, setSortByFavorites] = useState(false);
   
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          task.description.toLowerCase().includes(searchQuery.toLowerCase());
     
     if (activeTab === 'all') return matchesSearch;
+    if (activeTab === 'favorites') return matchesSearch && task.favorite === true;
     if (activeTab === 'pending') return matchesSearch && task.status === 'pending';
     if (activeTab === 'in-progress') return matchesSearch && task.status === 'in-progress';
     if (activeTab === 'completed') return matchesSearch && task.status === 'completed';
@@ -34,6 +37,10 @@ export default function Tasks() {
     return matchesSearch;
   });
 
+  const sortedTasks = sortByFavorites 
+    ? sortTasksByFavorites(filteredTasks) 
+    : filteredTasks;
+
   const handleUpdateTaskStatus = (taskId: string, newStatus: TaskStatus) => {
     setTasks(prevTasks => 
       prevTasks.map(task => 
@@ -42,6 +49,19 @@ export default function Tasks() {
               ...task, 
               status: newStatus,
               completedDate: newStatus === 'completed' ? new Date().toISOString() : task.completedDate
+            } 
+          : task
+      )
+    );
+  };
+
+  const handleToggleFavorite = (taskId: string) => {
+    setTasks(prevTasks => 
+      prevTasks.map(task => 
+        task.id === taskId 
+          ? { 
+              ...task, 
+              favorite: !task.favorite
             } 
           : task
       )
@@ -77,10 +97,21 @@ export default function Tasks() {
                 <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               </div>
               
-              <Button className="bg-siso-orange hover:bg-siso-orange/90 text-white">
-                <Plus className="h-4 w-4 mr-2" />
-                New Task
-              </Button>
+              <div className="flex gap-3 w-full md:w-auto">
+                <Button 
+                  variant="outline" 
+                  className={`${sortByFavorites ? 'bg-amber-500/20 text-amber-500 border-amber-500/50' : 'bg-black/30'}`}
+                  onClick={() => setSortByFavorites(!sortByFavorites)}
+                >
+                  <Star className={`h-4 w-4 mr-2 ${sortByFavorites ? 'fill-amber-500' : ''}`} />
+                  {sortByFavorites ? 'Favorites First' : 'Sort by Date'}
+                </Button>
+                
+                <Button className="bg-siso-orange hover:bg-siso-orange/90 text-white">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Task
+                </Button>
+              </div>
             </CardContent>
           </Card>
           
@@ -88,6 +119,9 @@ export default function Tasks() {
             <TabsList className="bg-black/30 border border-slate-800/50 p-1 flex flex-wrap">
               <TabsTrigger value="all" className="data-[state=active]:bg-siso-orange/20 data-[state=active]:text-siso-orange">
                 All Tasks
+              </TabsTrigger>
+              <TabsTrigger value="favorites" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-500">
+                <Star className="h-4 w-4 mr-1 fill-amber-500" /> Favorites
               </TabsTrigger>
               <TabsTrigger value="pending" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-500">
                 Pending
@@ -117,8 +151,12 @@ export default function Tasks() {
             </TabsList>
             
             <TabsContent value="all" className="mt-6">
-              {filteredTasks.length > 0 ? (
-                <TaskLifecycle tasks={filteredTasks} onUpdateStatus={handleUpdateTaskStatus} />
+              {sortedTasks.length > 0 ? (
+                <TaskLifecycle 
+                  tasks={sortedTasks} 
+                  onUpdateStatus={handleUpdateTaskStatus} 
+                  onToggleFavorite={handleToggleFavorite}
+                />
               ) : (
                 <div className="py-16 text-center">
                   <motion.div
@@ -134,10 +172,14 @@ export default function Tasks() {
               )}
             </TabsContent>
             
-            {['pending', 'in-progress', 'completed', 'setup', 'review', 'initiation', 'development', 'completion'].map((tabValue) => (
+            {['favorites', 'pending', 'in-progress', 'completed', 'setup', 'review', 'initiation', 'development', 'completion'].map((tabValue) => (
               <TabsContent key={tabValue} value={tabValue} className="mt-6">
-                {filteredTasks.length > 0 ? (
-                  <TaskLifecycle tasks={filteredTasks} onUpdateStatus={handleUpdateTaskStatus} />
+                {sortedTasks.length > 0 ? (
+                  <TaskLifecycle 
+                    tasks={sortedTasks} 
+                    onUpdateStatus={handleUpdateTaskStatus} 
+                    onToggleFavorite={handleToggleFavorite}
+                  />
                 ) : (
                   <div className="py-16 text-center">
                     <motion.div
@@ -150,6 +192,8 @@ export default function Tasks() {
                       <p className="text-muted-foreground">
                         {tabValue === 'completed' 
                           ? 'You haven\'t completed any tasks yet.' 
+                          : tabValue === 'favorites'
+                          ? 'You haven\'t marked any tasks as favorites yet.'
                           : `You don't have any ${tabValue.replace('-', ' ')} tasks. Create one to get started.`}
                       </p>
                     </motion.div>

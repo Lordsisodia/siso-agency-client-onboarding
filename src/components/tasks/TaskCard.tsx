@@ -4,16 +4,22 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CalendarIcon, ClipboardList, ThumbsUp, Clock, AlertCircle, CheckCircle } from 'lucide-react';
+import { CalendarIcon, ClipboardList, ThumbsUp, Clock, AlertCircle, CheckCircle, Star, StarOff } from 'lucide-react';
 import { Task, TaskStatus } from '@/types/task';
 
 interface TaskCardProps {
   task: Task;
   allTasks: Task[];
   onUpdateStatus: (taskId: string, newStatus: TaskStatus) => void;
+  onToggleFavorite?: (taskId: string) => void;
 }
 
-export const TaskCard: React.FC<TaskCardProps> = ({ task, allTasks, onUpdateStatus }) => {
+export const TaskCard: React.FC<TaskCardProps> = ({ 
+  task, 
+  allTasks, 
+  onUpdateStatus,
+  onToggleFavorite 
+}) => {
   const phaseInfo = task.phase ? {
     icon: <ClipboardList className="w-4 h-4" />,
     color: 'text-slate-400 bg-slate-400/10 border-slate-400/20'
@@ -58,12 +64,18 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, allTasks, onUpdateStat
     }
   };
 
+  const handleToggleFavorite = () => {
+    if (onToggleFavorite) {
+      onToggleFavorite(task.id);
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`p-4 rounded-xl border ${task.status === 'completed' ? 'border-green-500/30 bg-green-500/5' : 'border-slate-800/60 bg-black/20'} backdrop-blur-sm shadow-sm hover:shadow-md transition-all`}
+      className={`p-4 rounded-xl border ${task.status === 'completed' ? 'border-green-500/30 bg-green-500/5' : 'border-slate-800/60 bg-black/20'} ${task.favorite ? 'ring-2 ring-amber-500/50' : ''} backdrop-blur-sm shadow-sm hover:shadow-md transition-all`}
     >
       <div className="flex justify-between items-start mb-2">
         <div className="flex items-center gap-2">
@@ -72,9 +84,19 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, allTasks, onUpdateStat
           </span>
           <h3 className={`font-semibold ${task.status === 'completed' ? 'text-slate-400 line-through' : 'text-slate-100'}`}>{task.title}</h3>
         </div>
-        <span className={`text-xs px-2 py-1 rounded-full border ${priorityColors[task.priority]}`}>
-          {task.priority}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className={`text-xs px-2 py-1 rounded-full border ${priorityColors[task.priority]}`}>
+            {task.priority}
+          </span>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-8 h-8 p-0 text-amber-500 hover:text-amber-400 hover:bg-amber-900/20"
+            onClick={handleToggleFavorite}
+          >
+            {task.favorite ? <Star className="w-4 h-4 fill-amber-500" /> : <StarOff className="w-4 h-4" />}
+          </Button>
+        </div>
       </div>
       
       <p className={`text-sm text-slate-300/80 mb-3 ml-10 ${task.status === 'completed' ? 'text-slate-500/80 line-through' : ''}`}>{task.description}</p>

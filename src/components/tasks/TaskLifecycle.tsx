@@ -8,11 +8,13 @@ import { sortTasksByPhase } from '@/utils/taskUtils';
 interface TaskLifecycleProps {
   tasks: Task[];
   onUpdateStatus: (taskId: string, newStatus: TaskStatus) => void;
+  onToggleFavorite?: (taskId: string) => void;
 }
 
 export const TaskLifecycle: React.FC<TaskLifecycleProps> = ({ 
   tasks, 
-  onUpdateStatus 
+  onUpdateStatus,
+  onToggleFavorite 
 }) => {
   const phaseSortedTasks = sortTasksByPhase(tasks);
   
@@ -34,11 +36,11 @@ export const TaskLifecycle: React.FC<TaskLifecycleProps> = ({
         />
       </div>
       
-      <PhaseGroup phase="setup" tasks={phaseSortedTasks} allTasks={tasks} onUpdateStatus={onUpdateStatus} />
-      <PhaseGroup phase="review" tasks={phaseSortedTasks} allTasks={tasks} onUpdateStatus={onUpdateStatus} />
-      <PhaseGroup phase="initiation" tasks={phaseSortedTasks} allTasks={tasks} onUpdateStatus={onUpdateStatus} />
-      <PhaseGroup phase="development" tasks={phaseSortedTasks} allTasks={tasks} onUpdateStatus={onUpdateStatus} />
-      <PhaseGroup phase="completion" tasks={phaseSortedTasks} allTasks={tasks} onUpdateStatus={onUpdateStatus} />
+      <PhaseGroup phase="setup" tasks={phaseSortedTasks} allTasks={tasks} onUpdateStatus={onUpdateStatus} onToggleFavorite={onToggleFavorite} />
+      <PhaseGroup phase="review" tasks={phaseSortedTasks} allTasks={tasks} onUpdateStatus={onUpdateStatus} onToggleFavorite={onToggleFavorite} />
+      <PhaseGroup phase="initiation" tasks={phaseSortedTasks} allTasks={tasks} onUpdateStatus={onUpdateStatus} onToggleFavorite={onToggleFavorite} />
+      <PhaseGroup phase="development" tasks={phaseSortedTasks} allTasks={tasks} onUpdateStatus={onUpdateStatus} onToggleFavorite={onToggleFavorite} />
+      <PhaseGroup phase="completion" tasks={phaseSortedTasks} allTasks={tasks} onUpdateStatus={onUpdateStatus} onToggleFavorite={onToggleFavorite} />
     </div>
   );
 };

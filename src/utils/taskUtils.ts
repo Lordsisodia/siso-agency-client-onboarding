@@ -20,3 +20,14 @@ export const sortTasksByPhase = (tasks: Task[]): Task[] => {
     return 0;
   });
 };
+
+export const sortTasksByFavorites = (tasks: Task[]): Task[] => {
+  return [...tasks].sort((a, b) => {
+    // Sort by favorite status first (favorites come first)
+    if (a.favorite && !b.favorite) return -1;
+    if (!a.favorite && b.favorite) return 1;
+    
+    // Then sort by due date if favorite status is the same
+    return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+  });
+};

@@ -10,13 +10,15 @@ interface PhaseGroupProps {
   tasks: Task[];
   allTasks: Task[];
   onUpdateStatus: (taskId: string, newStatus: TaskStatus) => void;
+  onToggleFavorite?: (taskId: string) => void;
 }
 
 export const PhaseGroup: React.FC<PhaseGroupProps> = ({
   phase,
   tasks,
   allTasks,
-  onUpdateStatus
+  onUpdateStatus,
+  onToggleFavorite
 }) => {
   const phaseInfo = phaseConfig[phase];
   const tasksInPhase = tasks.filter(task => task.phase === phase);
@@ -63,6 +65,7 @@ export const PhaseGroup: React.FC<PhaseGroupProps> = ({
             task={task} 
             allTasks={allTasks} 
             onUpdateStatus={onUpdateStatus} 
+            onToggleFavorite={onToggleFavorite}
           />
         ))}
       </div>

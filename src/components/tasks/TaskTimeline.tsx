@@ -9,11 +9,13 @@ import { sortTasksChronologically } from '@/utils/taskUtils';
 interface TaskTimelineProps {
   tasks: Task[];
   onUpdateStatus: (taskId: string, newStatus: TaskStatus) => void;
+  onToggleFavorite?: (taskId: string) => void;
 }
 
 export const TaskTimeline: React.FC<TaskTimelineProps> = ({ 
   tasks, 
-  onUpdateStatus 
+  onUpdateStatus,
+  onToggleFavorite
 }) => {
   const chronologicalTasks = sortTasksChronologically(tasks);
   
@@ -56,7 +58,12 @@ export const TaskTimeline: React.FC<TaskTimelineProps> = ({
               <div className="text-xs text-slate-400 mb-1">
                 {format(new Date(task.dueDate), 'MMM d, yyyy')}
               </div>
-              <TaskCard task={task} allTasks={chronologicalTasks} onUpdateStatus={onUpdateStatus} />
+              <TaskCard 
+                task={task} 
+                allTasks={chronologicalTasks} 
+                onUpdateStatus={onUpdateStatus} 
+                onToggleFavorite={onToggleFavorite}
+              />
             </div>
           </div>
         ))}
