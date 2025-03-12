@@ -1,4 +1,5 @@
 
+
 interface Project {
   id: string;
   title: string;
@@ -297,3 +298,4 @@ export const demoProjects: Project[] = [
     }
   }
 ];
+
