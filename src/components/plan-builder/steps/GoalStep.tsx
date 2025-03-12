@@ -17,10 +17,7 @@ export const GoalStep: React.FC<GoalStepProps> = ({
   onGoalChange, 
   onNext 
 }) => {
-  const [showCustomInput, setShowCustomInput] = useState(
-    !goals.some(g => g.value === goal) && goal !== ""
-  );
-
+  // Define the goals array before using it
   const goals = [
     { 
       value: "Increase Sales", 
@@ -47,6 +44,10 @@ export const GoalStep: React.FC<GoalStepProps> = ({
       description: "Successfully introduce a new offering to the market"
     }
   ];
+  
+  const [showCustomInput, setShowCustomInput] = useState(
+    !goals.some(g => g.value === goal) && goal !== ""
+  );
 
   const handleCustomGoal = (value: string) => {
     if (value.trim()) {
