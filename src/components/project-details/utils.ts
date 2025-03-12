@@ -47,9 +47,9 @@ export const fetchProjectData = async (projectId: string, isDemo: boolean): Prom
     // We need to check if the timeline property exists in the database response
     let timeline = undefined;
     
-    // The timeline data might be stored in a JSON column or might not exist at all
-    // Let's check if it exists in detailsData first
-    const timelineData = detailsData.timeline;
+    // Using type assertion with 'as any' to handle the property access
+    // We're already checking if the property exists at runtime
+    const timelineData = (detailsData as any).timeline;
     if (timelineData) {
       const timelineJson = safeJsonObject(timelineData);
       timeline = {
