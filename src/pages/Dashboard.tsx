@@ -16,8 +16,8 @@ export default function Dashboard() {
   const { user, loading: authLoading } = useAuthSession();
   const { userData } = useBasicUserData();
   const { stats, fetchStats, isLoading: statsLoading, error } = useDashboardStats();
-  const { notifications, handleMarkAsRead, handleViewAll } = useNotifications();
-  const { events, handleViewCalendar } = useEvents();
+  const { notifications, handleMarkAsRead, handleViewAll, isLoading: notificationsLoading } = useNotifications();
+  const { events, handleViewCalendar, isLoading: eventsLoading } = useEvents();
   const location = useLocation();
 
   useEffect(() => {
@@ -98,7 +98,9 @@ export default function Dashboard() {
           stats={stats}
           statsLoading={statsLoading}
           notifications={notifications}
+          notificationsLoading={notificationsLoading}
           events={events}
+          eventsLoading={eventsLoading}
           onNotificationRead={handleMarkAsRead}
           onViewAllNotifications={handleViewAll}
           onViewCalendar={handleViewCalendar}

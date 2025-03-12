@@ -1,145 +1,143 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle2, Clock, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, CircleDashed, AlertCircle, ArrowRight, ListTodo } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { motion } from 'framer-motion';
 
 interface TasksPreviewProps {
   pendingTasks: number;
-  onViewAll: () => void;
+  onViewAll?: () => void;
   loading?: boolean;
 }
 
 export const TasksPreview: React.FC<TasksPreviewProps> = ({ 
-  pendingTasks,
+  pendingTasks, 
   onViewAll,
   loading = false
 }) => {
-  // Sample tasks data - in a real app, these would come from an API or data store
-  const sampleTasks = [
+  // Demo tasks - in a real application, these would come from the database
+  const demoTasks = [
     {
-      id: "1",
-      title: "Review project proposal",
-      priority: "high",
-      dueDate: "Today",
-      status: "pending"
+      id: '1',
+      title: 'Complete project wireframes',
+      status: 'pending',
+      dueDate: '2023-09-30'
     },
     {
-      id: "2",
-      title: "Finalize marketing plan",
-      priority: "medium",
-      dueDate: "Tomorrow",
-      status: "in-progress"
+      id: '2',
+      title: 'Review client feedback',
+      status: 'completed',
+      dueDate: '2023-09-25'
     },
     {
-      id: "3",
-      title: "Schedule client meeting",
-      priority: "low",
-      dueDate: "Next week",
-      status: "pending"
+      id: '3',
+      title: 'Meeting with design team',
+      status: 'pending',
+      dueDate: '2023-10-02'
     }
   ];
-  
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
-      case 'medium': return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-      case 'low': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-      default: return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
-    }
-  };
-  
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed': return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'in-progress': return <CircleDashed className="h-4 w-4 text-blue-500" />;
-      case 'pending': return <AlertCircle className="h-4 w-4 text-amber-500" />;
-      default: return <CircleDashed className="h-4 w-4" />;
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
     }
   };
 
-  if (loading) {
-    return (
-      <Card className="border border-siso-border/40 bg-black/20 backdrop-blur-sm">
-        <CardHeader className="pb-2 flex flex-row justify-between items-center">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <ListTodo className="h-4 w-4" />
-            Pending Tasks
-          </CardTitle>
-          <Skeleton className="h-6 w-12 rounded-full" />
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-20 w-full rounded-lg" />
-            ))}
-          </div>
-          <Skeleton className="h-9 w-full mt-3" />
-        </CardContent>
-      </Card>
-    );
-  }
-  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.4 }
+    }
+  };
+
   return (
-    <Card className="border border-siso-border/40 bg-black/20 backdrop-blur-sm hover:bg-black/30 transition-colors duration-300">
-      <CardHeader className="pb-2 flex flex-row justify-between items-center">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <ListTodo className="h-4 w-4" />
-          Pending Tasks
-        </CardTitle>
-        <Badge variant="outline" className="bg-siso-primary/10 text-siso-primary border-siso-primary/20">
-          {pendingTasks} Task{pendingTasks !== 1 ? 's' : ''}
-        </Badge>
+    <Card className="border border-slate-800/60 bg-gradient-to-br from-slate-900/50 to-slate-800/30 shadow-md">
+      <CardHeader className="flex flex-row items-center justify-between pb-2 pt-4">
+        <CardTitle className="text-lg font-medium">Tasks Preview</CardTitle>
+        <div className="flex items-center space-x-2">
+          {loading ? (
+            <div className="flex items-center space-x-2">
+              <Loader2 className="h-4 w-4 animate-spin text-siso-orange" />
+              <span className="text-sm text-siso-text-muted">Loading...</span>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <Clock className="h-4 w-4 text-siso-orange" />
+              <span className="text-sm text-siso-text-muted">{pendingTasks} pending</span>
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
-        {sampleTasks.length === 0 ? (
-          <div className="text-center py-4">
-            <p className="text-sm text-siso-text-muted">No pending tasks</p>
-          </div>
-        ) : (
-          <AnimatePresence>
-            <div className="space-y-3">
-              {sampleTasks.map((task, index) => (
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-2"
+        >
+          {loading ? (
+            // Loading skeleton state
+            <>
+              {[1, 2, 3].map(i => (
                 <motion.div 
-                  key={task.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="group p-3 rounded-lg border border-siso-border/20 hover:border-siso-border/40 
-                            transition-all duration-300 bg-siso-bg-card/50 hover:bg-siso-bg-card/70"
+                  key={i} 
+                  variants={itemVariants}
+                  className="flex items-center justify-between p-2 rounded-md bg-gray-800/20 animate-pulse"
                 >
-                  <div className="flex justify-between items-start mb-1">
-                    <h4 className="font-medium text-sm flex items-center gap-2 group-hover:text-white transition-colors">
-                      <span className="transition-transform duration-300 group-hover:scale-110">
-                        {getStatusIcon(task.status)}
-                      </span>
-                      {task.title}
-                    </h4>
-                    <Badge className={`text-xs ${getPriorityColor(task.priority)}`}>
-                      {task.priority}
-                    </Badge>
+                  <div className="flex items-center space-x-3">
+                    <div className="h-4 w-4 rounded-full bg-gray-700/50"></div>
+                    <div className="h-4 w-48 bg-gray-700/50 rounded"></div>
                   </div>
-                  <div className="flex items-center text-xs text-siso-text-muted group-hover:text-siso-text pl-6 transition-colors">
-                    Due: {task.dueDate}
-                  </div>
+                  <div className="h-3 w-20 bg-gray-700/50 rounded"></div>
                 </motion.div>
               ))}
-            </div>
-          </AnimatePresence>
-        )}
-        
-        <Button 
-          variant="ghost" 
-          className="w-full mt-3 text-sm text-siso-text-muted hover:text-siso-text hover:bg-white/5 transition-colors"
-          onClick={onViewAll}
-        >
-          View All Tasks
-          <ArrowRight className="h-4 w-4 ml-1" />
-        </Button>
+            </>
+          ) : (
+            // Actual task items
+            <>
+              {demoTasks.map((task) => (
+                <motion.div 
+                  key={task.id} 
+                  variants={itemVariants}
+                  className="flex items-center justify-between p-2 rounded-md hover:bg-slate-800/30 transition-colors"
+                >
+                  <div className="flex items-center space-x-3">
+                    {task.status === 'completed' ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Clock className="h-4 w-4 text-yellow-500" />
+                    )}
+                    <span className={`${task.status === 'completed' ? 'line-through text-slate-400' : 'text-white'}`}>
+                      {task.title}
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-400">
+                    {new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
+                </motion.div>
+              ))}
+            </>
+          )}
+          
+          <div className="mt-4 flex justify-end">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="flex items-center text-siso-text-muted hover:text-white"
+              onClick={onViewAll}
+            >
+              View all tasks
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </motion.div>
       </CardContent>
     </Card>
   );

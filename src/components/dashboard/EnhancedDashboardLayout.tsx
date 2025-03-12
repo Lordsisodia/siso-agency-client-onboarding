@@ -18,7 +18,9 @@ interface DashboardLayoutProps {
   stats?: DashboardStats;
   statsLoading?: boolean;
   notifications?: Notification[];
+  notificationsLoading?: boolean;
   events?: Event[];
+  eventsLoading?: boolean;
   onNotificationRead?: (id: string) => void;
   onViewAllNotifications?: () => void;
   onViewCalendar?: () => void;
@@ -30,7 +32,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   stats,
   statsLoading = false,
   notifications = [],
+  notificationsLoading = false,
   events = [],
+  eventsLoading = false,
   onNotificationRead,
   onViewAllNotifications,
   onViewCalendar
@@ -58,6 +62,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   const handleViewAllTasks = () => {
     navigate('/tasks');
+  };
+
+  const handleRefreshData = () => {
+    window.location.reload();
   };
 
   const containerVariants = {
@@ -108,7 +116,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 variant="ghost" 
                 size="sm" 
                 className="text-xs text-siso-text-muted hover:text-white flex items-center gap-1"
-                onClick={() => window.location.reload()}
+                onClick={handleRefreshData}
               >
                 <RefreshCw className="h-3 w-3" />
                 Refresh
@@ -129,6 +137,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <TasksPreview 
                 pendingTasks={stats?.pendingTasks || 0} 
                 onViewAll={handleViewAllTasks} 
+                loading={statsLoading}
               />
             </div>
           </motion.div>
@@ -139,7 +148,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 notifications={notifications} 
                 onViewAll={onViewAllNotifications}
                 onMarkAsRead={onNotificationRead}
-                loading={statsLoading}
+                loading={notificationsLoading}
               />
             )}
             
@@ -147,7 +156,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <UpcomingEvents 
                 events={events} 
                 onViewCalendar={onViewCalendar}
-                loading={statsLoading}
+                loading={eventsLoading}
               />
             )}
           </motion.div>
