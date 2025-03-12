@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Waves } from '@/components/ui/waves-background';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Plus, Edit, Trash2, MessageCircle, Calendar, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, MessageCircle, Calendar, Loader2, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -64,7 +63,6 @@ export default function Projects() {
         throw error;
       }
 
-      // Fetch project details for each project
       const projectsWithDetails = await Promise.all(
         projectsData.map(async (project) => {
           const { data: detailsData, error: detailsError } = await supabase
@@ -174,6 +172,10 @@ export default function Projects() {
     navigate(`/new-project?projectId=${projectId}`);
   };
 
+  const viewProjectDetails = (projectId: string) => {
+    navigate(`/project/${projectId}`);
+  };
+
   useEffect(() => {
     fetchProjects();
   }, [user]);
@@ -281,7 +283,12 @@ export default function Projects() {
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle className="text-xl font-bold">{project.title}</CardTitle>
+                          <CardTitle 
+                            className="text-xl font-bold hover:text-siso-orange transition-colors cursor-pointer"
+                            onClick={() => viewProjectDetails(project.id)}
+                          >
+                            {project.title}
+                          </CardTitle>
                           <CardDescription className="mt-1 text-siso-text/70">
                             Created: {format(new Date(project.created_at), 'MMM d, yyyy')}
                           </CardDescription>
@@ -330,15 +337,26 @@ export default function Projects() {
                           Delete
                         </Button>
                       </div>
-                      <Button 
-                        variant="default" 
-                        size="sm"
-                        onClick={() => continuePlanning(project.id)}
-                        className="text-xs h-8 bg-gradient-to-r from-siso-red to-siso-orange"
-                      >
-                        <MessageCircle className="mr-1 h-3 w-3" />
-                        Continue
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => viewProjectDetails(project.id)}
+                          className="text-xs h-8"
+                        >
+                          <ExternalLink className="mr-1 h-3 w-3" />
+                          View
+                        </Button>
+                        <Button 
+                          variant="default" 
+                          size="sm"
+                          onClick={() => continuePlanning(project.id)}
+                          className="text-xs h-8 bg-gradient-to-r from-siso-red to-siso-orange"
+                        >
+                          <MessageCircle className="mr-1 h-3 w-3" />
+                          Continue
+                        </Button>
+                      </div>
                     </CardFooter>
                   </Card>
                 </motion.div>

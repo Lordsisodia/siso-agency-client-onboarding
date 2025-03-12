@@ -1,130 +1,56 @@
-
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './hooks/useAuth';
-import './App.css';
-
-import { Helmet } from 'react-helmet';
-import { useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
-
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import Landing from '@/pages/Landing';
 import Auth from '@/pages/Auth';
-import Profile from '@/pages/Profile';
-import SocialOnboarding from '@/pages/onboarding/social';
-import OnboardingCongratulations from '@/pages/onboarding/congratulations';
-import ThankYou from '@/pages/ThankYou';
-import Terms from '@/pages/Terms';
-import PrivacyPolicy from '@/pages/PrivacyPolicy';
-
-// Core pages
 import Dashboard from '@/pages/Dashboard';
-import Projects from '@/pages/Projects';
-import PlanBuilder from '@/pages/PlanBuilder';
 import NewProject from '@/pages/NewProject';
-import Support from '@/pages/Support';
-import Notifications from '@/pages/Notifications';
-import Tasks from '@/pages/PendingTasks'; // Renamed for consistency
-import Portfolio from '@/pages/Portfolio';
+import PlanBuilder from '@/pages/PlanBuilder';
+import Projects from '@/pages/Projects';
+import Assistants from '@/pages/Assistants';
+import Assistant from '@/pages/Assistant';
+import LeaderboardPage from '@/pages/LeaderboardPage';
+import { AuthProvider } from '@/hooks/useAuth';
+import { ToastProvider } from '@/hooks/use-toast';
+import { ViewportLoadingProvider } from '@/hooks/useViewportLoading';
+import { NotificationsProvider } from '@/hooks/useNotifications';
+import { DashboardStatsProvider } from '@/hooks/useDashboardStats';
+import { LeaderboardDataProvider } from '@/hooks/leaderboard/useLeaderboardData';
+import ProjectDetails from '@/pages/ProjectDetails';
 
-// Support documentation pages
-import DocumentationCategoryPage from '@/pages/support/DocumentationCategoryPage';
-import DocumentationArticlePage from '@/pages/support/DocumentationArticlePage';
-import DocumentationQuestionPage from '@/pages/support/DocumentationQuestionPage';
-import ImportDocumentationPage from '@/pages/support/ImportDocumentationPage';
-
-import { Toaster } from '@/components/ui/toaster';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-// Create a React Query client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
-      retry: 1,
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-    },
-  },
-});
-
-const AppRoutes = () => {
-  const location = useLocation();
-
-  // Simple route logging
+function App() {
   useEffect(() => {
-    console.info('Current pathname:', location.pathname);
-  }, [location]);
+    // Log the current base URL
+    console.log("Base URL:", import.meta.env.BASE_URL);
+  }, []);
 
   return (
-    <SidebarProvider className="flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar">
-      <Helmet>
-        <title>SISO - Your business planning platform</title>
-        <meta name="description" content="SISO is the premier platform for business planning and resource management." />
-      </Helmet>
-
-      <div className="flex min-h-screen w-full bg-gradient-to-b from-gray-900 to-black">
-        <Routes>
-          {/* Public routes */}
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/thank-you" element={<ThankYou />} />
-          
-          {/* Default route - show dashboard for both logged in and not logged in users */}
-          <Route path="/" element={<Dashboard />} />
-          
-          {/* Core routes - protected */}
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
-          <Route path="/plan-builder" element={<ProtectedRoute><PlanBuilder /></ProtectedRoute>} />
-          <Route path="/plan-builder/:projectId" element={<ProtectedRoute><PlanBuilder /></ProtectedRoute>} />
-          <Route path="/new-project" element={<ProtectedRoute><NewProject /></ProtectedRoute>} />
-          
-          {/* Support routes - properly nested */}
-          <Route path="/support" element={<Support />} />
-          <Route path="/support/import" element={<ImportDocumentationPage />} />
-          <Route path="/support/:categoryId" element={<DocumentationCategoryPage />} />
-          <Route path="/support/:categoryId/:articleId" element={<DocumentationArticlePage />} />
-          <Route path="/support/:categoryId/:articleId/:questionId" element={<DocumentationQuestionPage />} />
-          
-          <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-          <Route path="/portfolio" element={<ProtectedRoute><Portfolio /></ProtectedRoute>} />
-          <Route path="/tasks" element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          
-          {/* Redirects for renamed/moved pages */}
-          <Route path="/pending-tasks" element={<Navigate to="/tasks" replace />} />
-          <Route path="/organization" element={<Navigate to="/profile" replace />} />
-          <Route path="/company-profile" element={<Navigate to="/profile" replace />} />
-          <Route path="/import-documentation" element={<Navigate to="/support/import" replace />} />
-          
-          {/* Onboarding routes */}
-          <Route path="/onboarding/social" element={<SocialOnboarding />} />
-          <Route path="/onboarding/congratulations" element={<OnboardingCongratulations />} />
-
-          {/* Fallback route */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </div>
-
-      <Toaster />
-    </SidebarProvider>
+    <Router basename={import.meta.env.BASE_URL || "/"}>
+      <AuthProvider>
+        <ToastProvider>
+          <ViewportLoadingProvider>
+            <NotificationsProvider>
+              <DashboardStatsProvider>
+                <LeaderboardDataProvider>
+                  <Routes>
+                    <Route path="/" element={<Landing />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/new-project" element={<NewProject />} />
+                    <Route path="/project/:projectId" element={<ProjectDetails />} />
+                    <Route path="/plan-builder" element={<PlanBuilder />} />
+                    <Route path="/projects" element={<Projects />} />
+                    <Route path="/assistants" element={<Assistants />} />
+                    <Route path="/assistants/:id" element={<Assistant />} />
+                    <Route path="/leaderboard" element={<LeaderboardPage />} />
+                  </Routes>
+                </LeaderboardDataProvider>
+              </DashboardStatsProvider>
+            </NotificationsProvider>
+          </ViewportLoadingProvider>
+        </ToastProvider>
+      </AuthProvider>
+    </Router>
   );
-};
-
-const App: React.FC = () => {
-  return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </QueryClientProvider>
-    </AuthProvider>
-  );
-};
+}
 
 export default App;
