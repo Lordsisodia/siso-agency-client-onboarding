@@ -9,6 +9,8 @@ import NewProject from '@/pages/NewProject';
 import PlanBuilder from '@/pages/PlanBuilder';
 import Projects from '@/pages/Projects';
 import ProjectDetails from '@/pages/ProjectDetails';
+import Calendar from '@/pages/Calendar';
+import Tasks from '@/pages/Tasks';
 import { AuthProvider } from '@/hooks/useAuth';
 
 function App() {
@@ -29,6 +31,8 @@ function App() {
           <Route path="/project/:projectId" element={<ProjectDetails />} />
           <Route path="/plan-builder" element={<PlanBuilder />} />
           <Route path="/projects" element={<Projects />} />
+          <Route path="/calendar" element={<Calendar />} />
+          <Route path="/tasks" element={<Tasks />} />
         </Routes>
       </AuthProvider>
     </Router>
