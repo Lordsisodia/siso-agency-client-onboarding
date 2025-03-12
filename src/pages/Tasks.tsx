@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,19 +12,24 @@ import {
   AlertCircle, 
   Filter, 
   Plus, 
-  Gavel, 
-  Bell, 
-  FileText, 
   ClipboardList,
   Calendar as CalendarIcon,
-  ChevronRight
+  ChevronRight,
+  Package,
+  CheckSquare,
+  ThumbsUp,
+  Rocket,
+  Play,
+  Code,
+  Settings,
+  FlagCheckered,
+  Trophy
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 
-// Enhanced Task type definition with categories
 type TaskStatus = 'pending' | 'in-progress' | 'completed';
-type TaskCategory = 'court-action' | 'cta-action' | 'documentation' | 'general';
+type TaskPhase = 'setup' | 'review' | 'initiation' | 'development' | 'completion';
 
 type Task = {
   id: string;
@@ -34,15 +38,255 @@ type Task = {
   dueDate: string;
   priority: 'low' | 'medium' | 'high';
   status: TaskStatus;
-  category: TaskCategory;
+  phase: TaskPhase;
+  phaseOrder: number;
   completedDate?: string;
   dependsOn?: string[];
   assignedTo?: string;
   project?: string;
   tags?: string[];
+  requiresApproval?: boolean;
+  approvedBy?: string;
+  approvedAt?: string;
 };
 
-// Sample data for tasks - now with chronological ordering and categories
+const phaseConfig = {
+  'setup': {
+    icon: <Package className="w-4 h-4" />,
+    color: 'text-blue-500 bg-blue-500/10 border-blue-500/20',
+    title: 'Project Setup',
+    description: 'Initial project setup and requirements gathering'
+  },
+  'review': {
+    icon: <CheckSquare className="w-4 h-4" />,
+    color: 'text-purple-500 bg-purple-500/10 border-purple-500/20',
+    title: 'Review & Approval',
+    description: 'Review and approval of project requirements'
+  },
+  'initiation': {
+    icon: <Rocket className="w-4 h-4" />,
+    color: 'text-pink-500 bg-pink-500/10 border-pink-500/20',
+    title: 'Project Initiation',
+    description: 'Initiate the project and begin onboarding'
+  },
+  'development': {
+    icon: <Code className="w-4 h-4" />,
+    color: 'text-amber-500 bg-amber-500/10 border-amber-500/20',
+    title: 'Development',
+    description: 'Project development and implementation'
+  },
+  'completion': {
+    icon: <FlagCheckered className="w-4 h-4" />,
+    color: 'text-green-500 bg-green-500/10 border-green-500/20',
+    title: 'Completion',
+    description: 'Final review and project delivery'
+  }
+};
+
+const projectLifecycleTasks: Task[] = [
+  {
+    id: 'setup-1',
+    title: 'Complete Plan Builder Information',
+    description: 'Fill out all required information in the Plan Builder',
+    dueDate: '2023-12-15',
+    priority: 'high',
+    status: 'pending',
+    phase: 'setup',
+    phaseOrder: 1,
+    project: 'Project Lifecycle',
+    tags: ['setup', 'planning']
+  },
+  {
+    id: 'setup-2',
+    title: 'Initial AI Consultation',
+    description: 'Schedule and complete initial consultation with AI assistant',
+    dueDate: '2023-12-16',
+    priority: 'medium',
+    status: 'pending',
+    phase: 'setup',
+    phaseOrder: 2,
+    dependsOn: ['setup-1'],
+    project: 'Project Lifecycle',
+    tags: ['setup', 'consultation']
+  },
+  {
+    id: 'setup-3',
+    title: 'Submit Project Requirements',
+    description: 'Finalize and submit all project requirements',
+    dueDate: '2023-12-18',
+    priority: 'high',
+    status: 'pending',
+    phase: 'setup',
+    phaseOrder: 3,
+    dependsOn: ['setup-2'],
+    project: 'Project Lifecycle',
+    tags: ['setup', 'requirements'],
+    requiresApproval: true
+  },
+  
+  {
+    id: 'review-1',
+    title: 'AI Review & Feedback',
+    description: 'AI review of project requirements and initial feedback',
+    dueDate: '2023-12-20',
+    priority: 'high',
+    status: 'pending',
+    phase: 'review',
+    phaseOrder: 1,
+    dependsOn: ['setup-3'],
+    project: 'Project Lifecycle',
+    tags: ['review', 'feedback']
+  },
+  {
+    id: 'review-2',
+    title: 'Requirements Adjustment',
+    description: 'Make adjustments to requirements based on AI feedback',
+    dueDate: '2023-12-22',
+    priority: 'medium',
+    status: 'pending',
+    phase: 'review',
+    phaseOrder: 2,
+    dependsOn: ['review-1'],
+    project: 'Project Lifecycle',
+    tags: ['review', 'adjustment']
+  },
+  {
+    id: 'review-3',
+    title: 'Final AI Approval',
+    description: 'Get final approval from AI for project requirements',
+    dueDate: '2023-12-24',
+    priority: 'high',
+    status: 'pending',
+    phase: 'review',
+    phaseOrder: 3,
+    dependsOn: ['review-2'],
+    project: 'Project Lifecycle',
+    tags: ['review', 'approval'],
+    requiresApproval: true
+  },
+  
+  {
+    id: 'initiation-1',
+    title: 'Project Publication',
+    description: 'Publish project to development team',
+    dueDate: '2023-12-26',
+    priority: 'high',
+    status: 'pending',
+    phase: 'initiation',
+    phaseOrder: 1,
+    dependsOn: ['review-3'],
+    project: 'Project Lifecycle',
+    tags: ['initiation', 'publication']
+  },
+  {
+    id: 'initiation-2',
+    title: 'Initial Deposit Payment',
+    description: 'Process initial deposit payment',
+    dueDate: '2023-12-28',
+    priority: 'high',
+    status: 'pending',
+    phase: 'initiation',
+    phaseOrder: 2,
+    dependsOn: ['initiation-1'],
+    project: 'Project Lifecycle',
+    tags: ['initiation', 'payment']
+  },
+  {
+    id: 'initiation-3',
+    title: 'Schedule Onboarding Call',
+    description: 'Schedule and prepare for onboarding call with client',
+    dueDate: '2023-12-30',
+    priority: 'medium',
+    status: 'pending',
+    phase: 'initiation',
+    phaseOrder: 3,
+    dependsOn: ['initiation-2'],
+    project: 'Project Lifecycle',
+    tags: ['initiation', 'onboarding']
+  },
+  
+  {
+    id: 'development-1',
+    title: 'Onboarding Call Completion',
+    description: 'Complete onboarding call and document action items',
+    dueDate: '2024-01-02',
+    priority: 'high',
+    status: 'pending',
+    phase: 'development',
+    phaseOrder: 1,
+    dependsOn: ['initiation-3'],
+    project: 'Project Lifecycle',
+    tags: ['development', 'onboarding']
+  },
+  {
+    id: 'development-2',
+    title: 'Feature Review',
+    description: 'Review all features to be implemented',
+    dueDate: '2024-01-04',
+    priority: 'medium',
+    status: 'pending',
+    phase: 'development',
+    phaseOrder: 2,
+    dependsOn: ['development-1'],
+    project: 'Project Lifecycle',
+    tags: ['development', 'review']
+  },
+  {
+    id: 'development-3',
+    title: 'Implementation Changes',
+    description: 'Make necessary changes to implementation plan',
+    dueDate: '2024-01-06',
+    priority: 'high',
+    status: 'pending',
+    phase: 'development',
+    phaseOrder: 3,
+    dependsOn: ['development-2'],
+    project: 'Project Lifecycle',
+    tags: ['development', 'implementation']
+  },
+  
+  {
+    id: 'completion-1',
+    title: 'Final Review',
+    description: 'Conduct final review of all deliverables',
+    dueDate: '2024-01-08',
+    priority: 'high',
+    status: 'pending',
+    phase: 'completion',
+    phaseOrder: 1,
+    dependsOn: ['development-3'],
+    project: 'Project Lifecycle',
+    tags: ['completion', 'review']
+  },
+  {
+    id: 'completion-2',
+    title: 'Final Payment',
+    description: 'Process final payment for project completion',
+    dueDate: '2024-01-10',
+    priority: 'high',
+    status: 'pending',
+    phase: 'completion',
+    phaseOrder: 2,
+    dependsOn: ['completion-1'],
+    project: 'Project Lifecycle',
+    tags: ['completion', 'payment']
+  },
+  {
+    id: 'completion-3',
+    title: 'Project Delivery',
+    description: 'Deliver final project assets and documentation',
+    dueDate: '2024-01-12',
+    priority: 'high',
+    status: 'pending',
+    phase: 'completion',
+    phaseOrder: 3,
+    dependsOn: ['completion-2'],
+    project: 'Project Lifecycle',
+    tags: ['completion', 'delivery'],
+    requiresApproval: true
+  }
+];
+
 const sampleTasks: Task[] = [
   {
     id: '1',
@@ -139,12 +383,20 @@ const sampleTasks: Task[] = [
   }
 ];
 
-// Helper to sort tasks chronologically by due date
 const sortTasksChronologically = (tasks: Task[]): Task[] => {
   return [...tasks].sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
 };
 
-// Helper to check if a task can be completed (all dependencies completed)
+const sortTasksByPhase = (tasks: Task[]): Task[] => {
+  const phaseOrder = { 'setup': 1, 'review': 2, 'initiation': 3, 'development': 4, 'completion': 5 };
+  return [...tasks].sort((a, b) => {
+    const phaseDiff = phaseOrder[a.phase] - phaseOrder[b.phase];
+    if (phaseDiff !== 0) return phaseDiff;
+    
+    return a.phaseOrder - b.phaseOrder;
+  });
+};
+
 const canCompleteTask = (task: Task, allTasks: Task[]): boolean => {
   if (!task.dependsOn || task.dependsOn.length === 0) return true;
   
@@ -154,22 +406,18 @@ const canCompleteTask = (task: Task, allTasks: Task[]): boolean => {
   });
 };
 
-// Category Icons and Colors
-const categoryIcons = {
-  'court-action': <Gavel className="w-4 h-4" />,
-  'cta-action': <Bell className="w-4 h-4" />,
-  'documentation': <FileText className="w-4 h-4" />,
-  'general': <ClipboardList className="w-4 h-4" />
+const statusIcons = {
+  'pending': <Clock className="w-4 h-4 text-amber-500" />,
+  'in-progress': <AlertCircle className="w-4 h-4 text-blue-500" />,
+  'completed': <CheckCircle className="w-4 h-4 text-green-500" />
 };
 
-const categoryColors = {
-  'court-action': 'text-purple-500 bg-purple-500/10 border-purple-500/20',
-  'cta-action': 'text-amber-500 bg-amber-500/10 border-amber-500/20',
-  'documentation': 'text-blue-500 bg-blue-500/10 border-blue-500/20',
-  'general': 'text-green-500 bg-green-500/10 border-green-500/20'
+const priorityColors = {
+  low: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+  medium: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+  high: 'bg-red-500/10 text-red-500 border-red-500/20'
 };
 
-// Task Card Component
 const TaskCard = ({ 
   task, 
   allTasks, 
@@ -179,22 +427,13 @@ const TaskCard = ({
   allTasks: Task[];
   onUpdateStatus: (taskId: string, newStatus: TaskStatus) => void;
 }) => {
-  const priorityColors = {
-    low: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-    medium: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-    high: 'bg-red-500/10 text-red-500 border-red-500/20'
-  };
-
-  const statusIcons = {
-    'pending': <Clock className="w-4 h-4 text-amber-500" />,
-    'in-progress': <AlertCircle className="w-4 h-4 text-blue-500" />,
-    'completed': <CheckCircle className="w-4 h-4 text-green-500" />
+  const phaseInfo = phaseConfig[task.phase] || {
+    icon: <ClipboardList className="w-4 h-4" />,
+    color: 'text-slate-400 bg-slate-400/10 border-slate-400/20'
   };
 
   const isCompletable = canCompleteTask(task, allTasks);
-  const categoryColor = categoryColors[task.category];
 
-  // Format the due date
   const formatDueDate = (dateString: string) => {
     const date = new Date(dateString);
     const today = new Date();
@@ -226,8 +465,8 @@ const TaskCard = ({
     >
       <div className="flex justify-between items-start mb-2">
         <div className="flex items-center gap-2">
-          <span className={`flex items-center justify-center w-8 h-8 rounded-full ${categoryColor}`}>
-            {categoryIcons[task.category]}
+          <span className={`flex items-center justify-center w-8 h-8 rounded-full ${phaseInfo.color}`}>
+            {phaseInfo.icon}
           </span>
           <h3 className={`font-semibold ${task.status === 'completed' ? 'text-slate-400 line-through' : 'text-slate-100'}`}>{task.title}</h3>
         </div>
@@ -246,6 +485,12 @@ const TaskCard = ({
         {task.project && (
           <div className="text-xs bg-siso-orange/10 text-siso-orange px-2 py-1 rounded-md">
             {task.project}
+          </div>
+        )}
+        {task.requiresApproval && (
+          <div className="text-xs bg-purple-500/10 text-purple-500 px-2 py-1 rounded-md flex items-center">
+            <ThumbsUp className="w-3 h-3 mr-1" />
+            Approval Required
           </div>
         )}
       </div>
@@ -299,7 +544,105 @@ const TaskCard = ({
   );
 };
 
-// Timeline Component for chronological display
+const PhaseGroup = ({
+  phase,
+  tasks,
+  allTasks,
+  onUpdateStatus
+}: {
+  phase: TaskPhase;
+  tasks: Task[];
+  allTasks: Task[];
+  onUpdateStatus: (taskId: string, newStatus: TaskStatus) => void;
+}) => {
+  const phaseInfo = phaseConfig[phase];
+  const tasksInPhase = tasks.filter(task => task.phase === phase);
+  const totalTasks = tasksInPhase.length;
+  const completedTasks = tasksInPhase.filter(task => task.status === 'completed').length;
+  const progressPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+  
+  if (tasksInPhase.length === 0) return null;
+  
+  return (
+    <div className="mb-8">
+      <div className="flex items-center gap-2 mb-4">
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${phaseInfo.color}`}>
+          {phaseInfo.icon}
+        </div>
+        <div>
+          <h3 className="font-bold text-lg">{phaseInfo.title}</h3>
+          <p className="text-sm text-slate-400">{phaseInfo.description}</p>
+        </div>
+      </div>
+      
+      <div className="mb-4">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm font-medium">Phase Progress</span>
+          <span className="text-sm">{completedTasks}/{totalTasks} tasks completed</span>
+        </div>
+        <Progress 
+          value={progressPercentage} 
+          className="h-2 bg-slate-800/50" 
+          indicatorClassName={`bg-gradient-to-r ${
+            phase === 'setup' ? 'from-blue-500 to-blue-400' :
+            phase === 'review' ? 'from-purple-500 to-purple-400' :
+            phase === 'initiation' ? 'from-pink-500 to-pink-400' :
+            phase === 'development' ? 'from-amber-500 to-amber-400' :
+            'from-green-500 to-green-400'
+          }`} 
+        />
+      </div>
+      
+      <div className="space-y-4 pl-4 border-l-2 border-slate-800/50">
+        {tasksInPhase.map((task) => (
+          <TaskCard 
+            key={task.id} 
+            task={task} 
+            allTasks={allTasks} 
+            onUpdateStatus={onUpdateStatus} 
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const TaskLifecycle = ({ 
+  tasks, 
+  onUpdateStatus 
+}: { 
+  tasks: Task[]; 
+  onUpdateStatus: (taskId: string, newStatus: TaskStatus) => void; 
+}) => {
+  const phaseSortedTasks = sortTasksByPhase(tasks);
+  
+  const totalTasks = phaseSortedTasks.length;
+  const completedTasks = phaseSortedTasks.filter(task => task.status === 'completed').length;
+  const progressPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+  
+  return (
+    <div className="space-y-2">
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-sm font-medium">Overall Progress</h3>
+          <span className="text-sm">{completedTasks}/{totalTasks} tasks completed</span>
+        </div>
+        <Progress 
+          value={progressPercentage} 
+          className="h-2 bg-slate-800/50" 
+          indicatorClassName="bg-gradient-to-r from-siso-red to-siso-orange" 
+        />
+      </div>
+      
+      <PhaseGroup phase="setup" tasks={phaseSortedTasks} allTasks={tasks} onUpdateStatus={onUpdateStatus} />
+      <PhaseGroup phase="review" tasks={phaseSortedTasks} allTasks={tasks} onUpdateStatus={onUpdateStatus} />
+      <PhaseGroup phase="initiation" tasks={phaseSortedTasks} allTasks={tasks} onUpdateStatus={onUpdateStatus} />
+      <PhaseGroup phase="development" tasks={phaseSortedTasks} allTasks={tasks} onUpdateStatus={onUpdateStatus} />
+      <PhaseGroup phase="completion" tasks={phaseSortedTasks} allTasks={tasks} onUpdateStatus={onUpdateStatus} />
+    </div>
+  );
+};
+
 const TaskTimeline = ({ 
   tasks, 
   onUpdateStatus 
@@ -309,7 +652,6 @@ const TaskTimeline = ({
 }) => {
   const chronologicalTasks = sortTasksChronologically(tasks);
   
-  // Calculate overall progress
   const totalTasks = chronologicalTasks.length;
   const completedTasks = chronologicalTasks.filter(task => task.status === 'completed').length;
   const progressPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
@@ -329,12 +671,10 @@ const TaskTimeline = ({
       </div>
       
       <div className="relative">
-        {/* Timeline line */}
         <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-slate-800/70" />
         
         {chronologicalTasks.map((task, index) => (
           <div key={task.id} className="mb-4 relative">
-            {/* Timeline node */}
             <div className={`absolute left-4 top-6 w-3 h-3 rounded-full transform -translate-x-1.5 z-10 
               ${task.status === 'completed' 
                 ? 'bg-green-500' 
@@ -343,12 +683,10 @@ const TaskTimeline = ({
                   : 'bg-slate-700'}`} 
             />
             
-            {/* Timeline connector line to next task */}
             {index < chronologicalTasks.length - 1 && (
               <div className="absolute left-4 top-6 bottom-0 w-0.5 bg-slate-800/70 transform -translate-x-1/2" />
             )}
             
-            {/* Task content */}
             <div className="pl-10 pr-4">
               <div className="text-xs text-slate-400 mb-1">
                 {format(new Date(task.dueDate), 'MMM d, yyyy')}
@@ -365,9 +703,8 @@ const TaskTimeline = ({
 export default function Tasks() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
-  const [tasks, setTasks] = useState(sampleTasks);
+  const [tasks, setTasks] = useState([...projectLifecycleTasks, ...sampleTasks]);
   
-  // Filter tasks based on search query and active tab
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          task.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -376,15 +713,15 @@ export default function Tasks() {
     if (activeTab === 'pending') return matchesSearch && task.status === 'pending';
     if (activeTab === 'in-progress') return matchesSearch && task.status === 'in-progress';
     if (activeTab === 'completed') return matchesSearch && task.status === 'completed';
-    if (activeTab === 'court-action') return matchesSearch && task.category === 'court-action';
-    if (activeTab === 'cta-action') return matchesSearch && task.category === 'cta-action';
-    if (activeTab === 'documentation') return matchesSearch && task.category === 'documentation';
-    if (activeTab === 'general') return matchesSearch && task.category === 'general';
+    if (activeTab === 'setup') return matchesSearch && task.phase === 'setup';
+    if (activeTab === 'review') return matchesSearch && task.phase === 'review';
+    if (activeTab === 'initiation') return matchesSearch && task.phase === 'initiation';
+    if (activeTab === 'development') return matchesSearch && task.phase === 'development';
+    if (activeTab === 'completion') return matchesSearch && task.phase === 'completion';
     
     return matchesSearch;
   });
 
-  // Handle task status updates
   const handleUpdateTaskStatus = (taskId: string, newStatus: TaskStatus) => {
     setTasks(prevTasks => 
       prevTasks.map(task => 
@@ -409,13 +746,12 @@ export default function Tasks() {
             transition={{ duration: 0.5 }}
             className="mb-8"
           >
-            <h1 className="text-3xl md:text-4xl font-bold">Tasks</h1>
+            <h1 className="text-3xl md:text-4xl font-bold">Project Lifecycle Tasks</h1>
             <p className="mt-2 text-muted-foreground">
-              Track and manage your tasks across different projects. Stay organized and meet your deadlines.
+              Track your project progress through each phase of the lifecycle. Complete tasks sequentially to move your project forward.
             </p>
           </motion.div>
           
-          {/* Search & Filter */}
           <Card className="mb-8 bg-black/20 backdrop-blur-sm border-slate-800/60">
             <CardContent className="p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
               <div className="relative flex-1 max-w-md w-full">
@@ -436,7 +772,6 @@ export default function Tasks() {
             </CardContent>
           </Card>
           
-          {/* Tabs for filtering tasks by status and category */}
           <Tabs defaultValue="all" className="mb-8" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="bg-black/30 border border-slate-800/50 p-1 flex flex-wrap">
               <TabsTrigger value="all" className="data-[state=active]:bg-siso-orange/20 data-[state=active]:text-siso-orange">
@@ -451,23 +786,27 @@ export default function Tasks() {
               <TabsTrigger value="completed" className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-500">
                 Completed
               </TabsTrigger>
-              <TabsTrigger value="court-action" className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-500">
-                <Gavel className="h-4 w-4 mr-1" /> Court
+              
+              <TabsTrigger value="setup" className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-500">
+                <Package className="h-4 w-4 mr-1" /> Setup
               </TabsTrigger>
-              <TabsTrigger value="cta-action" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-500">
-                <Bell className="h-4 w-4 mr-1" /> CTA
+              <TabsTrigger value="review" className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-500">
+                <CheckSquare className="h-4 w-4 mr-1" /> Review
               </TabsTrigger>
-              <TabsTrigger value="documentation" className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-500">
-                <FileText className="h-4 w-4 mr-1" /> Docs
+              <TabsTrigger value="initiation" className="data-[state=active]:bg-pink-500/20 data-[state=active]:text-pink-500">
+                <Rocket className="h-4 w-4 mr-1" /> Initiation
               </TabsTrigger>
-              <TabsTrigger value="general" className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-500">
-                <ClipboardList className="h-4 w-4 mr-1" /> General
+              <TabsTrigger value="development" className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-500">
+                <Code className="h-4 w-4 mr-1" /> Development
+              </TabsTrigger>
+              <TabsTrigger value="completion" className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-500">
+                <FlagCheckered className="h-4 w-4 mr-1" /> Completion
               </TabsTrigger>
             </TabsList>
             
             <TabsContent value="all" className="mt-6">
               {filteredTasks.length > 0 ? (
-                <TaskTimeline tasks={filteredTasks} onUpdateStatus={handleUpdateTaskStatus} />
+                <TaskLifecycle tasks={filteredTasks} onUpdateStatus={handleUpdateTaskStatus} />
               ) : (
                 <div className="py-16 text-center">
                   <motion.div
@@ -483,11 +822,10 @@ export default function Tasks() {
               )}
             </TabsContent>
             
-            {/* The following TabsContent elements all use the same TaskTimeline component */}
-            {['pending', 'in-progress', 'completed', 'court-action', 'cta-action', 'documentation', 'general'].map((tabValue) => (
+            {['pending', 'in-progress', 'completed', 'setup', 'review', 'initiation', 'development', 'completion'].map((tabValue) => (
               <TabsContent key={tabValue} value={tabValue} className="mt-6">
                 {filteredTasks.length > 0 ? (
-                  <TaskTimeline tasks={filteredTasks} onUpdateStatus={handleUpdateTaskStatus} />
+                  <TaskLifecycle tasks={filteredTasks} onUpdateStatus={handleUpdateTaskStatus} />
                 ) : (
                   <div className="py-16 text-center">
                     <motion.div
