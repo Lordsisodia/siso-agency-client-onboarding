@@ -17,7 +17,6 @@ interface SummaryStepProps {
       industry: string;
       targetAudience: string;
     };
-    projectType: string;
     goals: string;
   };
   onComplete: () => void;

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePlanChatAssistant } from '@/hooks/use-plan-chat-assistant';
@@ -62,10 +61,6 @@ export const useNewProject = () => {
         Target Audience: ${projectData.businessContext.targetAudience || 'Not specified'}
         Main Goal: ${projectData.goals || 'Not specified'}
         `;
-        
-        if (projectData.projectType) {
-          prompt += `Project Type: ${projectData.projectType}\n`;
-        }
         
         // Add selected features if any
         const selectedFeatures = Object.entries(projectData.features || {})
