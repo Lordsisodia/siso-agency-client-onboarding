@@ -2,6 +2,7 @@
 import React from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Waves } from '@/components/ui/waves-background';
+import { FloatingOrbs } from '@/components/effects/FloatingOrbs';
 import { WebsiteInputSheet } from '@/components/plan-builder/WebsiteInputSheet';
 import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';
 import { ProjectHeader } from '@/components/project/ProjectHeader';
@@ -29,16 +30,19 @@ export default function NewProject() {
 
   return (
     <MainLayout>
+      {/* Add FloatingOrbs background effect */}
+      <FloatingOrbs />
+      
       <div className="container max-w-6xl mx-auto py-6 px-4 min-h-screen relative">
-        {/* Waves background */}
+        {/* Waves background with adjusted z-index */}
         <Waves 
-          lineColor="rgba(255, 87, 34, 0.05)" 
+          lineColor="rgba(255, 87, 34, 0.08)" 
           backgroundColor="transparent" 
           waveSpeedX={0.01} 
           waveSpeedY={0.004} 
-          waveAmpX={24} 
-          waveAmpY={12} 
-          className="absolute inset-0 z-0 w-full h-full" 
+          waveAmpX={28} 
+          waveAmpY={16} 
+          className="absolute inset-0 z-0 w-full h-full opacity-80" 
         />
         
         {/* Page header */}

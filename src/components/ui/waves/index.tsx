@@ -39,16 +39,18 @@ export function Waves({
       ref={containerRef}
       style={{
         backgroundColor,
+        position: "relative", // Ensure proper stacking context
+        zIndex: -5, // Higher than FloatingOrbs but still behind content
       }}
       className={cn(
-        "absolute top-0 left-0 w-full h-full overflow-hidden -z-10",
+        "absolute top-0 left-0 w-full h-full overflow-hidden",
         className,
       )}
     >
       <div
         className={cn(
           "absolute top-0 left-0 rounded-full",
-          "w-2 h-2 bg-foreground/10 -z-10",
+          "w-2 h-2 bg-foreground/10",
         )}
         style={{
           transform:
@@ -58,7 +60,7 @@ export function Waves({
       />
       <canvas 
         ref={canvasRef} 
-        className="block w-full h-full -z-10 pointer-events-none" 
+        className="block w-full h-full pointer-events-none" 
       />
     </div>
   )

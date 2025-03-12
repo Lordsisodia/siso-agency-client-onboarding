@@ -39,9 +39,9 @@ export function FloatingOrbs() {
       y: Math.random() * canvas.height,
       vx: (Math.random() - 0.5) * 0.3,
       vy: (Math.random() - 0.5) * 0.3,
-      radius: 20 + Math.random() * 40,
-      color: Math.random() > 0.5 ? 'rgba(255, 87, 34, 0.12)' : 'rgba(255, 167, 38, 0.12)',
-      intensity: 0.5 + Math.random() * 0.5,
+      radius: 25 + Math.random() * 55, // Increased particle size
+      color: Math.random() > 0.5 ? 'rgba(255, 87, 34, 0.18)' : 'rgba(255, 167, 38, 0.18)', // More opacity
+      intensity: 0.6 + Math.random() * 0.5, // Increased intensity
       pulse: Math.random() * Math.PI * 2,
       pulseSpeed: 0.02 + Math.random() * 0.02
     });
@@ -59,21 +59,21 @@ export function FloatingOrbs() {
       const intensityBoost = Math.max(0, 1 - distanceToMouse / interactionRadius);
       
       particle.pulse += particle.pulseSpeed;
-      const pulseIntensity = 0.2 + Math.sin(particle.pulse) * 0.1;
+      const pulseIntensity = 0.3 + Math.sin(particle.pulse) * 0.15; // Enhanced pulse
       
       const gradient = ctx.createRadialGradient(
         particle.x, particle.y, 0,
         particle.x, particle.y, particle.radius * (1 + intensityBoost * 0.3)
       );
       
-      const baseOpacity = particle.intensity * (0.12 + intensityBoost * 0.08 + pulseIntensity + interactionFade * 0.1);
-      gradient.addColorStop(0, particle.color.replace('0.12', baseOpacity.toString()));
+      const baseOpacity = particle.intensity * (0.18 + intensityBoost * 0.12 + pulseIntensity + interactionFade * 0.15);
+      gradient.addColorStop(0, particle.color.replace('0.18', baseOpacity.toString()));
       gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
       // Add glow effect
       if (intensityBoost > 0) {
-        ctx.shadowColor = particle.color.replace('0.12', '1');
-        ctx.shadowBlur = 20 * intensityBoost;
+        ctx.shadowColor = particle.color.replace('0.18', '1');
+        ctx.shadowBlur = 30 * intensityBoost; // Enhanced glow
       } else {
         ctx.shadowBlur = 0;
       }
@@ -126,9 +126,9 @@ export function FloatingOrbs() {
       
       // Create a dynamic gradient mesh background
       const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-      gradient.addColorStop(0, 'rgba(18, 18, 18, 0.8)');
-      gradient.addColorStop(0.5, 'rgba(24, 24, 24, 0.85)');
-      gradient.addColorStop(1, 'rgba(18, 18, 18, 0.8)');
+      gradient.addColorStop(0, 'rgba(18, 18, 18, 0.7)'); // More transparent
+      gradient.addColorStop(0.5, 'rgba(24, 24, 24, 0.75)'); // More transparent
+      gradient.addColorStop(1, 'rgba(18, 18, 18, 0.7)'); // More transparent
       
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -146,7 +146,7 @@ export function FloatingOrbs() {
         );
         
         const opacity = Math.max(0, 1 - timeSinceLastInteraction / 1000);
-        beamGradient.addColorStop(0, `rgba(255, 255, 255, ${0.1 * opacity})`);
+        beamGradient.addColorStop(0, `rgba(255, 255, 255, ${0.15 * opacity})`); // Increased opacity
         beamGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
         
         ctx.fillStyle = beamGradient;
@@ -203,7 +203,7 @@ export function FloatingOrbs() {
     <motion.canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-auto"
-      style={{ zIndex: -1 }}
+      style={{ zIndex: -10 }} // Lower z-index to ensure it sits behind the Waves component
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 1 }}
