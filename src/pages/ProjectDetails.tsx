@@ -15,6 +15,8 @@ import { Waves } from '@/components/ui/waves-background';
 import { motion } from 'framer-motion';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { demoProjects } from '@/data/demoData';
+import { Json } from '@/integrations/supabase/types';
+import { safeJsonObject, safeJsonArray, safeJsonProperty } from '@/utils/json-helpers';
 
 interface Project {
   id: string;
@@ -69,7 +71,7 @@ export default function ProjectDetails() {
           }
         }
         
-        if (!projectId || !user) {
+        if (!projectId) {
           setLoading(false);
           return;
         }
@@ -93,9 +95,43 @@ export default function ProjectDetails() {
           console.error("Error fetching project details:", detailsError);
         }
 
+        // Parse JSON data from Supabase
+        let parsedDetails = undefined;
+        
+        if (detailsData) {
+          // Parse business_context
+          const businessContext = safeJsonObject(detailsData.business_context);
+          
+          // Parse features
+          const featuresJson = safeJsonObject(detailsData.features);
+          const features = {
+            core: safeJsonArray<string>(featuresJson.core),
+            extras: safeJsonArray<string>(featuresJson.extras)
+          };
+          
+          // Parse timeline
+          const timelineJson = safeJsonObject(detailsData.timeline);
+          const timeline = timelineJson ? {
+            estimated_weeks: safeJsonProperty<number>(timelineJson, 'estimated_weeks', 0),
+            phases: safeJsonArray<{name: string; duration: string; tasks: string[]}>(timelineJson.phases)
+          } : undefined;
+
+          parsedDetails = {
+            business_context: {
+              industry: safeJsonProperty<string>(businessContext, 'industry', ''),
+              companyName: safeJsonProperty<string>(businessContext, 'companyName', ''),
+              scale: safeJsonProperty<string>(businessContext, 'scale', ''),
+              target_audience: safeJsonArray<string>(businessContext.target_audience)
+            },
+            goals: detailsData.goals,
+            features,
+            timeline
+          };
+        }
+
         setProject({
           ...projectData,
-          details: detailsData || undefined
+          details: parsedDetails
         });
       } catch (error) {
         console.error("Error fetching project:", error);
