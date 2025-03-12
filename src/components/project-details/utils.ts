@@ -44,12 +44,15 @@ export const fetchProjectData = async (projectId: string, isDemo: boolean): Prom
       extras: safeJsonArray<string>(featuresJson.extras)
     };
     
-    // Parse timeline
-    const timelineJson = safeJsonObject(detailsData.timeline || null);
-    const timeline = timelineJson ? {
-      estimated_weeks: safeJsonProperty<number>(timelineJson, 'estimated_weeks', 0),
-      phases: safeJsonArray<{name: string; duration: string; tasks: string[]}>(timelineJson.phases)
-    } : undefined;
+    // Parse timeline - check if timeline exists in detailsData first
+    let timeline = undefined;
+    if (detailsData.timeline) {
+      const timelineJson = safeJsonObject(detailsData.timeline);
+      timeline = {
+        estimated_weeks: safeJsonProperty<number>(timelineJson, 'estimated_weeks', 0),
+        phases: safeJsonArray<{name: string; duration: string; tasks: string[]}>(timelineJson.phases)
+      };
+    }
 
     parsedDetails = {
       business_context: {
