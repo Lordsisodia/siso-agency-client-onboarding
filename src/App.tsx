@@ -11,7 +11,11 @@ import Projects from '@/pages/Projects';
 import ProjectDetails from '@/pages/ProjectDetails';
 import Calendar from '@/pages/Calendar';
 import Tasks from '@/pages/Tasks';
+import Support from '@/pages/Support';
 import { AuthProvider } from '@/hooks/useAuth';
+import DocumentationCategoryPage from '@/pages/support/DocumentationCategoryPage';
+import DocumentationArticlePage from '@/pages/support/DocumentationArticlePage';
+import DocumentationQuestionPage from '@/pages/support/DocumentationQuestionPage';
 
 function App() {
   useEffect(() => {
@@ -33,6 +37,10 @@ function App() {
           <Route path="/projects" element={<Projects />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/tasks" element={<Tasks />} />
+          <Route path="/support" element={<Support />} />
+          <Route path="/support/:categorySlug" element={<DocumentationCategoryPage />} />
+          <Route path="/support/:categorySlug/:articleSlug" element={<DocumentationArticlePage />} />
+          <Route path="/support/:categorySlug/:articleSlug/:questionSlug" element={<DocumentationQuestionPage />} />
         </Routes>
       </AuthProvider>
     </Router>

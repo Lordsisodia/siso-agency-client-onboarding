@@ -8,7 +8,8 @@ export const awardNavigationPoints = (path: string) => {
     '/organization': 5,
     '/preferences': 5,
     '/tasks': 3,
-    '/portfolio': 5
+    '/portfolio': 5,
+    '/support': 4 // Added points for visiting Support/Help Center
   };
   
   if (pointsMap[path]) {
