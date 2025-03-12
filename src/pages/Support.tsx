@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { AiChatSection } from '@/components/support/AiChatSection';
@@ -10,6 +11,7 @@ import { DocCategory } from '@/types/documentation';
 import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { GradientHeading } from '@/components/ui/gradient-heading';
 
 const Support = () => {
   const [activeTab, setActiveTab] = useState('documentation');
@@ -77,27 +79,32 @@ const Support = () => {
       <div className="container mx-auto py-12 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           {/* Header with search */}
-          <div className="mb-12 text-center">
-            <h1 className="text-4xl font-bold mb-4 text-white">Help Center</h1>
-            <p className="text-siso-text/70 mb-8 text-lg max-w-2xl mx-auto">
-              Find answers to your questions and comprehensive guides to help you get started
-            </p>
+          <div className="mb-12">
+            <div className="text-center mb-6">
+              <GradientHeading asChild variant="rainbow" size="lg" weight="bold" className="mb-3">
+                <h1>Help Center</h1>
+              </GradientHeading>
+              <p className="text-siso-text/70 text-lg max-w-2xl mx-auto">
+                Find answers to your questions and comprehensive guides to help you get started
+              </p>
+            </div>
             
             {/* Fancy animated search bar */}
             <div className={cn(
-              "relative max-w-2xl mx-auto",
+              "relative max-w-2xl mx-auto mt-8",
               activeTab === 'documentation' ? 'block' : 'hidden'
             )}>
               <PlaceholdersAndVanishInput
                 placeholders={searchPlaceholders}
                 onChange={handleSearch}
                 onSubmit={handleSearchSubmit}
+                className="shadow-lg"
               />
             </div>
           </div>
 
           <Tabs defaultValue="documentation" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto mb-10">
+            <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto mb-10 bg-siso-bg-alt/30 backdrop-blur-sm">
               <TabsTrigger value="documentation" className="flex items-center gap-2">
                 <Book className="h-4 w-4" />
                 Documentation
@@ -116,26 +123,28 @@ const Support = () => {
                   <p className="text-siso-text/70">Loading documentation...</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {categories.map((category) => (
                     <Card 
                       key={category.id} 
-                      className="border border-siso-border hover:border-siso-border-hover cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                      className="border border-siso-border hover:border-siso-orange/30 cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-siso-bg-alt/20 backdrop-blur-sm overflow-hidden"
                       onClick={() => handleCategoryClick(category.slug)}
                     >
-                      <CardContent className="p-6">
-                        <div className="flex items-start gap-3">
-                          <div className="bg-siso-orange/10 p-2.5 rounded-lg">
-                            {React.createElement(category.icon as React.ElementType, { 
-                              className: "h-5 w-5 text-siso-orange" 
-                            })}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-lg text-white mb-2 truncate">{category.title}</h3>
-                            <p className="text-sm text-siso-text/70 mb-3 line-clamp-2">{category.description}</p>
-                            <div className="flex items-center text-xs text-siso-text/50">
-                              <Search className="h-3 w-3 mr-1" />
-                              {category.questionCount} questions
+                      <CardContent className="p-0">
+                        <div className="p-6">
+                          <div className="flex items-start gap-4">
+                            <div className="bg-gradient-to-br from-siso-orange/20 to-siso-red/20 p-3 rounded-lg">
+                              {React.createElement(category.icon as React.ElementType, { 
+                                className: "h-6 w-6 text-siso-orange" 
+                              })}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-lg text-white mb-2">{category.title}</h3>
+                              <p className="text-sm text-siso-text/70 mb-4 line-clamp-2">{category.description}</p>
+                              <div className="flex items-center text-xs font-medium text-siso-orange/80 bg-siso-orange/10 py-1 px-2 rounded-full w-fit">
+                                <Search className="h-3 w-3 mr-1" />
+                                {category.questionCount} questions
+                              </div>
                             </div>
                           </div>
                         </div>
