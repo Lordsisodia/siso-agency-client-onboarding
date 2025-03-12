@@ -10,14 +10,17 @@ interface ProjectResourcesProps {
 }
 
 export const ProjectResources: React.FC<ProjectResourcesProps> = ({ project, isDemo }) => {
-  // Sample resources for demo purposes
-  const resources = project.details?.resources || [
+  // Sample resources for demo purposes or if resources are not defined
+  const defaultResources = [
     { id: '1', name: 'Project Documentation', type: 'document', url: '#' },
     { id: '2', name: 'API Documentation', type: 'link', url: '#' },
     { id: '3', name: 'Source Code Repository', type: 'code', url: '#' },
     { id: '4', name: 'Database Schema', type: 'database', url: '#' },
     { id: '5', name: 'UI Design Assets', type: 'image', url: '#' }
   ];
+  
+  // Use project resources if they exist, otherwise use default resources
+  const resources = project.details?.resources || defaultResources;
 
   // Get appropriate icon based on resource type
   const getResourceIcon = (type: string) => {

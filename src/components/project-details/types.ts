@@ -29,5 +29,11 @@ export interface Project {
         tasks: string[];
       }[];
     };
+    resources?: {
+      id: string;
+      name: string;
+      type: string;
+      url: string;
+    }[];
   };
 }

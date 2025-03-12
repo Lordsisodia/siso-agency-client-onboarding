@@ -1,5 +1,3 @@
-
-
 interface Project {
   id: string;
   title: string;
@@ -113,7 +111,14 @@ export const demoProjects: Project[] = [
             ]
           }
         ]
-      }
+      },
+      resources: [
+        { id: '1', name: 'Mobile App Design Guidelines', type: 'document', url: '#' },
+        { id: '2', name: 'Payment Gateway API Docs', type: 'link', url: '#' },
+        { id: '3', name: 'Frontend Repository', type: 'code', url: '#' },
+        { id: '4', name: 'Product Database Schema', type: 'database', url: '#' },
+        { id: '5', name: 'Brand Assets', type: 'image', url: '#' }
+      ]
     }
   },
   {
@@ -198,7 +203,14 @@ export const demoProjects: Project[] = [
             ]
           }
         ]
-      }
+      },
+      resources: [
+        { id: '1', name: 'User Flow Documentation', type: 'document', url: '#' },
+        { id: '2', name: 'Calendar Integration Docs', type: 'link', url: '#' },
+        { id: '3', name: 'Backend Repository', type: 'code', url: '#' },
+        { id: '4', name: 'Task Database Schema', type: 'database', url: '#' },
+        { id: '5', name: 'UI Components Library', type: 'image', url: '#' }
+      ]
     }
   },
   {
@@ -294,8 +306,14 @@ export const demoProjects: Project[] = [
             ]
           }
         ]
-      }
+      },
+      resources: [
+        { id: '1', name: 'Exercise Reference Guide', type: 'document', url: '#' },
+        { id: '2', name: 'Nutrition API Documentation', type: 'link', url: '#' },
+        { id: '3', name: 'Mobile App Repository', type: 'code', url: '#' },
+        { id: '4', name: 'Health Metrics Schema', type: 'database', url: '#' },
+        { id: '5', name: 'Workout Illustrations', type: 'image', url: '#' }
+      ]
     }
   }
 ];
-
