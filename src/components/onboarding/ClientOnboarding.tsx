@@ -138,7 +138,7 @@ export function ClientOnboarding({ onComplete }: ClientOnboardingProps) {
         toast({
           title: "Warning",
           description: "Project created but some details couldn't be saved.",
-          variant: "warning"
+          variant: "default"
         });
       } else {
         toast({
