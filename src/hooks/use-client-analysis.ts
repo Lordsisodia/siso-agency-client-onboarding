@@ -33,6 +33,7 @@ export function useClientAnalysis() {
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ClientAnalysisResult | null>(null);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const analyzeClient = async (
@@ -52,8 +53,15 @@ export function useClientAnalysis() {
 
       console.log(`Analyzing client with input: "${input.substring(0, 50)}..."${websiteUrl ? ` and website: ${websiteUrl}` : ''}${responseId ? ` and responseId: ${responseId}` : ''}`);
       
+      // If we have a previous conversationId and no explicit responseId, use it
+      const effectiveResponseId = responseId || conversationId;
+      
       const { data, error } = await supabase.functions.invoke('client-analysis', {
-        body: { input, websiteUrl, responseId }
+        body: { 
+          input, 
+          websiteUrl, 
+          responseId: effectiveResponseId 
+        }
       });
 
       setIsSearching(false);
@@ -80,6 +88,11 @@ export function useClientAnalysis() {
         return null;
       }
 
+      // Save the response ID for potential follow-up requests
+      if (data.result && data.result.responseId) {
+        setConversationId(data.result.responseId);
+      }
+
       console.log('Client analysis result:', data.result);
       setResult(data.result);
       return data.result;
@@ -97,11 +110,20 @@ export function useClientAnalysis() {
     }
   };
 
+  // Function to clear the current conversation
+  const clearConversation = () => {
+    setConversationId(null);
+    setResult(null);
+    setError(null);
+  };
+
   return {
     analyzeClient,
+    clearConversation,
     isLoading,
     isSearching,
     error,
-    result
+    result,
+    conversationId
   };
 }

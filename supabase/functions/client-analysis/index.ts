@@ -10,7 +10,8 @@ const corsHeaders = {
 
 // Initialize OpenAI API 
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-const MODEL = 'gpt-4o'; // Using a capable model that supports web search
+// Using a model that supports web search and the Responses API
+const MODEL = 'gpt-4o-mini';
 
 // Initialize Supabase client
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -58,9 +59,14 @@ serve(async (req) => {
 
     console.log("Initialized OpenAI client");
     
-    // Call OpenAI Responses API
     try {
-      // Prepare input for OpenAI
+      // Prepare proper input format for OpenAI Responses API
+      let formattedInput = input;
+      if (websiteUrl) {
+        formattedInput = `Analyze this website: ${websiteUrl}\n\n${input}`;
+      }
+      
+      // Setup base options for OpenAI Responses API
       const openaiOptions = {
         model: MODEL,
         tools,
@@ -74,28 +80,22 @@ serve(async (req) => {
         console.log(`Continuing conversation with responseId: ${responseId}`);
         response = await openai.responses.create({
           ...openaiOptions,
-          input: input,
+          input: formattedInput,
           previous_response_id: responseId
         });
       } else {
         // Start a new conversation
         console.log("Starting new conversation");
-        
-        // Construct our input with website URL if provided
-        let openaiInput = input;
-        if (websiteUrl) {
-          openaiInput = `Analyze this website: ${websiteUrl}\n\n${input}`;
-        }
-        
         response = await openai.responses.create({
           ...openaiOptions,
-          input: openaiInput
+          input: formattedInput
         });
       }
       
       console.log(`Response received with ID: ${response.id}`);
       
-      // Process the response
+      // Extract and process the response
+      // Web search results
       const webSearchResults = response.output
         .filter(item => item.type === 'web_search_call')
         .map(item => ({
@@ -103,17 +103,26 @@ serve(async (req) => {
           status: item.status
         }));
       
-      const messages = response.output
-        .filter(item => item.type === 'message')
-        .flatMap(item => 
-          item.content.map(content => ({
-            type: item.role === 'assistant' ? 'answer' : 'question',
-            content: content.text || '',
-            annotations: content.annotations || []
-          }))
-        );
+      // Process message content
+      const messages = [];
+      for (const item of response.output) {
+        if (item.type === 'message') {
+          // Process content array items
+          for (const contentItem of item.content) {
+            if (contentItem.text) {
+              // Process annotations
+              const messageObj = {
+                type: item.role === 'assistant' ? 'answer' : 'question',
+                content: contentItem.text,
+                annotations: contentItem.annotations || []
+              };
+              messages.push(messageObj);
+            }
+          }
+        }
+      }
       
-      // Return the result
+      // Return the formatted result
       return new Response(
         JSON.stringify({
           success: true,
