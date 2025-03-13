@@ -21,11 +21,13 @@ export function usePlanChatAssistant(projectId?: string) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [threadId, setThreadId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const clearMessages = useCallback(() => {
     setMessages([]);
     setError(null);
+    setThreadId(null);
   }, []);
 
   const sendMessage = useCallback(async (
@@ -55,7 +57,7 @@ export function usePlanChatAssistant(projectId?: string) {
         });
       }
       
-      setMessages(messagesArray);
+      setMessages(prev => [...prev, userMessage]);
 
       // Optimistically show the loading message
       setMessages(prev => [...prev, { 
@@ -69,12 +71,13 @@ export function usePlanChatAssistant(projectId?: string) {
       const { data, error } = await supabase.functions.invoke('chat-with-plan-assistant', {
         body: {
           messages: messagesArray.map(({ id, loading, ...rest }) => rest),
-          planId: projectId,
-          formData
+          projectId,
+          formData,
+          threadId
         }
       });
 
-      // Remove the loading message and handle the response
+      // Remove the loading message
       setMessages(prev => prev.filter(msg => !msg.loading));
 
       if (error) {
@@ -86,12 +89,19 @@ export function usePlanChatAssistant(projectId?: string) {
           variant: 'destructive',
         });
       } else if (data) {
+        // Store thread ID for conversation continuity
+        if (data.threadId) {
+          setThreadId(data.threadId);
+        }
+        
         const assistantMessage: Message = {
           id: uuidv4(),
           role: 'assistant',
-          content: data.reply || 'Sorry, I couldn\'t generate a response.'
+          content: data.response || data.reply || 'Sorry, I couldn\'t generate a response.'
         };
+        
         setMessages(prev => [...prev, assistantMessage]);
+        return data;
       }
     } catch (err: any) {
       console.error('Error in chat:', err);
@@ -104,13 +114,14 @@ export function usePlanChatAssistant(projectId?: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, projectId, toast]);
+  }, [messages, projectId, threadId, toast]);
 
   return {
     messages,
     isLoading,
     error,
     sendMessage,
-    clearMessages
+    clearMessages,
+    threadId
   };
 }

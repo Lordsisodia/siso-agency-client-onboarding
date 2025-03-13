@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
+import "https://deno.land/x/xhr@0.1.0/mod.ts"; // Required for OpenAI in Deno
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,8 +10,7 @@ const corsHeaders = {
 
 // Initialize OpenAI API 
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-const MODEL_DEFAULT = 'gpt-4o-mini';  // Default model (faster, cheaper)
-const MODEL_FALLBACK = 'gpt-4o';      // Fallback model (more powerful)
+const MODEL = 'gpt-4o-mini';  // Using the recommended model (faster, cheaper)
 
 // Initialize Supabase client
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -311,98 +311,42 @@ async function handleChat(req: Request) {
     // Create message context for OpenAI
     const messageContext = createMessageContext(messages);
     
-    // Call OpenAI Chat Completions API
+    // Initialize OpenAI client
+    const OpenAI = (await import("https://esm.sh/openai@4.26.0")).default;
+    const openai = new OpenAI({
+      apiKey: OPENAI_API_KEY,
+    });
+    
+    // Call OpenAI using the official SDK
     try {
       console.log(`Calling OpenAI with ${messageContext.length} messages in context`);
       
-      const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENAI_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: MODEL_DEFAULT,
-          messages: messageContext,
-          temperature: 0.7,
-          max_tokens: 2000,
-          frequency_penalty: 0.3,
-          presence_penalty: 0.3
-        })
+      const response = await openai.chat.completions.create({
+        model: MODEL,
+        messages: messageContext,
+        temperature: 0.7,
+        max_tokens: 2000,
+        frequency_penalty: 0.3,
+        presence_penalty: 0.3
       });
       
-      if (!openaiResponse.ok) {
-        const errorData = await openaiResponse.json();
-        console.error('OpenAI API error:', errorData);
-        
-        // Try fallback model if available and appropriate error
-        if (errorData?.error?.type === 'server_error' || errorData?.error?.type === 'invalid_request_error') {
-          console.log('Attempting fallback to more powerful model:', MODEL_FALLBACK);
-          
-          const fallbackResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${OPENAI_API_KEY}`
-            },
-            body: JSON.stringify({
-              model: MODEL_FALLBACK,
-              messages: messageContext,
-              temperature: 0.7,
-              max_tokens: 2000
-            })
-          });
-          
-          if (!fallbackResponse.ok) {
-            const fallbackError = await fallbackResponse.json();
-            throw new Error(`Fallback model also failed: ${fallbackError?.error?.message || 'Unknown error'}`);
-          }
-          
-          const fallbackData = await fallbackResponse.json();
-          const assistantResponse = fallbackData.choices[0].message.content;
-          
-          // Save chat history
-          await saveChatHistory(projectId, userMessage.content, assistantResponse, formData, { 
-            thread_id: threadId,
-            model: MODEL_FALLBACK,
-            fallback_used: true
-          });
-          
-          return new Response(
-            JSON.stringify({ 
-              response: assistantResponse,
-              threadId: threadId,
-              model: MODEL_FALLBACK
-            }),
-            {
-              headers: {
-                ...corsHeaders,
-                'Content-Type': 'application/json'
-              }
-            }
-          );
-        }
-        
-        throw new Error(`OpenAI API error: ${errorData?.error?.message || 'Unknown error'}`);
-      }
+      const assistantResponse = response.choices[0].message.content;
       
-      const data = await openaiResponse.json();
-      const assistantResponse = data.choices[0].message.content;
-      
-      console.log('Got assistant response of length:', assistantResponse.length);
+      console.log('Received response from OpenAI:', assistantResponse?.substring(0, 100) + '...');
       
       // Save chat history
       await saveChatHistory(projectId, userMessage.content, assistantResponse, formData, { 
         thread_id: threadId,
-        model: MODEL_DEFAULT
+        model: MODEL
       });
       
       // Return the assistant's response
       return new Response(
         JSON.stringify({ 
           response: assistantResponse,
+          reply: assistantResponse, // For backward compatibility 
           threadId: threadId,
-          model: MODEL_DEFAULT
+          model: MODEL
         }),
         {
           headers: {
