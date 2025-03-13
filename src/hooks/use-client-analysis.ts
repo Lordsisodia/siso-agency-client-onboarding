@@ -30,6 +30,7 @@ export interface ClientAnalysisResult {
 
 export function useClientAnalysis() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ClientAnalysisResult | null>(null);
   const { toast } = useToast();
@@ -43,11 +44,19 @@ export function useClientAnalysis() {
       setIsLoading(true);
       setError(null);
 
-      console.log(`Analyzing client with input: "${input.substring(0, 50)}..."${websiteUrl ? ` and website: ${websiteUrl}` : ''}`);
+      // Detect if the input might involve web search (contains search terms or analysis request)
+      const mightInvolveSearch = /search|find|research|information about|what is|latest|news|analyze/i.test(input);
+      if (mightInvolveSearch) {
+        setIsSearching(true);
+      }
+
+      console.log(`Analyzing client with input: "${input.substring(0, 50)}..."${websiteUrl ? ` and website: ${websiteUrl}` : ''}${responseId ? ` and responseId: ${responseId}` : ''}`);
       
       const { data, error } = await supabase.functions.invoke('client-analysis', {
         body: { input, websiteUrl, responseId }
       });
+
+      setIsSearching(false);
 
       if (error) {
         console.error('Error invoking client-analysis function:', error);
@@ -91,6 +100,7 @@ export function useClientAnalysis() {
   return {
     analyzeClient,
     isLoading,
+    isSearching,
     error,
     result
   };

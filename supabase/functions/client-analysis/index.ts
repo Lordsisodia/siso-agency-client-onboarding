@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {
@@ -7,110 +8,158 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Initialize OpenAI API 
+const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+const MODEL = 'gpt-4o'; // Using a capable model that supports web search
+
+// Initialize Supabase client
+const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, {
+      headers: corsHeaders
+    });
   }
-
+  
   try {
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openAIApiKey) {
+    // Parse request body
+    const { input, websiteUrl, responseId } = await req.json();
+    
+    if (!input) {
       return new Response(
-        JSON.stringify({ success: false, error: "OpenAI API key not configured" }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          success: false, 
+          error: 'No input provided' 
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
       );
     }
 
-    const { input, responseId, websiteUrl } = await req.json();
-
-    // Create a new response or continue from an existing one
-    const apiEndpoint = "https://api.openai.com/v1/responses";
-    const method = responseId ? "PATCH" : "POST";
-    const url = responseId ? `${apiEndpoint}/${responseId}` : apiEndpoint;
-
-    // Enhance the input with website-related context if provided
-    let formattedInput = input;
-    if (websiteUrl && !responseId) {
-      formattedInput = `Analyze this client website: ${websiteUrl}\n\n${input}`;
-    }
-
-    // Construct the request body
-    const requestBody: any = {
-      model: "gpt-4o",
-      temperature: 0.7
-    };
-
-    // For a new conversation
-    if (!responseId) {
-      requestBody.input = formattedInput;
-      requestBody.tools = [{ type: "web_search" }];
-    } 
-    // For continuing a conversation
-    else {
-      requestBody.input = formattedInput;
-      requestBody.previous_response_id = responseId;
-    }
-
-    console.log(`Making ${method} request to ${url}`);
-    const response = await fetch(url, {
-      method,
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-        'OpenAI-Beta': 'responses-2024-08-23' // Include the beta header
-      },
-      body: JSON.stringify(requestBody)
+    console.log(`Processing request with input: "${input.substring(0, 100)}..."${websiteUrl ? ` and website: ${websiteUrl}` : ''}${responseId ? ` and responseId: ${responseId}` : ''}`);
+    
+    // Setup tools for web search
+    const tools = [{ type: "web_search" }];
+    
+    // Setup OpenAI API client
+    const OpenAI = (await import("https://esm.sh/openai@4.26.0")).default;
+    const openai = new OpenAI({
+      apiKey: OPENAI_API_KEY,
     });
 
-    // Check if the response is successful
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`OpenAI API error (${response.status}): ${errorText}`);
+    console.log("Initialized OpenAI client");
+    
+    // Call OpenAI Responses API
+    try {
+      // Prepare input for OpenAI
+      const openaiOptions = {
+        model: MODEL,
+        tools,
+        temperature: 0.7,
+      };
+      
+      let response;
+      
+      if (responseId) {
+        // Continue conversation with previous response ID
+        console.log(`Continuing conversation with responseId: ${responseId}`);
+        response = await openai.responses.create({
+          ...openaiOptions,
+          input: input,
+          previous_response_id: responseId
+        });
+      } else {
+        // Start a new conversation
+        console.log("Starting new conversation");
+        
+        // Construct our input with website URL if provided
+        let openaiInput = input;
+        if (websiteUrl) {
+          openaiInput = `Analyze this website: ${websiteUrl}\n\n${input}`;
+        }
+        
+        response = await openai.responses.create({
+          ...openaiOptions,
+          input: openaiInput
+        });
+      }
+      
+      console.log(`Response received with ID: ${response.id}`);
+      
+      // Process the response
+      const webSearchResults = response.output
+        .filter(item => item.type === 'web_search_call')
+        .map(item => ({
+          id: item.id,
+          status: item.status
+        }));
+      
+      const messages = response.output
+        .filter(item => item.type === 'message')
+        .flatMap(item => 
+          item.content.map(content => ({
+            type: item.role === 'assistant' ? 'answer' : 'question',
+            content: content.text || '',
+            annotations: content.annotations || []
+          }))
+        );
+      
+      // Return the result
       return new Response(
-        JSON.stringify({ success: false, error: `OpenAI API error: ${response.status}` }),
-        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({
+          success: true,
+          result: {
+            responseId: response.id,
+            messages,
+            webSearchResults
+          }
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    } catch (err) {
+      console.error('Error calling OpenAI:', err);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: `OpenAI API error: ${err.message || 'Unknown error'}` 
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
       );
     }
-
-    const data = await response.json();
-    
-    // Extract the assistant's messages and any web search results
-    const processedResult = {
-      responseId: data.id,
-      messages: [],
-      webSearchResults: []
-    };
-
-    // Process the output to extract messages and web search results
-    if (data.output) {
-      for (const item of data.output) {
-        if (item.type === "message" && item.role === "assistant") {
-          processedResult.messages.push({
-            type: "text",
-            content: item.content[0].text,
-            annotations: item.content[0].annotations || []
-          });
-        } else if (item.type === "web_search_call") {
-          processedResult.webSearchResults.push({
-            id: item.id,
-            status: item.status
-          });
+  } catch (error) {
+    console.error('Unhandled error:', error);
+    return new Response(
+      JSON.stringify({ 
+        success: false, 
+        error: `Internal server error: ${error.message}` 
+      }),
+      {
+        status: 500,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
         }
       }
-    }
-
-    console.log("Processed response:", JSON.stringify(processedResult, null, 2));
-    
-    return new Response(
-      JSON.stringify({ success: true, result: processedResult }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-  } catch (error) {
-    console.error("Error in client-analysis function:", error);
-    return new Response(
-      JSON.stringify({ success: false, error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,9 +29,8 @@ export function ClientOnboarding({ onComplete }: ClientOnboardingProps) {
     features: { core: [], extras: [] }
   });
   const [isVerified, setIsVerified] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
   
-  const { analyzeClient, isLoading, error } = useClientAnalysis();
+  const { analyzeClient, isLoading, isSearching, error } = useClientAnalysis();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -53,9 +51,7 @@ export function ClientOnboarding({ onComplete }: ClientOnboardingProps) {
       After analysis, ask follow-up questions about areas that need clarification.
     `;
 
-    setIsSearching(true);
     const result = await analyzeClient(initialPrompt, websiteUrl);
-    setIsSearching(false);
     
     if (result) {
       setResponseId(result.responseId);
@@ -71,9 +67,7 @@ export function ClientOnboarding({ onComplete }: ClientOnboardingProps) {
   const handleContinueConversation = async () => {
     if (!clientInfo.trim() || !responseId) return;
     
-    setIsSearching(true);
     const result = await analyzeClient(clientInfo, undefined, responseId);
-    setIsSearching(false);
     
     if (result) {
       setConversation([...conversation, ...result.messages]);
@@ -175,7 +169,9 @@ export function ClientOnboarding({ onComplete }: ClientOnboardingProps) {
   const extractBusinessData = (result: ClientAnalysisResult) => {
     // Simple extraction based on text content
     // In a real implementation, this would be more sophisticated
-    const content = result.messages[0]?.content || '';
+    
+    // Combine all message content for analysis
+    const content = result.messages.map(msg => msg.content).join('\n');
     
     // Extract company name if not already set
     if (!businessData.companyName) {
