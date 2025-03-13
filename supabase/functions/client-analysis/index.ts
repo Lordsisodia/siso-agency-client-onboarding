@@ -61,10 +61,24 @@ serve(async (req) => {
     
     try {
       // Prepare proper input format for OpenAI Responses API
-      let formattedInput = input;
+      let messages = [];
+      
+      // Add system message
+      messages.push({
+        role: "system",
+        content: "You are a helpful AI assistant that provides thorough and relevant information by searching the web when needed. Use the search tool when information might be outdated or when you need specific details. Respond with accurate, up-to-date information and cite your sources."
+      });
+      
+      // Add user message
+      let userMessage = input;
       if (websiteUrl) {
-        formattedInput = `Analyze this website: ${websiteUrl}\n\n${input}`;
+        userMessage = `Analyze this website: ${websiteUrl}\n\n${input}`;
       }
+      
+      messages.push({
+        role: "user",
+        content: userMessage
+      });
       
       // Setup base options for OpenAI Responses API
       const openaiOptions = {
@@ -80,7 +94,7 @@ serve(async (req) => {
         console.log(`Continuing conversation with responseId: ${responseId}`);
         response = await openai.responses.create({
           ...openaiOptions,
-          input: formattedInput,
+          messages,
           previous_response_id: responseId
         });
       } else {
@@ -88,7 +102,7 @@ serve(async (req) => {
         console.log("Starting new conversation");
         response = await openai.responses.create({
           ...openaiOptions,
-          input: formattedInput
+          messages
         });
       }
       
