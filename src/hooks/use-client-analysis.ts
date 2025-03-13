@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface WebSearchResult {
   id: string;

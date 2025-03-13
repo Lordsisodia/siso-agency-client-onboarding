@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, Globe, Search, Loader2, CheckCircle } from 'lucide-react';
+import { AlertCircle, Globe, Search, Loader2, CheckCircle, ExternalLink } from 'lucide-react';
 import { useClientAnalysis, ClientAnalysisResult, Message } from '@/hooks/use-client-analysis';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,6 +30,7 @@ export function ClientOnboarding({ onComplete }: ClientOnboardingProps) {
     features: { core: [], extras: [] }
   });
   const [isVerified, setIsVerified] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   
   const { analyzeClient, isLoading, error } = useClientAnalysis();
   const { user } = useAuth();
@@ -52,7 +53,10 @@ export function ClientOnboarding({ onComplete }: ClientOnboardingProps) {
       After analysis, ask follow-up questions about areas that need clarification.
     `;
 
+    setIsSearching(true);
     const result = await analyzeClient(initialPrompt, websiteUrl);
+    setIsSearching(false);
+    
     if (result) {
       setResponseId(result.responseId);
       setConversation([...result.messages]);
@@ -67,7 +71,10 @@ export function ClientOnboarding({ onComplete }: ClientOnboardingProps) {
   const handleContinueConversation = async () => {
     if (!clientInfo.trim() || !responseId) return;
     
+    setIsSearching(true);
     const result = await analyzeClient(clientInfo, undefined, responseId);
+    setIsSearching(false);
+    
     if (result) {
       setConversation([...conversation, ...result.messages]);
       setClientInfo('');
@@ -226,6 +233,39 @@ export function ClientOnboarding({ onComplete }: ClientOnboardingProps) {
     }
   };
 
+  // Function to render message content with annotations (web search results)
+  const renderMessageWithAnnotations = (message: Message) => {
+    if (!message.annotations || message.annotations.length === 0) {
+      return <div className="whitespace-pre-wrap">{message.content}</div>;
+    }
+
+    return (
+      <>
+        <div className="whitespace-pre-wrap">{message.content}</div>
+        
+        {/* Display annotations (web search results) */}
+        <div className="mt-3 pt-2 border-t border-slate-800/20">
+          <p className="text-xs text-muted-foreground mb-1">Sources:</p>
+          <ul className="text-xs space-y-1">
+            {message.annotations.map((annotation, i) => (
+              <li key={i}>
+                <a 
+                  href={annotation.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline flex items-center"
+                >
+                  <ExternalLink className="h-3 w-3 mr-1 inline-flex" />
+                  <span className="truncate">{annotation.title}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Step 1: Website Analysis */}
@@ -264,7 +304,7 @@ export function ClientOnboarding({ onComplete }: ClientOnboardingProps) {
                 <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-lg p-4 text-sm flex items-start space-x-2">
                   <AlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
                   <div className="text-amber-800 dark:text-amber-300">
-                    <p>Our AI will analyze the website to extract business information and help you create a project.</p>
+                    <p>Our AI will analyze the website and search the web to extract business information and help you create a project.</p>
                   </div>
                 </div>
               </CardContent>
@@ -311,32 +351,18 @@ export function ClientOnboarding({ onComplete }: ClientOnboardingProps) {
                   {/* Display conversation */}
                   {conversation.map((message, idx) => (
                     <div key={idx} className="break-words">
-                      <div className="whitespace-pre-wrap">{message.content}</div>
-                      
-                      {/* Display any annotations (web search results) */}
-                      {message.annotations && message.annotations.length > 0 && (
-                        <div className="mt-2 pt-2 border-t border-slate-800/20">
-                          <p className="text-xs text-muted-foreground mb-1">Sources:</p>
-                          <ul className="text-xs space-y-1">
-                            {message.annotations.map((annotation, i) => (
-                              <li key={i}>
-                                <a 
-                                  href={annotation.url} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 hover:underline flex items-center"
-                                >
-                                  <span className="truncate">{annotation.title}</span>
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                      {renderMessageWithAnnotations(message)}
                     </div>
                   ))}
                   
-                  {isLoading && (
+                  {isLoading && isSearching && (
+                    <div className="flex flex-col items-center space-y-2 text-muted-foreground p-4">
+                      <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                      <span className="text-sm">Searching the web for information...</span>
+                    </div>
+                  )}
+                  
+                  {isLoading && !isSearching && (
                     <div className="flex items-center space-x-2 text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin" />
                       <span>Analyzing...</span>
