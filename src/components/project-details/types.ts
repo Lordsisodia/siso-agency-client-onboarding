@@ -35,5 +35,11 @@ export interface Project {
       type: string;
       url: string;
     }[];
+    analysis_results?: {
+      key_findings: string[];
+      recommendations: string[];
+      competitive_insights?: string[];
+      technical_requirements?: string[];
+    };
   };
 }

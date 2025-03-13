@@ -9,9 +9,12 @@ import { ProjectContent } from '@/components/project/ProjectContent';
 import { useNewProject } from '@/hooks/use-new-project';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ClientOnboarding } from '@/components/onboarding/ClientOnboarding';
 
 export default function NewProject() {
   const [isReady, setIsReady] = useState(false);
+  const [activeTab, setActiveTab] = useState('chat');
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   
@@ -64,6 +67,10 @@ export default function NewProject() {
     );
   }
 
+  const handleProjectCreated = (projectId: string) => {
+    navigate(`/project/${projectId}`);
+  };
+
   return (
     <MainLayout>
       <div className="container max-w-6xl mx-auto py-6 px-4 min-h-screen relative">
@@ -86,17 +93,31 @@ export default function NewProject() {
           showActionButtons={showChat}
         />
 
-        {/* Main content */}
-        <ProjectContent
-          showOnboarding={showOnboarding}
-          showChat={showChat}
-          connectionError={connectionError}
-          projectId={projectId}
-          messages={messages}
-          isLoading={chatLoading}
-          onStartChat={startChatInterface}
-          onSkipOnboarding={() => startChatInterface()}
-        />
+        {/* Project Creation Options */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="chat">Chat Assistant</TabsTrigger>
+            <TabsTrigger value="ai">AI Onboarding</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="chat" className="mt-0">
+            {/* Main content */}
+            <ProjectContent
+              showOnboarding={showOnboarding}
+              showChat={showChat}
+              connectionError={connectionError}
+              projectId={projectId}
+              messages={messages}
+              isLoading={chatLoading}
+              onStartChat={startChatInterface}
+              onSkipOnboarding={() => startChatInterface()}
+            />
+          </TabsContent>
+          
+          <TabsContent value="ai" className="mt-0">
+            <ClientOnboarding onComplete={handleProjectCreated} />
+          </TabsContent>
+        </Tabs>
         
         {/* Input Sheets */}
         <WebsiteInputSheet 
