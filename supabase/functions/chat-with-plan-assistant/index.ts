@@ -229,7 +229,7 @@ function extractTextFromResponseOutput(output: any[]): string {
     if (item.type === 'message' && item.role === 'assistant') {
       if (item.content && Array.isArray(item.content)) {
         for (const contentItem of item.content) {
-          if (contentItem.type === 'output_text') {
+          if (contentItem.type === 'text') {
             return contentItem.text;
           }
         }
