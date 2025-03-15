@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChatMessage as ChatMessageType } from '@/types/chat';
 import { ThinkingDots } from './processing/ThinkingDots';
+import { MessageLoading } from '@/components/ui/message-loading';
 
 export interface ChatMessageProps {
   message?: ChatMessageType;

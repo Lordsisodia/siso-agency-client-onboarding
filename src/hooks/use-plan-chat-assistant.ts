@@ -50,13 +50,10 @@ export function usePlanChatAssistant(projectId?: string) {
         loading: true 
       }]);
 
-      // Prepare the messages array to send to the API
-      const messagesArray = [...messages, userMessage];
-      
       // Make the API call to the Edge Function
       const { data, error } = await supabase.functions.invoke('chat-with-plan-assistant', {
         body: {
-          messages: messagesArray.map(({ id, loading, ...rest }) => rest),
+          messages: [...messages, userMessage].map(({ id, loading, ...rest }) => rest),
           projectId,
           formData,
           stream: true // Request streaming response

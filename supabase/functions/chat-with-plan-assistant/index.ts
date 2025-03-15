@@ -61,23 +61,6 @@ serve(async (req) => {
     try {
       console.log(`Calling OpenAI Responses API with user message`);
       
-      // Prepare input for the Responses API 
-      // Combine system prompt and relevant context into a single input string
-      let inputContext = PROJECT_PLANNER_SYSTEM_PROMPT + "\n\n";
-      
-      // Add previous messages as context (excluding the current user message)
-      if (messages.length > 1) {
-        const previousMessages = messages.slice(0, -1);
-        previousMessages.forEach(msg => {
-          const role = msg.role === 'user' ? 'User' : 'Assistant';
-          inputContext += `${role}: ${msg.content}\n`;
-        });
-        inputContext += "\n";
-      }
-      
-      // Add the current user message
-      inputContext += `User: ${userMessage.content}\n\nAssistant: `;
-      
       // If streaming is requested, handle streaming response
       if (stream) {
         // Direct OpenAI API call for streaming with Responses API
@@ -95,6 +78,12 @@ serve(async (req) => {
           })
         });
         
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+        }
+        
+        // Handle streaming response with SSE format
         const reader = response.body?.getReader();
         if (!reader) {
           throw new Error('Stream reader is not available');
@@ -107,28 +96,37 @@ serve(async (req) => {
           const { done, value } = await reader.read();
           if (done) break;
           
+          // Process the SSE format (event: data: format)
           const chunk = decoder.decode(value, { stream: true });
-          // Parse the chunk (may contain multiple JSON objects)
-          const lines = chunk
-            .split('\n')
-            .filter(line => line.trim() !== '' && line.trim() !== 'data: [DONE]')
-            .map(line => line.replace(/^data: /, ''));
+          const lines = chunk.split('\n').filter(line => line.trim() !== '');
+          
+          let currentData = '';
           
           for (const line of lines) {
-            try {
-              if (line) {
-                const parsedChunk = JSON.parse(line);
-                if (parsedChunk.output && 
-                    parsedChunk.output[0]?.type === 'message' && 
-                    parsedChunk.output[0]?.content?.[0]?.type === 'output_text') {
-                  const textContent = parsedChunk.output[0].content[0].text;
-                  if (textContent) {
-                    completeResponse += textContent;
+            // SSE format: lines start with "event:" or "data:"
+            if (line.startsWith('data:')) {
+              currentData = line.substring(5).trim();
+              
+              // Skip [DONE] marker
+              if (currentData === '[DONE]') continue;
+              
+              try {
+                if (currentData) {
+                  const parsedData = JSON.parse(currentData);
+                  
+                  // Extract text content from the response structure
+                  if (parsedData.output && 
+                      parsedData.output[0]?.type === 'message' && 
+                      parsedData.output[0]?.content?.[0]?.type === 'output_text') {
+                    const textContent = parsedData.output[0].content[0].text;
+                    if (textContent) {
+                      completeResponse += textContent;
+                    }
                   }
                 }
+              } catch (e) {
+                console.error('Error parsing data:', e, currentData);
               }
-            } catch (e) {
-              console.error('Error parsing chunk:', e, line);
             }
           }
         }
@@ -178,6 +176,11 @@ serve(async (req) => {
             input: userMessage.content
           })
         });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+        }
         
         const result = await response.json();
         
