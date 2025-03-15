@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 import "https://deno.land/x/xhr@0.1.0/mod.ts"; // Required for OpenAI in Deno
@@ -189,30 +190,53 @@ async function saveChatHistory(
 }
 
 /**
- * Convert messages array to proper OpenAI input format
+ * Convert messages array to format expected by the Responses API
  */
-function formatMessagesForAPI(messages: any[], systemPrompt: string) {
+function formatMessagesForResponsesAPI(messages: any[]) {
   const formattedMessages = [];
   
-  // Add system message if provided
-  if (systemPrompt) {
-    formattedMessages.push({
-      role: 'system',
-      content: systemPrompt
-    });
-  }
-  
-  // Add user and assistant messages
-  messages.forEach(msg => {
-    if (msg.role && (msg.role === 'user' || msg.role === 'assistant')) {
+  // Process each message
+  for (const msg of messages) {
+    if (msg.role === 'user') {
+      // Format user message
       formattedMessages.push({
-        role: msg.role,
+        role: 'user',
+        content: msg.content
+      });
+    } else if (msg.role === 'assistant') {
+      // Format assistant message
+      formattedMessages.push({
+        role: 'assistant',
+        content: msg.content
+      });
+    } else if (msg.role === 'system') {
+      // Format system message
+      formattedMessages.push({
+        role: 'system',
         content: msg.content
       });
     }
-  });
+  }
   
   return formattedMessages;
+}
+
+/**
+ * Extract text content from Responses API output
+ */
+function extractTextFromResponseOutput(output: any[]): string {
+  for (const item of output) {
+    if (item.type === 'message' && item.role === 'assistant') {
+      if (item.content && Array.isArray(item.content)) {
+        for (const contentItem of item.content) {
+          if (contentItem.type === 'output_text') {
+            return contentItem.text;
+          }
+        }
+      }
+    }
+  }
+  return "No response text found";
 }
 
 /**
@@ -317,60 +341,32 @@ async function handleChat(req: Request) {
       apiKey: OPENAI_API_KEY,
     });
     
-    // Format messages for OpenAI API
-    const formattedMessages = formatMessagesForAPI(messages, PROJECT_PLANNER_SYSTEM_PROMPT);
+    // Format messages for OpenAI Responses API
+    const formattedMessages = formatMessagesForResponsesAPI(messages);
     
-    // Call OpenAI using the official SDK
     try {
-      console.log(`Calling OpenAI with ${formattedMessages.length} messages in context`);
+      console.log(`Calling OpenAI Responses API with ${formattedMessages.length} messages in context`);
       
-      let response;
+      const requestOptions: any = {
+        model: MODEL,
+        input: formattedMessages,
+        instructions: PROJECT_PLANNER_SYSTEM_PROMPT,
+        temperature: 0.7,
+      };
       
-      // Use Responses API if a responseId is provided
+      // Add previous_response_id if available
       if (responseId) {
         console.log(`Continuing conversation with responseId: ${responseId}`);
-        response = await openai.responses.create({
-          model: MODEL,
-          input: formattedMessages,
-          previous_response_id: responseId,
-          temperature: 0.7,
-          max_output_tokens: 2000
-        });
-      } else {
-        // Otherwise use regular chat completions
-        response = await openai.chat.completions.create({
-          model: MODEL,
-          messages: formattedMessages,
-          temperature: 0.7,
-          max_tokens: 2000
-        });
+        requestOptions.previous_response_id = responseId;
       }
       
-      // Extract the response text based on which API was used
-      let assistantResponse;
-      let newResponseId = null;
+      // Call OpenAI Responses API
+      const response = await openai.responses.create(requestOptions);
       
-      if ('choices' in response) {
-        // This is a ChatCompletions response
-        assistantResponse = response.choices[0].message.content;
-        console.log('Received response from OpenAI Chat Completions API:', 
-          assistantResponse?.substring(0, 100) + '...');
-      } else {
-        // This is a Responses API response
-        newResponseId = response.id;
-        
-        // Extract the text content from the output array
-        const messageOutput = response.output.find(item => item.type === 'message');
-        if (messageOutput && messageOutput.content) {
-          const textContent = messageOutput.content.find(item => item.type === 'output_text');
-          assistantResponse = textContent ? textContent.text : 'No response generated.';
-        } else {
-          assistantResponse = 'No response generated.';
-        }
-        
-        console.log('Received response from OpenAI Responses API:', 
-          assistantResponse?.substring(0, 100) + '...');
-      }
+      console.log('Received response from OpenAI Responses API with ID:', response.id);
+      
+      // Extract the text content from the response
+      const assistantResponse = extractTextFromResponseOutput(response.output);
       
       // Save chat history
       await saveChatHistory(
@@ -379,16 +375,15 @@ async function handleChat(req: Request) {
         assistantResponse, 
         formData, 
         { thread_id: threadId, model: MODEL },
-        newResponseId
+        response.id
       );
       
       // Return the assistant's response
       return new Response(
         JSON.stringify({ 
           response: assistantResponse,
-          reply: assistantResponse, // For backward compatibility 
           threadId: threadId,
-          responseId: newResponseId,
+          responseId: response.id,
           model: MODEL
         }),
         {

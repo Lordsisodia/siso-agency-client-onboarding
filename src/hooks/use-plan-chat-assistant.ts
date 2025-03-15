@@ -106,7 +106,7 @@ export function usePlanChatAssistant(projectId?: string) {
         const assistantMessage: Message = {
           id: uuidv4(),
           role: 'assistant',
-          content: data.response || data.reply || 'Sorry, I couldn\'t generate a response.'
+          content: data.response || 'Sorry, I couldn\'t generate a response.'
         };
         
         setMessages(prev => [...prev, assistantMessage]);
