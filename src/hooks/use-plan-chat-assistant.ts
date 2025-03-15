@@ -13,23 +13,15 @@ interface Message {
   loading?: boolean;
 }
 
-interface UsePlanChatAssistantProps {
-  projectId?: string;
-}
-
 export function usePlanChatAssistant(projectId?: string) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [threadId, setThreadId] = useState<string | null>(null);
-  const [responseId, setResponseId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const clearMessages = useCallback(() => {
     setMessages([]);
     setError(null);
-    setThreadId(null);
-    setResponseId(null);
   }, []);
 
   const sendMessage = useCallback(async (
@@ -74,9 +66,7 @@ export function usePlanChatAssistant(projectId?: string) {
         body: {
           messages: messagesArray.map(({ id, loading, ...rest }) => rest),
           projectId,
-          formData,
-          threadId,
-          responseId
+          formData
         }
       });
 
@@ -92,17 +82,6 @@ export function usePlanChatAssistant(projectId?: string) {
           variant: 'destructive',
         });
       } else if (data) {
-        // Store thread ID for conversation continuity
-        if (data.threadId) {
-          setThreadId(data.threadId);
-        }
-        
-        // Store response ID for API continuity
-        if (data.responseId) {
-          setResponseId(data.responseId);
-          console.log('Stored Response ID:', data.responseId);
-        }
-        
         const assistantMessage: Message = {
           id: uuidv4(),
           role: 'assistant',
@@ -123,15 +102,13 @@ export function usePlanChatAssistant(projectId?: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, projectId, threadId, responseId, toast]);
+  }, [messages, projectId, toast]);
 
   return {
     messages,
     isLoading,
     error,
     sendMessage,
-    clearMessages,
-    threadId,
-    responseId
+    clearMessages
   };
 }
