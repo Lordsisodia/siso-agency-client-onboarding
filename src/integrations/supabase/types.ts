@@ -1355,29 +1355,38 @@ export type Database = {
       plan_chat_history: {
         Row: {
           ai_response: string
+          conversation_id: string | null
           created_at: string
           form_data: Json | null
           id: string
+          message_order: number | null
           metadata: Json | null
           plan_id: string | null
+          user_id: string | null
           user_message: string
         }
         Insert: {
           ai_response: string
+          conversation_id?: string | null
           created_at?: string
           form_data?: Json | null
           id?: string
+          message_order?: number | null
           metadata?: Json | null
           plan_id?: string | null
+          user_id?: string | null
           user_message: string
         }
         Update: {
           ai_response?: string
+          conversation_id?: string | null
           created_at?: string
           form_data?: Json | null
           id?: string
+          message_order?: number | null
           metadata?: Json | null
           plan_id?: string | null
+          user_id?: string | null
           user_message?: string
         }
         Relationships: [
