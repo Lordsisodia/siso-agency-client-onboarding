@@ -39,18 +39,7 @@ export function usePlanChatAssistant(projectId?: string) {
       const userMessageId = uuidv4();
       const userMessage: Message = { id: userMessageId, role: 'user', content };
       
-      // Prepare the messages array, including system message if provided
-      const messagesArray = [...messages, userMessage];
-      
-      // Add system message to the beginning if provided and not already present
-      if (systemPrompt && !messages.some(m => m.role === 'system')) {
-        messagesArray.unshift({
-          id: uuidv4(),
-          role: 'system',
-          content: systemPrompt
-        });
-      }
-      
+      // Add user message to UI immediately
       setMessages(prev => [...prev, userMessage]);
 
       // Optimistically show the loading message
@@ -61,6 +50,9 @@ export function usePlanChatAssistant(projectId?: string) {
         loading: true 
       }]);
 
+      // Prepare the messages array to send to the API
+      const messagesArray = [...messages, userMessage];
+      
       // Make the API call to the Edge Function
       const { data, error } = await supabase.functions.invoke('chat-with-plan-assistant', {
         body: {

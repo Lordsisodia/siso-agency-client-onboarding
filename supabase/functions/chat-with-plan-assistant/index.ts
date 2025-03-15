@@ -58,37 +58,78 @@ serve(async (req) => {
     
     console.log('Processing message:', userMessage.content.substring(0, 100) + '...');
     
-    // Initialize OpenAI client
-    const OpenAI = (await import("https://esm.sh/openai@4.26.0")).default;
-    const openai = new OpenAI({
-      apiKey: OPENAI_API_KEY,
-    });
-    
     try {
-      console.log(`Calling OpenAI API with ${messages.length} messages in context`);
+      console.log(`Calling OpenAI Responses API with user message`);
       
-      // Format messages for OpenAI API - just pass through as is
-      const formattedMessages = messages.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }));
+      // Prepare input for the Responses API 
+      // Combine system prompt and relevant context into a single input string
+      let inputContext = PROJECT_PLANNER_SYSTEM_PROMPT + "\n\n";
+      
+      // Add previous messages as context (excluding the current user message)
+      if (messages.length > 1) {
+        const previousMessages = messages.slice(0, -1);
+        previousMessages.forEach(msg => {
+          const role = msg.role === 'user' ? 'User' : 'Assistant';
+          inputContext += `${role}: ${msg.content}\n`;
+        });
+        inputContext += "\n";
+      }
+      
+      // Add the current user message
+      inputContext += `User: ${userMessage.content}\n\nAssistant: `;
       
       // If streaming is requested, handle streaming response
       if (stream) {
-        const response = await openai.chat.completions.create({
-          model: MODEL,
-          messages: [
-            { role: 'system', content: PROJECT_PLANNER_SYSTEM_PROMPT },
-            ...formattedMessages
-          ],
-          stream: true
+        // Direct OpenAI API call for streaming with Responses API
+        const response = await fetch('https://api.openai.com/v1/responses', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: MODEL,
+            instructions: PROJECT_PLANNER_SYSTEM_PROMPT,
+            input: userMessage.content,
+            stream: true
+          })
         });
         
-        let completeResponse = '';
+        const reader = response.body?.getReader();
+        if (!reader) {
+          throw new Error('Stream reader is not available');
+        }
         
-        for await (const chunk of response) {
-          if (chunk.choices[0]?.delta?.content) {
-            completeResponse += chunk.choices[0].delta.content;
+        let completeResponse = '';
+        const decoder = new TextDecoder();
+        
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value, { stream: true });
+          // Parse the chunk (may contain multiple JSON objects)
+          const lines = chunk
+            .split('\n')
+            .filter(line => line.trim() !== '' && line.trim() !== 'data: [DONE]')
+            .map(line => line.replace(/^data: /, ''));
+          
+          for (const line of lines) {
+            try {
+              if (line) {
+                const parsedChunk = JSON.parse(line);
+                if (parsedChunk.output && 
+                    parsedChunk.output[0]?.type === 'message' && 
+                    parsedChunk.output[0]?.content?.[0]?.type === 'output_text') {
+                  const textContent = parsedChunk.output[0].content[0].text;
+                  if (textContent) {
+                    completeResponse += textContent;
+                  }
+                }
+              }
+            } catch (e) {
+              console.error('Error parsing chunk:', e, line);
+            }
           }
         }
         
@@ -124,19 +165,32 @@ serve(async (req) => {
           }
         );
       } else {
-        // Simple OpenAI chat completion request with system prompt (non-streaming)
-        const response = await openai.chat.completions.create({
-          model: MODEL,
-          messages: [
-            { role: 'system', content: PROJECT_PLANNER_SYSTEM_PROMPT },
-            ...formattedMessages
-          ]
+        // Non-streaming request handling
+        const response = await fetch('https://api.openai.com/v1/responses', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: MODEL,
+            instructions: PROJECT_PLANNER_SYSTEM_PROMPT,
+            input: userMessage.content
+          })
         });
         
-        console.log('Received response from OpenAI API');
+        const result = await response.json();
         
-        // Extract the assistant's response
-        const assistantResponse = response.choices[0].message.content;
+        // Extract the text content from the response
+        let assistantResponse = '';
+        if (result.output && 
+            result.output[0]?.type === 'message' && 
+            result.output[0]?.content?.[0]?.type === 'output_text') {
+          assistantResponse = result.output[0].content[0].text;
+        } else {
+          console.error('Unexpected response format:', result);
+          assistantResponse = "Sorry, I couldn't generate a proper response.";
+        }
         
         // Save chat history if we have a project ID
         if (projectId) {

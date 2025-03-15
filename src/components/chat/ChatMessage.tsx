@@ -89,4 +89,4 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
       </div>
     </motion.div>
   );
-};
+}
