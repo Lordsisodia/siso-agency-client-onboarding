@@ -66,7 +66,8 @@ export function usePlanChatAssistant(projectId?: string) {
         body: {
           messages: messagesArray.map(({ id, loading, ...rest }) => rest),
           projectId,
-          formData
+          formData,
+          stream: true // Request streaming response
         }
       });
 

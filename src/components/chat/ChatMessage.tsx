@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChatMessage as ChatMessageType } from '@/types/chat';
+import { ThinkingDots } from './processing/ThinkingDots';
 
 export interface ChatMessageProps {
   message?: ChatMessageType;
@@ -25,6 +26,36 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   
   // Use content prop directly or from message object
   const displayContent = content || (message?.content || '');
+
+  // State for typewriter effect
+  const [displayedText, setDisplayedText] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  
+  // Apply typewriter effect when message content changes and it's an assistant message
+  useEffect(() => {
+    if (!isUser && !isLoading && displayContent && displayContent.trim() !== '') {
+      setIsTyping(true);
+      setDisplayedText('');
+      
+      let i = 0;
+      const speed = 10; // ms per character - adjust for faster/slower typing
+      
+      const typeWriter = () => {
+        if (i < displayContent.length) {
+          setDisplayedText(displayContent.substring(0, i + 1));
+          i++;
+          setTimeout(typeWriter, speed);
+        } else {
+          setIsTyping(false);
+        }
+      };
+      
+      typeWriter();
+    } else if (isUser) {
+      // For user messages, display text immediately
+      setDisplayedText(displayContent);
+    }
+  }, [displayContent, isUser, isLoading]);
   
   return (
     <motion.div
@@ -35,19 +66,25 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     >
       <div
         className={`
-          px-4 py-3 rounded-lg max-w-[80%] shadow-sm
-          ${isUser ? 'bg-siso-orange-100 text-siso-orange-800' : 'bg-white text-siso-text'}
+          px-5 py-4 rounded-lg max-w-[80%] shadow-md border
+          ${isUser 
+            ? 'bg-gradient-to-r from-siso-orange/90 to-siso-red/90 text-white border-siso-orange/20' 
+            : 'bg-gradient-to-r from-slate-800/90 to-slate-900/90 text-slate-50 border-white/10'
+          }
           ${(message?.loading || isLoading) ? 'animate-pulse' : ''}
         `}
       >
         {(message?.loading || isLoading) ? (
-          <div className="flex items-center space-x-1">
-            <div className="h-2 w-2 bg-siso-text/40 rounded-full animate-bounce delay-100"></div>
-            <div className="h-2 w-2 bg-siso-text/40 rounded-full animate-bounce delay-200"></div>
-            <div className="h-2 w-2 bg-siso-text/40 rounded-full animate-bounce delay-300"></div>
-          </div>
+          <ThinkingDots />
         ) : (
-          <div className="whitespace-pre-wrap break-words">{displayContent}</div>
+          <div className="whitespace-pre-wrap break-words leading-relaxed">
+            {isUser ? displayedText : (isTyping ? (
+              <>
+                {displayedText}
+                <span className="inline-block w-1.5 h-4 ml-0.5 bg-siso-orange/70 animate-pulse"></span>
+              </>
+            ) : displayedText)}
+          </div>
         )}
       </div>
     </motion.div>

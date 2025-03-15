@@ -36,7 +36,7 @@ serve(async (req) => {
   try {
     // Parse request body
     const body = await req.json();
-    const { messages, projectId } = body;
+    const { messages, projectId, stream = false } = body;
     
     // Validate inputs
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -73,51 +73,103 @@ serve(async (req) => {
         content: msg.content
       }));
       
-      // Simple OpenAI chat completion request with system prompt
-      const response = await openai.chat.completions.create({
-        model: MODEL,
-        messages: [
-          { role: 'system', content: PROJECT_PLANNER_SYSTEM_PROMPT },
-          ...formattedMessages
-        ]
-      });
-      
-      console.log('Received response from OpenAI API');
-      
-      // Extract the assistant's response
-      const assistantResponse = response.choices[0].message.content;
-      
-      // Save chat history if we have a project ID
-      if (projectId) {
-        try {
-          await supabase
-            .from('plan_chat_history')
-            .insert({
-              plan_id: projectId,
-              user_message: userMessage.content,
-              ai_response: assistantResponse,
-              metadata: { model: MODEL }
-            });
-          console.log("Successfully saved chat history");
-        } catch (err) {
-          console.error("Error saving chat history:", err);
-          // Continue even if history saving fails
-        }
-      }
-      
-      // Return the assistant's response
-      return new Response(
-        JSON.stringify({ 
-          response: assistantResponse,
-          model: MODEL
-        }),
-        {
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json'
+      // If streaming is requested, handle streaming response
+      if (stream) {
+        const response = await openai.chat.completions.create({
+          model: MODEL,
+          messages: [
+            { role: 'system', content: PROJECT_PLANNER_SYSTEM_PROMPT },
+            ...formattedMessages
+          ],
+          stream: true
+        });
+        
+        let completeResponse = '';
+        
+        for await (const chunk of response) {
+          if (chunk.choices[0]?.delta?.content) {
+            completeResponse += chunk.choices[0].delta.content;
           }
         }
-      );
+        
+        // Save chat history if we have a project ID
+        if (projectId) {
+          try {
+            await supabase
+              .from('plan_chat_history')
+              .insert({
+                plan_id: projectId,
+                user_message: userMessage.content,
+                ai_response: completeResponse,
+                metadata: { model: MODEL }
+              });
+            console.log("Successfully saved chat history");
+          } catch (err) {
+            console.error("Error saving chat history:", err);
+            // Continue even if history saving fails
+          }
+        }
+        
+        // Return the complete collected response
+        return new Response(
+          JSON.stringify({ 
+            response: completeResponse,
+            model: MODEL
+          }),
+          {
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+      } else {
+        // Simple OpenAI chat completion request with system prompt (non-streaming)
+        const response = await openai.chat.completions.create({
+          model: MODEL,
+          messages: [
+            { role: 'system', content: PROJECT_PLANNER_SYSTEM_PROMPT },
+            ...formattedMessages
+          ]
+        });
+        
+        console.log('Received response from OpenAI API');
+        
+        // Extract the assistant's response
+        const assistantResponse = response.choices[0].message.content;
+        
+        // Save chat history if we have a project ID
+        if (projectId) {
+          try {
+            await supabase
+              .from('plan_chat_history')
+              .insert({
+                plan_id: projectId,
+                user_message: userMessage.content,
+                ai_response: assistantResponse,
+                metadata: { model: MODEL }
+              });
+            console.log("Successfully saved chat history");
+          } catch (err) {
+            console.error("Error saving chat history:", err);
+            // Continue even if history saving fails
+          }
+        }
+        
+        // Return the assistant's response
+        return new Response(
+          JSON.stringify({ 
+            response: assistantResponse,
+            model: MODEL
+          }),
+          {
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+      }
       
     } catch (err) {
       console.error('Error calling OpenAI:', err);
