@@ -97,7 +97,7 @@ export function usePlanChatAssistant(projectId?: string) {
           setThreadId(data.threadId);
         }
         
-        // Store response ID for the Responses API
+        // Store response ID for API continuity
         if (data.responseId) {
           setResponseId(data.responseId);
           console.log('Stored Response ID:', data.responseId);
