@@ -22,12 +22,14 @@ export function usePlanChatAssistant(projectId?: string) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [threadId, setThreadId] = useState<string | null>(null);
+  const [responseId, setResponseId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const clearMessages = useCallback(() => {
     setMessages([]);
     setError(null);
     setThreadId(null);
+    setResponseId(null);
   }, []);
 
   const sendMessage = useCallback(async (
@@ -73,7 +75,8 @@ export function usePlanChatAssistant(projectId?: string) {
           messages: messagesArray.map(({ id, loading, ...rest }) => rest),
           projectId,
           formData,
-          threadId
+          threadId,
+          responseId
         }
       });
 
@@ -92,6 +95,12 @@ export function usePlanChatAssistant(projectId?: string) {
         // Store thread ID for conversation continuity
         if (data.threadId) {
           setThreadId(data.threadId);
+        }
+        
+        // Store response ID for the Responses API
+        if (data.responseId) {
+          setResponseId(data.responseId);
+          console.log('Stored Response ID:', data.responseId);
         }
         
         const assistantMessage: Message = {
@@ -114,7 +123,7 @@ export function usePlanChatAssistant(projectId?: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, projectId, threadId, toast]);
+  }, [messages, projectId, threadId, responseId, toast]);
 
   return {
     messages,
@@ -122,6 +131,7 @@ export function usePlanChatAssistant(projectId?: string) {
     error,
     sendMessage,
     clearMessages,
-    threadId
+    threadId,
+    responseId
   };
 }

@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 import "https://deno.land/x/xhr@0.1.0/mod.ts"; // Required for OpenAI in Deno
@@ -141,7 +140,8 @@ async function saveChatHistory(
   userMessage: string, 
   aiResponse: string, 
   formData?: Record<string, any>, 
-  metadata?: Record<string, any>
+  metadata?: Record<string, any>,
+  responseId?: string
 ) {
   if (!projectId) {
     console.log("No project ID provided, skipping chat history save");
@@ -152,7 +152,8 @@ async function saveChatHistory(
     const finalMetadata = {
       ...metadata || {},
       saved_at: new Date().toISOString(),
-      client_info: 'edge-function'
+      client_info: 'edge-function',
+      response_id: responseId || null
     };
     
     const { data, error } = await supabase
@@ -188,25 +189,27 @@ async function saveChatHistory(
 }
 
 /**
- * Create a message history context with sliding window for OpenAI context management
+ * Convert messages array to proper OpenAI input format
  */
-function createMessageContext(messages, maxTokens = 4000) {
-  // Start with the system message
-  const formattedMessages = [
-    { role: 'system', content: PROJECT_PLANNER_SYSTEM_PROMPT }
-  ];
+function formatMessagesForAPI(messages: any[], systemPrompt: string) {
+  const formattedMessages = [];
   
-  // Add latest user messages (most recent 10)
-  // Simplified approach - in production we'd want token counting instead of message count
-  const userMessages = messages
-    .filter(msg => msg.role === 'user' || msg.role === 'assistant')
-    .slice(-20); // Keep last 20 messages to maintain context
-  
-  userMessages.forEach(msg => {
+  // Add system message if provided
+  if (systemPrompt) {
     formattedMessages.push({
-      role: msg.role,
-      content: msg.content
+      role: 'system',
+      content: systemPrompt
     });
+  }
+  
+  // Add user and assistant messages
+  messages.forEach(msg => {
+    if (msg.role && (msg.role === 'user' || msg.role === 'assistant')) {
+      formattedMessages.push({
+        role: msg.role,
+        content: msg.content
+      });
+    }
   });
   
   return formattedMessages;
@@ -251,7 +254,7 @@ async function handleChat(req: Request) {
       );
     }
     
-    const { messages, projectId, formData, threadId: existingThreadId } = body;
+    const { messages, projectId, formData, threadId: existingThreadId, responseId } = body;
     
     // Validate request data
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -308,37 +311,76 @@ async function handleChat(req: Request) {
       );
     }
     
-    // Create message context for OpenAI
-    const messageContext = createMessageContext(messages);
-    
     // Initialize OpenAI client
     const OpenAI = (await import("https://esm.sh/openai@4.26.0")).default;
     const openai = new OpenAI({
       apiKey: OPENAI_API_KEY,
     });
     
+    // Format messages for OpenAI API
+    const formattedMessages = formatMessagesForAPI(messages, PROJECT_PLANNER_SYSTEM_PROMPT);
+    
     // Call OpenAI using the official SDK
     try {
-      console.log(`Calling OpenAI with ${messageContext.length} messages in context`);
+      console.log(`Calling OpenAI with ${formattedMessages.length} messages in context`);
       
-      const response = await openai.chat.completions.create({
-        model: MODEL,
-        messages: messageContext,
-        temperature: 0.7,
-        max_tokens: 2000,
-        frequency_penalty: 0.3,
-        presence_penalty: 0.3
-      });
+      let response;
       
-      const assistantResponse = response.choices[0].message.content;
+      // Use Responses API if a responseId is provided
+      if (responseId) {
+        console.log(`Continuing conversation with responseId: ${responseId}`);
+        response = await openai.responses.create({
+          model: MODEL,
+          input: formattedMessages,
+          previous_response_id: responseId,
+          temperature: 0.7,
+          max_output_tokens: 2000
+        });
+      } else {
+        // Otherwise use regular chat completions
+        response = await openai.chat.completions.create({
+          model: MODEL,
+          messages: formattedMessages,
+          temperature: 0.7,
+          max_tokens: 2000
+        });
+      }
       
-      console.log('Received response from OpenAI:', assistantResponse?.substring(0, 100) + '...');
+      // Extract the response text based on which API was used
+      let assistantResponse;
+      let newResponseId = null;
+      
+      if ('choices' in response) {
+        // This is a ChatCompletions response
+        assistantResponse = response.choices[0].message.content;
+        console.log('Received response from OpenAI Chat Completions API:', 
+          assistantResponse?.substring(0, 100) + '...');
+      } else {
+        // This is a Responses API response
+        newResponseId = response.id;
+        
+        // Extract the text content from the output array
+        const messageOutput = response.output.find(item => item.type === 'message');
+        if (messageOutput && messageOutput.content) {
+          const textContent = messageOutput.content.find(item => item.type === 'output_text');
+          assistantResponse = textContent ? textContent.text : 'No response generated.';
+        } else {
+          assistantResponse = 'No response generated.';
+        }
+        
+        console.log('Received response from OpenAI Responses API:', 
+          assistantResponse?.substring(0, 100) + '...');
+      }
       
       // Save chat history
-      await saveChatHistory(projectId, userMessage.content, assistantResponse, formData, { 
-        thread_id: threadId,
-        model: MODEL
-      });
+      await saveChatHistory(
+        projectId, 
+        userMessage.content, 
+        assistantResponse, 
+        formData, 
+        { thread_id: threadId, model: MODEL },
+        newResponseId
+      );
       
       // Return the assistant's response
       return new Response(
@@ -346,6 +388,7 @@ async function handleChat(req: Request) {
           response: assistantResponse,
           reply: assistantResponse, // For backward compatibility 
           threadId: threadId,
+          responseId: newResponseId,
           model: MODEL
         }),
         {
