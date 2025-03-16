@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useChatAssistant, usePlanChatAssistant } from '@/hooks/core';
 import { useChatInterfaceState } from './useChatInterfaceState';
@@ -20,6 +20,7 @@ interface ChatInterfaceProps {
   projectId?: string;
   usePlanAssistant?: boolean;
   messages?: ChatMessage[]; // Added messages prop
+  onAssistantResponse?: (content: string) => void; // Added callback for assistant responses
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -31,6 +32,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   projectId,
   usePlanAssistant = false,
   messages: propMessages, // Accept messages from props
+  onAssistantResponse, // Added callback prop
 }) => {
   // State for AI enhancement options
   const [useWebSearch, setUseWebSearch] = useState(false);
@@ -85,8 +87,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     clearMessages,
     welcomeMessage,
     systemPrompt,
-    sendMessage: (message: string) => {
-      return hookSendMessage(message, systemPrompt || undefined);
+    sendMessage: async (message: string) => {
+      const response = await hookSendMessage(message, systemPrompt || undefined);
+      return response;
     }
   });
 
@@ -100,6 +103,20 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     setUseReasoning(prev => !prev);
     toggleReasoning();
   }, [toggleReasoning]);
+
+  // Monitor messages for new assistant responses
+  useEffect(() => {
+    if (messages && messages.length > 0 && onAssistantResponse) {
+      // Find the latest assistant message
+      const latestMessages = [...messages].reverse();
+      const latestAssistantMessage = latestMessages.find(msg => 
+        msg.role === 'assistant' && !msg.loading);
+      
+      if (latestAssistantMessage) {
+        onAssistantResponse(latestAssistantMessage.content);
+      }
+    }
+  }, [messages, onAssistantResponse]);
 
   // Convert onlineStatus string to boolean
   const isOnline = onlineStatus === 'online';

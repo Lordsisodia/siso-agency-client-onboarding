@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';
 import { WebsiteInputSheet } from '@/components/plan-builder/WebsiteInputSheet';
@@ -514,6 +514,12 @@ export default function PlanBuilder() {
 const EnhancedChatInterface = React.memo(({ projectId, ...props }: React.ComponentProps<typeof ChatInterface>) => {
   const { updateProjectData, extractDataFromAIResponse } = useProjectData();
   
+  const handleAssistantResponse = useCallback((content: string) => {
+    if (content && content.trim() !== '') {
+      extractDataFromAIResponse(content);
+    }
+  }, [extractDataFromAIResponse]);
+  
   useEffect(() => {
     const fetchLatestMessage = async () => {
       if (!props.usePlanAssistant || !projectId) return;
@@ -527,7 +533,7 @@ const EnhancedChatInterface = React.memo(({ projectId, ...props }: React.Compone
           .limit(1);
           
         if (error) throw error;
-          
+            
         const latestAssistantMessage = messages?.[0]?.ai_response;
         
         if (latestAssistantMessage) {
@@ -541,7 +547,7 @@ const EnhancedChatInterface = React.memo(({ projectId, ...props }: React.Compone
     fetchLatestMessage();
   }, [projectId, props.usePlanAssistant, extractDataFromAIResponse]);
   
-  return <ChatInterface {...props} projectId={projectId} />;
+  return <ChatInterface {...props} projectId={projectId} onAssistantResponse={handleAssistantResponse} />;
 });
 
 EnhancedChatInterface.displayName = 'EnhancedChatInterface';
