@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';
@@ -22,6 +21,14 @@ type ProjectHistoryItem = {
   conversationId?: string;
 };
 
+type WebsiteInputData = {
+  websiteUrl: string;
+  companyName: string;
+  projectGoals: string;
+  targetAudience: string;
+  socialLinks: Record<string, string>;
+};
+
 export default function PlanBuilder() {
   const [isManualInputOpen, setIsManualInputOpen] = useState(false);
   const [showConnectionAlert, setShowConnectionAlert] = useState(false);
@@ -34,14 +41,11 @@ export default function PlanBuilder() {
   const { projectId: urlProjectId } = useParams();
   
   const [projectId, setProjectId] = useState<string>(() => {
-    // If there's a project ID in the URL, use that
     if (urlProjectId) return urlProjectId;
     
-    // Otherwise check session storage
     const existingId = sessionStorage.getItem('planProjectId');
     if (existingId) return existingId;
     
-    // If no existing ID, create a new one
     const newId = `plan-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     sessionStorage.setItem('planProjectId', newId);
     return newId;
@@ -49,20 +53,17 @@ export default function PlanBuilder() {
 
   const { sendMessage, messages, isLoading, error } = usePlanChatAssistant(projectId);
 
-  // Set plan started if we have a project ID from the URL
   useEffect(() => {
     if (urlProjectId) {
       setIsPlanStarted(true);
     }
   }, [urlProjectId]);
 
-  // Load project history
   useEffect(() => {
     const fetchProjectHistory = async () => {
       try {
         setIsLoadingHistory(true);
         
-        // Get actual projects from plan_chat_history
         const { data: chatData, error: chatError } = await supabase
           .from('plan_chat_history')
           .select('plan_id, conversation_id, created_at, user_message, ai_response')
@@ -74,7 +75,6 @@ export default function PlanBuilder() {
           return;
         }
         
-        // Group by plan_id and get first message/response pairs
         const projectMap = new Map<string, ProjectHistoryItem>();
         
         chatData?.forEach(chat => {
@@ -82,11 +82,9 @@ export default function PlanBuilder() {
             let title = "Project Plan";
             let snippet = "";
             
-            // Attempt to extract a title from the AI response
             if (chat.ai_response) {
               const aiResponse = chat.ai_response;
               
-              // Look for common title patterns in AI responses
               const titleMatch = aiResponse.match(/# (.*?)(?:\n|$)/) || 
                              aiResponse.match(/\*\*(.*?)\*\*/) ||
                              aiResponse.match(/Title: (.*?)(?:\n|$)/);
@@ -95,12 +93,10 @@ export default function PlanBuilder() {
                 title = titleMatch[1].trim();
               }
               
-              // Get first paragraph as snippet
               const snippetMatch = aiResponse.match(/\n\n(.*?)(?:\n\n|$)/);
               if (snippetMatch && snippetMatch[1]) {
                 snippet = snippetMatch[1].trim().substring(0, 120) + '...';
               } else {
-                // Fallback to first 120 chars
                 snippet = aiResponse.substring(0, 120) + '...';
               }
             }
@@ -115,10 +111,8 @@ export default function PlanBuilder() {
           }
         });
         
-        // Convert map to array and set state
         const projectHistoryArray = Array.from(projectMap.values());
         setProjectHistory(projectHistoryArray);
-        
       } catch (error) {
         console.error("Error loading project history:", error);
       } finally {
@@ -129,7 +123,6 @@ export default function PlanBuilder() {
     fetchProjectHistory();
   }, []);
 
-  // Show a connection alert if we experience an error
   useEffect(() => {
     if (error) {
       setShowConnectionAlert(true);
@@ -138,7 +131,6 @@ export default function PlanBuilder() {
     }
   }, [error]);
 
-  // Start plan with initial prompt
   const handleStartPlan = async (prompt: string) => {
     try {
       toast({
@@ -190,6 +182,98 @@ export default function PlanBuilder() {
     }
   };
 
+  const handleWebsiteSubmit = async (websiteData: WebsiteInputData) => {
+    try {
+      toast({
+        title: "Processing Your Website",
+        description: "Analyzing your website and preparing project context...",
+        variant: "default"
+      });
+      
+      let enhancedData = { ...websiteData };
+      let analysisResults = null;
+      
+      if (websiteData.websiteUrl) {
+        try {
+          const { data, error } = await supabase.functions.invoke('analyze-website', {
+            body: { url: websiteData.websiteUrl }
+          });
+          
+          if (error) throw error;
+          
+          if (data.success) {
+            analysisResults = data;
+            
+            if (!enhancedData.companyName && data.aiAnalysis.companyName) {
+              enhancedData.companyName = data.aiAnalysis.companyName;
+            }
+            
+            if (data.basicExtraction.socialLinks) {
+              Object.keys(data.basicExtraction.socialLinks).forEach(platform => {
+                if (!enhancedData.socialLinks[platform]) {
+                  enhancedData.socialLinks[platform] = data.basicExtraction.socialLinks[platform];
+                }
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error analyzing website:", error);
+        }
+      }
+      
+      let initialMessage = `I'm creating a new ${enhancedData.companyName ? `project for ${enhancedData.companyName}` : 'project'}`;
+      
+      if (analysisResults) {
+        initialMessage += `\n\nBased on website analysis, here's what I found:`;
+        
+        if (analysisResults.aiAnalysis.companyName) {
+          initialMessage += `\n- Company: ${analysisResults.aiAnalysis.companyName}`;
+        }
+        
+        if (analysisResults.aiAnalysis.industry) {
+          initialMessage += `\n- Industry: ${analysisResults.aiAnalysis.industry}`;
+        }
+        
+        if (analysisResults.aiAnalysis.companyDescription) {
+          initialMessage += `\n- Description: ${analysisResults.aiAnalysis.companyDescription}`;
+        }
+        
+        if (analysisResults.aiAnalysis.productsOrServices) {
+          initialMessage += `\n- Products/Services: ${analysisResults.aiAnalysis.productsOrServices}`;
+        }
+        
+        if (analysisResults.basicExtraction.socialLinks && Object.keys(analysisResults.basicExtraction.socialLinks).length > 0) {
+          initialMessage += `\n- Social media presence: ${Object.keys(analysisResults.basicExtraction.socialLinks).join(', ')}`;
+        }
+      }
+      
+      if (enhancedData.projectGoals) {
+        initialMessage += `\n\nProject goals: ${enhancedData.projectGoals}`;
+      }
+      
+      if (enhancedData.targetAudience) {
+        initialMessage += `\n\nTarget audience: ${enhancedData.targetAudience}`;
+      }
+      
+      initialMessage += `\n\nCan you help me create a project plan based on this information?`;
+      
+      await sendMessage(initialMessage, undefined, {
+        website_data: enhancedData,
+        analysis_results: analysisResults
+      });
+      
+      setIsManualInputOpen(false);
+      setIsPlanStarted(true);
+    } catch (error) {
+      console.error("Error submitting to AI:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem processing your request. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleNewProject = () => {
     const newId = `plan-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     sessionStorage.setItem('planProjectId', newId);
@@ -206,7 +290,6 @@ export default function PlanBuilder() {
   return (
     <MainLayout>
       <div className="container max-w-6xl mx-auto py-8 px-4 min-h-screen relative">
-        {/* Waves background - now shown always and covering entire page */}
         <Waves 
           lineColor="rgba(255, 87, 34, 0.05)" 
           backgroundColor="transparent" 
@@ -224,7 +307,6 @@ export default function PlanBuilder() {
               onStartPlan={handleStartPlan}
             />
             
-            {/* Project History Section - Always visible now */}
             {(projectHistory.length > 0 || showProjectHistory) && (
               <motion.div 
                 className="mt-12 max-w-2xl mx-auto"
@@ -258,14 +340,12 @@ export default function PlanBuilder() {
                             title: "Loading Project",
                             description: `Loading ${project.title}...`,
                           });
-                          // Set the project ID and navigate to its page
                           sessionStorage.setItem('planProjectId', project.id);
                           setProjectId(project.id);
                           setIsPlanStarted(true);
                           navigate(`/plan-builder/${project.id}`);
                         }}
                       >
-                        {/* Gradient hover effect */}
                         <div className="absolute inset-0 bg-gradient-to-r from-siso-red/10 to-siso-orange/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         
                         <h3 className="text-lg font-medium text-siso-text relative z-10">{project.title}</h3>

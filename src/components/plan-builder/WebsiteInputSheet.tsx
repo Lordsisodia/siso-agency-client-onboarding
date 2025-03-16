@@ -9,6 +9,7 @@ import { Globe, Facebook, Twitter, Linkedin, Instagram, Send, Loader2, Building,
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
 
 interface WebsiteInputSheetProps {
   isOpen: boolean;
