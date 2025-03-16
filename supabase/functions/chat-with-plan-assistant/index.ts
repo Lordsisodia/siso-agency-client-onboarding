@@ -11,7 +11,7 @@ const corsHeaders = {
 
 // Initialize OpenAI API 
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-const MODEL = 'gpt-4o'; // Updated to use GPT-4o
+const MODEL = 'gpt-4o'; // Using GPT-4o for better project planning
 
 // Initialize Supabase client
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -255,11 +255,43 @@ serve(async (req) => {
             }
           }
         }
+
+        // Ensure response contains valid JSON
+        let enhancedResponse = completeResponse;
+        if (!enhancedResponse.includes('```json')) {
+          // If no JSON found, add a basic project skeleton
+          enhancedResponse += `\n\n\`\`\`json
+{
+  "title": "Project Plan",
+  "description": "",
+  "businessContext": {
+    "industry": "",
+    "companyName": "",
+    "scale": "",
+    "target_audience": []
+  },
+  "goals": "",
+  "features": {
+    "core": [],
+    "extras": []
+  },
+  "timeline": {
+    "estimated_weeks": null,
+    "phases": []
+  },
+  "budget": {
+    "estimated_total": null,
+    "currency": "USD",
+    "breakdown": []
+  }
+}
+\`\`\``;
+        }
         
         // Return the complete collected response without saving to database
         return new Response(
           JSON.stringify({ 
-            response: completeResponse,
+            response: enhancedResponse,
             model: MODEL,
             conversationId,
             web_search: useWebSearch,
@@ -287,11 +319,43 @@ serve(async (req) => {
           // Fallback response
           assistantResponse = "Sorry, I couldn't generate a proper response.";
         }
+
+        // Ensure response contains valid JSON
+        let enhancedResponse = assistantResponse;
+        if (!enhancedResponse.includes('```json')) {
+          // If no JSON found, add a basic project skeleton
+          enhancedResponse += `\n\n\`\`\`json
+{
+  "title": "Project Plan",
+  "description": "",
+  "businessContext": {
+    "industry": "",
+    "companyName": "",
+    "scale": "",
+    "target_audience": []
+  },
+  "goals": "",
+  "features": {
+    "core": [],
+    "extras": []
+  },
+  "timeline": {
+    "estimated_weeks": null,
+    "phases": []
+  },
+  "budget": {
+    "estimated_total": null,
+    "currency": "USD",
+    "breakdown": []
+  }
+}
+\`\`\``;
+        }
         
         // Return the assistant's response without saving to database
         return new Response(
           JSON.stringify({ 
-            response: assistantResponse,
+            response: enhancedResponse,
             model: MODEL,
             conversationId,
             web_search: useWebSearch,
@@ -341,7 +405,7 @@ serve(async (req) => {
 });
 
 // Helper function to get or create a conversation
-async function handleGetConversation(projectId: string, userId?: string) {
+async function handleGetConversation(projectId, userId) {
   try {
     if (!projectId) {
       return new Response(
