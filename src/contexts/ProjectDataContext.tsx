@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { StructuredData } from '@/types/chat';
+import { toast } from '@/hooks/use-toast';
 
 export interface ProjectData {
   title?: string;
@@ -90,17 +91,47 @@ export const ProjectDataProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setIsLoading(true);
     
     try {
-      // Try to detect JSON in the response
-      const jsonMatch = response.match(/```json\n([\s\S]*?)\n```/);
-      if (jsonMatch && jsonMatch[1]) {
-        try {
-          const parsedData = JSON.parse(jsonMatch[1]);
-          updateProjectData(parsedData, Object.keys(parsedData)[0]);
-          setIsLoading(false);
-          return;
-        } catch (e) {
-          console.error("Failed to parse JSON from AI response", e);
+      // Improved JSON detection using multiple patterns
+      const jsonPatterns = [
+        /```json\n([\s\S]*?)\n```/, // Standard markdown JSON code block
+        /```\n([\s\S]*?)\n```/,     // Code block without language specification
+        /{[\s\S]*"title"[\s\S]*}/   // Direct JSON object with title field
+      ];
+      
+      let extractedJson = null;
+      
+      // Try each pattern until we find a match
+      for (const pattern of jsonPatterns) {
+        const match = response.match(pattern);
+        if (match && match[1]) {
+          try {
+            // For the first two patterns that capture content between backticks
+            extractedJson = JSON.parse(match[1].trim());
+            console.log("Successfully extracted JSON data:", extractedJson);
+            break;
+          } catch (e) {
+            console.warn("Failed to parse JSON from pattern match:", e);
+            // Continue to the next pattern
+          }
+        } else if (pattern === jsonPatterns[2] && response.match(pattern)) {
+          // For the direct JSON object pattern
+          try {
+            const directMatch = response.match(pattern);
+            if (directMatch) {
+              extractedJson = JSON.parse(directMatch[0]);
+              console.log("Successfully extracted direct JSON data:", extractedJson);
+              break;
+            }
+          } catch (e) {
+            console.warn("Failed to parse direct JSON:", e);
+          }
         }
+      }
+      
+      if (extractedJson) {
+        updateProjectData(extractedJson, Object.keys(extractedJson)[0]);
+        setIsLoading(false);
+        return;
       }
       
       // If no JSON found, use heuristics to extract information
@@ -200,9 +231,21 @@ export const ProjectDataProvider: React.FC<{ children: React.ReactNode }> = ({ c
       if (Object.keys(newData).length > 0) {
         let highlightField = Object.keys(newData)[0];
         updateProjectData(newData, highlightField);
+      } else {
+        console.warn("Could not extract any structured data from AI response");
+        toast({
+          title: "Data Extraction",
+          description: "Could not extract structured project data from the AI's response.",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error("Error extracting data from AI response:", error);
+      toast({
+        title: "Data Extraction Error",
+        description: "Failed to process the AI's response data.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }

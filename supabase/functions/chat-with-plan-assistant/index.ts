@@ -11,7 +11,7 @@ const corsHeaders = {
 
 // Initialize OpenAI API 
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-const MODEL = 'gpt-4o-mini'; // Using the latest appropriate model for cost-efficiency
+const MODEL = 'gpt-4o'; // Updated to use GPT-4o
 
 // Initialize Supabase client
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -24,7 +24,7 @@ You are an expert AI project planning assistant specialized in helping users cre
 Provide helpful, structured advice on project requirements, timelines, budgets, and technical considerations.
 Be conversational and ask clarifying questions when needed.
 
-CRITICAL REQUIREMENT: Every response MUST include a structured JSON summary of the project details within 
+CRITICAL REQUIREMENT: Every response MUST include a complete structured JSON summary of the project details within 
 triple backticks (e.g. \`\`\`json {...} \`\`\`). Always include ALL the following fields (use empty or null values if information is unknown):
 
 {
@@ -69,11 +69,12 @@ triple backticks (e.g. \`\`\`json {...} \`\`\`). Always include ALL the followin
 
 FOLLOW THESE RULES:
 1. ALWAYS include this JSON with ALL fields in EVERY response
-2. If you don't have information for a field, include the field with empty or null values
+2. If you don't have information for a field, include the field with empty arrays, empty strings, or null values
 3. Make sure the budget field is ALWAYS included with at least an estimated_total if mentioned
 4. Maintain and update this JSON as the conversation progresses
 5. Include this JSON AFTER your conversational response
-6. Keep your responses concise and focused
+6. Ensure your JSON is valid and properly formatted
+7. Keep your responses concise and focused
 
 This structured data will be automatically extracted, so the format must be consistent.
 `;
@@ -148,6 +149,7 @@ serve(async (req) => {
     
     console.log('Processing message:', userMessage.content.substring(0, 100) + '...');
     console.log('Options - Web Search:', useWebSearch, 'Reasoning:', useReasoning);
+    console.log('Using model:', MODEL);
     
     try {
       console.log(`Calling OpenAI API with model ${MODEL}`);
