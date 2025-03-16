@@ -24,6 +24,14 @@ export interface ProjectData {
       tasks: string[];
     }[];
   };
+  budget?: {
+    estimated_total?: number;
+    currency?: string;
+    breakdown?: {
+      category: string;
+      amount: number;
+    }[];
+  };
   lastUpdatedField?: string;
   completionPercentage?: number;
 }
@@ -60,7 +68,7 @@ export const ProjectDataProvider: React.FC<{ children: React.ReactNode }> = ({ c
       
       // Calculate completion percentage
       let fieldsCompleted = 0;
-      let totalFields = 5; // Expected fields: title, description, businessContext, goals, features
+      let totalFields = 6; // Expected fields: title, description, businessContext, goals, features, budget
       
       if (updated.title) fieldsCompleted++;
       if (updated.description) fieldsCompleted++;
@@ -69,6 +77,7 @@ export const ProjectDataProvider: React.FC<{ children: React.ReactNode }> = ({ c
           updated.businessContext?.target_audience) fieldsCompleted++;
       if (updated.goals) fieldsCompleted++;
       if (updated.features?.core && updated.features.core.length > 0) fieldsCompleted++;
+      if (updated.budget?.estimated_total) fieldsCompleted++;
       
       updated.completionPercentage = Math.round((fieldsCompleted / totalFields) * 100);
       
@@ -150,6 +159,32 @@ export const ProjectDataProvider: React.FC<{ children: React.ReactNode }> = ({ c
           ...newData.timeline,
           estimated_weeks: parseInt(timelineMatch[1], 10)
         };
+      }
+      
+      // Extract budget information
+      const budgetMatch = response.match(/Budget:\s*(?:[\$€£])?\s*([0-9,]+)(?:\s*(?:USD|EUR|GBP))?/i);
+      if (budgetMatch && budgetMatch[1]) {
+        const budgetValue = parseInt(budgetMatch[1].replace(/,/g, ''), 10);
+        if (!isNaN(budgetValue)) {
+          newData.budget = {
+            ...newData.budget,
+            estimated_total: budgetValue,
+            currency: 'USD' // Default currency
+          };
+        }
+      }
+      
+      // Try to extract currency if budget is found
+      if (newData.budget?.estimated_total) {
+        const currencyMatch = response.match(/Budget:.*?(USD|EUR|GBP|[$€£])/i);
+        if (currencyMatch && currencyMatch[1]) {
+          let currency = currencyMatch[1];
+          // Convert symbols to codes if needed
+          if (currency === '$') currency = 'USD';
+          if (currency === '€') currency = 'EUR';
+          if (currency === '£') currency = 'GBP';
+          newData.budget.currency = currency;
+        }
       }
       
       // Update project data if we found anything

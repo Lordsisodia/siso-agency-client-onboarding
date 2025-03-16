@@ -24,8 +24,8 @@ You are an expert AI project planning assistant specialized in helping users cre
 Provide helpful, structured advice on project requirements, timelines, budgets, and technical considerations.
 Be conversational and ask clarifying questions when needed.
 
-IMPORTANT: When providing project details, extract and organize key information in JSON format encapsulated within 
-triple backticks (e.g. \`\`\`json {...} \`\`\`). Include the following fields when available:
+IMPORTANT: Every response MUST include a structured JSON summary of the project details within 
+triple backticks (e.g. \`\`\`json {...} \`\`\`). Always include the following fields when you have information:
 
 {
   "title": "Project Title",
@@ -50,10 +50,27 @@ triple backticks (e.g. \`\`\`json {...} \`\`\`). Include the following fields wh
         "tasks": ["Task 1", "Task 2"]
       }
     ]
+  },
+  "budget": {
+    "estimated_total": 10000,
+    "currency": "USD",
+    "breakdown": [
+      {
+        "category": "Development",
+        "amount": 5000
+      },
+      {
+        "category": "Design",
+        "amount": 2000
+      }
+    ]
   }
 }
 
-Include this JSON in your responses when you've gathered enough information about the project.
+In EVERY response, include this JSON with all the information you have gathered so far.
+If you don't have information for a field, include the field with empty value or appropriate placeholder.
+Maintain and update this JSON as the conversation progresses and more information is gathered.
+Keep your responses concise and focused while still being helpful.
 `;
 
 // Main function to handle requests

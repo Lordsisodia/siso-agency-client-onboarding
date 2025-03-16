@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
@@ -114,7 +115,7 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
       setMessages(prev => [...prev, userMessage]);
 
       const enhancedSystemPrompt = systemPrompt ? 
-        `${systemPrompt}\n\nWhen possible, include structured data about the project in JSON format wrapped in triple backticks (\`\`\`json ... \`\`\`) to help build the project overview. Include fields like title, description, businessContext (industry, companyName, target_audience), goals, features, and timeline when you have that information.` 
+        `${systemPrompt}\n\nIMPORTANT: Every response MUST include all known project information in a JSON format wrapped in triple backticks (\`\`\`json ... \`\`\`). Include fields like title, description, businessContext (industry, companyName, target_audience), goals, features, timeline, and budget where possible.` 
         : undefined;
 
       setMessages(prev => [...prev, { 

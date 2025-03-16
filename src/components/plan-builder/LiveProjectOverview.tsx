@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -12,7 +11,6 @@ export const LiveProjectOverview: React.FC = () => {
   const { projectData, isLoading } = useProjectData();
   const [highlightedField, setHighlightedField] = useState<string | null>(null);
   
-  // When lastUpdatedField changes, highlight it briefly
   useEffect(() => {
     if (projectData.lastUpdatedField) {
       setHighlightedField(projectData.lastUpdatedField);
@@ -267,6 +265,59 @@ export const LiveProjectOverview: React.FC = () => {
               </div>
             ) : (
               <div className="text-siso-text-muted italic">No timeline estimated yet</div>
+            )}
+          </CardContent>
+        </Card>
+        
+        {/* Budget */}
+        <Card className={cn(
+          "transition-all duration-300",
+          highlightedField === 'budget' 
+            ? "border-siso-red/70 shadow-md shadow-siso-red/20" 
+            : "border-siso-border"
+        )}>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center text-lg">
+              <InfoIcon className="w-5 h-5 mr-2 text-siso-orange" />
+              Budget
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {projectData.budget?.estimated_total ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">Estimated total:</span>
+                  <span className="text-lg font-semibold">
+                    {new Intl.NumberFormat('en-US', { 
+                      style: 'currency', 
+                      currency: projectData.budget.currency || 'USD',
+                      maximumFractionDigits: 0
+                    }).format(projectData.budget.estimated_total)}
+                  </span>
+                </div>
+                
+                {projectData.budget.breakdown && projectData.budget.breakdown.length > 0 && (
+                  <div>
+                    <h4 className="font-medium mb-2">Budget Breakdown</h4>
+                    <div className="space-y-2">
+                      {projectData.budget.breakdown.map((item, index) => (
+                        <div key={index} className="flex justify-between items-center">
+                          <span>{item.category}</span>
+                          <span className="font-medium">
+                            {new Intl.NumberFormat('en-US', { 
+                              style: 'currency', 
+                              currency: projectData.budget.currency || 'USD',
+                              maximumFractionDigits: 0
+                            }).format(item.amount)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-siso-text-muted italic">No budget estimated yet</div>
             )}
           </CardContent>
         </Card>
