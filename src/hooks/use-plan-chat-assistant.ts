@@ -138,8 +138,9 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
       setMessages(prev => [...prev, userMessage]);
 
       // Optimize the system prompt to encourage returning structured data
+      // Use proper escaping for the backticks in the template string
       const enhancedSystemPrompt = systemPrompt ? 
-        `${systemPrompt}\n\nWhen possible, include structured data about the project in JSON format wrapped in triple backticks (```json ... ```) to help build the project overview. Include fields like title, description, businessContext (industry, companyName, target_audience), goals, features, and timeline when you have that information.` 
+        `${systemPrompt}\n\nWhen possible, include structured data about the project in JSON format wrapped in triple backticks (\`\`\`json ... \`\`\`) to help build the project overview. Include fields like title, description, businessContext (industry, companyName, target_audience), goals, features, and timeline when you have that information.` 
         : undefined;
 
       // Optimistically show the loading message
