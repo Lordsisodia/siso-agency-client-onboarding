@@ -11,13 +11,25 @@ interface Message {
   role: MessageRole;
   content: string;
   loading?: boolean;
+  metadata?: {
+    web_search?: boolean;
+    reasoning?: boolean;
+    [key: string]: any;
+  };
 }
 
-export function usePlanChatAssistant(projectId?: string) {
+interface UsePlanChatAssistantOptions {
+  useWebSearch?: boolean;
+  useReasoning?: boolean;
+}
+
+export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAssistantOptions = {}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [useWebSearch, setUseWebSearch] = useState(options.useWebSearch || false);
+  const [useReasoning, setUseReasoning] = useState(options.useReasoning || false);
   const { toast } = useToast();
 
   // Load previous conversation messages if we have a project ID
@@ -64,7 +76,8 @@ export function usePlanChatAssistant(projectId?: string) {
           const formattedMessages = historyData.map((item): Message => ({
             id: item.id,
             role: item.user_message ? 'user' : 'assistant',
-            content: item.user_message || item.ai_response
+            content: item.user_message || item.ai_response,
+            metadata: item.metadata || {}
           }));
           
           setMessages(formattedMessages);
@@ -80,6 +93,22 @@ export function usePlanChatAssistant(projectId?: string) {
     setError(null);
   }, []);
 
+  const toggleWebSearch = useCallback(() => {
+    setUseWebSearch(prev => !prev);
+    toast({
+      title: useWebSearch ? "Web search disabled" : "Web search enabled",
+      description: useWebSearch ? "AI will use only its training data." : "AI will search the web for current information when relevant."
+    });
+  }, [useWebSearch, toast]);
+  
+  const toggleReasoning = useCallback(() => {
+    setUseReasoning(prev => !prev);
+    toast({
+      title: useReasoning ? "Advanced reasoning disabled" : "Advanced reasoning enabled",
+      description: useReasoning ? "AI will use standard reasoning." : "AI will use advanced reasoning capabilities for complex problems."
+    });
+  }, [useReasoning, toast]);
+
   const sendMessage = useCallback(async (
     content: string, 
     systemPrompt?: string, 
@@ -93,7 +122,15 @@ export function usePlanChatAssistant(projectId?: string) {
 
       // Add user message to state
       const userMessageId = uuidv4();
-      const userMessage: Message = { id: userMessageId, role: 'user', content };
+      const userMessage: Message = { 
+        id: userMessageId, 
+        role: 'user', 
+        content,
+        metadata: {
+          web_search: useWebSearch,
+          reasoning: useReasoning
+        }
+      };
       
       // Add user message to UI immediately
       setMessages(prev => [...prev, userMessage]);
@@ -103,7 +140,11 @@ export function usePlanChatAssistant(projectId?: string) {
         id: uuidv4(), 
         role: 'assistant', 
         content: '', 
-        loading: true 
+        loading: true,
+        metadata: {
+          web_search: useWebSearch,
+          reasoning: useReasoning
+        }
       }]);
 
       // Make the API call to the Edge Function with proper message format
@@ -114,7 +155,9 @@ export function usePlanChatAssistant(projectId?: string) {
           conversationId,
           formData,
           stream: true,
-          userId: (await supabase.auth.getUser()).data.user?.id
+          userId: (await supabase.auth.getUser()).data.user?.id,
+          useWebSearch,
+          useReasoning
         }
       });
 
@@ -141,7 +184,12 @@ export function usePlanChatAssistant(projectId?: string) {
         const assistantMessage: Message = {
           id: uuidv4(),
           role: 'assistant',
-          content: data.response || 'Sorry, I couldn\'t generate a response.'
+          content: data.response || 'Sorry, I couldn\'t generate a response.',
+          metadata: {
+            web_search: data.web_search || useWebSearch,
+            reasoning: data.reasoning || useReasoning,
+            model: data.model
+          }
         };
         
         setMessages(prev => [...prev.filter(msg => !msg.loading), assistantMessage]);
@@ -166,7 +214,7 @@ export function usePlanChatAssistant(projectId?: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, projectId, conversationId, toast]);
+  }, [messages, projectId, conversationId, toast, useWebSearch, useReasoning]);
 
   return {
     messages,
@@ -174,6 +222,10 @@ export function usePlanChatAssistant(projectId?: string) {
     error,
     sendMessage,
     clearMessages,
-    conversationId
+    conversationId,
+    useWebSearch,
+    useReasoning,
+    toggleWebSearch,
+    toggleReasoning
   };
 }

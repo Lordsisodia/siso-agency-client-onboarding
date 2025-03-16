@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';
@@ -11,12 +12,14 @@ import { PrePlanState } from '@/components/plan-builder/PrePlanState';
 import { motion } from 'framer-motion';
 import { Waves } from '@/components/ui/waves-background';
 import { useParams, useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 type ProjectHistoryItem = {
   id: string;
   title: string;
   createdAt: Date;
   snippet: string;
+  conversationId?: string;
 };
 
 export default function PlanBuilder() {
@@ -58,22 +61,64 @@ export default function PlanBuilder() {
     const fetchProjectHistory = async () => {
       try {
         setIsLoadingHistory(true);
-        const mockData = [
-          {
-            id: '1',
-            title: 'E-commerce Platform',
-            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-            snippet: 'An online marketplace with user accounts, product listings, and payment processing.'
-          },
-          {
-            id: '2',
-            title: 'Educational App',
-            createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-            snippet: 'Interactive learning platform for K-12 students with quizzes and progress tracking.'
-          }
-        ];
         
-        setProjectHistory(mockData);
+        // Get actual projects from plan_chat_history
+        const { data: chatData, error: chatError } = await supabase
+          .from('plan_chat_history')
+          .select('plan_id, conversation_id, created_at, user_message, ai_response')
+          .order('created_at', { ascending: false });
+          
+        if (chatError) {
+          console.error("Error fetching chat history:", chatError);
+          setIsLoadingHistory(false);
+          return;
+        }
+        
+        // Group by plan_id and get first message/response pairs
+        const projectMap = new Map<string, ProjectHistoryItem>();
+        
+        chatData?.forEach(chat => {
+          if (!projectMap.has(chat.plan_id)) {
+            let title = "Project Plan";
+            let snippet = "";
+            
+            // Attempt to extract a title from the AI response
+            if (chat.ai_response) {
+              const aiResponse = chat.ai_response;
+              
+              // Look for common title patterns in AI responses
+              const titleMatch = aiResponse.match(/# (.*?)(?:\n|$)/) || 
+                             aiResponse.match(/\*\*(.*?)\*\*/) ||
+                             aiResponse.match(/Title: (.*?)(?:\n|$)/);
+                             
+              if (titleMatch && titleMatch[1]) {
+                title = titleMatch[1].trim();
+              }
+              
+              // Get first paragraph as snippet
+              const snippetMatch = aiResponse.match(/\n\n(.*?)(?:\n\n|$)/);
+              if (snippetMatch && snippetMatch[1]) {
+                snippet = snippetMatch[1].trim().substring(0, 120) + '...';
+              } else {
+                // Fallback to first 120 chars
+                snippet = aiResponse.substring(0, 120) + '...';
+              }
+            }
+            
+            projectMap.set(chat.plan_id, {
+              id: chat.plan_id,
+              title,
+              createdAt: new Date(chat.created_at),
+              snippet,
+              conversationId: chat.conversation_id
+            });
+          }
+        });
+        
+        // Convert map to array and set state
+        const projectHistoryArray = Array.from(projectMap.values());
+        setProjectHistory(projectHistoryArray);
+        
       } catch (error) {
         console.error("Error loading project history:", error);
       } finally {
@@ -174,7 +219,10 @@ export default function PlanBuilder() {
         
         {!isPlanStarted ? (
           <>
-            <PrePlanState onShowProjectHistory={() => setShowProjectHistory(true)} />
+            <PrePlanState 
+              onShowProjectHistory={() => setShowProjectHistory(true)} 
+              onStartPlan={handleStartPlan}
+            />
             
             {/* Project History Section - Always visible now */}
             {(projectHistory.length > 0 || showProjectHistory) && (

@@ -43,7 +43,9 @@ serve(async (req) => {
       conversationId: existingConversationId,
       stream = false,
       action,
-      userId 
+      userId,
+      useWebSearch = false,
+      useReasoning = false
     } = body;
     
     // Handle conversation retrieval action
@@ -73,6 +75,7 @@ serve(async (req) => {
     const userMessage = messages[messages.length - 1];
     
     console.log('Processing message:', userMessage.content.substring(0, 100) + '...');
+    console.log('Options - Web Search:', useWebSearch, 'Reasoning:', useReasoning);
     
     try {
       console.log(`Calling OpenAI API with model ${MODEL}`);
@@ -91,18 +94,62 @@ serve(async (req) => {
         });
       }
       
+      // Prepare the API options based on the endpoint
+      let apiUrl = 'https://api.openai.com/v1/chat/completions';
+      let requestBody: any = {
+        model: MODEL,
+        messages: openaiMessages,
+        stream: stream
+      };
+      
+      // Use the responses API with web search and reasoning if requested
+      if (useWebSearch || useReasoning) {
+        apiUrl = 'https://api.openai.com/v1/responses';
+        
+        requestBody = {
+          model: "gpt-4o",  // Responses API requires specific models
+          input: userMessage.content,
+        };
+        
+        // Add previous messages context if available
+        if (messages.length > 1) {
+          const previousMessages = messages.slice(0, -1).map(msg => ({
+            role: msg.role,
+            content: msg.content
+          }));
+          
+          requestBody.context = {
+            messages: previousMessages
+          };
+        }
+        
+        // Add web search if enabled
+        if (useWebSearch) {
+          requestBody.tools = [{ type: "web_search_preview" }];
+        }
+        
+        // Add reasoning if enabled
+        if (useReasoning) {
+          requestBody.reasoning = {
+            effort: "high"
+          };
+        }
+        
+        // Don't stream with responses API
+        stream = false;
+      }
+      
+      console.log('API URL:', apiUrl);
+      console.log('Request body:', JSON.stringify(requestBody, null, 2).substring(0, 500) + '...');
+      
       // Make API call to OpenAI
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${OPENAI_API_KEY}`,
         },
-        body: JSON.stringify({
-          model: MODEL,
-          messages: openaiMessages,
-          stream: stream
-        })
+        body: JSON.stringify(requestBody)
       });
       
       if (!response.ok) {
@@ -177,7 +224,12 @@ serve(async (req) => {
                 message_order: nextOrder,
                 conversation_id: conversationId,
                 user_id: userId,
-                metadata: { model: MODEL, message_type: 'user' }
+                metadata: { 
+                  model: MODEL, 
+                  message_type: 'user',
+                  web_search: useWebSearch,
+                  reasoning: useReasoning 
+                }
               });
               
             // Save AI response
@@ -190,7 +242,12 @@ serve(async (req) => {
                 message_order: nextOrder + 1,
                 conversation_id: conversationId,
                 user_id: userId,
-                metadata: { model: MODEL, message_type: 'assistant' }
+                metadata: { 
+                  model: MODEL, 
+                  message_type: 'assistant',
+                  web_search: useWebSearch,
+                  reasoning: useReasoning
+                }
               });
               
             console.log("Successfully saved chat history");
@@ -205,7 +262,9 @@ serve(async (req) => {
           JSON.stringify({ 
             response: completeResponse,
             model: MODEL,
-            conversationId
+            conversationId,
+            web_search: useWebSearch,
+            reasoning: useReasoning
           }),
           {
             headers: {
@@ -215,12 +274,21 @@ serve(async (req) => {
           }
         );
       } else {
-        // Non-streaming request handling
+        // Process non-streaming response
         const result = await response.json();
         
         // Extract the assistant's response
-        const assistantResponse = result.choices[0]?.message?.content || 
-          "Sorry, I couldn't generate a proper response.";
+        let assistantResponse = '';
+        
+        // Process responses from different APIs
+        if (apiUrl.includes('/responses')) {
+          // For responses API
+          assistantResponse = result.content || result.response || "Sorry, I couldn't generate a proper response.";
+          console.log("Responses API result:", JSON.stringify(result).substring(0, 500) + '...');
+        } else {
+          // For chat/completions API
+          assistantResponse = result.choices[0]?.message?.content || "Sorry, I couldn't generate a proper response.";
+        }
         
         // Save chat history if we have a project ID
         if (projectId) {
@@ -247,7 +315,12 @@ serve(async (req) => {
                 message_order: nextOrder,
                 conversation_id: conversationId,
                 user_id: userId,
-                metadata: { model: MODEL, message_type: 'user' }
+                metadata: { 
+                  model: MODEL, 
+                  message_type: 'user',
+                  web_search: useWebSearch,
+                  reasoning: useReasoning
+                }
               });
               
             // Save AI response
@@ -260,7 +333,12 @@ serve(async (req) => {
                 message_order: nextOrder + 1,
                 conversation_id: conversationId,
                 user_id: userId,
-                metadata: { model: MODEL, message_type: 'assistant' }
+                metadata: { 
+                  model: MODEL, 
+                  message_type: 'assistant',
+                  web_search: useWebSearch,
+                  reasoning: useReasoning
+                }
               });
               
             console.log("Successfully saved chat history");
@@ -275,7 +353,9 @@ serve(async (req) => {
           JSON.stringify({ 
             response: assistantResponse,
             model: MODEL,
-            conversationId
+            conversationId,
+            web_search: useWebSearch,
+            reasoning: useReasoning
           }),
           {
             headers: {

@@ -10,6 +10,7 @@ interface ChatHeaderProps {
   isLoading: boolean;
   messagesCount: number;
   onClear: () => void;
+  children?: React.ReactNode;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -18,6 +19,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   isLoading,
   messagesCount,
   onClear,
+  children
 }) => {
   return (
     <div className="p-4 border-b border-siso-border bg-gradient-to-r from-siso-red/10 to-siso-orange/10 backdrop-blur-md flex items-center justify-between">
@@ -29,6 +31,9 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
       </div>
       
       <div className="flex items-center gap-2">
+        {/* AI feature toggles passed as children */}
+        {children}
+        
         {onlineStatus ? (
           <Wifi className="w-4 h-4 text-green-500" />
         ) : (

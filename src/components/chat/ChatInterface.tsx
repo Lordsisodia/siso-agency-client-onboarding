@@ -7,6 +7,9 @@ import { ChatHeader } from './ChatHeader';
 import { ChatMessageList } from './ChatMessageList';
 import { ChatFooter } from './ChatFooter';
 import { ChatMessage } from '@/types/chat';
+import { Button } from '@/components/ui/button';
+import { Globe, Brain } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ChatInterfaceProps {
   title?: string;
@@ -27,14 +30,22 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   projectId,
   usePlanAssistant = false
 }) => {
+  // State for AI enhancement options
+  const [useWebSearch, setUseWebSearch] = useState(false);
+  const [useReasoning, setUseReasoning] = useState(false);
+
   // Use the chat assistant hook based on usePlanAssistant boolean
   const { 
     messages: rawMessages, 
     isLoading, 
     error, 
     sendMessage: hookSendMessage, 
-    clearMessages 
-  } = usePlanAssistant ? usePlanChatAssistant(projectId) : useChatAssistant();
+    clearMessages,
+    toggleWebSearch,
+    toggleReasoning 
+  } = usePlanAssistant 
+    ? usePlanChatAssistant(projectId, { useWebSearch, useReasoning }) 
+    : useChatAssistant();
   
   // Map messages to ensure they match our ChatMessage type
   const messages = (rawMessages || []).map(msg => ({
@@ -60,6 +71,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   });
 
+  // Toggle handlers
+  const handleToggleWebSearch = useCallback(() => {
+    setUseWebSearch(prev => !prev);
+    if (toggleWebSearch) toggleWebSearch();
+  }, [toggleWebSearch]);
+
+  const handleToggleReasoning = useCallback(() => {
+    setUseReasoning(prev => !prev);
+    if (toggleReasoning) toggleReasoning();
+  }, [toggleReasoning]);
+
   // Convert onlineStatus string to boolean
   const isOnline = onlineStatus === 'online';
 
@@ -76,7 +98,36 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         isLoading={isLoading}
         messagesCount={messages.length}
         onClear={() => clearMessages()}
-      />
+      >
+        {usePlanAssistant && (
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "p-1 h-8 w-8 rounded-full",
+                useWebSearch && "bg-blue-500/20 text-blue-400"
+              )}
+              title={useWebSearch ? "Disable web search" : "Enable web search"}
+              onClick={handleToggleWebSearch}
+            >
+              <Globe className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "p-1 h-8 w-8 rounded-full",
+                useReasoning && "bg-purple-500/20 text-purple-400"
+              )}
+              title={useReasoning ? "Disable advanced reasoning" : "Enable advanced reasoning"}
+              onClick={handleToggleReasoning}
+            >
+              <Brain className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </ChatHeader>
       
       <ChatMessageList 
         messages={messages}
@@ -92,6 +143,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         isLoading={isLoading}
         inputPlaceholder={inputPlaceholder}
         onlineStatus={isOnline}
+        useWebSearch={useWebSearch}
+        useReasoning={useReasoning}
       />
     </motion.div>
   );

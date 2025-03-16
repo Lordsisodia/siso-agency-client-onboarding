@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChatMessage as ChatMessageType } from '@/types/chat';
 import { ThinkingDots } from './processing/ThinkingDots';
+import { Globe, Brain } from 'lucide-react';
 
 export interface ChatMessageProps {
   message?: ChatMessageType;
@@ -10,6 +11,11 @@ export interface ChatMessageProps {
   assistantType?: string;
   isLoading?: boolean;
   role?: 'user' | 'assistant' | string;
+  metadata?: {
+    web_search?: boolean;
+    reasoning?: boolean;
+    [key: string]: any;
+  };
 }
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ 
@@ -17,7 +23,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   content,
   assistantType,
   isLoading,
-  role: explicitRole
+  role: explicitRole,
+  metadata
 }) => {
   // Use explicit role if provided, otherwise use message.role
   const isUser = explicitRole 
@@ -26,6 +33,11 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   
   // Use content prop directly or from message object
   const displayContent = content || (message?.content || '');
+
+  // Get metadata from props or message
+  const messageMetadata = metadata || message?.metadata || {};
+  const usedWebSearch = messageMetadata.web_search;
+  const usedReasoning = messageMetadata.reasoning;
 
   // State for typewriter effect
   const [displayedText, setDisplayedText] = useState('');
@@ -78,6 +90,22 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
           <ThinkingDots />
         ) : (
           <div className="whitespace-pre-wrap break-words leading-relaxed">
+            {!isUser && (usedWebSearch || usedReasoning) && (
+              <div className="flex gap-2 mb-2 text-xs text-slate-300">
+                {usedWebSearch && (
+                  <div className="flex items-center gap-1">
+                    <Globe className="w-3 h-3 text-blue-400" />
+                    <span>Web search</span>
+                  </div>
+                )}
+                {usedReasoning && (
+                  <div className="flex items-center gap-1">
+                    <Brain className="w-3 h-3 text-purple-400" />
+                    <span>Advanced reasoning</span>
+                  </div>
+                )}
+              </div>
+            )}
             {isUser ? displayedText : (isTyping ? (
               <>
                 {displayedText}
