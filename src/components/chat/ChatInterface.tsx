@@ -19,6 +19,7 @@ interface ChatInterfaceProps {
   className?: string;
   projectId?: string;
   usePlanAssistant?: boolean;
+  messages?: ChatMessage[]; // Added messages prop
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -28,7 +29,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   inputPlaceholder = 'Type your message...',
   className,
   projectId,
-  usePlanAssistant = false
+  usePlanAssistant = false,
+  messages: propMessages, // Accept messages from props
 }) => {
   // State for AI enhancement options
   const [useWebSearch, setUseWebSearch] = useState(false);
@@ -45,7 +47,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   // Use the chat assistant hook based on usePlanAssistant boolean
   const { 
-    messages: rawMessages, 
+    messages: hookMessages, 
     isLoading, 
     error, 
     sendMessage: hookSendMessage, 
@@ -64,8 +66,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         toggleReasoning: defaultToggleReasoning
       };
   
-  // Map messages to ensure they match our ChatMessage type
-  const messages = (rawMessages || []).map(msg => ({
+  // Use provided messages or the ones from the hook
+  const messages = (propMessages || hookMessages || []).map(msg => ({
     ...msg,
     role: msg.role as "user" | "assistant"
   })) as ChatMessage[];

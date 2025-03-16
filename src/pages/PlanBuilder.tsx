@@ -3,14 +3,14 @@ import { ChatInterface } from '@/components/chat/ChatInterface';
 import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';
 import { WebsiteInputSheet } from '@/components/plan-builder/WebsiteInputSheet';
 import { Button } from '@/components/ui/button';
-import { FileEdit, AlertCircle, History, PlusCircle, ArrowLeft, LayoutSplit, LayoutSidebar } from 'lucide-react';
+import { FileEdit, AlertCircle, History, PlusCircle, ArrowLeft, LayoutGrid, Layout } from 'lucide-react';
 import { usePlanChatAssistant } from '@/hooks/core';
 import { useToast } from '@/hooks/use-toast';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PrePlanState } from '@/components/plan-builder/PrePlanState';
 import { LiveProjectOverview } from '@/components/plan-builder/LiveProjectOverview';
-import { ProjectDataProvider } from '@/contexts/ProjectDataContext';
+import { ProjectDataProvider, useProjectData } from '@/contexts/ProjectDataContext';
 import { motion } from 'framer-motion';
 import { Waves } from '@/components/ui/waves-background';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -408,7 +408,7 @@ export default function PlanBuilder() {
                         variant="outline"
                         className="border-siso-border text-siso-text hover:bg-siso-bg-card"
                       >
-                        {splitView ? <LayoutSplit className="h-4 w-4" /> : <LayoutSidebar className="h-4 w-4" />}
+                        {splitView ? <LayoutGrid className="h-4 w-4" /> : <Layout className="h-4 w-4" />}
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -506,14 +506,13 @@ export default function PlanBuilder() {
   );
 };
 
-// Enhanced chat interface that passes AI responses to the ProjectData context
 const EnhancedChatInterface: React.FC<React.ComponentProps<typeof ChatInterface>> = (props) => {
   const { updateProjectData, extractDataFromAIResponse } = useProjectData();
   
-  // Process AI messages to extract data
   useEffect(() => {
-    const messages = props.messages || [];
-    // Look for the latest assistant message
+    if (!props.usePlanAssistant) return;
+    
+    const { messages } = usePlanChatAssistant(props.projectId);
     const latestAssistantMessage = [...messages]
       .reverse()
       .find(msg => msg.role === 'assistant');
@@ -521,7 +520,7 @@ const EnhancedChatInterface: React.FC<React.ComponentProps<typeof ChatInterface>
     if (latestAssistantMessage?.content) {
       extractDataFromAIResponse(latestAssistantMessage.content);
     }
-  }, [props.messages, extractDataFromAIResponse]);
+  }, [props.projectId, props.usePlanAssistant, extractDataFromAIResponse]);
   
   return <ChatInterface {...props} />;
 };
