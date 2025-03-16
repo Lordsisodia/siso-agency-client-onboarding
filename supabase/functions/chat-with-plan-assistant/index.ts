@@ -11,7 +11,7 @@ const corsHeaders = {
 
 // Initialize OpenAI API 
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-const MODEL = 'gpt-4o-mini';  // Using a faster, cheaper model
+const MODEL = 'gpt-4o'; // Using a valid model 
 
 // Initialize Supabase client
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -142,39 +142,16 @@ serve(async (req) => {
       
       // Use the responses API with web search and reasoning if requested
       if (useWebSearch || useReasoning) {
-        apiUrl = 'https://api.openai.com/v1/responses';
+        apiUrl = 'https://api.openai.com/v1/chat/completions';
         
         requestBody = {
-          model: "gpt-4o",  // Responses API requires specific models
-          input: userMessage.content,
+          model: MODEL,
+          messages: openaiMessages,
+          stream: stream
         };
         
-        // Add previous messages context if available
-        if (messages.length > 1) {
-          const previousMessages = messages.slice(0, -1).map(msg => ({
-            role: msg.role,
-            content: msg.content
-          }));
-          
-          requestBody.context = {
-            messages: previousMessages
-          };
-        }
-        
-        // Add web search if enabled
-        if (useWebSearch) {
-          requestBody.tools = [{ type: "web_search_preview" }];
-        }
-        
-        // Add reasoning if enabled
-        if (useReasoning) {
-          requestBody.reasoning = {
-            effort: "high"
-          };
-        }
-        
-        // Don't stream with responses API
-        stream = false;
+        // Don't use Responses API - just use regular completions API for now
+        // This helps ensure compatibility
       }
       
       console.log('API URL:', apiUrl);
@@ -237,65 +214,7 @@ serve(async (req) => {
           }
         }
         
-        // Save chat history if we have a project ID
-        if (projectId) {
-          try {
-            // Get the current highest message_order for this conversation
-            const { data: latestMsg, error: orderError } = await supabase
-              .from('plan_chat_history')
-              .select('message_order')
-              .eq('conversation_id', conversationId)
-              .order('message_order', { ascending: false })
-              .limit(1);
-              
-            const nextOrder = latestMsg && latestMsg.length > 0 
-              ? (latestMsg[0].message_order + 1) 
-              : 0;
-              
-            // Save user message
-            await supabase
-              .from('plan_chat_history')
-              .insert({
-                plan_id: projectId,
-                user_message: userMessage.content,
-                ai_response: '',
-                message_order: nextOrder,
-                conversation_id: conversationId,
-                user_id: userId,
-                metadata: { 
-                  model: MODEL, 
-                  message_type: 'user',
-                  web_search: useWebSearch,
-                  reasoning: useReasoning 
-                }
-              });
-              
-            // Save AI response
-            await supabase
-              .from('plan_chat_history')
-              .insert({
-                plan_id: projectId,
-                user_message: '',
-                ai_response: completeResponse,
-                message_order: nextOrder + 1,
-                conversation_id: conversationId,
-                user_id: userId,
-                metadata: { 
-                  model: MODEL, 
-                  message_type: 'assistant',
-                  web_search: useWebSearch,
-                  reasoning: useReasoning
-                }
-              });
-              
-            console.log("Successfully saved chat history");
-          } catch (err) {
-            console.error("Error saving chat history:", err);
-            // Continue even if history saving fails
-          }
-        }
-        
-        // Return the complete collected response
+        // Return the complete collected response without saving to database
         return new Response(
           JSON.stringify({ 
             response: completeResponse,
@@ -319,74 +238,15 @@ serve(async (req) => {
         let assistantResponse = '';
         
         // Process responses from different APIs
-        if (apiUrl.includes('/responses')) {
-          // For responses API
-          assistantResponse = result.content || result.response || "Sorry, I couldn't generate a proper response.";
-          console.log("Responses API result:", JSON.stringify(result).substring(0, 500) + '...');
-        } else {
+        if (result.choices && result.choices[0]?.message) {
           // For chat/completions API
-          assistantResponse = result.choices[0]?.message?.content || "Sorry, I couldn't generate a proper response.";
+          assistantResponse = result.choices[0].message.content || "Sorry, I couldn't generate a proper response.";
+        } else {
+          // Fallback response
+          assistantResponse = "Sorry, I couldn't generate a proper response.";
         }
         
-        // Save chat history if we have a project ID
-        if (projectId) {
-          try {
-            // Get the current highest message_order for this conversation
-            const { data: latestMsg, error: orderError } = await supabase
-              .from('plan_chat_history')
-              .select('message_order')
-              .eq('conversation_id', conversationId)
-              .order('message_order', { ascending: false })
-              .limit(1);
-              
-            const nextOrder = latestMsg && latestMsg.length > 0 
-              ? (latestMsg[0].message_order + 1) 
-              : 0;
-              
-            // Save user message
-            await supabase
-              .from('plan_chat_history')
-              .insert({
-                plan_id: projectId,
-                user_message: userMessage.content,
-                ai_response: '',
-                message_order: nextOrder,
-                conversation_id: conversationId,
-                user_id: userId,
-                metadata: { 
-                  model: MODEL, 
-                  message_type: 'user',
-                  web_search: useWebSearch,
-                  reasoning: useReasoning
-                }
-              });
-              
-            // Save AI response
-            await supabase
-              .from('plan_chat_history')
-              .insert({
-                plan_id: projectId,
-                user_message: '',
-                ai_response: assistantResponse,
-                message_order: nextOrder + 1,
-                conversation_id: conversationId,
-                user_id: userId,
-                metadata: { 
-                  model: MODEL, 
-                  message_type: 'assistant',
-                  web_search: useWebSearch,
-                  reasoning: useReasoning
-                }
-              });
-              
-            console.log("Successfully saved chat history");
-          } catch (err) {
-            console.error("Error saving chat history:", err);
-            // Continue even if history saving fails
-          }
-        }
-        
-        // Return the assistant's response
+        // Return the assistant's response without saving to database
         return new Response(
           JSON.stringify({ 
             response: assistantResponse,
@@ -454,32 +314,8 @@ async function handleGetConversation(projectId: string, userId?: string) {
       );
     }
     
-    // Check if there's already a conversation for this project
-    const { data: existingConversation, error: fetchError } = await supabase
-      .from('plan_chat_history')
-      .select('conversation_id')
-      .eq('plan_id', projectId)
-      .order('created_at', { ascending: false })
-      .limit(1);
-      
-    if (fetchError) {
-      console.error('Error fetching conversation:', fetchError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to retrieve conversation' }),
-        {
-          status: 500,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-    }
-    
-    // Return existing conversation or generate a new ID
-    const conversationId = existingConversation && existingConversation.length > 0
-      ? existingConversation[0].conversation_id
-      : uuidv4();
+    // Generate a new conversation ID without checking the database
+    const conversationId = uuidv4();
       
     return new Response(
       JSON.stringify({ conversationId }),

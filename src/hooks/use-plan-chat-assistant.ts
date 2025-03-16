@@ -34,17 +34,19 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
   const [useReasoning, setUseReasoning] = useState(options.useReasoning || false);
   const { toast } = useToast();
 
-  // Load previous conversation messages if we have a project ID
+  // Load conversation ID if we have a project ID
   useEffect(() => {
     if (projectId) {
-      loadConversationHistory(projectId);
+      initializeConversation(projectId);
     }
   }, [projectId]);
 
-  // Load conversation history from the database
-  const loadConversationHistory = async (projectId: string) => {
+  // Initialize a conversation ID
+  const initializeConversation = async (projectId: string) => {
     try {
-      // First, fetch or create a conversation ID for this project
+      console.log("Initializing conversation for project:", projectId);
+      
+      // Get a conversation ID from the edge function
       const { data: convData, error: convError } = await supabase.functions.invoke(
         'chat-with-plan-assistant', 
         {
@@ -59,34 +61,11 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
       
       const conversationId = convData?.conversationId;
       if (conversationId) {
+        console.log("Received conversation ID:", conversationId);
         setConversationId(conversationId);
-        
-        // Fetch messages for this conversation
-        const { data: historyData, error: historyError } = await supabase
-          .from('plan_chat_history')
-          .select('*')
-          .eq('conversation_id', conversationId)
-          .order('message_order', { ascending: true });
-        
-        if (historyError) {
-          console.error('Error fetching chat history:', historyError);
-          return;
-        }
-        
-        if (historyData && historyData.length > 0) {
-          // Transform the data to our message format
-          const formattedMessages = historyData.map((item): Message => ({
-            id: item.id,
-            role: item.user_message ? 'user' : 'assistant',
-            content: item.user_message || item.ai_response,
-            metadata: item.metadata ? item.metadata as { [key: string]: any; web_search?: boolean; reasoning?: boolean } : {}
-          }));
-          
-          setMessages(formattedMessages);
-        }
       }
     } catch (err) {
-      console.error('Error loading conversation history:', err);
+      console.error('Error initializing conversation:', err);
     }
   };
 
@@ -138,7 +117,6 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
       setMessages(prev => [...prev, userMessage]);
 
       // Optimize the system prompt to encourage returning structured data
-      // Use proper escaping for the backticks in the template string
       const enhancedSystemPrompt = systemPrompt ? 
         `${systemPrompt}\n\nWhen possible, include structured data about the project in JSON format wrapped in triple backticks (\`\`\`json ... \`\`\`) to help build the project overview. Include fields like title, description, businessContext (industry, companyName, target_audience), goals, features, and timeline when you have that information.` 
         : undefined;
@@ -155,72 +133,103 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
         }
       }]);
 
-      // Make the API call to the Edge Function with proper message format
-      const { data, error: apiError } = await supabase.functions.invoke('chat-with-plan-assistant', {
-        body: {
-          messages: [...messages, userMessage].map(({ id, loading, ...rest }) => rest),
-          projectId,
-          conversationId,
-          formData,
-          stream: true,
-          userId: (await supabase.auth.getUser()).data.user?.id,
-          useWebSearch,
-          useReasoning,
-          systemPrompt: enhancedSystemPrompt
-        }
-      });
+      // Generate a temporary conversation ID if none exists
+      if (!conversationId) {
+        const tempConversationId = uuidv4();
+        setConversationId(tempConversationId);
+      }
 
-      // Remove the loading message
-      setMessages(prev => prev.filter(msg => !msg.loading));
-
-      if (apiError) {
-        console.error('Error getting reply:', apiError);
-        setError(`Failed to get a response: ${apiError.message || 'Unknown error'}`);
-        toast({
-          title: 'Error',
-          description: 'Failed to get a response from the assistant.',
-          variant: 'destructive',
+      try {
+        // Make the API call to the Edge Function with proper message format
+        const { data, error: apiError } = await supabase.functions.invoke('chat-with-plan-assistant', {
+          body: {
+            messages: [...messages, userMessage].map(({ id, loading, ...rest }) => rest),
+            projectId,
+            conversationId,
+            formData,
+            stream: true,
+            userId: (await supabase.auth.getUser()).data.user?.id,
+            useWebSearch,
+            useReasoning,
+            systemPrompt: enhancedSystemPrompt
+          }
         });
-        return;
-      } 
-      
-      if (data) {
-        // If this is our first message, save the conversation ID from the response
-        if (!conversationId && data.conversationId) {
-          setConversationId(data.conversationId);
-        }
+
+        // Remove the loading message
+        setMessages(prev => prev.filter(msg => !msg.loading));
+
+        if (apiError) {
+          console.error('Error getting reply:', apiError);
+          setError(`Failed to get a response: ${apiError.message || 'Unknown error'}`);
+          toast({
+            title: 'Error',
+            description: 'Failed to get a response from the assistant.',
+            variant: 'destructive',
+          });
+          return;
+        } 
         
-        // Extract structured data if present in JSON format
-        let structuredData = null;
-        const jsonMatch = data.response?.match(/```json\n([\s\S]*?)\n```/);
-        if (jsonMatch && jsonMatch[1]) {
-          try {
-            structuredData = JSON.parse(jsonMatch[1]);
-          } catch (e) {
-            console.error("Failed to parse JSON from AI response", e);
+        if (data) {
+          // If this is our first message, save the conversation ID from the response
+          if (data.conversationId) {
+            setConversationId(data.conversationId);
           }
-        }
-        
-        const assistantMessage: Message = {
-          id: uuidv4(),
-          role: 'assistant',
-          content: data.response || 'Sorry, I couldn\'t generate a response.',
-          metadata: {
-            web_search: data.web_search || useWebSearch,
-            reasoning: data.reasoning || useReasoning,
-            model: data.model,
-            structured_data: structuredData
+          
+          // Extract structured data if present in JSON format
+          let structuredData = null;
+          const jsonMatch = data.response?.match(/```json\n([\s\S]*?)\n```/);
+          if (jsonMatch && jsonMatch[1]) {
+            try {
+              structuredData = JSON.parse(jsonMatch[1]);
+            } catch (e) {
+              console.error("Failed to parse JSON from AI response", e);
+            }
           }
-        };
+          
+          const assistantMessage: Message = {
+            id: uuidv4(),
+            role: 'assistant',
+            content: data.response || 'Sorry, I couldn\'t generate a response.',
+            metadata: {
+              web_search: data.web_search || useWebSearch,
+              reasoning: data.reasoning || useReasoning,
+              model: data.model,
+              structured_data: structuredData
+            }
+          };
+          
+          setMessages(prev => [...prev.filter(msg => !msg.loading), assistantMessage]);
+          return data;
+        } else {
+          // Handle case where there's no error but also no data
+          setError('No response received from the assistant');
+          toast({
+            title: 'Error',
+            description: 'No response received from the assistant.',
+            variant: 'destructive',
+          });
+        }
+      } catch (err: any) {
+        // Handle edge function error
+        console.error('Edge function error:', err);
+        setError(`Failed to communicate with backend: ${err.message || 'Unknown error'}`);
         
-        setMessages(prev => [...prev.filter(msg => !msg.loading), assistantMessage]);
-        return data;
-      } else {
-        // Handle case where there's no error but also no data
-        setError('No response received from the assistant');
+        // Remove the loading message and add an error message
+        setMessages(prev => {
+          const filtered = prev.filter(msg => !msg.loading);
+          return [...filtered, {
+            id: uuidv4(),
+            role: 'assistant',
+            content: 'Sorry, I encountered an error while trying to respond. Please try again later.',
+            metadata: {
+              error: true
+            }
+          }];
+        });
+        
         toast({
-          title: 'Error',
-          description: 'No response received from the assistant.',
+          title: 'Connection Error',
+          description: 'There was a problem connecting to the AI service. Please try again.',
           variant: 'destructive',
         });
       }
