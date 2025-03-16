@@ -1,2 +1,4 @@
 
 project_id = "wnwhlqmeshtreeebxior"
+name = "analyze-article"
+no_public_access = false

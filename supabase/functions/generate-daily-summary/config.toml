@@ -1,6 +1,4 @@
 
 project_id = "fzuwsjxjymwcjsbpwfsl"
-
-[verify_jwt]
-verify_jwt = false
-
+name = "generate-daily-summary"
+no_public_access = false

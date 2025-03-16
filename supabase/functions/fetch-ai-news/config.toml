@@ -1,3 +1,4 @@
 
 project_id = "fzuwsjxjymwcjsbpwfsl"
-app_version = "v1"
+name = "fetch-ai-news"
+no_public_access = false
