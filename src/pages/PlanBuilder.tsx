@@ -312,7 +312,11 @@ export default function PlanBuilder() {
             {!isPlanStarted ? (
               <>
                 <PrePlanState 
-                  onShowProjectHistory={() => setShowProjectHistory(true)} 
+                  onShowProjectHistory={() => setShowProjectHistory(true)}
+                  onStartPlanning={() => {
+                    setIsPlanStarted(true);
+                    // Don't navigate away, just set the state to show the planner UI
+                  }}
                 />
                 
                 {(projectHistory.length > 0 || showProjectHistory) && (

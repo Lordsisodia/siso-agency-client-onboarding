@@ -3,19 +3,16 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { FileText, Clock, Zap, History } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 
 interface PrePlanStateProps {
   onShowProjectHistory: () => void;
+  onStartPlanning: () => void;
 }
 
-export const PrePlanState: React.FC<PrePlanStateProps> = ({ onShowProjectHistory }) => {
-  const navigate = useNavigate();
-
-  const handleStartPlanning = () => {
-    navigate('/onboarding/social');
-  };
-
+export const PrePlanState: React.FC<PrePlanStateProps> = ({ 
+  onShowProjectHistory,
+  onStartPlanning
+}) => {
   return (
     <div className="max-w-4xl mx-auto pt-10 relative z-10">
       <div className="text-center mb-14">
@@ -65,7 +62,7 @@ export const PrePlanState: React.FC<PrePlanStateProps> = ({ onShowProjectHistory
           
           <div className="flex flex-col items-center">
             <Button 
-              onClick={handleStartPlanning}
+              onClick={onStartPlanning}
               className="w-full sm:w-auto bg-gradient-to-r from-siso-orange to-siso-red hover:opacity-90 text-white flex items-center gap-2 px-8 py-6 text-lg"
             >
               <Zap className="w-5 h-5" />
