@@ -11,7 +11,7 @@ const corsHeaders = {
 
 // Initialize OpenAI API 
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-const MODEL = 'gpt-4o'; // Using a valid model 
+const MODEL = 'gpt-4o-mini'; // Using the latest appropriate model for cost-efficiency
 
 // Initialize Supabase client
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -66,6 +66,24 @@ serve(async (req) => {
   }
   
   try {
+    // Check if OpenAI API key is available
+    if (!OPENAI_API_KEY) {
+      console.error('OpenAI API key is not set');
+      return new Response(
+        JSON.stringify({ 
+          error: 'OpenAI API key is not configured on the server',
+          details: 'Please ask the administrator to set up the OPENAI_API_KEY'
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
+
     // Parse request body
     const body = await req.json();
     const { 
@@ -132,30 +150,24 @@ serve(async (req) => {
         }
       }
       
-      // Prepare the API options based on the endpoint
-      let apiUrl = 'https://api.openai.com/v1/chat/completions';
-      let requestBody: any = {
+      // API URL
+      const apiUrl = 'https://api.openai.com/v1/chat/completions';
+      
+      // Prepare the request body
+      const requestBody = {
         model: MODEL,
         messages: openaiMessages,
         stream: stream
       };
       
-      // Use the responses API with web search and reasoning if requested
-      if (useWebSearch || useReasoning) {
-        apiUrl = 'https://api.openai.com/v1/chat/completions';
-        
-        requestBody = {
-          model: MODEL,
-          messages: openaiMessages,
-          stream: stream
-        };
-        
-        // Don't use Responses API - just use regular completions API for now
-        // This helps ensure compatibility
-      }
-      
       console.log('API URL:', apiUrl);
-      console.log('Request body:', JSON.stringify(requestBody, null, 2).substring(0, 500) + '...');
+      console.log('Request body:', JSON.stringify({
+        ...requestBody,
+        messages: requestBody.messages.map(m => ({ 
+          role: m.role, 
+          content: m.content.substring(0, 50) + '...' 
+        }))
+      }));
       
       // Make API call to OpenAI
       const response = await fetch(apiUrl, {
@@ -168,9 +180,15 @@ serve(async (req) => {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('OpenAI API error response:', errorData);
-        throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+        let errorMessage = `OpenAI API error: Status ${response.status}`;
+        try {
+          const errorData = await response.json();
+          console.error('OpenAI API error response:', errorData);
+          errorMessage = `OpenAI API error: ${errorData.error?.message || errorData.error || 'Unknown error'}`;
+        } catch (e) {
+          console.error('Failed to parse error response:', e);
+        }
+        throw new Error(errorMessage);
       }
       
       // Handle streaming response
@@ -314,7 +332,7 @@ async function handleGetConversation(projectId: string, userId?: string) {
       );
     }
     
-    // Generate a new conversation ID without checking the database
+    // Generate a new conversation ID
     const conversationId = uuidv4();
       
     return new Response(

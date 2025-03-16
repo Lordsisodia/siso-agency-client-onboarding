@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
@@ -34,19 +33,16 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
   const [useReasoning, setUseReasoning] = useState(options.useReasoning || false);
   const { toast } = useToast();
 
-  // Load conversation ID if we have a project ID
   useEffect(() => {
     if (projectId) {
       initializeConversation(projectId);
     }
   }, [projectId]);
 
-  // Initialize a conversation ID
   const initializeConversation = async (projectId: string) => {
     try {
       console.log("Initializing conversation for project:", projectId);
       
-      // Get a conversation ID from the edge function
       const { data: convData, error: convError } = await supabase.functions.invoke(
         'chat-with-plan-assistant', 
         {
@@ -56,16 +52,19 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
       
       if (convError) {
         console.error('Error fetching conversation:', convError);
-        return;
-      }
-      
-      const conversationId = convData?.conversationId;
-      if (conversationId) {
-        console.log("Received conversation ID:", conversationId);
+        const fallbackId = `fallback-${uuidv4()}`;
+        console.log("Using fallback conversation ID:", fallbackId);
+        setConversationId(fallbackId);
+      } else {
+        const conversationId = convData?.conversationId || `local-${uuidv4()}`;
+        console.log("Using conversation ID:", conversationId);
         setConversationId(conversationId);
       }
     } catch (err) {
       console.error('Error initializing conversation:', err);
+      const fallbackId = `fallback-${uuidv4()}`;
+      console.log("Using fallback conversation ID:", fallbackId);
+      setConversationId(fallbackId);
     }
   };
 
@@ -101,7 +100,6 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
       setIsLoading(true);
       setError(null);
 
-      // Add user message to state
       const userMessageId = uuidv4();
       const userMessage: Message = { 
         id: userMessageId, 
@@ -113,15 +111,12 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
         }
       };
       
-      // Add user message to UI immediately
       setMessages(prev => [...prev, userMessage]);
 
-      // Optimize the system prompt to encourage returning structured data
       const enhancedSystemPrompt = systemPrompt ? 
         `${systemPrompt}\n\nWhen possible, include structured data about the project in JSON format wrapped in triple backticks (\`\`\`json ... \`\`\`) to help build the project overview. Include fields like title, description, businessContext (industry, companyName, target_audience), goals, features, and timeline when you have that information.` 
         : undefined;
 
-      // Optimistically show the loading message
       setMessages(prev => [...prev, { 
         id: uuidv4(), 
         role: 'assistant', 
@@ -133,19 +128,17 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
         }
       }]);
 
-      // Generate a temporary conversation ID if none exists
+      const currentConvId = conversationId || `temp-${uuidv4()}`;
       if (!conversationId) {
-        const tempConversationId = uuidv4();
-        setConversationId(tempConversationId);
+        setConversationId(currentConvId);
       }
 
       try {
-        // Make the API call to the Edge Function with proper message format
         const { data, error: apiError } = await supabase.functions.invoke('chat-with-plan-assistant', {
           body: {
             messages: [...messages, userMessage].map(({ id, loading, ...rest }) => rest),
             projectId,
-            conversationId,
+            conversationId: currentConvId,
             formData,
             stream: true,
             userId: (await supabase.auth.getUser()).data.user?.id,
@@ -155,27 +148,34 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
           }
         });
 
-        // Remove the loading message
         setMessages(prev => prev.filter(msg => !msg.loading));
 
         if (apiError) {
           console.error('Error getting reply:', apiError);
           setError(`Failed to get a response: ${apiError.message || 'Unknown error'}`);
+          
+          setMessages(prev => [...prev.filter(msg => !msg.loading), {
+            id: uuidv4(),
+            role: 'assistant',
+            content: "I'm having trouble connecting to the AI service right now. Please try again in a moment. If the issue persists, you can continue planning manually using the form options above.",
+            metadata: {
+              error: true
+            }
+          }]);
+          
           toast({
             title: 'Error',
             description: 'Failed to get a response from the assistant.',
             variant: 'destructive',
           });
-          return;
+          return null;
         } 
         
         if (data) {
-          // If this is our first message, save the conversation ID from the response
           if (data.conversationId) {
             setConversationId(data.conversationId);
           }
           
-          // Extract structured data if present in JSON format
           let structuredData = null;
           const jsonMatch = data.response?.match(/```json\n([\s\S]*?)\n```/);
           if (jsonMatch && jsonMatch[1]) {
@@ -201,26 +201,34 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
           setMessages(prev => [...prev.filter(msg => !msg.loading), assistantMessage]);
           return data;
         } else {
-          // Handle case where there's no error but also no data
           setError('No response received from the assistant');
+          
+          setMessages(prev => [...prev.filter(msg => !msg.loading), {
+            id: uuidv4(),
+            role: 'assistant',
+            content: "I'm unable to process your request right now. Please try again or use the form options above to provide more structured information about your project.",
+            metadata: {
+              error: true
+            }
+          }]);
+          
           toast({
             title: 'Error',
             description: 'No response received from the assistant.',
             variant: 'destructive',
           });
+          return null;
         }
       } catch (err: any) {
-        // Handle edge function error
         console.error('Edge function error:', err);
         setError(`Failed to communicate with backend: ${err.message || 'Unknown error'}`);
         
-        // Remove the loading message and add an error message
         setMessages(prev => {
           const filtered = prev.filter(msg => !msg.loading);
           return [...filtered, {
             id: uuidv4(),
             role: 'assistant',
-            content: 'Sorry, I encountered an error while trying to respond. Please try again later.',
+            content: 'Sorry, I encountered an error while trying to respond. You can continue with your project planning using the manual input or website analysis options above.',
             metadata: {
               error: true
             }
@@ -232,15 +240,27 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
           description: 'There was a problem connecting to the AI service. Please try again.',
           variant: 'destructive',
         });
+        return null;
       }
     } catch (err: any) {
       console.error('Error in chat:', err);
       setError(`Something went wrong: ${err.message || 'Unknown error'}`);
+      
+      setMessages(prev => [...prev.filter(msg => !msg.loading), {
+        id: uuidv4(),
+        role: 'assistant',
+        content: 'An unexpected error occurred. Please try again later or use the form options to provide more structured information about your project.',
+        metadata: {
+          error: true
+        }
+      }]);
+      
       toast({
         title: 'Error',
         description: 'An unexpected error occurred.',
         variant: 'destructive',
       });
+      return null;
     } finally {
       setIsLoading(false);
     }
