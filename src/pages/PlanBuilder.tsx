@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { ManualInputSheet } from '@/components/plan-builder/ManualInputSheet';
+import { WebsiteInputSheet } from '@/components/plan-builder/WebsiteInputSheet';
 import { Button } from '@/components/ui/button';
-import { FileEdit, AlertCircle, History, PlusCircle, ArrowLeft } from 'lucide-react';
+import { FileEdit, AlertCircle, History, PlusCircle, ArrowLeft, LayoutSplit, LayoutSidebar } from 'lucide-react';
 import { usePlanChatAssistant } from '@/hooks/core';
 import { useToast } from '@/hooks/use-toast';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PrePlanState } from '@/components/plan-builder/PrePlanState';
+import { LiveProjectOverview } from '@/components/plan-builder/LiveProjectOverview';
+import { ProjectDataProvider } from '@/contexts/ProjectDataContext';
 import { motion } from 'framer-motion';
 import { Waves } from '@/components/ui/waves-background';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 type ProjectHistoryItem = {
   id: string;
@@ -31,11 +36,13 @@ type WebsiteInputData = {
 
 export default function PlanBuilder() {
   const [isManualInputOpen, setIsManualInputOpen] = useState(false);
+  const [isWebsiteInputOpen, setIsWebsiteInputOpen] = useState(false);
   const [showConnectionAlert, setShowConnectionAlert] = useState(false);
   const [isPlanStarted, setIsPlanStarted] = useState(false);
   const [projectHistory, setProjectHistory] = useState<ProjectHistoryItem[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [showProjectHistory, setShowProjectHistory] = useState(false);
+  const [splitView, setSplitView] = useState(true); // Default to split view
   const { toast } = useToast();
   const navigate = useNavigate();
   const { projectId: urlProjectId } = useParams();
@@ -288,32 +295,33 @@ export default function PlanBuilder() {
   };
 
   return (
-    <MainLayout>
-      <div className="container max-w-6xl mx-auto py-8 px-4 min-h-screen relative">
-        <Waves 
-          lineColor="rgba(255, 87, 34, 0.05)" 
-          backgroundColor="transparent" 
-          waveSpeedX={0.01} 
-          waveSpeedY={0.004} 
-          waveAmpX={24} 
-          waveAmpY={12} 
-          className="absolute inset-0 z-0 w-full h-full" 
-        />
-        
-        {!isPlanStarted ? (
-          <>
-            <PrePlanState 
-              onShowProjectHistory={() => setShowProjectHistory(true)} 
-              onStartPlan={handleStartPlan}
-            />
-            
-            {(projectHistory.length > 0 || showProjectHistory) && (
-              <motion.div 
-                className="mt-12 max-w-2xl mx-auto"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-              >
+    <ProjectDataProvider>
+      <MainLayout>
+        <div className="container max-w-7xl mx-auto py-8 px-4 min-h-screen relative">
+          <Waves 
+            lineColor="rgba(255, 87, 34, 0.05)" 
+            backgroundColor="transparent" 
+            waveSpeedX={0.01} 
+            waveSpeedY={0.004} 
+            waveAmpX={24} 
+            waveAmpY={12} 
+            className="absolute inset-0 z-0 w-full h-full" 
+          />
+          
+          {!isPlanStarted ? (
+            <>
+              <PrePlanState 
+                onShowProjectHistory={() => setShowProjectHistory(true)} 
+                onStartPlan={handleStartPlan}
+              />
+              
+              {(projectHistory.length > 0 || showProjectHistory) && (
+                <motion.div 
+                  className="mt-12 max-w-2xl mx-auto"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
                 <div className="flex items-center mb-6">
                   <History className="w-5 h-5 text-siso-orange mr-2" />
                   <h2 className="text-xl font-semibold text-siso-text">Recent Projects</h2>
@@ -358,97 +366,162 @@ export default function PlanBuilder() {
                   )}
                 </div>
               </motion.div>
-            )}
-          </>
-        ) : (
-          <>
-            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between relative z-10">
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-siso-red to-siso-orange bg-clip-text text-transparent">AI Project Planner</h1>
-                <p className="text-siso-text-muted mt-1">
-                  Get detailed project plans, budgets, and timelines based on your requirements
-                </p>
-              </div>
-              
-              <div className="flex space-x-3">
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button 
-                    onClick={handleGoBack}
-                    variant="outline"
-                    className="border-siso-border text-siso-text hover:bg-siso-bg-card flex items-center gap-2"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    <span>Back</span>
-                  </Button>
-                </motion.div>
-                
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button 
-                    onClick={handleNewProject}
-                    variant="outline"
-                    className="border-siso-border text-siso-text hover:bg-siso-bg-card flex items-center gap-2"
-                  >
-                    <PlusCircle className="w-4 h-4" />
-                    <span>New Project</span>
-                  </Button>
-                </motion.div>
-                
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button 
-                    onClick={() => setIsManualInputOpen(true)}
-                    className="bg-gradient-to-r from-siso-orange to-siso-red text-white hover:opacity-90"
-                  >
-                    <FileEdit className="mr-2 h-4 w-4" />
-                    Use Form
-                  </Button>
-                </motion.div>
-              </div>
-            </div>
-
-            {showConnectionAlert && (
-              <Alert variant="destructive" className="mb-6 relative z-10">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  There was a problem connecting to the AI service. Please check your connection and try again.
-                  <Button 
-                    variant="link" 
-                    className="text-white p-0 h-auto font-normal ml-2"
-                    onClick={() => setShowConnectionAlert(false)}
-                  >
-                    Dismiss
-                  </Button>
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <div className="grid grid-cols-1 gap-6 relative z-10">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <div className="p-0.5 bg-gradient-to-r from-siso-red/40 to-siso-orange/40 rounded-xl">
-                  <ChatInterface 
-                    title="AI Project Planner" 
-                    welcomeMessage="I'll help create a detailed plan for your project. Feel free to ask questions or provide more details as we refine your plan."
-                    inputPlaceholder="Add more details or ask questions about your plan..."
-                    systemPrompt="You are a professional project planning assistant specialized in helping users create comprehensive software project plans. Help users define requirements, select features, estimate timelines, and budget effectively."
-                    usePlanAssistant={true}
-                    projectId={projectId}
-                    className="border-0 bg-transparent"
-                  />
+              )}
+            </>
+          ) : (
+            <>
+              <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between relative z-10">
+                <div>
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-siso-red to-siso-orange bg-clip-text text-transparent">AI Project Planner</h1>
+                  <p className="text-siso-text-muted mt-1">
+                    Get detailed project plans, budgets, and timelines based on your requirements
+                  </p>
                 </div>
-              </motion.div>
-            </div>
-          </>
-        )}
+                
+                <div className="flex flex-wrap items-center gap-3">
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button 
+                      onClick={handleGoBack}
+                      variant="outline"
+                      className="border-siso-border text-siso-text hover:bg-siso-bg-card flex items-center gap-2"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      <span>Back</span>
+                    </Button>
+                  </motion.div>
+                  
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button 
+                      onClick={handleNewProject}
+                      variant="outline"
+                      className="border-siso-border text-siso-text hover:bg-siso-bg-card flex items-center gap-2"
+                    >
+                      <PlusCircle className="w-4 h-4" />
+                      <span>New Project</span>
+                    </Button>
+                  </motion.div>
+                  
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={() => setSplitView(!splitView)}
+                        variant="outline"
+                        className="border-siso-border text-siso-text hover:bg-siso-bg-card"
+                      >
+                        {splitView ? <LayoutSplit className="h-4 w-4" /> : <LayoutSidebar className="h-4 w-4" />}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {splitView ? 'Switch to chat only' : 'Show project overview'}
+                    </TooltipContent>
+                  </Tooltip>
+                  
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button 
+                      onClick={() => setIsWebsiteInputOpen(true)}
+                      variant="outline"
+                      className="border-siso-border text-siso-text hover:bg-siso-bg-card flex items-center gap-2"
+                    >
+                      <FileEdit className="w-4 h-4" />
+                      Add Website
+                    </Button>
+                  </motion.div>
+                  
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button 
+                      onClick={() => setIsManualInputOpen(true)}
+                      className="bg-gradient-to-r from-siso-orange to-siso-red text-white hover:opacity-90"
+                    >
+                      <FileEdit className="mr-2 h-4 w-4" />
+                      Use Form
+                    </Button>
+                  </motion.div>
+                </div>
+              </div>
 
-        <ManualInputSheet 
-          isOpen={isManualInputOpen} 
-          onClose={() => setIsManualInputOpen(false)}
-          onSubmitToAI={handleSubmitToAI}
-        />
-      </div>
-    </MainLayout>
+              {showConnectionAlert && (
+                <Alert variant="destructive" className="mb-6 relative z-10">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    There was a problem connecting to the AI service. Please check your connection and try again.
+                    <Button 
+                      variant="link" 
+                      className="text-white p-0 h-auto font-normal ml-2"
+                      onClick={() => setShowConnectionAlert(false)}
+                    >
+                      Dismiss
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-6 relative z-10">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className={splitView ? "md:col-span-3" : "md:col-span-5"}
+                >
+                  <div className="p-0.5 bg-gradient-to-r from-siso-red/40 to-siso-orange/40 rounded-xl h-[calc(100vh-12rem)]">
+                    <EnhancedChatInterface 
+                      title="AI Project Planner" 
+                      welcomeMessage="I'll help create a detailed plan for your project. Feel free to ask questions or provide more details as we refine your plan."
+                      inputPlaceholder="Add more details or ask questions about your plan..."
+                      systemPrompt="You are a professional project planning assistant specialized in helping users create comprehensive software project plans. Help users define requirements, select features, estimate timelines, and budget effectively. When possible, return structured data about the project in JSON format to help build the project overview."
+                      usePlanAssistant={true}
+                      projectId={projectId}
+                      className="border-0 bg-transparent h-full"
+                    />
+                  </div>
+                </motion.div>
+                
+                {splitView && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="md:col-span-2 h-[calc(100vh-12rem)] bg-siso-bg-card/20 backdrop-blur-sm border border-siso-border rounded-xl overflow-hidden"
+                  >
+                    <LiveProjectOverview />
+                  </motion.div>
+                )}
+              </div>
+            </>
+          )}
+
+          <WebsiteInputSheet 
+            isOpen={isWebsiteInputOpen} 
+            onClose={() => setIsWebsiteInputOpen(false)}
+            onSubmit={handleWebsiteSubmit}
+          />
+          
+          <ManualInputSheet 
+            isOpen={isManualInputOpen} 
+            onClose={() => setIsManualInputOpen(false)}
+            onSubmitToAI={handleSubmitToAI}
+          />
+        </div>
+      </MainLayout>
+    </ProjectDataProvider>
   );
-}
+};
+
+// Enhanced chat interface that passes AI responses to the ProjectData context
+const EnhancedChatInterface: React.FC<React.ComponentProps<typeof ChatInterface>> = (props) => {
+  const { updateProjectData, extractDataFromAIResponse } = useProjectData();
+  
+  // Process AI messages to extract data
+  useEffect(() => {
+    const messages = props.messages || [];
+    // Look for the latest assistant message
+    const latestAssistantMessage = [...messages]
+      .reverse()
+      .find(msg => msg.role === 'assistant');
+      
+    if (latestAssistantMessage?.content) {
+      extractDataFromAIResponse(latestAssistantMessage.content);
+    }
+  }, [props.messages, extractDataFromAIResponse]);
+  
+  return <ChatInterface {...props} />;
+};

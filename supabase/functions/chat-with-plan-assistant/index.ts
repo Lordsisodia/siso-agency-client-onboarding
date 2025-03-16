@@ -18,11 +18,42 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Simple system prompt for project planning
+// Enhanced system prompt for project planning with structured data
 const PROJECT_PLANNER_SYSTEM_PROMPT = `
 You are an expert AI project planning assistant specialized in helping users create comprehensive software project plans.
 Provide helpful, structured advice on project requirements, timelines, budgets, and technical considerations.
 Be conversational and ask clarifying questions when needed.
+
+IMPORTANT: When providing project details, extract and organize key information in JSON format encapsulated within 
+triple backticks (e.g. \`\`\`json {...} \`\`\`). Include the following fields when available:
+
+{
+  "title": "Project Title",
+  "description": "Brief description of the project",
+  "businessContext": {
+    "industry": "Industry name",
+    "companyName": "Company name",
+    "scale": "Small/Medium/Enterprise",
+    "target_audience": ["Audience 1", "Audience 2"]
+  },
+  "goals": "Key project goals and objectives",
+  "features": {
+    "core": ["Feature 1", "Feature 2"],
+    "extras": ["Nice-to-have 1", "Nice-to-have 2"]
+  },
+  "timeline": {
+    "estimated_weeks": 12,
+    "phases": [
+      {
+        "name": "Phase name",
+        "duration": "X weeks",
+        "tasks": ["Task 1", "Task 2"]
+      }
+    ]
+  }
+}
+
+Include this JSON in your responses when you've gathered enough information about the project.
 `;
 
 // Main function to handle requests
@@ -45,7 +76,8 @@ serve(async (req) => {
       action,
       userId,
       useWebSearch = false,
-      useReasoning = false
+      useReasoning = false,
+      systemPrompt
     } = body;
     
     // Handle conversation retrieval action
@@ -90,8 +122,14 @@ serve(async (req) => {
       if (!openaiMessages.some(msg => msg.role === 'system')) {
         openaiMessages.unshift({
           role: 'system',
-          content: PROJECT_PLANNER_SYSTEM_PROMPT
+          content: systemPrompt || PROJECT_PLANNER_SYSTEM_PROMPT
         });
+      } else if (systemPrompt) {
+        // Replace the existing system message if a custom one is provided
+        const systemIndex = openaiMessages.findIndex(msg => msg.role === 'system');
+        if (systemIndex >= 0) {
+          openaiMessages[systemIndex].content = systemPrompt;
+        }
       }
       
       // Prepare the API options based on the endpoint

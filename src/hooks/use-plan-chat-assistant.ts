@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
@@ -13,6 +14,7 @@ interface Message {
   metadata?: {
     web_search?: boolean;
     reasoning?: boolean;
+    structured_data?: any;
     [key: string]: any;
   };
 }
@@ -20,6 +22,7 @@ interface Message {
 interface UsePlanChatAssistantOptions {
   useWebSearch?: boolean;
   useReasoning?: boolean;
+  extractProjectData?: boolean;
 }
 
 export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAssistantOptions = {}) {
@@ -134,6 +137,11 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
       // Add user message to UI immediately
       setMessages(prev => [...prev, userMessage]);
 
+      // Optimize the system prompt to encourage returning structured data
+      const enhancedSystemPrompt = systemPrompt ? 
+        `${systemPrompt}\n\nWhen possible, include structured data about the project in JSON format wrapped in triple backticks (```json ... ```) to help build the project overview. Include fields like title, description, businessContext (industry, companyName, target_audience), goals, features, and timeline when you have that information.` 
+        : undefined;
+
       // Optimistically show the loading message
       setMessages(prev => [...prev, { 
         id: uuidv4(), 
@@ -156,7 +164,8 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
           stream: true,
           userId: (await supabase.auth.getUser()).data.user?.id,
           useWebSearch,
-          useReasoning
+          useReasoning,
+          systemPrompt: enhancedSystemPrompt
         }
       });
 
@@ -180,6 +189,17 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
           setConversationId(data.conversationId);
         }
         
+        // Extract structured data if present in JSON format
+        let structuredData = null;
+        const jsonMatch = data.response?.match(/```json\n([\s\S]*?)\n```/);
+        if (jsonMatch && jsonMatch[1]) {
+          try {
+            structuredData = JSON.parse(jsonMatch[1]);
+          } catch (e) {
+            console.error("Failed to parse JSON from AI response", e);
+          }
+        }
+        
         const assistantMessage: Message = {
           id: uuidv4(),
           role: 'assistant',
@@ -187,7 +207,8 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
           metadata: {
             web_search: data.web_search || useWebSearch,
             reasoning: data.reasoning || useReasoning,
-            model: data.model
+            model: data.model,
+            structured_data: structuredData
           }
         };
         
