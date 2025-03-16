@@ -1,35 +1,19 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { FileText, Clock, Zap, ChevronRight, History } from 'lucide-react';
+import { FileText, Clock, Zap, History } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 
 interface PrePlanStateProps {
   onShowProjectHistory: () => void;
-  onStartPlan: (prompt: string) => Promise<void>;
 }
 
-export const PrePlanState: React.FC<PrePlanStateProps> = ({ onShowProjectHistory, onStartPlan }) => {
+export const PrePlanState: React.FC<PrePlanStateProps> = ({ onShowProjectHistory }) => {
   const navigate = useNavigate();
-  const [projectDescription, setProjectDescription] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!projectDescription.trim()) return;
-    
-    setIsSubmitting(true);
-    
-    try {
-      await onStartPlan(projectDescription);
-    } catch (error) {
-      console.error("Error submitting project description:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleStartPlanning = () => {
+    navigate('/onboarding/social');
   };
 
   return (
@@ -59,7 +43,7 @@ export const PrePlanState: React.FC<PrePlanStateProps> = ({ onShowProjectHistory
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-lg text-siso-text-muted max-w-2xl mx-auto"
         >
-          Get detailed project plans, budget estimates, and timelines tailored to your specific needs in minutes. Start by describing your project.
+          Get detailed project plans, budget estimates, and timelines tailored to your specific needs in minutes.
         </motion.p>
       </div>
       
@@ -69,54 +53,36 @@ export const PrePlanState: React.FC<PrePlanStateProps> = ({ onShowProjectHistory
         transition={{ duration: 0.5, delay: 0.3 }}
         className="bg-siso-bg-alt/30 backdrop-blur-md border border-siso-border rounded-xl p-6 md:p-8 mb-10"
       >
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label htmlFor="project-description" className="block text-lg text-siso-text font-medium">
-              Describe your project
-            </label>
+        <div className="space-y-6">
+          <div className="space-y-2 text-center">
+            <h2 className="text-xl text-siso-text font-medium">
+              Ready to create your project plan?
+            </h2>
             <p className="text-sm text-siso-text-muted">
-              What are you trying to build? Provide as much detail as possible for a more accurate plan.
+              Our AI will guide you through the process of creating a comprehensive project plan.
             </p>
-            <Textarea
-              id="project-description"
-              placeholder="I want to create a mobile app for scheduling appointments..."
-              value={projectDescription}
-              onChange={(e) => setProjectDescription(e.target.value)}
-              className="h-32 resize-none bg-siso-bg-card/40 border-siso-border focus:border-siso-red text-siso-text"
-              required
-            />
           </div>
           
-          <div className="flex flex-col sm:flex-row sm:justify-between gap-4 items-center">
+          <div className="flex flex-col items-center">
+            <Button 
+              onClick={handleStartPlanning}
+              className="w-full sm:w-auto bg-gradient-to-r from-siso-orange to-siso-red hover:opacity-90 text-white flex items-center gap-2 px-8 py-6 text-lg"
+            >
+              <Zap className="w-5 h-5" />
+              <span>Start Planning</span>
+            </Button>
+            
             <Button
               type="button"
               variant="outline"
-              className="w-full sm:w-auto border-siso-border text-siso-text hover:text-siso-red flex items-center gap-2"
+              className="mt-4 border-siso-border text-siso-text hover:text-siso-red flex items-center gap-2"
               onClick={onShowProjectHistory}
             >
               <History className="w-4 h-4" />
               <span>View project history</span>
             </Button>
-            
-            <Button 
-              type="submit"
-              disabled={!projectDescription.trim() || isSubmitting}
-              className="w-full sm:w-auto bg-gradient-to-r from-siso-orange to-siso-red hover:opacity-90 text-white flex items-center gap-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                  <span>Processing...</span>
-                </>
-              ) : (
-                <>
-                  <Zap className="w-4 h-4" />
-                  <span>Generate project plan</span>
-                </>
-              )}
-            </Button>
           </div>
-        </form>
+        </div>
       </motion.div>
       
       <motion.div

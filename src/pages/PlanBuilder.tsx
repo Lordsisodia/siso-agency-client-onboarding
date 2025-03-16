@@ -313,7 +313,6 @@ export default function PlanBuilder() {
               <>
                 <PrePlanState 
                   onShowProjectHistory={() => setShowProjectHistory(true)} 
-                  onStartPlan={handleStartPlan}
                 />
                 
                 {(projectHistory.length > 0 || showProjectHistory) && (
