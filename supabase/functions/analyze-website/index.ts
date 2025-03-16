@@ -1,285 +1,296 @@
 
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 
-interface AnalyzeWebsiteRequest {
+const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+const SERPER_API_KEY = Deno.env.get('SERPER_API_KEY');
+
+interface AnalysisRequest {
   url: string;
+  companyName?: string;
+  socialLinks?: Record<string, string>;
 }
 
 serve(async (req) => {
   // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { url } = await req.json() as AnalyzeWebsiteRequest;
-
-    if (!url) {
+    const { url, companyName, socialLinks } = await req.json() as AnalysisRequest;
+    
+    if (!url && !companyName && (!socialLinks || Object.keys(socialLinks).length === 0)) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: "URL is required" 
-        }),
-        { 
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
-        }
+        JSON.stringify({ error: 'Either a website URL, company name, or social links must be provided' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`Analyzing website: ${url}`);
-
-    try {
-      // Fetch the website content
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; SisoWebsiteAnalyzer/1.0)'
+    console.log(`Analyzing data for: ${url || companyName}`);
+    
+    // Extract domain from URL
+    let domain = '';
+    let extractedCompanyName = companyName;
+    
+    if (url) {
+      try {
+        // Add protocol if missing
+        const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+        const urlObj = new URL(fullUrl);
+        domain = urlObj.hostname.replace(/^www\./, '');
+        
+        // If company name wasn't provided, try to extract it from domain
+        if (!extractedCompanyName) {
+          extractedCompanyName = domain.split('.')[0];
+          // Convert to title case
+          extractedCompanyName = extractedCompanyName
+            .split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
         }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch website: ${response.status} ${response.statusText}`);
+      } catch (error) {
+        console.error('Error parsing URL:', error);
       }
-
-      const html = await response.text();
-      
-      // Basic extraction
-      const basicExtraction = {
-        title: extractTitle(html),
-        description: extractDescription(html),
-        emails: extractEmails(html),
-        phones: extractPhones(html),
-        colors: extractColors(html),
-        socialLinks: extractSocialLinks(html, url),
-      };
-
-      // AI analysis of the content would normally go here
-      // For now, we'll do some basic heuristics to extract information
-      const aiAnalysis = {
-        companyName: extractCompanyName(html, url),
-        industry: inferIndustry(html),
-        companyDescription: extractDescription(html) || inferDescription(html),
-        location: extractLocation(html),
-        productsOrServices: inferProductsOrServices(html),
-        yearFounded: inferYearFounded(html),
-      };
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          url,
-          basicExtraction,
-          aiAnalysis,
-        }),
-        { 
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
-        }
-      );
-    } catch (error) {
-      console.error(`Error analyzing website: ${error.message}`);
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: `Failed to analyze website: ${error.message}` 
-        }),
-        { 
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
-        }
-      );
     }
+
+    // Step 1: Perform web search about the company or website
+    let searchResults = [];
+    if (domain || extractedCompanyName) {
+      const searchQuery = domain || extractedCompanyName;
+      console.log(`Performing web search for: ${searchQuery}`);
+      
+      try {
+        const searchResponse = await fetch('https://google.serper.dev/search', {
+          method: 'POST',
+          headers: {
+            'X-API-KEY': SERPER_API_KEY || '',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            q: `${searchQuery} company information`,
+            num: 5
+          })
+        });
+        
+        if (searchResponse.ok) {
+          const searchData = await searchResponse.json();
+          searchResults = searchData.organic || [];
+          console.log(`Found ${searchResults.length} search results`);
+        } else {
+          console.error('Search API error:', await searchResponse.text());
+        }
+      } catch (error) {
+        console.error('Error during web search:', error);
+      }
+    }
+
+    // Extract relevant information from search results
+    const relevantInfo = searchResults.map((result: any) => ({
+      title: result.title,
+      snippet: result.snippet,
+      link: result.link
+    }));
+
+    // Step 2: Analyze social media links if provided
+    let socialMediaAnalysis = null;
+    if (socialLinks && Object.keys(socialLinks).filter(k => socialLinks[k]).length > 0) {
+      console.log('Analyzing social media links');
+      
+      // Format social links for analysis
+      const socialLinksFormatted = Object.entries(socialLinks)
+        .filter(([_, value]) => value)
+        .map(([platform, link]) => `${platform}: ${link}`)
+        .join('\n');
+      
+      socialMediaAnalysis = {
+        platforms: Object.keys(socialLinks).filter(k => socialLinks[k]),
+        links: socialLinks
+      };
+    }
+
+    // Step 3: Use OpenAI to analyze all gathered information
+    console.log('Calling OpenAI API to analyze data');
+    
+    const systemPrompt = `
+    You are a business analyst specialized in extracting and organizing company information.
+    Analyze the provided website, company name, search results, and social media links to extract structured information.
+    Provide insights, but stick strictly to the facts you can verify from the provided data.
+    `;
+
+    const userPrompt = `
+    I need a comprehensive analysis of a company with the following information:
+    ${url ? `- Website URL: ${url}` : ''}
+    ${extractedCompanyName ? `- Company Name: ${extractedCompanyName}` : ''}
+    ${relevantInfo.length > 0 ? `- Search Results:\n${JSON.stringify(relevantInfo, null, 2)}` : ''}
+    ${socialMediaAnalysis ? `- Social Media Profiles:\n${JSON.stringify(socialMediaAnalysis, null, 2)}` : ''}
+    
+    Extract as much structured information as possible.
+    `;
+
+    const response = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        input: userPrompt,
+        context: {
+          messages: [
+            { role: "system", content: systemPrompt }
+          ]
+        },
+        tools: [{ type: "web_search_preview" }],
+        reasoning: {
+          effort: "high"
+        },
+        format: {
+          type: "json_schema",
+          schema: {
+            type: "object",
+            properties: {
+              company: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  description: { type: "string" },
+                  industry: { type: "string" },
+                  founded: { type: "string" },
+                  size: { type: "string" },
+                  location: { type: "string" },
+                  website: { type: "string" }
+                },
+                required: ["name", "description", "industry", "founded", "size", "location", "website"],
+                additionalProperties: false
+              },
+              business: {
+                type: "object",
+                properties: {
+                  products: { 
+                    type: "array", 
+                    items: { type: "string" } 
+                  },
+                  services: { 
+                    type: "array", 
+                    items: { type: "string" } 
+                  },
+                  target_audience: { type: "string" },
+                  value_proposition: { type: "string" },
+                  competitors: { 
+                    type: "array", 
+                    items: { type: "string" } 
+                  }
+                },
+                required: ["products", "services", "target_audience", "value_proposition", "competitors"],
+                additionalProperties: false
+              },
+              online_presence: {
+                type: "object",
+                properties: {
+                  social_media: { 
+                    type: "array", 
+                    items: { 
+                      type: "object",
+                      properties: {
+                        platform: { type: "string" },
+                        url: { type: "string" },
+                        activity_level: { type: "string" }
+                      },
+                      required: ["platform", "url", "activity_level"],
+                      additionalProperties: false
+                    } 
+                  },
+                  content_types: { 
+                    type: "array", 
+                    items: { type: "string" } 
+                  }
+                },
+                required: ["social_media", "content_types"],
+                additionalProperties: false
+              },
+              application_recommendations: {
+                type: "object",
+                properties: {
+                  suggested_features: { 
+                    type: "array", 
+                    items: { 
+                      type: "object",
+                      properties: {
+                        name: { type: "string" },
+                        description: { type: "string" },
+                        priority: { type: "string" }
+                      },
+                      required: ["name", "description", "priority"],
+                      additionalProperties: false
+                    } 
+                  },
+                  design_recommendations: { 
+                    type: "array", 
+                    items: { type: "string" } 
+                  },
+                  integration_suggestions: { 
+                    type: "array", 
+                    items: { type: "string" } 
+                  }
+                },
+                required: ["suggested_features", "design_recommendations", "integration_suggestions"],
+                additionalProperties: false
+              },
+              confidence_score: { type: "number" },
+              data_sources: { 
+                type: "array", 
+                items: { type: "string" } 
+              }
+            },
+            required: ["company", "business", "online_presence", "application_recommendations", "confidence_score", "data_sources"],
+            additionalProperties: false
+          }
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('OpenAI API error:', errorText);
+      throw new Error(`OpenAI API error: ${errorText}`);
+    }
+
+    const analysisResult = await response.json();
+    console.log('Analysis completed successfully');
+    
+    // Return the structured analysis
+    return new Response(JSON.stringify({
+      success: true,
+      analysis: analysisResult.content || analysisResult,
+      searchResults: relevantInfo.slice(0, 3),
+      inputData: {
+        url,
+        companyName: extractedCompanyName,
+        socialLinks
+      }
+    }), {
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      }
+    });
   } catch (error) {
-    console.error(`Error processing request: ${error.message}`);
+    console.error('Error in analyze-website function:', error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: `Internal server error: ${error.message}` 
+      JSON.stringify({
+        success: false,
+        error: error.message || 'Unknown error occurred'
       }),
-      { 
+      {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       }
     );
   }
 });
-
-// Helper functions for extracting information from HTML
-function extractTitle(html: string): string | null {
-  const titleMatch = html.match(/<title>(.*?)<\/title>/i);
-  return titleMatch ? titleMatch[1].trim() : null;
-}
-
-function extractDescription(html: string): string | null {
-  const descMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["'](.*?)["'][^>]*>/i) ||
-                   html.match(/<meta[^>]*content=["'](.*?)["'][^>]*name=["']description["'][^>]*>/i);
-  return descMatch ? descMatch[1].trim() : null;
-}
-
-function extractEmails(html: string): string[] {
-  const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
-  return [...new Set(html.match(emailRegex) || [])];
-}
-
-function extractPhones(html: string): string[] {
-  // This is a simplified regex for phone numbers
-  const phoneRegex = /(?:\+\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g;
-  return [...new Set(html.match(phoneRegex) || [])];
-}
-
-function extractColors(html: string): string[] {
-  // Extract color codes from CSS in the HTML
-  const hexColorRegex = /#([0-9a-f]{3}){1,2}\b/gi;
-  const rgbColorRegex = /rgb\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)/gi;
-  
-  const hexColors = html.match(hexColorRegex) || [];
-  const rgbColors = html.match(rgbColorRegex) || [];
-  
-  // Combine and deduplicate
-  return [...new Set([...hexColors, ...rgbColors])].slice(0, 5);
-}
-
-function extractSocialLinks(html: string, baseUrl: string): Record<string, string> {
-  const socialPatterns = {
-    facebook: /(?:https?:)?\/\/(?:www\.)?facebook\.com\/[a-zA-Z0-9.]+/g,
-    twitter: /(?:https?:)?\/\/(?:www\.)?twitter\.com\/[a-zA-Z0-9_]+/g,
-    instagram: /(?:https?:)?\/\/(?:www\.)?instagram\.com\/[a-zA-Z0-9_.]+/g,
-    linkedin: /(?:https?:)?\/\/(?:www\.)?linkedin\.com\/(?:company|in)\/[a-zA-Z0-9_-]+/g,
-    youtube: /(?:https?:)?\/\/(?:www\.)?youtube\.com\/(?:user|channel)\/[a-zA-Z0-9_-]+/g,
-  };
-
-  const result: Record<string, string> = {};
-  
-  for (const [platform, pattern] of Object.entries(socialPatterns)) {
-    const matches = html.match(pattern);
-    if (matches && matches.length > 0) {
-      result[platform] = matches[0];
-    }
-  }
-  
-  return result;
-}
-
-function extractCompanyName(html: string, url: string): string | null {
-  // Try to extract from OpenGraph metadata first
-  const ogSiteNameMatch = html.match(/<meta[^>]*property=["']og:site_name["'][^>]*content=["'](.*?)["'][^>]*>/i);
-  if (ogSiteNameMatch) return ogSiteNameMatch[1].trim();
-  
-  // Try to extract from title
-  const titleMatch = extractTitle(html);
-  if (titleMatch) {
-    // Remove common suffixes like "Home", "Welcome", etc.
-    return titleMatch.replace(/\s*[-|]\s*.+$/, '').trim();
-  }
-  
-  // Extract from URL domain
-  try {
-    const domain = new URL(url).hostname;
-    return domain.replace(/^www\./, '').split('.')[0];
-  } catch {
-    return null;
-  }
-}
-
-function inferIndustry(html: string): string | null {
-  const lowerHtml = html.toLowerCase();
-  
-  const industries = [
-    { name: "Technology", keywords: ["software", "tech", "technology", "digital", "app", "computer"] },
-    { name: "Marketing", keywords: ["marketing", "advertising", "agency", "branding", "campaign"] },
-    { name: "Finance", keywords: ["finance", "financial", "banking", "investment", "insurance"] },
-    { name: "Healthcare", keywords: ["health", "healthcare", "medical", "doctor", "hospital", "clinic"] },
-    { name: "Education", keywords: ["education", "school", "university", "college", "learning", "teaching"] },
-    { name: "Real Estate", keywords: ["real estate", "property", "housing", "apartment", "home"] },
-    { name: "Retail", keywords: ["retail", "shop", "store", "ecommerce", "product"] },
-    { name: "Manufacturing", keywords: ["manufacturing", "factory", "production", "industrial"] },
-    { name: "Hospitality", keywords: ["hospitality", "hotel", "restaurant", "travel", "tourism"] },
-  ];
-  
-  // Count occurrences of keywords for each industry
-  const counts = industries.map(industry => ({
-    industry: industry.name,
-    count: industry.keywords.reduce((sum, keyword) => {
-      const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-      const matches = lowerHtml.match(regex);
-      return sum + (matches ? matches.length : 0);
-    }, 0)
-  }));
-  
-  // Sort by count and return the top match if any
-  counts.sort((a, b) => b.count - a.count);
-  return counts[0]?.count > 0 ? counts[0].industry : null;
-}
-
-function inferDescription(html: string): string | null {
-  // Extract the first paragraph that's likely to be a description
-  const paragraphMatch = html.match(/<p[^>]*>(.*?)<\/p>/i);
-  if (paragraphMatch) {
-    const text = paragraphMatch[1].replace(/<[^>]+>/g, '').trim();
-    if (text.length > 20) return text;
-  }
-  
-  return null;
-}
-
-function extractLocation(html: string): string | null {
-  // Try to find common location patterns
-  const addressRegex = /(?:address|location)[\s\n]*:[\s\n]*([^<]+)/i;
-  const addressMatch = html.match(addressRegex);
-  
-  if (addressMatch) {
-    return addressMatch[1].trim();
-  }
-  
-  return null;
-}
-
-function inferProductsOrServices(html: string): string | null {
-  const lowerHtml = html.toLowerCase();
-  
-  // Check for service sections
-  const serviceKeywords = ["service", "product", "solution", "offering"];
-  
-  for (const keyword of serviceKeywords) {
-    const regex = new RegExp(`<h[2-4][^>]*>.*?${keyword}.*?</h[2-4]>`, 'i');
-    const match = html.match(regex);
-    
-    if (match) {
-      // Find the next paragraph or list
-      const index = html.indexOf(match[0]) + match[0].length;
-      const nextSection = html.substring(index, index + 500);
-      
-      // Extract text from lists
-      const listMatch = nextSection.match(/<li[^>]*>(.*?)<\/li>/i);
-      if (listMatch) {
-        return listMatch[1].replace(/<[^>]+>/g, '').trim();
-      }
-      
-      // Extract from paragraph
-      const paragraphMatch = nextSection.match(/<p[^>]*>(.*?)<\/p>/i);
-      if (paragraphMatch) {
-        return paragraphMatch[1].replace(/<[^>]+>/g, '').trim();
-      }
-    }
-  }
-  
-  return null;
-}
-
-function inferYearFounded(html: string): number | null {
-  // Look for common founding year patterns
-  const foundedRegex = /(?:founded|established|since|est\.?)(?:\s+in)?(?:\s+the)?(?:\s+year)?\s+(\d{4})/i;
-  const foundedMatch = html.match(foundedRegex);
-  
-  if (foundedMatch) {
-    const year = parseInt(foundedMatch[1]);
-    const currentYear = new Date().getFullYear();
-    
-    // Validate the year is reasonable
-    if (year >= 1800 && year <= currentYear) {
-      return year;
-    }
-  }
-  
-  return null;
-}

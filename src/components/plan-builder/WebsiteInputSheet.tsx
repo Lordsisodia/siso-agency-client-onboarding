@@ -5,11 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Globe, Facebook, Twitter, Linkedin, Instagram, Send, Loader2, Building, Users, BarChart } from 'lucide-react';
+import { Globe, Facebook, Twitter, Linkedin, Instagram, Send, Loader2, Building, Users, BarChart, Search, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
+import { WebsiteAnalyzer } from './WebsiteAnalyzer';
 
 interface WebsiteInputSheetProps {
   isOpen: boolean;
@@ -43,6 +44,9 @@ export function WebsiteInputSheet({ isOpen, onClose, onSubmit }: WebsiteInputShe
   const [targetAudience, setTargetAudience] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('basics');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysis, setAnalysis] = useState<any>(null);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const updateSocialLink = (platform: string, value: string) => {
@@ -50,6 +54,70 @@ export function WebsiteInputSheet({ isOpen, onClose, onSubmit }: WebsiteInputShe
       ...prev,
       [platform]: value,
     }));
+  };
+
+  const handleAnalyzeWebsite = async () => {
+    if (!websiteUrl && !companyName && !Object.values(socialLinks).some(link => link)) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide at least a website URL, company name, or social media link.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsAnalyzing(true);
+    setAnalysis(null);
+    setAnalysisError(null);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-website', {
+        body: { 
+          url: websiteUrl,
+          companyName,
+          socialLinks
+        }
+      });
+      
+      if (error) throw new Error(error.message);
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      if (!data.success) {
+        throw new Error("Analysis failed. Please try again.");
+      }
+      
+      setAnalysis(data.analysis);
+      
+      // Auto-populate fields based on analysis
+      if (data.analysis.company) {
+        if (!companyName && data.analysis.company.name) {
+          setCompanyName(data.analysis.company.name);
+        }
+        
+        if (!targetAudience && data.analysis.business.target_audience) {
+          setTargetAudience(data.analysis.business.target_audience);
+        }
+      }
+      
+      toast({
+        title: "Analysis Complete",
+        description: "We've analyzed your company information and have suggestions for your project.",
+      });
+      
+    } catch (error) {
+      console.error("Error analyzing website:", error);
+      setAnalysisError(error.message || "An unknown error occurred during analysis");
+      toast({
+        title: "Analysis Failed",
+        description: error.message || "There was a problem analyzing your website. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -112,7 +180,7 @@ export function WebsiteInputSheet({ isOpen, onClose, onSubmit }: WebsiteInputShe
             
             <form onSubmit={handleSubmit} className="px-4 py-3">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-3">
-                <TabsList className="grid grid-cols-3 w-full bg-black/20 p-0.5">
+                <TabsList className="grid grid-cols-4 w-full bg-black/20 p-0.5">
                   <TabsTrigger 
                     value="basics" 
                     className="text-xs py-1.5 data-[state=active]:bg-siso-orange/10"
@@ -126,6 +194,14 @@ export function WebsiteInputSheet({ isOpen, onClose, onSubmit }: WebsiteInputShe
                   >
                     <Globe className="w-3 h-3 mr-1" />
                     Social
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="analysis" 
+                    className="text-xs py-1.5 data-[state=active]:bg-siso-orange/10"
+                    disabled={isAnalyzing}
+                  >
+                    <Search className="w-3 h-3 mr-1" />
+                    Analysis
                   </TabsTrigger>
                   <TabsTrigger 
                     value="details" 
@@ -166,6 +242,16 @@ export function WebsiteInputSheet({ isOpen, onClose, onSubmit }: WebsiteInputShe
                         type="url"
                       />
                     </div>
+                  </div>
+                  
+                  <div className="pt-2">
+                    <Button
+                      type="button"
+                      onClick={() => setActiveTab('social')}
+                      className="w-full h-8 text-xs bg-gradient-to-r from-siso-red/80 to-siso-orange/80 text-white hover:opacity-90"
+                    >
+                      Next: Social Links
+                    </Button>
                   </div>
                 </TabsContent>
 
@@ -212,6 +298,90 @@ export function WebsiteInputSheet({ isOpen, onClose, onSubmit }: WebsiteInputShe
                       />
                     </div>
                   </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 pt-2">
+                    <Button
+                      type="button"
+                      onClick={() => setActiveTab('basics')}
+                      variant="outline"
+                      className="h-8 text-xs"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => setActiveTab('analysis')}
+                      className="h-8 text-xs bg-gradient-to-r from-siso-red/80 to-siso-orange/80 text-white hover:opacity-90"
+                    >
+                      Next: Analysis
+                    </Button>
+                  </div>
+                </TabsContent>
+
+                {/* ANALYSIS TAB */}
+                <TabsContent value="analysis" className="space-y-3 mt-2">
+                  <div className="space-y-4">
+                    {!analysis && !isAnalyzing && !analysisError && (
+                      <div className="text-center p-4 border border-dashed border-siso-border/50 rounded-lg">
+                        <Search className="h-8 w-8 mx-auto mb-2 text-siso-orange/60" />
+                        <h4 className="text-sm font-medium">Analyze Your Business</h4>
+                        <p className="text-xs text-siso-text-muted mb-4">
+                          Our AI can analyze your business info to provide personalized recommendations
+                        </p>
+                        <Button
+                          type="button"
+                          onClick={handleAnalyzeWebsite}
+                          className="bg-gradient-to-r from-siso-red to-siso-orange text-white hover:opacity-90 transition-opacity h-8 text-xs"
+                        >
+                          {isAnalyzing ? (
+                            <>
+                              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                              Analyzing...
+                            </>
+                          ) : (
+                            <>
+                              <Search className="mr-1.5 h-3.5 w-3.5" />
+                              Start Analysis
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    )}
+                    
+                    <AnimatePresence>
+                      {(isAnalyzing || analysis || analysisError) && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                        >
+                          <WebsiteAnalyzer 
+                            analysis={analysis} 
+                            isLoading={isAnalyzing}
+                            error={analysisError}
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 pt-2">
+                    <Button
+                      type="button"
+                      onClick={() => setActiveTab('social')}
+                      variant="outline"
+                      className="h-8 text-xs"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => setActiveTab('details')}
+                      className="h-8 text-xs bg-gradient-to-r from-siso-red/80 to-siso-orange/80 text-white hover:opacity-90"
+                    >
+                      Next: Details
+                    </Button>
+                  </div>
                 </TabsContent>
 
                 {/* DETAILS TAB */}
@@ -242,27 +412,46 @@ export function WebsiteInputSheet({ isOpen, onClose, onSubmit }: WebsiteInputShe
                       className="min-h-[60px] text-sm bg-card/50 focus:ring-1 focus:ring-siso-orange/50 transition-all border-siso-border/50 text-siso-text resize-none"
                     />
                   </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 pt-2">
+                    <Button
+                      type="button"
+                      onClick={() => setActiveTab('analysis')}
+                      variant="outline"
+                      className="h-8 text-xs"
+                    >
+                      Back
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      disabled={isSubmitting}
+                      className="h-8 text-xs bg-gradient-to-r from-siso-red to-siso-orange text-white hover:opacity-90 transition-opacity shadow-md"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="mr-1.5 h-3.5 w-3.5" />
+                          Submit
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </TabsContent>
               </Tabs>
               
-              <div className="pt-3 mt-3 border-t border-siso-border/30 flex justify-end sticky bottom-0 bg-card/95 pb-3">
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="h-8 text-sm bg-gradient-to-r from-siso-red to-siso-orange text-white hover:opacity-90 transition-opacity shadow-md"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                      Analyzing...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="mr-1.5 h-3.5 w-3.5" />
-                      Submit
-                    </>
+              <div className="pt-3 mt-3 border-t border-siso-border/30 flex justify-between items-center sticky bottom-0 bg-card/95 pb-3">
+                <div className="text-xs text-siso-text-muted">
+                  {activeTab === 'analysis' && !isAnalyzing && !analysis && !analysisError && (
+                    <div className="flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3 text-siso-orange" />
+                      <span>Analysis helps us better understand your needs</span>
+                    </div>
                   )}
-                </Button>
+                </div>
               </div>
             </form>
           </motion.div>
