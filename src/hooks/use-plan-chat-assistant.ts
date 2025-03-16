@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
@@ -77,7 +76,7 @@ export function usePlanChatAssistant(projectId?: string, options: UsePlanChatAss
             id: item.id,
             role: item.user_message ? 'user' : 'assistant',
             content: item.user_message || item.ai_response,
-            metadata: item.metadata || {}
+            metadata: item.metadata ? item.metadata as { [key: string]: any; web_search?: boolean; reasoning?: boolean } : {}
           }));
           
           setMessages(formattedMessages);

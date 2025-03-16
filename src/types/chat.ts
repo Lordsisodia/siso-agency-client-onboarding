@@ -63,3 +63,8 @@ export interface CompanyAnalysis {
   confidence_score: number;
   data_sources: string[];
 }
+
+// Add a generic structured data interface to handle JSON schema outputs
+export interface StructuredData {
+  [key: string]: any;
+}

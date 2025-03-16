@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlanIcon, FileText, Clock, Zap, ChevronRight, History } from 'lucide-react';
+import { FileText, Clock, Zap, ChevronRight, History } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';

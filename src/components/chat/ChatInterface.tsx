@@ -34,6 +34,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [useWebSearch, setUseWebSearch] = useState(false);
   const [useReasoning, setUseReasoning] = useState(false);
 
+  // Create basic toggle functions for regular chat (these will be overridden by plan assistant if used)
+  const defaultToggleWebSearch = useCallback(() => {
+    setUseWebSearch(prev => !prev);
+  }, []);
+
+  const defaultToggleReasoning = useCallback(() => {
+    setUseReasoning(prev => !prev);
+  }, []);
+
   // Use the chat assistant hook based on usePlanAssistant boolean
   const { 
     messages: rawMessages, 
@@ -41,11 +50,19 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     error, 
     sendMessage: hookSendMessage, 
     clearMessages,
-    toggleWebSearch,
-    toggleReasoning 
+    toggleWebSearch = defaultToggleWebSearch,
+    toggleReasoning = defaultToggleReasoning 
   } = usePlanAssistant 
     ? usePlanChatAssistant(projectId, { useWebSearch, useReasoning }) 
-    : useChatAssistant();
+    : { 
+        messages: useChatAssistant().messages, 
+        isLoading: useChatAssistant().isLoading, 
+        error: useChatAssistant().error, 
+        sendMessage: useChatAssistant().sendMessage, 
+        clearMessages: useChatAssistant().clearMessages,
+        toggleWebSearch: defaultToggleWebSearch,
+        toggleReasoning: defaultToggleReasoning
+      };
   
   // Map messages to ensure they match our ChatMessage type
   const messages = (rawMessages || []).map(msg => ({
@@ -74,12 +91,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   // Toggle handlers
   const handleToggleWebSearch = useCallback(() => {
     setUseWebSearch(prev => !prev);
-    if (toggleWebSearch) toggleWebSearch();
+    toggleWebSearch();
   }, [toggleWebSearch]);
 
   const handleToggleReasoning = useCallback(() => {
     setUseReasoning(prev => !prev);
-    if (toggleReasoning) toggleReasoning();
+    toggleReasoning();
   }, [toggleReasoning]);
 
   // Convert onlineStatus string to boolean
