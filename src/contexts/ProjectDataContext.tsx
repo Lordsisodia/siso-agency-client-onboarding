@@ -161,29 +161,38 @@ export const ProjectDataProvider: React.FC<{ children: React.ReactNode }> = ({ c
         };
       }
       
-      // Extract budget information
-      const budgetMatch = response.match(/Budget:\s*(?:[\$€£])?\s*([0-9,]+)(?:\s*(?:USD|EUR|GBP))?/i);
-      if (budgetMatch && budgetMatch[1]) {
-        const budgetValue = parseInt(budgetMatch[1].replace(/,/g, ''), 10);
-        if (!isNaN(budgetValue)) {
-          newData.budget = {
-            ...newData.budget,
-            estimated_total: budgetValue,
-            currency: 'USD' // Default currency
-          };
-        }
-      }
+      // Enhanced budget extraction - try multiple patterns
+      // First attempt: Look for clear budget format
+      const budgetMatch = response.match(/Budget:\s*(?:[\$€£])?\s*([0-9,]+(?:\.[0-9]+)?)(?:\s*(?:USD|EUR|GBP|dollars?|euros?|pounds?))?/i);
       
-      // Try to extract currency if budget is found
-      if (newData.budget?.estimated_total) {
-        const currencyMatch = response.match(/Budget:.*?(USD|EUR|GBP|[$€£])/i);
-        if (currencyMatch && currencyMatch[1]) {
-          let currency = currencyMatch[1];
-          // Convert symbols to codes if needed
-          if (currency === '$') currency = 'USD';
-          if (currency === '€') currency = 'EUR';
-          if (currency === '£') currency = 'GBP';
-          newData.budget.currency = currency;
+      // Second attempt: Look for budget in a sentence
+      const budgetSentenceMatch = !budgetMatch && response.match(/(?:budget|cost|price)(?:\s+is|\s+of|\s+estimated at)?\s+(?:around|approximately|about)?\s*(?:[\$€£])?\s*([0-9,]+(?:\.[0-9]+)?)(?:\s*(?:USD|EUR|GBP|dollars?|euros?|pounds?))?/i);
+      
+      // Third attempt: Look for numbers with currency symbols
+      const currencyMatch = !budgetMatch && !budgetSentenceMatch && response.match(/[\$€£]\s*([0-9,]+(?:\.[0-9]+)?)/);
+      
+      const matchToUse = budgetMatch || budgetSentenceMatch || currencyMatch;
+      
+      if (matchToUse && matchToUse[1]) {
+        const budgetValue = parseFloat(matchToUse[1].replace(/,/g, ''));
+        if (!isNaN(budgetValue)) {
+          // Look for currency
+          let currency = 'USD'; // Default currency
+          
+          // Check for currency in the context
+          const fullMatch = matchToUse[0];
+          if (fullMatch.includes('$') || fullMatch.includes('USD') || fullMatch.includes('dollar')) {
+            currency = 'USD';
+          } else if (fullMatch.includes('€') || fullMatch.includes('EUR') || fullMatch.includes('euro')) {
+            currency = 'EUR';
+          } else if (fullMatch.includes('£') || fullMatch.includes('GBP') || fullMatch.includes('pound')) {
+            currency = 'GBP';
+          }
+          
+          newData.budget = {
+            estimated_total: budgetValue,
+            currency: currency
+          };
         }
       }
       
