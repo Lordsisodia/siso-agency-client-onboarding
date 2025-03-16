@@ -44,9 +44,9 @@ export function usePlanChatAssistant(projectId?: string) {
       }
       
       const conversationId = convData?.conversationId;
-      setConversationId(conversationId);
-      
       if (conversationId) {
+        setConversationId(conversationId);
+        
         // Fetch messages for this conversation
         const { data: historyData, error: historyError } = await supabase
           .from('plan_chat_history')
@@ -106,8 +106,8 @@ export function usePlanChatAssistant(projectId?: string) {
         loading: true 
       }]);
 
-      // Make the API call to the Edge Function
-      const { data, error } = await supabase.functions.invoke('chat-with-plan-assistant', {
+      // Make the API call to the Edge Function with proper message format
+      const { data, error: apiError } = await supabase.functions.invoke('chat-with-plan-assistant', {
         body: {
           messages: [...messages, userMessage].map(({ id, loading, ...rest }) => rest),
           projectId,
@@ -121,15 +121,18 @@ export function usePlanChatAssistant(projectId?: string) {
       // Remove the loading message
       setMessages(prev => prev.filter(msg => !msg.loading));
 
-      if (error) {
-        console.error('Error getting reply:', error);
-        setError(`Failed to get a response: ${error.message || 'Unknown error'}`);
+      if (apiError) {
+        console.error('Error getting reply:', apiError);
+        setError(`Failed to get a response: ${apiError.message || 'Unknown error'}`);
         toast({
           title: 'Error',
           description: 'Failed to get a response from the assistant.',
           variant: 'destructive',
         });
-      } else if (data) {
+        return;
+      } 
+      
+      if (data) {
         // If this is our first message, save the conversation ID from the response
         if (!conversationId && data.conversationId) {
           setConversationId(data.conversationId);
@@ -141,8 +144,16 @@ export function usePlanChatAssistant(projectId?: string) {
           content: data.response || 'Sorry, I couldn\'t generate a response.'
         };
         
-        setMessages(prev => [...prev, assistantMessage]);
+        setMessages(prev => [...prev.filter(msg => !msg.loading), assistantMessage]);
         return data;
+      } else {
+        // Handle case where there's no error but also no data
+        setError('No response received from the assistant');
+        toast({
+          title: 'Error',
+          description: 'No response received from the assistant.',
+          variant: 'destructive',
+        });
       }
     } catch (err: any) {
       console.error('Error in chat:', err);

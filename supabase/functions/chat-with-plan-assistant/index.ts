@@ -75,31 +75,44 @@ serve(async (req) => {
     console.log('Processing message:', userMessage.content.substring(0, 100) + '...');
     
     try {
-      console.log(`Calling OpenAI Responses API with user message`);
+      console.log(`Calling OpenAI API with model ${MODEL}`);
       
-      // If streaming is requested, handle streaming response
-      if (stream) {
-        // Direct OpenAI API call for streaming with Responses API
-        const response = await fetch('https://api.openai.com/v1/responses', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OPENAI_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: MODEL,
-            instructions: PROJECT_PLANNER_SYSTEM_PROMPT,
-            input: userMessage.content,
-            stream: true
-          })
+      // Create the messages array for OpenAI
+      const openaiMessages = messages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+
+      // Add system message if not present
+      if (!openaiMessages.some(msg => msg.role === 'system')) {
+        openaiMessages.unshift({
+          role: 'system',
+          content: PROJECT_PLANNER_SYSTEM_PROMPT
         });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
-        }
-        
-        // Handle streaming response with SSE format
+      }
+      
+      // Make API call to OpenAI
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          messages: openaiMessages,
+          stream: stream
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('OpenAI API error response:', errorData);
+        throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+      }
+      
+      // Handle streaming response
+      if (stream) {
         const reader = response.body?.getReader();
         if (!reader) {
           throw new Error('Stream reader is not available');
@@ -112,36 +125,28 @@ serve(async (req) => {
           const { done, value } = await reader.read();
           if (done) break;
           
-          // Process the SSE format (event: data: format)
           const chunk = decoder.decode(value, { stream: true });
           const lines = chunk.split('\n').filter(line => line.trim() !== '');
           
-          let currentData = '';
-          
           for (const line of lines) {
-            // SSE format: lines start with "event:" or "data:"
             if (line.startsWith('data:')) {
-              currentData = line.substring(5).trim();
+              const data = line.substring(5).trim();
               
               // Skip [DONE] marker
-              if (currentData === '[DONE]') continue;
+              if (data === '[DONE]') continue;
               
               try {
-                if (currentData) {
-                  const parsedData = JSON.parse(currentData);
+                if (data) {
+                  const parsedData = JSON.parse(data);
                   
-                  // Extract text content from the response structure
-                  if (parsedData.output && 
-                      parsedData.output[0]?.type === 'message' && 
-                      parsedData.output[0]?.content?.[0]?.type === 'output_text') {
-                    const textContent = parsedData.output[0].content[0].text;
-                    if (textContent) {
-                      completeResponse += textContent;
-                    }
+                  // Extract content from the streaming response
+                  if (parsedData.choices && parsedData.choices[0]?.delta?.content) {
+                    const content = parsedData.choices[0].delta.content;
+                    completeResponse += content;
                   }
                 }
               } catch (e) {
-                console.error('Error parsing data:', e, currentData);
+                console.error('Error parsing data:', e, data);
               }
             }
           }
@@ -211,36 +216,11 @@ serve(async (req) => {
         );
       } else {
         // Non-streaming request handling
-        const response = await fetch('https://api.openai.com/v1/responses', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OPENAI_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: MODEL,
-            instructions: PROJECT_PLANNER_SYSTEM_PROMPT,
-            input: userMessage.content
-          })
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
-        }
-        
         const result = await response.json();
         
-        // Extract the text content from the response
-        let assistantResponse = '';
-        if (result.output && 
-            result.output[0]?.type === 'message' && 
-            result.output[0]?.content?.[0]?.type === 'output_text') {
-          assistantResponse = result.output[0].content[0].text;
-        } else {
-          console.error('Unexpected response format:', result);
-          assistantResponse = "Sorry, I couldn't generate a proper response.";
-        }
+        // Extract the assistant's response
+        const assistantResponse = result.choices[0]?.message?.content || 
+          "Sorry, I couldn't generate a proper response.";
         
         // Save chat history if we have a project ID
         if (projectId) {
