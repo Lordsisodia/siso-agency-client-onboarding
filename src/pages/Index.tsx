@@ -11,7 +11,8 @@ export default function Index() {
 
   useEffect(() => {
     if (user && !loading) {
-      navigate('/plan-builder');
+      // If user is logged in, redirect to dashboard
+      navigate('/dashboard');
     }
   }, [user, loading, navigate]);
 
@@ -19,6 +20,7 @@ export default function Index() {
     return <LoadingFallback />;
   }
 
+  // If not logged in, show the landing page
   return (
     <div className="relative">
       <Suspense fallback={<LoadingFallback />}>

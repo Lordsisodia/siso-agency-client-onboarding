@@ -15,8 +15,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   useEffect(() => {
     // Only redirect if loading is complete and user is null
     if (!loading && !user) {
-      console.log('ProtectedRoute: Not authenticated, redirecting to /auth');
-      navigate('/auth', { replace: true });
+      console.log('ProtectedRoute: Not authenticated, redirecting to /');
+      navigate('/', { replace: true });
     }
   }, [loading, user, navigate]);
 
