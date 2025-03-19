@@ -14,6 +14,9 @@ const WhyChooseSection = lazy(() => import('./sections/WhyChooseSection').then(m
 const FeaturesSection = lazy(() => import('./sections/FeaturesSection').then(m => ({ 
   default: memo(m.FeaturesSection) 
 })));
+const TechStackSection = lazy(() => import('./sections/TechStackSection').then(m => ({ 
+  default: memo(m.TechStackSection) 
+})));
 const GettingStartedSection = lazy(() => import('./sections/GettingStartedSection').then(m => ({ 
   default: memo(m.GettingStartedSection) 
 })));
@@ -37,6 +40,7 @@ const LandingPage = () => {
   // Setup viewport loading for each section
   const whyChoose = useViewportLoading({ threshold: 0.1 });
   const features = useViewportLoading({ threshold: 0.1 });
+  const techStack = useViewportLoading({ threshold: 0.1 });
   const gettingStarted = useViewportLoading({ threshold: 0.1 });
   const pricing = useViewportLoading({ threshold: 0.1 });
   const testimonials = useViewportLoading({ threshold: 0.1 });
@@ -97,6 +101,12 @@ const LandingPage = () => {
           <section id="features" ref={features.elementRef}>
             <Suspense fallback={<LoadingFallback />}>
               {(features.isVisible || features.isLoaded) && <FeaturesSection />}
+            </Suspense>
+          </section>
+          
+          <section id="tech-stack" ref={techStack.elementRef}>
+            <Suspense fallback={<LoadingFallback />}>
+              {(techStack.isVisible || techStack.isLoaded) && <TechStackSection />}
             </Suspense>
           </section>
 
