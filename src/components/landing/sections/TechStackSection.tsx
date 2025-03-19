@@ -8,7 +8,7 @@ import { VercelIcon } from '@/components/ui/icons/VercelIcon';
 import { TailwindCSSIcon } from '@/components/ui/icons/TailwindCSSIcon';
 import { TypeScriptIcon } from '@/components/ui/icons/TypeScriptIcon';
 import { NextjsIcon } from '@/components/ui/icons/NextjsIcon';
-import { OpenAIIcon } from '@/components/ui/icons/OpenAIIcon';
+import { OpenAIIconBlack } from '@/components/ui/icons/OpenAIIcon';
 import { ClaudeAIIcon } from '@/components/ui/icons/ClaudeAIIcon';
 import { StripeIcon } from '@/components/ui/icons/StripeIcon';
 import { UpstashIcon } from '@/components/ui/icons/UpstashIcon';
@@ -20,7 +20,7 @@ export const TechStackSection = () => {
     { id: 3, name: "TailwindCSS", img: TailwindCSSIcon },
     { id: 4, name: "Supabase", img: SupabaseIcon },
     { id: 5, name: "Vercel", img: VercelIcon },
-    { id: 6, name: "OpenAI", img: OpenAIIcon },
+    { id: 6, name: "OpenAI", img: OpenAIIconBlack },
     { id: 7, name: "Claude AI", img: ClaudeAIIcon },
     { id: 8, name: "Stripe", img: StripeIcon },
     { id: 9, name: "Upstash", img: UpstashIcon },
