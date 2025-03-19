@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { PhoneCall, MoveRight } from "lucide-react";
@@ -11,7 +10,7 @@ function Hero() {
   const navigate = useNavigate();
   
   const titles = useMemo(
-    () => ["AI-Powered Development", "Smart Project Planning", "Rapid Prototyping"],
+    () => ["Client-Winning AI Apps", "48-Hour MVP Magic", "Streamlined Agency Apps"],
     []
   );
 
@@ -44,7 +43,6 @@ function Hero() {
     }
   };
 
-  // Animation variants for staggered animations
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -93,7 +91,7 @@ function Hero() {
               className="text-5xl md:text-7xl max-w-4xl tracking-tighter text-center font-regular"
               variants={itemVariants}
             >
-              <span className="text-siso-text-bold whitespace-normal md:whitespace-nowrap">Build Your App With</span>
+              <span className="text-siso-text-bold whitespace-normal md:whitespace-nowrap">Grow your agency with</span>
               <div className="hero-title-container">
                 {titles.map((title, index) => (
                   <motion.span
