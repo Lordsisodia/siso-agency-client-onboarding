@@ -101,19 +101,26 @@ function Hero() {
                     className={`hero-title font-semibold bg-gradient-to-r from-siso-red to-siso-orange bg-clip-text text-transparent ${
                       titleNumber === index ? "opacity-100" : "opacity-0"
                     }`}
-                    initial={{ opacity: 0, y: "-30px" }}
+                    initial={{ opacity: 0, y: 30 }}
                     animate={
                       titleNumber === index
                         ? {
-                            y: 0,
                             opacity: 1,
+                            y: 0,
+                            position: "relative"
                           }
                         : {
-                            y: titleNumber > index ? -100 : 100,
                             opacity: 0,
+                            y: titleNumber > index ? -30 : 30,
+                            position: "absolute"
                           }
                     }
-                    transition={{ type: "spring", stiffness: 70, damping: 15 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 100, 
+                      damping: 15,
+                      duration: 0.6
+                    }}
                   >
                     {title}
                   </motion.span>

@@ -51,18 +51,19 @@ export function OnboardingStyles() {
       }
       
       .hero-title-container {
-        height: auto;
-        min-height: 150px;
+        height: 70px;
         position: relative;
+        width: 100%;
         margin: 1rem 0;
-        overflow: visible;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
       }
       
       .hero-title {
-        position: absolute;
         width: 100%;
-        left: 0;
-        animation: titleTransition 0.5s ease-out forwards;
+        text-align: center;
       }
       
       .hero-content > * {
@@ -85,7 +86,7 @@ export function OnboardingStyles() {
       
       @media (max-width: 768px) {
         .hero-title-container {
-          min-height: 100px;
+          height: 60px;
         }
       }
     `}} />
