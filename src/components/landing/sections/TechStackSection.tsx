@@ -48,7 +48,7 @@ export const TechStackSection = () => {
             <OrbitingCircles
               className="size-[40px] md:size-[50px] border-none bg-transparent"
               duration={25}
-              delay={5}
+              delay={0}
               radius={100}
             >
               <div className="w-10 h-10 md:w-12 md:h-12">
@@ -58,7 +58,7 @@ export const TechStackSection = () => {
             <OrbitingCircles
               className="size-[40px] md:size-[50px] border-none bg-transparent"
               duration={25}
-              delay={15}
+              delay={12}
               radius={100}
             >
               <div className="w-10 h-10 md:w-12 md:h-12">
@@ -70,7 +70,7 @@ export const TechStackSection = () => {
             <OrbitingCircles
               className="size-[40px] md:size-[50px] border-none bg-transparent"
               duration={30}
-              delay={10}
+              delay={6}
               radius={150}
               reverse
             >
@@ -81,7 +81,7 @@ export const TechStackSection = () => {
             <OrbitingCircles
               className="size-[40px] md:size-[50px] border-none bg-transparent"
               duration={30}
-              delay={25}
+              delay={18}
               radius={150}
               reverse
             >
@@ -95,7 +95,7 @@ export const TechStackSection = () => {
               className="size-[40px] md:size-[50px] border-none bg-transparent"
               radius={200}
               duration={35}
-              delay={0}
+              delay={3}
             >
               <div className="w-10 h-10 md:w-12 md:h-12">
                 <VercelIcon />
@@ -105,7 +105,7 @@ export const TechStackSection = () => {
               className="size-[40px] md:size-[50px] border-none bg-transparent"
               radius={200}
               duration={35}
-              delay={20}
+              delay={15}
             >
               <div className="w-10 h-10 md:w-12 md:h-12">
                 <NextjsIcon />
