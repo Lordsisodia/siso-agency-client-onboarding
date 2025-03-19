@@ -40,7 +40,7 @@ export const TechStackSection = () => {
       <Card className="border border-siso-text/10 bg-black/20 backdrop-blur-sm overflow-hidden">
         <CardContent className="pt-8 px-4 md:px-8 pb-8">
           <div className="relative flex h-[400px] md:h-[500px] w-full flex-col items-center justify-center overflow-hidden rounded-lg">
-            <span className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-white to-gray-500 bg-clip-text text-center text-4xl md:text-6xl font-semibold leading-none text-transparent">
+            <span className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-white to-gray-500 bg-clip-text text-center text-4xl md:text-6xl font-semibold leading-none text-transparent z-20">
               Tech Stack
             </span>
 
