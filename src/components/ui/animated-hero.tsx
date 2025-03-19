@@ -1,6 +1,7 @@
+
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { PhoneCall, MoveRight } from "lucide-react";
+import { Rocket, MoveRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { OnboardingStyles } from "@/components/plan-builder/components/OnboardingStyles";
@@ -130,9 +131,7 @@ function Hero() {
               className="text-lg md:text-xl leading-relaxed tracking-tight text-siso-text max-w-2xl text-center mx-auto"
               variants={itemVariants}
             >
-              Transform your app ideas into reality with our AI-powered development platform. 
-              Get detailed project plans, resource estimates, and development roadmaps tailored 
-              to your specific requirements - all powered by cutting-edge artificial intelligence.
+              From vision to MVP in 48-72 hours—built for 49+ agencies with 1K+ developers in our network.
             </motion.p>
           </div>
           <motion.div 
@@ -141,18 +140,10 @@ function Hero() {
           >
             <Button 
               size="lg" 
-              className="gap-4" 
-              variant="outline"
-              onClick={handleTryAI}
-            >
-              Try AI Planner <PhoneCall className="w-4 h-4" />
-            </Button>
-            <Button 
-              size="lg" 
               className="gap-4 bg-gradient-to-r from-siso-red to-siso-orange hover:opacity-90"
               onClick={handleGetStarted}
             >
-              Get Started <MoveRight className="w-4 h-4" />
+              Let's Build Your App Now <MoveRight className="w-4 h-4" />
             </Button>
           </motion.div>
         </motion.div>
