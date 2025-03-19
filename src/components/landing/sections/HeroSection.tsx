@@ -10,7 +10,7 @@ export const HeroSection = memo(() => {
 
   return (
     <section id="hero" className="relative min-h-screen overflow-hidden">
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 opacity-0 animate-fade-in" style={{ animationDelay: '0.3s', animationDuration: '1.5s', animationFillMode: 'forwards' }}>
         <Waves 
           lineColor="rgba(255, 87, 34, 0.15)"
           backgroundColor="transparent"

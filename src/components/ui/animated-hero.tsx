@@ -44,13 +44,55 @@ function Hero() {
     }
   };
 
+  // Animation variants for staggered animations
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.3,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" }
+    }
+  };
+
+  const buttonVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        duration: 0.5, 
+        ease: "easeOut",
+        delay: 0.8 
+      }
+    }
+  };
+
   return (
     <div className="w-full relative z-10">
       <OnboardingStyles />
       <div className="container mx-auto px-4">
-        <div className="flex gap-8 py-16 lg:py-28 items-center justify-center flex-col">
+        <motion.div 
+          className="flex gap-8 py-16 lg:py-28 items-center justify-center flex-col"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
           <div className="flex gap-6 flex-col items-center hero-content">
-            <h1 className="text-5xl md:text-7xl max-w-4xl tracking-tighter text-center font-regular">
+            <motion.h1 
+              className="text-5xl md:text-7xl max-w-4xl tracking-tighter text-center font-regular"
+              variants={itemVariants}
+            >
               <span className="text-siso-text-bold whitespace-normal md:whitespace-nowrap">Build Your App With</span>
               <div className="hero-title-container">
                 {titles.map((title, index) => (
@@ -77,15 +119,21 @@ function Hero() {
                   </motion.span>
                 ))}
               </div>
-            </h1>
+            </motion.h1>
 
-            <p className="text-lg md:text-xl leading-relaxed tracking-tight text-siso-text max-w-2xl text-center mx-auto">
+            <motion.p 
+              className="text-lg md:text-xl leading-relaxed tracking-tight text-siso-text max-w-2xl text-center mx-auto"
+              variants={itemVariants}
+            >
               Transform your app ideas into reality with our AI-powered development platform. 
               Get detailed project plans, resource estimates, and development roadmaps tailored 
               to your specific requirements - all powered by cutting-edge artificial intelligence.
-            </p>
+            </motion.p>
           </div>
-          <div className="flex flex-row gap-4 hero-action-buttons">
+          <motion.div 
+            className="flex flex-row gap-4 hero-action-buttons"
+            variants={buttonVariants}
+          >
             <Button 
               size="lg" 
               className="gap-4" 
@@ -101,8 +149,8 @@ function Hero() {
             >
               Get Started <MoveRight className="w-4 h-4" />
             </Button>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );

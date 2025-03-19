@@ -65,12 +65,22 @@ export function OnboardingStyles() {
         animation: titleTransition 0.5s ease-out forwards;
       }
       
-      .hero-content {
+      .hero-content > * {
+        opacity: 0;
         animation: fadeSlideUp 0.6s ease-out forwards;
       }
       
+      .hero-content > *:nth-child(1) {
+        animation-delay: 0.2s;
+      }
+      
+      .hero-content > *:nth-child(2) {
+        animation-delay: 0.6s;
+      }
+      
       .hero-action-buttons {
-        animation: fadeSlideUp 0.8s ease-out forwards;
+        opacity: 0;
+        animation: fadeSlideUp 0.8s ease-out 1s forwards;
       }
       
       @media (max-width: 768px) {
