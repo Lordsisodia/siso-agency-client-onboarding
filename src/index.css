@@ -1,150 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap') layer(fonts);
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 88%;
-    --card: 0 0% 3%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 16 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 33 100% 50%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
-    --accent: 16 100% 50%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 85% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
-    --ring: 16 100% 50%;
-    --radius: 0.5rem;
-  }
+@import './styles/animations.css';
 
-  * {
-    @apply border-border;
-  }
-
-  html {
-    @apply scroll-smooth;
-  }
-
-  body {
-    @apply font-['Inter'] antialiased bg-gradient-to-b from-gray-900 to-black text-gray-100;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  #root {
-    @apply min-h-screen;
-  }
-
-  img {
-    content-visibility: auto;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    * {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
-  }
-
-  @keyframes gradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-
-  .animate-gradient {
-    animation: gradient 6s linear infinite;
-  }
-
-  @keyframes glow {
-    0%, 100% { 
-      filter: drop-shadow(0 0 0.5rem rgba(255, 87, 34, 0.2)); 
-    }
-    50% { 
-      filter: drop-shadow(0 0 1rem rgba(255, 87, 34, 0.4)); 
-    }
-  }
-
-  .animate-glow {
-    animation: glow 2s ease-in-out infinite;
-  }
-
-  @keyframes thinking-pulse {
-    0%, 100% { transform: scale(1); opacity: 0.5; }
-    50% { transform: scale(1.2); opacity: 1; }
-  }
-
-  .thinking-pulse {
-    animation: thinking-pulse 1.5s infinite ease-in-out;
-  }
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 0, 0, 0;
+  --background-end-rgb: 0, 0, 0;
 }
 
-.nav-link {
-  @apply relative px-4 py-2.5 text-siso-text hover:text-siso-text-bold transition-colors duration-300;
-}
-
-.nav-link::after {
-  @apply content-[''] absolute left-0 bottom-0 w-0 h-0.5 bg-gradient-to-r from-siso-red to-siso-orange transition-all duration-300 ease-out;
-}
-
-.nav-link:hover::after {
-  @apply w-full;
-}
-
-.glow-card {
-  @apply relative overflow-hidden rounded-lg bg-gradient-to-br from-siso-red/5 to-siso-orange/5 
-    hover:from-siso-red/10 hover:to-siso-orange/10 border border-siso-border hover:border-siso-border-hover
-    p-6 transition-all duration-300 backdrop-blur-sm;
-}
-
-.title-glow {
-  @apply bg-gradient-to-r from-siso-red to-siso-orange bg-clip-text text-transparent;
-}
-
-.gradient-border {
-  @apply relative border-2 border-transparent bg-clip-padding rounded-lg;
-}
-
-.gradient-border::before {
-  @apply content-[''] absolute inset-[-2px] rounded-[inherit] bg-gradient-to-r from-siso-red to-siso-orange -z-10;
-}
-
-.card {
-  @apply rounded-lg border border-siso-border bg-siso-bg-alt p-6 shadow-sm transition-all duration-300
-    hover:border-siso-border-hover hover:shadow-md;
-}
-
-.button-base {
-  @apply rounded-lg px-4 py-2 font-medium transition-all duration-300 disabled:opacity-50 
-    disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-siso-bg;
-}
-
-.button-primary {
-  @apply button-base bg-gradient-to-r from-siso-red to-siso-orange text-white 
-    hover:from-siso-red/90 hover:to-siso-orange/90 focus:ring-siso-red;
-}
-
-.button-secondary {
-  @apply button-base border border-siso-border bg-transparent text-siso-text 
-    hover:bg-siso-bg-alt hover:border-siso-border-hover focus:ring-siso-text;
-}
-
-.input-base {
-  @apply rounded-lg border border-siso-border bg-siso-bg-alt px-4 py-2 text-siso-text 
-    placeholder:text-siso-text-muted focus:border-siso-red focus:outline-none focus:ring-1 
-    focus:ring-siso-red transition-all duration-300;
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
 }

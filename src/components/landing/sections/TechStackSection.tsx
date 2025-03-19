@@ -1,9 +1,15 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { GradientHeading } from '@/components/ui/gradient-heading';
-import { LogoCarousel } from '@/components/ui/logo-carousel';
 import { allLogos } from '../constants';
 import { motion } from 'framer-motion';
+import { OrbitingCircles } from '@/components/ui/orbiting-circles';
+import { Icons } from '@/components/ui/icons';
+import { SupabaseIcon } from '@/components/ui/icons/SupabaseIcon';
+import { VercelIcon } from '@/components/ui/icons/VercelIcon';
+import { NextjsIcon } from '@/components/ui/icons/NextjsIcon';
+import { OpenAIIconBlack } from '@/components/ui/icons/OpenAIIcon';
+import { ClaudeAIIcon } from '@/components/ui/icons/ClaudeAIIcon';
 
 export const TechStackSection = () => {
   return (
@@ -32,8 +38,80 @@ export const TechStackSection = () => {
       </motion.div>
 
       <Card className="border border-siso-text/10 bg-black/20 backdrop-blur-sm overflow-hidden">
-        <CardContent className="pt-8 px-4 md:px-8">
-          <LogoCarousel logos={allLogos} columnCount={3} speed={15} />
+        <CardContent className="pt-8 px-4 md:px-8 pb-8">
+          <div className="relative flex h-[400px] md:h-[500px] w-full flex-col items-center justify-center overflow-hidden rounded-lg">
+            <span className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-white to-gray-500 bg-clip-text text-center text-4xl md:text-6xl font-semibold leading-none text-transparent">
+              Tech Stack
+            </span>
+
+            {/* Inner Circles */}
+            <OrbitingCircles
+              className="size-[40px] md:size-[50px] border-none bg-transparent"
+              duration={25}
+              delay={5}
+              radius={100}
+            >
+              <div className="w-10 h-10 md:w-12 md:h-12">
+                <OpenAIIconBlack />
+              </div>
+            </OrbitingCircles>
+            <OrbitingCircles
+              className="size-[40px] md:size-[50px] border-none bg-transparent"
+              duration={25}
+              delay={15}
+              radius={100}
+            >
+              <div className="w-10 h-10 md:w-12 md:h-12">
+                <ClaudeAIIcon />
+              </div>
+            </OrbitingCircles>
+
+            {/* Middle Circles */}
+            <OrbitingCircles
+              className="size-[40px] md:size-[50px] border-none bg-transparent"
+              duration={30}
+              delay={10}
+              radius={150}
+              reverse
+            >
+              <div className="w-10 h-10 md:w-12 md:h-12">
+                <SupabaseIcon />
+              </div>
+            </OrbitingCircles>
+            <OrbitingCircles
+              className="size-[40px] md:size-[50px] border-none bg-transparent"
+              duration={30}
+              delay={25}
+              radius={150}
+              reverse
+            >
+              <div className="w-10 h-10 md:w-12 md:h-12">
+                <Icons.logo className="text-white" />
+              </div>
+            </OrbitingCircles>
+
+            {/* Outer Circles */}
+            <OrbitingCircles
+              className="size-[40px] md:size-[50px] border-none bg-transparent"
+              radius={200}
+              duration={35}
+              delay={0}
+            >
+              <div className="w-10 h-10 md:w-12 md:h-12">
+                <VercelIcon />
+              </div>
+            </OrbitingCircles>
+            <OrbitingCircles
+              className="size-[40px] md:size-[50px] border-none bg-transparent"
+              radius={200}
+              duration={35}
+              delay={20}
+            >
+              <div className="w-10 h-10 md:w-12 md:h-12">
+                <NextjsIcon />
+              </div>
+            </OrbitingCircles>
+          </div>
         </CardContent>
       </Card>
     </div>
