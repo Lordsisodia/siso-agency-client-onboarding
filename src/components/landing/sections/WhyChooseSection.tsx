@@ -1,37 +1,37 @@
 
 import { GradientHeading } from '@/components/ui/gradient-heading';
-import { Bot, Users, Zap, Globe } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Rocket, ShieldCheck, Bot, Users } from 'lucide-react';
 
 export const WhyChooseSection = () => {
   const features = [
     {
+      icon: Rocket,
+      title: "Rapid MVP Delivery",
+      description: "From idea to app in just 48-72 hours—our streamlined process gets your MVP live faster than your next pitch meeting.",
+      stats: "48-72 Hour Turnaround",
+      highlight: "Speed That Wins Deals"
+    },
+    {
+      icon: ShieldCheck,
+      title: "Zero-Risk Commitment",
+      description: "No upfront costs—see your app, tweak it, love it, then pay. We deliver to your standard, risk-free.",
+      stats: "Pay When You're Happy",
+      highlight: "Your Vision, Your Terms"
+    },
+    {
       icon: Bot,
       title: "AI Development Assistant",
-      description: "Work with our AI assistant that understands your project needs, suggests optimal architectures, and provides real-time development guidance.",
-      stats: "95% accuracy in recommendations",
+      description: "Work with our AI assistant that understands your project needs, suggests optimal architectures, and provides real-time guidance.",
+      stats: "95% Accuracy in Recommendations",
       highlight: "Powered by GPT-4"
     },
     {
       icon: Users,
-      title: "Developer Community",
-      description: "Join a community of innovative developers. Access proven patterns, share insights, and get help from experienced app builders.",
-      stats: "1,000+ active developers",
-      highlight: "Real-world solutions"
-    },
-    {
-      icon: Zap,
-      title: "Smart Project Planning",
-      description: "Get instant project estimates, automated task breakdowns, and intelligent resource allocation powered by AI analysis.",
-      stats: "24/7 assistance",
-      highlight: "Always optimizing"
-    },
-    {
-      icon: Globe,
-      title: "Complete Dev Toolkit",
-      description: "Access everything you need: from project templates and component libraries to deployment pipelines and testing tools.",
-      stats: "500+ dev resources",
-      highlight: "Full-stack solution"
+      title: "Agency-Proven Expertise",
+      description: "We've built apps for 40+ agencies like yours, turning feedback and know-how into custom solutions that work.",
+      stats: "Trusted by 40+ Agencies",
+      highlight: "Experience That Delivers"
     }
   ];
 
@@ -92,7 +92,7 @@ export const WhyChooseSection = () => {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-gradient-to-r from-siso-red/5 to-siso-orange/5 rounded-full filter blur-[50px]" />
           
           <GradientHeading variant="secondary" className="text-4xl md:text-5xl font-bold mb-6 relative">
-            Why Build With Our AI Platform
+            Why Build With SISO
           </GradientHeading>
 
           {/* Enhanced separator with animation */}
