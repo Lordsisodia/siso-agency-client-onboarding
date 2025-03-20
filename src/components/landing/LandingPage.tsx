@@ -6,6 +6,7 @@ import { useViewportLoading } from '@/hooks/useViewportLoading';
 import { usePerformanceMetrics } from '@/hooks/usePerformanceMetrics';
 import { ErrorBoundary } from 'react-error-boundary';
 import { HeroSection } from './sections/HeroSection';
+import { Waves } from '@/components/ui/waves-background';
 
 // [Analysis] Only lazy load non-critical sections
 const WhyChooseSection = lazy(() => import('./sections/WhyChooseSection').then(m => ({ 
@@ -53,6 +54,24 @@ const LandingPage = () => {
       {/* DNS prefetch and preconnect optimizations */}
       <link rel="dns-prefetch" href="https://fzuwsjxjymwcjsbpwfsl.supabase.co" />
       <link rel="preconnect" href="https://fzuwsjxjymwcjsbpwfsl.supabase.co" crossOrigin="anonymous" />
+      
+      {/* Global wave background that covers the entire page */}
+      <div className="fixed inset-0 z-0 opacity-0 animate-fade-in" style={{ animationDelay: '0.3s', animationDuration: '1.5s', animationFillMode: 'forwards' }}>
+        <Waves 
+          lineColor="rgba(255, 87, 34, 0.2)"
+          backgroundColor="transparent"
+          waveSpeedX={0.03}
+          waveSpeedY={0.02}
+          waveAmpX={60}
+          waveAmpY={40}
+          friction={0.92}
+          tension={0.01}
+          maxCursorMove={150}
+          xGap={30}
+          yGap={60}
+          className="fixed inset-0 pointer-events-none"
+        />
+      </div>
       
       <ErrorBoundary 
         fallback={<LoadingFallback error={new Error()} />}
