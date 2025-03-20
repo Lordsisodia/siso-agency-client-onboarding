@@ -1,10 +1,12 @@
 
-import { TestimonialSection } from '../TestimonialSection';
+import TestimonialsSection from '../TestimonialsSection';
 
 export const TestimonialsSection = () => {
   return (
     <section id="testimonials" className="py-16">
-      <TestimonialSection />
+      <TestimonialsSection />
     </section>
   );
 };
+
+export default TestimonialsSection;
