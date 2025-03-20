@@ -76,9 +76,7 @@ export const TechStackSection = () => {
       {/* Added AnimatedTestimonials component */}
       <Card className="border border-siso-text/10 bg-black/20 backdrop-blur-sm overflow-hidden">
         <CardContent className="p-4 md:p-8">
-          <h3 className="text-2xl md:text-3xl font-bold text-center mb-6 text-siso-text">
-            What Our Users Say
-          </h3>
+          
           <AnimatedTestimonials testimonials={testimonials} autoplay={true} className="py-8" />
         </CardContent>
       </Card>
