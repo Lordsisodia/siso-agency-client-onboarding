@@ -1,4 +1,3 @@
-
 import { TestimonialCard } from './TestimonialCard';
 
 // [Analysis] Sample testimonial data - alternating video and audio reviews for visual balance
