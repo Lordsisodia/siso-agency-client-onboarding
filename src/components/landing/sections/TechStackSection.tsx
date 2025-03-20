@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from '@/components/ui/card';
 import { GradientHeading } from '@/components/ui/gradient-heading';
 import { allLogos } from '../constants';
@@ -11,6 +12,7 @@ import { OpenAIIconBlack } from '@/components/ui/icons/OpenAIIcon';
 import { ClaudeAIIcon } from '@/components/ui/icons/ClaudeAIIcon';
 import { LucideGithub, LucideNotebook, LucideCircle } from 'lucide-react';
 import { AnimatedTestimonials } from '@/components/ui/animated-testimonials';
+
 export const TechStackSection = () => {
   // Testimonials data for the animated testimonials component
   const testimonials = [{
@@ -39,7 +41,8 @@ export const TechStackSection = () => {
     designation: "VP of Technology at FutureNet",
     src: "https://images.unsplash.com/photo-1624561172888-ac93c696e10c?q=80&w=2592&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   }];
-  return <div className="container mx-auto px-4 py-20">
+  
+  return <div className="container mx-auto px-4 py-20" id="tech-stack">
       <motion.div initial={{
       opacity: 0,
       y: 20
@@ -70,13 +73,71 @@ export const TechStackSection = () => {
       </motion.div>
 
       <Card className="border border-siso-text/10 bg-black/20 backdrop-blur-sm overflow-hidden mb-16">
-        
+        <CardContent className="p-8 relative">
+          <div className="relative h-[400px] flex items-center justify-center">
+            {/* Center Icon */}
+            <div className="relative z-10 w-20 h-20 rounded-full bg-gradient-to-r from-siso-red/20 to-siso-orange/20 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center">
+                <LucideGithub className="w-8 h-8 text-white/70" />
+              </div>
+            </div>
+            
+            {/* First Orbit */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <svg className="w-[200px] h-[200px] absolute pointer-events-none">
+                <circle cx="50%" cy="50%" r="95" fill="none" stroke="rgba(255,255,255,0.05)" />
+              </svg>
+              
+              <div className="absolute w-10 h-10" style={{ transform: `rotate(30deg) translateX(95px) rotate(-30deg)` }}>
+                <div className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center">
+                  <SupabaseIcon className="w-5 h-5 text-white/70" />
+                </div>
+              </div>
+              
+              <div className="absolute w-10 h-10" style={{ transform: `rotate(150deg) translateX(95px) rotate(-150deg)` }}>
+                <div className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center">
+                  <VercelIcon className="w-5 h-5 text-white/70" />
+                </div>
+              </div>
+              
+              <div className="absolute w-10 h-10" style={{ transform: `rotate(270deg) translateX(95px) rotate(-270deg)` }}>
+                <div className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center">
+                  <NextjsIcon className="w-5 h-5 text-white/70" />
+                </div>
+              </div>
+            </div>
+            
+            {/* Second Orbit */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <svg className="w-[300px] h-[300px] absolute pointer-events-none">
+                <circle cx="50%" cy="50%" r="145" fill="none" stroke="rgba(255,255,255,0.05)" />
+              </svg>
+              
+              <div className="absolute w-10 h-10" style={{ transform: `rotate(60deg) translateX(145px) rotate(-60deg)` }}>
+                <div className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center">
+                  <OpenAIIconBlack className="w-5 h-5 text-white/70" />
+                </div>
+              </div>
+              
+              <div className="absolute w-10 h-10" style={{ transform: `rotate(180deg) translateX(145px) rotate(-180deg)` }}>
+                <div className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center">
+                  <ClaudeAIIcon className="w-5 h-5 text-white/70" />
+                </div>
+              </div>
+              
+              <div className="absolute w-10 h-10" style={{ transform: `rotate(300deg) translateX(145px) rotate(-300deg)` }}>
+                <div className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center">
+                  <LucideNotebook className="w-5 h-5 text-white/70" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
       </Card>
 
       {/* Added AnimatedTestimonials component */}
       <Card className="border border-siso-text/10 bg-black/20 backdrop-blur-sm overflow-hidden">
         <CardContent className="p-4 md:p-8">
-          
           <AnimatedTestimonials testimonials={testimonials} autoplay={true} className="py-8" />
         </CardContent>
       </Card>

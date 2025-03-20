@@ -1,6 +1,6 @@
 
 import { GradientHeading } from '@/components/ui/gradient-heading';
-import { UserPlusIcon, ClipboardCheckIcon, RocketIcon, Heart, ArrowRight } from 'lucide-react';
+import { LightbulbIcon, RocketIcon, MessageCircleIcon, Trophy, Heart, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
@@ -55,39 +55,49 @@ export const GettingStartedSection = () => {
 
   const steps = [
     {
-      icon: UserPlusIcon,
-      title: "Create Your Account",
-      description: "Get started with SISO Resources in seconds. Join thousands of successful agency owners.",
-      stats: {
-        likes: 234,
-        signupsToday: 156,
-        setupTime: "2 min"
-      }
-    },
-    {
-      icon: ClipboardCheckIcon,
-      title: "Complete Onboarding",
-      description: "Quick and easy setup to personalize your experience. 98% completion rate with stellar reviews.",
+      icon: LightbulbIcon,
+      title: "Share Your Vision",
+      description: "Tell us your app idea and goals—we'll map out a plan to make it a client-winning reality.",
       stats: {
         likes: 189,
-        completionRate: "98%",
-        rating: "4.9/5"
+        signupsToday: "2 min to start",
+        setupTime: "40+ agency partners"
       }
     },
     {
       icon: RocketIcon,
-      title: "Access Resources",
-      description: "Instantly unlock AI-powered tools and insights. Updated daily with fresh content.",
+      title: "See Your MVP in 48 Hours",
+      description: "Watch your app come to life in 48-72 hours, powered by our AI and 10K+ developer network.",
+      stats: {
+        likes: 234,
+        completionRate: "95% satisfaction rate",
+        rating: "48-hour delivery"
+      }
+    },
+    {
+      icon: MessageCircleIcon,
+      title: "Refine with Feedback",
+      description: "Hop on a call, share feedback, and see tweaks in 2-3 days—we iterate until you're thrilled.",
+      stats: {
+        likes: 198,
+        completionRate: "2-3 day tweaks",
+        rating: "100% happy clients"
+      }
+    },
+    {
+      icon: Trophy,
+      title: "Launch & Scale",
+      description: "Approve your app, get the source code, and launch with zero hosting costs—ready to grow.",
       stats: {
         likes: 312,
-        resources: "1000+",
-        dailyUsers: "5k+"
+        resources: "£0/month for 99%",
+        dailyUsers: "10K+ developer support"
       }
     }
   ];
 
   return (
-    <section className="py-16 relative overflow-hidden">
+    <section className="py-16 relative overflow-hidden" id="getting-started">
       {/* Background Pattern */}
       <div 
         className="absolute inset-0 opacity-[0.15]" 
@@ -101,10 +111,10 @@ export const GettingStartedSection = () => {
       <div className="container mx-auto px-4 relative">
         <div className="text-center mb-12">
           <GradientHeading variant="secondary" className="text-4xl md:text-5xl font-bold mb-4">
-            Get Access in Seconds
+            Kick Off Your App in Seconds
           </GradientHeading>
           <p className="text-lg text-siso-text-muted max-w-2xl mx-auto">
-            Join thousands of successful agency owners already growing their business
+            Join 40+ agencies already scaling with custom apps built for success
           </p>
         </div>
 
@@ -143,7 +153,7 @@ export const GettingStartedSection = () => {
                     <p className="text-sm text-siso-text-muted">{step.description}</p>
 
                     {/* Stats Bar */}
-                    <div className="flex items-center gap-4 text-sm text-siso-text-muted">
+                    <div className="flex items-center gap-4 text-sm text-siso-text-muted flex-wrap">
                       {/* Like Counter */}
                       <motion.button 
                         className="flex items-center gap-1.5 hover:text-siso-orange transition-colors"
@@ -158,21 +168,27 @@ export const GettingStartedSection = () => {
                         <>
                           <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                            <span>{step.stats.signupsToday} signups today</span>
+                            <span>{step.stats.signupsToday}</span>
                           </div>
-                          <div>{step.stats.setupTime} average setup</div>
+                          <div>{step.stats.setupTime}</div>
                         </>
                       )}
                       {index === 1 && (
                         <>
-                          <div>{step.stats.completionRate} completion rate</div>
-                          <div>{step.stats.rating} user rating</div>
+                          <div>{step.stats.completionRate}</div>
+                          <div>{step.stats.rating}</div>
                         </>
                       )}
                       {index === 2 && (
                         <>
-                          <div>{step.stats.resources} resources</div>
-                          <div>{step.stats.dailyUsers} daily users</div>
+                          <div>{step.stats.completionRate}</div>
+                          <div>{step.stats.rating}</div>
+                        </>
+                      )}
+                      {index === 3 && (
+                        <>
+                          <div>{step.stats.resources}</div>
+                          <div>{step.stats.dailyUsers}</div>
                         </>
                       )}
                     </div>
@@ -186,7 +202,7 @@ export const GettingStartedSection = () => {
                           className="bg-gradient-to-r from-siso-red to-siso-orange hover:from-siso-red/90 hover:to-siso-orange/90 
                             text-white font-semibold px-5 py-2 flex items-center gap-2"
                         >
-                          Create Your Account
+                          Let's Get Started
                           <ArrowRight className="w-4 h-4" />
                         </Button>
                         <GoogleSignInButton
@@ -210,3 +226,5 @@ export const GettingStartedSection = () => {
     </section>
   );
 };
+
+export default GettingStartedSection;
