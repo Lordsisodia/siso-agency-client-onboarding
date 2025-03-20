@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from '@/components/ui/card';
 import { GradientHeading } from '@/components/ui/gradient-heading';
 import { allLogos } from '../constants';
@@ -9,19 +10,28 @@ import { VercelIcon } from '@/components/ui/icons/VercelIcon';
 import { NextjsIcon } from '@/components/ui/icons/NextjsIcon';
 import { OpenAIIconBlack } from '@/components/ui/icons/OpenAIIcon';
 import { ClaudeAIIcon } from '@/components/ui/icons/ClaudeAIIcon';
+import { LucideGithub, LucideNotebook, LucideCircle } from 'lucide-react';
+
 export const TechStackSection = () => {
-  return <div className="container mx-auto px-4 py-20">
-      <motion.div initial={{
-      opacity: 0,
-      y: 20
-    }} whileInView={{
-      opacity: 1,
-      y: 0
-    }} viewport={{
-      once: true
-    }} transition={{
-      duration: 0.6
-    }} className="text-center mb-12 relative">
+  return (
+    <div className="container mx-auto px-4 py-20">
+      <motion.div 
+        initial={{
+          opacity: 0,
+          y: 20
+        }} 
+        whileInView={{
+          opacity: 1,
+          y: 0
+        }} 
+        viewport={{
+          once: true
+        }} 
+        transition={{
+          duration: 0.6
+        }} 
+        className="text-center mb-12 relative"
+      >
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-gradient-to-r from-siso-red/5 to-siso-orange/5 rounded-full filter blur-[50px]" />
         
         <GradientHeading variant="secondary" className="text-4xl md:text-5xl font-bold mb-6 relative">
@@ -31,8 +41,8 @@ export const TechStackSection = () => {
         <div className="relative h-1 w-24 mx-auto mb-6">
           <div className="absolute inset-0 bg-gradient-to-r from-siso-red to-siso-orange rounded-full animate-pulse" />
           <div className="absolute inset-0 bg-gradient-to-r from-siso-orange to-siso-red rounded-full animate-pulse" style={{
-          animationDelay: '1s'
-        }} />
+            animationDelay: '1s'
+          }} />
         </div>
         
         <p className="text-lg text-siso-text-muted max-w-2xl mx-auto relative">
@@ -41,8 +51,86 @@ export const TechStackSection = () => {
       </motion.div>
 
       <Card className="border border-siso-text/10 bg-black/20 backdrop-blur-sm overflow-hidden">
-        
+        <CardContent className="p-10 md:p-16 flex justify-center items-center">
+          <div className="relative h-[400px] w-full max-w-[600px] flex flex-col items-center justify-center">
+            {/* Center Icon */}
+            <div className="relative size-[100px] rounded-full bg-black/10 dark:bg-white/5 border border-white/10 backdrop-blur-sm flex items-center justify-center z-20">
+              <LucideCircle className="size-[40px] text-siso-orange" />
+            </div>
+            
+            {/* Inner Circle */}
+            <OrbitingCircles 
+              className="size-[40px] border-none bg-transparent" 
+              duration={25} 
+              delay={5} 
+              radius={120}
+            >
+              <SupabaseIcon className="size-[25px]" />
+            </OrbitingCircles>
+            
+            <OrbitingCircles 
+              className="size-[40px] border-none bg-transparent" 
+              duration={25} 
+              delay={12} 
+              radius={120}
+            >
+              <VercelIcon className="size-[25px]" />
+            </OrbitingCircles>
+            
+            <OrbitingCircles 
+              className="size-[40px] border-none bg-transparent" 
+              duration={25} 
+              delay={18} 
+              radius={120}
+            >
+              <NextjsIcon className="size-[25px] text-white" />
+            </OrbitingCircles>
+            
+            {/* Outer Circle */}
+            <OrbitingCircles 
+              className="size-[50px] border-none bg-transparent" 
+              duration={40} 
+              delay={0} 
+              radius={200} 
+              reverse
+            >
+              <OpenAIIconBlack className="size-[30px]" />
+            </OrbitingCircles>
+            
+            <OrbitingCircles 
+              className="size-[50px] border-none bg-transparent" 
+              duration={40} 
+              delay={13} 
+              radius={200} 
+              reverse
+            >
+              <ClaudeAIIcon className="size-[30px]" />
+            </OrbitingCircles>
+            
+            <OrbitingCircles 
+              className="size-[50px] border-none bg-transparent" 
+              duration={40} 
+              delay={26} 
+              radius={200} 
+              reverse
+            >
+              <LucideGithub className="size-[30px] text-white" />
+            </OrbitingCircles>
+            
+            <OrbitingCircles 
+              className="size-[50px] border-none bg-transparent" 
+              duration={40} 
+              delay={35} 
+              radius={200} 
+              reverse
+            >
+              <LucideNotebook className="size-[30px] text-white" />
+            </OrbitingCircles>
+          </div>
+        </CardContent>
       </Card>
-    </div>;
+    </div>
+  );
 };
+
 export default TechStackSection;
