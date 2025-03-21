@@ -1,4 +1,3 @@
-
 import { lazy, Suspense, memo, useEffect } from 'react';
 import { LoadingFallback } from './sections/LoadingFallback';
 import Footer from '@/components/Footer';
@@ -8,7 +7,6 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { HeroSection } from './sections/HeroSection';
 import { Waves } from '@/components/ui/waves-background';
 
-// [Analysis] Only lazy load non-critical sections
 const VideoSection = lazy(() => import('./sections/VideoSection').then(m => ({ 
   default: memo(m.VideoSection) 
 })));
@@ -38,10 +36,8 @@ const ScrollNav = lazy(() => import('@/components/ui/scroll-nav.tsx').then(m => 
 })));
 
 const LandingPage = () => {
-  // Initialize performance monitoring
   usePerformanceMetrics();
 
-  // Setup viewport loading for each section
   const video = useViewportLoading({ threshold: 0.1 });
   const whyChoose = useViewportLoading({ threshold: 0.1 });
   const features = useViewportLoading({ threshold: 0.1 });
@@ -51,33 +47,29 @@ const LandingPage = () => {
   const testimonials = useViewportLoading({ threshold: 0.1 });
   const cta = useViewportLoading({ threshold: 0.1 });
 
-  console.log('[LandingPage] Rendering landing page with updated sections'); // Updated debug log
+  console.log('[LandingPage] Rendering landing page with enhanced hero section');
 
-  // Force a re-render on initial load
   useEffect(() => {
     console.log('[LandingPage] Mounted with all sections');
-    // Force layout recalculation
     window.dispatchEvent(new Event('resize'));
   }, []);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-black via-siso-bg to-black overflow-x-hidden">
-      {/* DNS prefetch and preconnect optimizations */}
       <link rel="dns-prefetch" href="https://fzuwsjxjymwcjsbpwfsl.supabase.co" />
       <link rel="preconnect" href="https://fzuwsjxjymwcjsbpwfsl.supabase.co" crossOrigin="anonymous" />
       
-      {/* Global wave background that covers the entire page */}
       <div className="fixed inset-0 z-0 opacity-0 animate-fade-in" style={{ animationDelay: '0.3s', animationDuration: '1.5s', animationFillMode: 'forwards' }}>
         <Waves 
-          lineColor="rgba(255, 87, 34, 0.3)" // Increased opacity for better visibility
+          lineColor="rgba(255, 87, 34, 0.35)"
           backgroundColor="transparent"
-          waveSpeedX={0.04} // Increased speed
-          waveSpeedY={0.03} // Increased speed
-          waveAmpX={70} // Increased amplitude
-          waveAmpY={50} // Increased amplitude 
-          friction={0.92}
-          tension={0.01}
-          maxCursorMove={150}
+          waveSpeedX={0.05}
+          waveSpeedY={0.04}
+          waveAmpX={90}
+          waveAmpY={70}
+          friction={0.94}
+          tension={0.015}
+          maxCursorMove={170}
           xGap={30}
           yGap={60}
           className="fixed inset-0 pointer-events-none"
@@ -93,23 +85,21 @@ const LandingPage = () => {
         </Suspense>
       </ErrorBoundary>
       
-      {/* Optimized background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-1/4 w-[250px] md:w-[600px] h-[250px] md:h-[600px] 
-          bg-siso-red/15 rounded-full filter blur-[80px] md:blur-[120px] 
+        <div className="absolute top-1/4 -left-1/4 w-[300px] md:w-[700px] h-[300px] md:h-[700px] 
+          bg-siso-red/20 rounded-full filter blur-[100px] md:blur-[140px] 
           animate-float-slow transform-gpu will-change-transform"
         />
-        <div className="absolute bottom-1/4 -right-1/4 w-[250px] md:w-[600px] h-[250px] md:h-[600px] 
-          bg-siso-orange/15 rounded-full filter blur-[80px] md:blur-[120px] 
+        <div className="absolute bottom-1/4 -right-1/4 w-[300px] md:w-[700px] h-[300px] md:h-[700px] 
+          bg-siso-orange/20 rounded-full filter blur-[100px] md:blur-[140px] 
           animate-float-slower transform-gpu will-change-transform"
         />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
-          w-[350px] md:w-[1000px] h-[350px] md:h-[1000px] 
-          bg-siso-red/8 rounded-full filter blur-[100px] md:blur-[150px] transform-gpu will-change-transform"
+          w-[400px] md:w-[1200px] h-[400px] md:h-[1200px] 
+          bg-siso-red/10 rounded-full filter blur-[120px] md:blur-[180px] transform-gpu will-change-transform"
         />
       </div>
 
-      {/* Progressive section loading */}
       <div className="relative z-10 px-4 md:px-0 space-y-12 md:space-y-24">
         <ErrorBoundary
           fallback={<LoadingFallback error={new Error()} />}
@@ -118,7 +108,6 @@ const LandingPage = () => {
           <HeroSection />
         </ErrorBoundary>
 
-        {/* Added Video Section after Hero Section */}
         <ErrorBoundary
           fallback={<LoadingFallback error={new Error()} />}
           onError={(error) => console.error('[LandingPage] Error in VideoSection:', error)}

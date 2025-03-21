@@ -20,7 +20,7 @@ export default function Index() {
     return <LoadingFallback />;
   }
 
-  // If not logged in, show the landing page
+  // If not logged in, show the enhanced landing page
   return (
     <div className="relative w-full">
       <Suspense fallback={<LoadingFallback />}>
