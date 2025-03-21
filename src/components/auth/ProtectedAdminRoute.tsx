@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '@/hooks/useAdmin';
 import { ProfileSkeleton } from '@/components/profile/ProfileSkeleton';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ProtectedAdminRouteProps {
   children: React.ReactNode;
@@ -11,11 +12,19 @@ interface ProtectedAdminRouteProps {
 
 export const ProtectedAdminRoute: React.FC<ProtectedAdminRouteProps> = ({ children }) => {
   const { isAdmin, loading } = useAdmin();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   
   useEffect(() => {
-    // Only redirect if loading is complete and user is not an admin
+    // First check if user is authenticated
+    if (!authLoading && !user) {
+      console.log('Not authenticated, redirecting to /');
+      navigate('/', { replace: true });
+      return;
+    }
+    
+    // Then check if user is an admin
     if (!loading && !isAdmin) {
       console.log('Not authorized as admin, redirecting to /');
       toast({
@@ -25,10 +34,10 @@ export const ProtectedAdminRoute: React.FC<ProtectedAdminRouteProps> = ({ childr
       });
       navigate('/', { replace: true });
     }
-  }, [loading, isAdmin, navigate, toast]);
+  }, [loading, isAdmin, authLoading, user, navigate, toast]);
 
   // Show loading state
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="w-full min-h-screen flex items-center justify-center">
         <ProfileSkeleton />

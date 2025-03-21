@@ -6,6 +6,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { SidebarRoot, SidebarProvider } from '@/components/ui/sidebar';
+import { AuthProvider } from '@/hooks/useAuth';
 
 // Pages
 import Index from '@/pages/Index';
@@ -227,7 +228,9 @@ const AppContent = () => {
 function App() {
   return (
     <Router>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </Router>
   );
 }
