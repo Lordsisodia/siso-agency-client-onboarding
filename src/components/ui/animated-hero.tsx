@@ -1,8 +1,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Rocket, MoveRight } from "lucide-react";
+import { Rocket, MoveRight, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RainbowButton } from "@/components/ui/rainbow-button";
 import { useNavigate } from "react-router-dom";
 import { OnboardingStyles } from "@/components/plan-builder/components/OnboardingStyles";
 
@@ -93,11 +94,11 @@ function Hero() {
               variants={itemVariants}
             >
               <span className="text-siso-text-bold whitespace-normal md:whitespace-nowrap">Grow your agency with</span>
-              <div className="hero-title-container">
+              <div className="hero-title-container h-16 md:h-20 relative">
                 {titles.map((title, index) => (
                   <motion.span
                     key={index}
-                    className={`hero-title font-semibold bg-gradient-to-r from-siso-red to-siso-orange bg-clip-text text-transparent ${
+                    className={`hero-title absolute inset-0 flex justify-center font-semibold bg-gradient-to-r from-siso-red to-siso-orange bg-clip-text text-transparent ${
                       titleNumber === index ? "opacity-100" : "opacity-0"
                     }`}
                     initial={{ opacity: 0, y: 30 }}
@@ -106,12 +107,10 @@ function Hero() {
                         ? {
                             opacity: 1,
                             y: 0,
-                            position: "relative"
                           }
                         : {
                             opacity: 0,
                             y: titleNumber > index ? -30 : 30,
-                            position: "absolute"
                           }
                     }
                     transition={{ 
@@ -131,19 +130,28 @@ function Hero() {
               className="text-lg md:text-xl leading-relaxed tracking-tight text-siso-text max-w-2xl text-center mx-auto"
               variants={itemVariants}
             >
-              From vision to MVP in 48-72 hours—built for 49+ agencies with 1K+ developers in our network.
+              From vision to MVP in 48-72 hours—trusted by 49+ agencies with 1,000+ developers in our network.
             </motion.p>
           </div>
           <motion.div 
             className="flex flex-row gap-4 hero-action-buttons"
             variants={buttonVariants}
           >
-            <Button 
-              size="lg" 
-              className="gap-4 bg-gradient-to-r from-siso-red to-siso-orange hover:opacity-90"
+            <RainbowButton
               onClick={handleGetStarted}
+              className="group flex items-center gap-2 text-base md:text-lg font-medium px-6 py-3"
             >
-              Let's Build Your App Now <MoveRight className="w-4 h-4" />
+              <span>Build Your App Now</span>
+              <MoveRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </RainbowButton>
+            
+            <Button 
+              variant="outline"
+              size="lg" 
+              className="border-siso-text/20 hover:bg-siso-bg-alt hover:text-siso-text-bold transition-all text-base"
+              onClick={handleTryAI}
+            >
+              Try AI Planner <ArrowRight className="ml-2 w-4 h-4" />
             </Button>
           </motion.div>
         </motion.div>
