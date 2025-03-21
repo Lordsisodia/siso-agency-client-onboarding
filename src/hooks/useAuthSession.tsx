@@ -1,15 +1,13 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-// [Analysis] Complete rewrite of auth session management to fix infinite redirects
-// [Plan] Monitor auth state changes and session restoration separately
+// [Analysis] Complete rewrite of auth session management to fix navigation issues 
+// and remove direct Router dependency from the hook
 export const useAuthSession = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const navigate = useNavigate();
   const { toast } = useToast();
   // [Analysis] Track initialization vs auth events separately
   const isInitialized = useRef(false);
@@ -85,14 +83,7 @@ export const useAuthSession = () => {
           const profile = await checkProfile(session.user.id);
           if (profile) {
             setUser(session.user);
-            // [Fix] Only navigate on explicit sign in, not session restore
-            if (!user) {
-              navigate('/home', { replace: true });
-              toast({
-                title: "Successfully signed in",
-                description: "Welcome to SISO Resource Hub!",
-              });
-            }
+            // Navigation will be handled by the component using this hook
           } else {
             await supabase.auth.signOut();
             setUser(null);
@@ -102,11 +93,7 @@ export const useAuthSession = () => {
         isAuthEvent.current = true;
         setUser(null);
         profileCache.current = null;
-        navigate('/', { replace: true });
-        toast({
-          title: "Signed out",
-          description: "Come back soon!",
-        });
+        // Navigation will be handled by the component using this hook
       } else if (event === 'TOKEN_REFRESHED') {
         // Just update the user without navigation
         if (session?.user) {
@@ -120,7 +107,7 @@ export const useAuthSession = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, checkProfile, toast, user]); // [Fix] Added user dependency to prevent unnecessary navigations
+  }, [checkProfile, toast]); // Removed navigate dependency
 
   const handleSignIn = async (session: any) => {
     try {
@@ -161,6 +148,7 @@ export const useAuthSession = () => {
         title: "Signed out",
         description: "Come back soon!",
       });
+      return true;
     } catch (error) {
       console.error('Error signing out:', error);
       toast({
@@ -168,6 +156,7 @@ export const useAuthSession = () => {
         title: "Error signing out",
         description: "There was a problem signing you out. Please try again.",
       });
+      return false;
     } finally {
       isAuthEvent.current = false;
     }
