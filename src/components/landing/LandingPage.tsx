@@ -1,5 +1,5 @@
 
-import { lazy, Suspense, memo } from 'react';
+import { lazy, Suspense, memo, useEffect } from 'react';
 import { LoadingFallback } from './sections/LoadingFallback';
 import Footer from '@/components/Footer';
 import { useViewportLoading } from '@/hooks/useViewportLoading';
@@ -47,7 +47,14 @@ const LandingPage = () => {
   const testimonials = useViewportLoading({ threshold: 0.1 });
   const cta = useViewportLoading({ threshold: 0.1 });
 
-  console.log('[LandingPage] Rendering landing page'); // Debug log
+  console.log('[LandingPage] Rendering landing page with updated sections'); // Updated debug log
+
+  // Force a re-render on initial load
+  useEffect(() => {
+    console.log('[LandingPage] Mounted with all sections');
+    // Force layout recalculation
+    window.dispatchEvent(new Event('resize'));
+  }, []);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-black via-siso-bg to-black overflow-x-hidden">
@@ -58,12 +65,12 @@ const LandingPage = () => {
       {/* Global wave background that covers the entire page */}
       <div className="fixed inset-0 z-0 opacity-0 animate-fade-in" style={{ animationDelay: '0.3s', animationDuration: '1.5s', animationFillMode: 'forwards' }}>
         <Waves 
-          lineColor="rgba(255, 87, 34, 0.2)"
+          lineColor="rgba(255, 87, 34, 0.3)" // Increased opacity for better visibility
           backgroundColor="transparent"
-          waveSpeedX={0.03}
-          waveSpeedY={0.02}
-          waveAmpX={60}
-          waveAmpY={40}
+          waveSpeedX={0.04} // Increased speed
+          waveSpeedY={0.03} // Increased speed
+          waveAmpX={70} // Increased amplitude
+          waveAmpY={50} // Increased amplitude 
           friction={0.92}
           tension={0.01}
           maxCursorMove={150}

@@ -22,7 +22,7 @@ export default function Index() {
 
   // If not logged in, show the landing page
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <Suspense fallback={<LoadingFallback />}>
         <LandingPage />
       </Suspense>

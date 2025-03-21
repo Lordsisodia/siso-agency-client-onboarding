@@ -6,7 +6,7 @@ import LandingPage from '@/components/landing/LandingPage';
 
 export default function Landing() {
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <LandingPage />
     </div>
   );
