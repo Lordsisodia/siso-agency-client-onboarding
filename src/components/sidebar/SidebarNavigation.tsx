@@ -5,14 +5,14 @@ import { cn } from '@/lib/utils';
 import { getNavigationData } from './navigationData';
 import { MenuSection, NavigationProps } from './types';
 import { SidebarSeparator } from '@/components/ui/sidebar';
-import { useAdmin } from '@/hooks/useAdmin';
 
 export const SidebarNavigation = ({ collapsed, onItemClick, visible }: NavigationProps) => {
   const { pathname } = useLocation();
-  const { isAdmin } = useAdmin();
+  // Always show admin section regardless of auth status
+  const isAdmin = true; // Force this to true to always show admin section
   const [navigationData, setNavigationData] = useState<MenuSection[]>([]);
 
-  // Update navigation data when isAdmin changes
+  // Update navigation data to always include admin
   useEffect(() => {
     setNavigationData(getNavigationData(isAdmin));
   }, [isAdmin]);
