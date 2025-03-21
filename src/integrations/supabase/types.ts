@@ -453,6 +453,149 @@ export type Database = {
         }
         Relationships: []
       }
+      client_notes: {
+        Row: {
+          client_id: string
+          content: string | null
+          created_at: string
+          created_by: string
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          content?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          content?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_notes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_pages: {
+        Row: {
+          client_id: string
+          content: Json | null
+          created_at: string
+          created_by: string
+          icon: string | null
+          id: string
+          last_edited_by: string | null
+          page_type: string | null
+          parent_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          content?: Json | null
+          created_at?: string
+          created_by: string
+          icon?: string | null
+          id?: string
+          last_edited_by?: string | null
+          page_type?: string | null
+          parent_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          content?: Json | null
+          created_at?: string
+          created_by?: string
+          icon?: string | null
+          id?: string
+          last_edited_by?: string | null
+          page_type?: string | null
+          parent_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_pages_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_pages_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "client_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          assigned_admin: string | null
+          company: string | null
+          created_at: string
+          created_by: string
+          email: string | null
+          id: string
+          industry: string | null
+          logo_url: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_admin?: string | null
+          company?: string | null
+          created_at?: string
+          created_by: string
+          email?: string | null
+          id?: string
+          industry?: string | null
+          logo_url?: string | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_admin?: string | null
+          company?: string | null
+          created_at?: string
+          created_by?: string
+          email?: string | null
+          id?: string
+          industry?: string | null
+          logo_url?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       company_profiles: {
         Row: {
           accent_color: string | null
@@ -1662,6 +1805,7 @@ export type Database = {
           professional_role: string | null
           rank: string | null
           referral_count: number | null
+          role: Database["public"]["Enums"]["app_role"]
           siso_tokens: number | null
           twitter_url: string | null
           updated_at: string | null
@@ -1691,6 +1835,7 @@ export type Database = {
           professional_role?: string | null
           rank?: string | null
           referral_count?: number | null
+          role?: Database["public"]["Enums"]["app_role"]
           siso_tokens?: number | null
           twitter_url?: string | null
           updated_at?: string | null
@@ -1720,6 +1865,7 @@ export type Database = {
           professional_role?: string | null
           rank?: string | null
           referral_count?: number | null
+          role?: Database["public"]["Enums"]["app_role"]
           siso_tokens?: number | null
           twitter_url?: string | null
           updated_at?: string | null
@@ -1885,6 +2031,7 @@ export type Database = {
       }
       projects: {
         Row: {
+          client_id: string | null
           created_at: string
           description: string | null
           id: string
@@ -1894,6 +2041,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          client_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -1903,6 +2051,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          client_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -1911,7 +2060,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       resource_categories: {
         Row: {
@@ -2793,6 +2950,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "user"
       point_action_type:
         | "login"
         | "complete_task"

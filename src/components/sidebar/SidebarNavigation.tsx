@@ -1,81 +1,86 @@
 
-import { useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import { useLocation, Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { SidebarSection } from './SidebarSection';
-import { NavigationProps } from './types';
-import { menuSections } from './navigationData';
+import { getNavigationData } from './navigationData';
+import { MenuSection, NavigationProps } from './types';
+import { SidebarSeparator } from '@/components/ui/sidebar';
+import { useAdmin } from '@/hooks/useAdmin';
 
 export const SidebarNavigation = ({ collapsed, onItemClick, visible }: NavigationProps) => {
-  const location = useLocation();
+  const { pathname } = useLocation();
+  const { isAdmin } = useAdmin();
+  const [navigationData, setNavigationData] = useState<MenuSection[]>([]);
 
-  if (!visible) return null;
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.05,
-        duration: 0.2
-      }
-    }
-  };
-
-  // Simplified route matching logic
-  const isItemActive = (href: string) => {
-    // Remove trailing slashes for consistency
-    const currentPath = location.pathname.replace(/\/$/, '');
-    const targetPath = href.replace(/\/$/, '');
-
-    // For exact matching
-    if (currentPath === targetPath) {
-      return true;
-    }
-
-    // Special case for dashboard as home
-    if (targetPath === '/dashboard' && currentPath === '/') {
-      return true;
-    }
-
-    // For nested routes like /projects/123
-    if (targetPath !== '/' && currentPath.startsWith(targetPath)) {
-      // Make sure it's a true parent path (e.g., /projects is parent of /projects/123)
-      // but /project is not a parent of /projects
-      const nextChar = currentPath.substring(targetPath.length, targetPath.length + 1);
-      return nextChar === '' || nextChar === '/';
-    }
-
-    return false;
-  };
+  // Update navigation data when isAdmin changes
+  useEffect(() => {
+    setNavigationData(getNavigationData(isAdmin));
+  }, [isAdmin]);
 
   return (
-    <motion.nav
-      initial="hidden"
-      animate="show"
-      variants={containerVariants}
-      className={cn("px-2 py-4", collapsed && "px-1")}
+    <div 
+      className={cn(
+        "flex flex-col gap-1 py-2",
+        !visible && "hidden",
+      )}
     >
-      <div className="space-y-2">
-        <AnimatePresence mode="wait">
-          {menuSections.map((section, index) => (
-            <motion.div 
-              key={index}
+      {navigationData.map((section, idx) => {
+        if (section.type === 'main') {
+          // Main navigation item
+          return (
+            <Link
+              key={`main-${idx}`}
+              to={section.href || '#'}
               className={cn(
-                "space-y-1",
-                section.type === 'section' && "border-b border-siso-border pb-2 mb-2"
+                "flex items-center gap-3.5 px-3.5 py-2.5 rounded-md text-sm hover:bg-muted transition-colors",
+                pathname === section.href && "bg-muted",
+                collapsed && "justify-center"
               )}
+              onClick={onItemClick}
             >
-              <SidebarSection
-                section={section}
-                collapsed={collapsed}
-                onItemClick={onItemClick}
-                isItemActive={isItemActive}
-              />
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
-    </motion.nav>
+              <section.icon className="h-5 w-5" />
+              {!collapsed && <span>{section.label}</span>}
+            </Link>
+          );
+        }
+        
+        // Section with items
+        return (
+          <div key={`section-${idx}`} className="mb-1.5">
+            {idx > 0 && <SidebarSeparator />}
+            
+            {!collapsed && section.title && (
+              <h3 className="text-xs font-medium uppercase text-muted-foreground mt-3 mb-1 px-3.5">
+                {section.title}
+              </h3>
+            )}
+            
+            {collapsed && section.title && (
+              <div className="flex justify-center my-2">
+                <section.icon className="h-5 w-5 text-muted-foreground" />
+              </div>
+            )}
+            
+            {section.items && section.items.map((item, itemIdx) => (
+              <Link
+                key={`item-${idx}-${itemIdx}`}
+                to={item.href}
+                className={cn(
+                  "flex items-center gap-3.5 px-3.5 py-2.5 rounded-md text-sm hover:bg-muted transition-colors",
+                  pathname === item.href && "bg-muted",
+                  collapsed && "justify-center"
+                )}
+                onClick={onItemClick}
+                target={item.isExternal ? "_blank" : undefined}
+                rel={item.isExternal ? "noopener noreferrer" : undefined}
+              >
+                <item.icon className="h-5 w-5" />
+                {!collapsed && <span>{item.label}</span>}
+              </Link>
+            ))}
+          </div>
+        );
+      })}
+    </div>
   );
 };
