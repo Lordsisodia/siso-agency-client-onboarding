@@ -1,5 +1,5 @@
 
-import { lazy, Suspense, memo, useEffect } from 'react';
+import { lazy, Suspense, memo, useEffect, useState } from 'react';
 import { LoadingFallback } from './sections/LoadingFallback';
 import Footer from '@/components/Footer';
 import { useViewportLoading } from '@/hooks/useViewportLoading';
@@ -8,6 +8,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { HeroSection } from './sections/HeroSection';
 import { Waves } from '@/components/ui/waves-background';
 
+// Preload critical sections
 const VideoSection = lazy(() => import('./sections/VideoSection').then(m => ({ 
   default: memo(m.VideoSection) 
 })));
@@ -38,29 +39,81 @@ const ScrollNav = lazy(() => import('@/components/ui/scroll-nav.tsx').then(m => 
 
 const LandingPage = () => {
   usePerformanceMetrics();
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  const video = useViewportLoading({ threshold: 0.1 });
-  const whyChoose = useViewportLoading({ threshold: 0.1 });
-  const features = useViewportLoading({ threshold: 0.1 });
-  const techStack = useViewportLoading({ threshold: 0.1 });
-  const gettingStarted = useViewportLoading({ threshold: 0.1 });
-  const pricing = useViewportLoading({ threshold: 0.1 });
-  const testimonials = useViewportLoading({ threshold: 0.1 });
-  const cta = useViewportLoading({ threshold: 0.1 });
+  // Preload the critical components as soon as the hero is rendered
+  const video = useViewportLoading({ threshold: 0.05 });
+  const whyChoose = useViewportLoading({ threshold: 0.05 });
+  const features = useViewportLoading({ threshold: 0.05 });
+  const techStack = useViewportLoading({ threshold: 0.05 });
+  const gettingStarted = useViewportLoading({ threshold: 0.05 });
+  const pricing = useViewportLoading({ threshold: 0.05 });
+  const testimonials = useViewportLoading({ threshold: 0.05 });
+  const cta = useViewportLoading({ threshold: 0.05 });
 
   console.log('[LandingPage] Rendering landing page with enhanced hero section');
 
+  // Preload all main sections eagerly but staggered
   useEffect(() => {
-    console.log('[LandingPage] Mounted with all sections');
+    const preloadComponents = async () => {
+      // Start preloading important components right away
+      const imports = [
+        import('./sections/VideoSection'),
+        import('./sections/WhyChooseSection')
+      ];
+      
+      try {
+        await Promise.all(imports);
+        
+        // Staggered loading for other components
+        setTimeout(async () => {
+          await import('./sections/FeaturesSection');
+          await import('./sections/TechStackSection');
+        }, 100);
+        
+        setTimeout(async () => {
+          await import('./sections/GettingStartedSection');
+          await import('./sections/PricingSection');
+        }, 200);
+        
+        setTimeout(async () => {
+          await import('./sections/TestimonialsSection');
+          await import('./sections/CallToActionSection');
+        }, 300);
+        
+        setIsPageLoaded(true);
+      } catch (err) {
+        console.error('[LandingPage] Error preloading components:', err);
+      }
+    };
+
+    preloadComponents();
     window.dispatchEvent(new Event('resize'));
+    
+    // Preconnect to important domains
+    const linkRels = [
+      { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+      { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
+      { rel: 'dns-prefetch', href: 'https://fzuwsjxjymwcjsbpwfsl.supabase.co' },
+      { rel: 'preconnect', href: 'https://fzuwsjxjymwcjsbpwfsl.supabase.co', crossOrigin: 'anonymous' }
+    ];
+    
+    linkRels.forEach(linkRel => {
+      const link = document.createElement('link');
+      link.rel = linkRel.rel;
+      link.href = linkRel.href;
+      if (linkRel.crossOrigin) {
+        link.crossOrigin = linkRel.crossOrigin;
+      }
+      document.head.appendChild(link);
+    });
   }, []);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-black via-siso-bg to-black overflow-x-hidden">
-      <link rel="dns-prefetch" href="https://fzuwsjxjymwcjsbpwfsl.supabase.co" />
-      <link rel="preconnect" href="https://fzuwsjxjymwcjsbpwfsl.supabase.co" crossOrigin="anonymous" />
+      {/* DNS Prefetch and preconnect already handled in useEffect */}
       
-      <div className="fixed inset-0 z-0 opacity-0 animate-fade-in" style={{ animationDelay: '0.3s', animationDuration: '1.5s', animationFillMode: 'forwards' }}>
+      <div className="fixed inset-0 z-0 opacity-0 animate-fade-in" style={{ animationDelay: '0.3s', animationDuration: '1.5s', animationFillMode: 'forwards', transform: 'translateZ(0)', willChange: 'opacity' }}>
         <Waves 
           lineColor="rgba(255, 87, 34, 0.12)"
           backgroundColor="transparent"
@@ -81,12 +134,12 @@ const LandingPage = () => {
         fallback={<LoadingFallback error={new Error()} />}
         onError={(error) => console.error('[LandingPage] Error in ScrollNav:', error)}
       >
-        <Suspense fallback={<LoadingFallback />}>
+        <Suspense fallback={null}>
           <ScrollNav />
         </Suspense>
       </ErrorBoundary>
       
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{ transform: 'translateZ(0)', willChange: 'transform' }}>
         <div className="absolute top-1/4 -left-1/4 w-[300px] md:w-[700px] h-[300px] md:h-[700px] 
           bg-siso-red/10 rounded-full filter blur-[100px] md:blur-[140px] 
           animate-float-slow transform-gpu will-change-transform"
@@ -113,9 +166,9 @@ const LandingPage = () => {
           fallback={<LoadingFallback error={new Error()} />}
           onError={(error) => console.error('[LandingPage] Error in VideoSection:', error)}
         >
-          <section id="video" ref={video.elementRef}>
+          <section id="video" ref={video.elementRef} className="transform-gpu will-change-opacity">
             <Suspense fallback={<LoadingFallback />}>
-              {(video.isVisible || video.isLoaded) && <VideoSection />}
+              {(video.isVisible || video.isLoaded || isPageLoaded) && <VideoSection />}
             </Suspense>
           </section>
         </ErrorBoundary>
@@ -124,45 +177,45 @@ const LandingPage = () => {
           fallback={<LoadingFallback error={new Error()} />}
           onError={(error) => console.error('[LandingPage] Error in other sections:', error)}
         >
-          <section id="why-choose" ref={whyChoose.elementRef}>
+          <section id="why-choose" ref={whyChoose.elementRef} className="transform-gpu will-change-opacity">
             <Suspense fallback={<LoadingFallback />}>
-              {(whyChoose.isVisible || whyChoose.isLoaded) && <WhyChooseSection />}
+              {(whyChoose.isVisible || whyChoose.isLoaded || isPageLoaded) && <WhyChooseSection />}
             </Suspense>
           </section>
 
-          <section id="features" ref={features.elementRef}>
+          <section id="features" ref={features.elementRef} className="transform-gpu will-change-opacity">
             <Suspense fallback={<LoadingFallback />}>
-              {(features.isVisible || features.isLoaded) && <FeaturesSection />}
+              {(features.isVisible || features.isLoaded || isPageLoaded) && <FeaturesSection />}
             </Suspense>
           </section>
           
-          <section id="tech-stack" ref={techStack.elementRef}>
+          <section id="tech-stack" ref={techStack.elementRef} className="transform-gpu will-change-opacity">
             <Suspense fallback={<LoadingFallback />}>
-              {(techStack.isVisible || techStack.isLoaded) && <TechStackSection />}
+              {(techStack.isVisible || techStack.isLoaded || isPageLoaded) && <TechStackSection />}
             </Suspense>
           </section>
 
-          <section id="getting-started" ref={gettingStarted.elementRef}>
+          <section id="getting-started" ref={gettingStarted.elementRef} className="transform-gpu will-change-opacity">
             <Suspense fallback={<LoadingFallback />}>
-              {(gettingStarted.isVisible || gettingStarted.isLoaded) && <GettingStartedSection />}
+              {(gettingStarted.isVisible || gettingStarted.isLoaded || isPageLoaded) && <GettingStartedSection />}
             </Suspense>
           </section>
 
-          <section id="pricing" ref={pricing.elementRef}>
+          <section id="pricing" ref={pricing.elementRef} className="transform-gpu will-change-opacity">
             <Suspense fallback={<LoadingFallback />}>
-              {(pricing.isVisible || pricing.isLoaded) && <PricingSection />}
+              {(pricing.isVisible || pricing.isLoaded || isPageLoaded) && <PricingSection />}
             </Suspense>
           </section>
 
-          <section id="testimonials" ref={testimonials.elementRef}>
+          <section id="testimonials" ref={testimonials.elementRef} className="transform-gpu will-change-opacity">
             <Suspense fallback={<LoadingFallback />}>
-              {(testimonials.isVisible || testimonials.isLoaded) && <TestimonialsSection />}
+              {(testimonials.isVisible || testimonials.isLoaded || isPageLoaded) && <TestimonialsSection />}
             </Suspense>
           </section>
 
-          <section id="cta" ref={cta.elementRef}>
+          <section id="cta" ref={cta.elementRef} className="transform-gpu will-change-opacity">
             <Suspense fallback={<LoadingFallback />}>
-              {(cta.isVisible || cta.isLoaded) && <CallToActionSection />}
+              {(cta.isVisible || cta.isLoaded || isPageLoaded) && <CallToActionSection />}
             </Suspense>
           </section>
         </ErrorBoundary>

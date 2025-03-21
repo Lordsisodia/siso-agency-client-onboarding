@@ -13,7 +13,7 @@ export const LoadingFallback = memo(({ error, onRetry }: LoadingFallbackProps) =
     return (
       <div className="w-full py-12 animate-fade-in">
         <div className="container mx-auto px-4 text-center">
-          <div className="max-w-md mx-auto space-y-4 p-6 rounded-xl border border-siso-text/10 backdrop-blur-sm">
+          <div className="max-w-md mx-auto space-y-4 p-6 rounded-xl border border-siso-text/10 backdrop-blur-sm transform-gpu">
             <AlertCircle className="w-12 h-12 mx-auto text-siso-red animate-pulse" />
             <h3 className="text-lg font-semibold text-siso-text">Failed to load content</h3>
             <p className="text-sm text-siso-text/70">There was an error loading this section. Please try again.</p>
@@ -34,12 +34,12 @@ export const LoadingFallback = memo(({ error, onRetry }: LoadingFallbackProps) =
   }
 
   return (
-    <div className="w-full py-12 space-y-8 animate-fade-in">
+    <div className="w-full py-12 space-y-8 animate-fade-in transform-gpu">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="space-y-4 text-center">
-            <Skeleton className="h-12 w-3/4 mx-auto mb-4 bg-gradient-to-r from-black/40 to-black/20 animate-pulse" />
-            <Skeleton className="h-6 w-1/2 mx-auto bg-gradient-to-r from-black/40 to-black/20 animate-pulse" />
+            <div className="h-12 w-3/4 mx-auto mb-4 rounded-lg bg-gradient-to-r from-black/40 to-black/20 animate-pulse transform-gpu" />
+            <div className="h-6 w-1/2 mx-auto rounded-md bg-gradient-to-r from-black/40 to-black/20 animate-pulse transform-gpu" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
@@ -47,16 +47,16 @@ export const LoadingFallback = memo(({ error, onRetry }: LoadingFallbackProps) =
               <div 
                 key={i} 
                 className="space-y-4 p-6 rounded-xl border border-siso-text/10 backdrop-blur-sm 
-                  animate-fade-in"
-                style={{ animationDelay: `${i * 100}ms` }}
+                  animate-fade-in transform-gpu"
+                style={{ animationDelay: `${i * 50}ms` }}
               >
-                <Skeleton className="h-12 w-12 rounded-lg bg-gradient-to-r from-black/40 to-black/20 animate-pulse" />
-                <Skeleton className="h-6 w-3/4 bg-gradient-to-r from-black/40 to-black/20 animate-pulse" />
-                <Skeleton className="h-6 w-1/3 rounded-full bg-gradient-to-r from-black/40 to-black/20 animate-pulse" />
+                <div className="h-12 w-12 rounded-lg bg-gradient-to-r from-black/40 to-black/20 animate-pulse" />
+                <div className="h-6 w-3/4 rounded-md bg-gradient-to-r from-black/40 to-black/20 animate-pulse" />
+                <div className="h-6 w-1/3 rounded-full bg-gradient-to-r from-black/40 to-black/20 animate-pulse" />
                 <div className="space-y-2">
-                  <Skeleton className="h-4 w-full bg-gradient-to-r from-black/40 to-black/20 animate-pulse" />
-                  <Skeleton className="h-4 w-5/6 bg-gradient-to-r from-black/40 to-black/20 animate-pulse" />
-                  <Skeleton className="h-4 w-4/6 bg-gradient-to-r from-black/40 to-black/20 animate-pulse" />
+                  <div className="h-4 w-full rounded-md bg-gradient-to-r from-black/40 to-black/20 animate-pulse" />
+                  <div className="h-4 w-5/6 rounded-md bg-gradient-to-r from-black/40 to-black/20 animate-pulse" />
+                  <div className="h-4 w-4/6 rounded-md bg-gradient-to-r from-black/40 to-black/20 animate-pulse" />
                 </div>
               </div>
             ))}

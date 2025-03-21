@@ -1,3 +1,4 @@
+
 @keyframes orbit {
   0% {
     transform: rotate(0deg) translateX(var(--radius, 100px)) rotate(0deg);
@@ -29,6 +30,15 @@
   }
 }
 
+@keyframes float-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -38,16 +48,53 @@
   }
 }
 
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .animate-fade-in {
   animation: fade-in 0.5s ease-out forwards;
 }
 
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.5s ease-out forwards;
+}
+
 .animate-float-slow {
   animation: float-slow 10s ease-in-out infinite;
+  will-change: transform;
 }
 
 .animate-float-slower {
   animation: float-slower 15s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-float-subtle {
+  animation: float-subtle 6s ease-in-out infinite;
+  will-change: transform;
 }
 
 @keyframes gradient {
@@ -79,3 +126,71 @@
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Performance optimized animations */
+.transform-gpu {
+  transform: translateZ(0);
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+.will-change-transform {
+  will-change: transform;
+}
+
+/* Intersection animation classes */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  will-change: opacity, transform;
+}
+
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Progressive load-in animation - use data-delay="50" etc. as attribute */
+.progressive-load-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  will-change: opacity, transform;
+}
+
+.progressive-load-in.is-loaded {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Staggered section animations */
+@keyframes slide-in-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger-animation > * {
+  opacity: 0;
+}
+
+.stagger-animation.is-visible > * {
+  animation: slide-in-bottom 0.4s ease-out forwards;
+}
+
+.stagger-animation.is-visible > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-animation.is-visible > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-animation.is-visible > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-animation.is-visible > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-animation.is-visible > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-animation.is-visible > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-animation.is-visible > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-animation.is-visible > *:nth-child(8) { animation-delay: 0.4s; }
