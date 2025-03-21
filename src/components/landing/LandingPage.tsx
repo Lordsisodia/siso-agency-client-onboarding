@@ -62,17 +62,17 @@ const LandingPage = () => {
       
       <div className="fixed inset-0 z-0 opacity-0 animate-fade-in" style={{ animationDelay: '0.3s', animationDuration: '1.5s', animationFillMode: 'forwards' }}>
         <Waves 
-          lineColor="rgba(255, 87, 34, 0.08)"
+          lineColor="rgba(255, 87, 34, 0.12)"
           backgroundColor="transparent"
-          waveSpeedX={0.03}
-          waveSpeedY={0.02}
-          waveAmpX={30}
-          waveAmpY={20}
+          waveSpeedX={0.02}
+          waveSpeedY={0.01}
+          waveAmpX={25}
+          waveAmpY={15}
           friction={0.97}
-          tension={0.008}
-          maxCursorMove={100}
-          xGap={40}
-          yGap={80}
+          tension={0.01}
+          maxCursorMove={80}
+          xGap={60}
+          yGap={90}
           className="fixed inset-0 pointer-events-none"
         />
       </div>
