@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 
 const tiers = [
@@ -39,8 +40,8 @@ const tiers = [
 
 export const TierSection = () => {
   return (
-    <section className="py-24 relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-24 relative w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full box-border">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-white mb-4">
             Choose the Right Tier for Your Agency
@@ -50,12 +51,12 @@ export const TierSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 w-full">
           {tiers.map((tier) => (
             <div
               key={tier.name}
-              className={`relative p-8 rounded-xl backdrop-blur-sm border border-white/10 
-                transition-all duration-300 hover:scale-105 hover:border-white/20
+              className={`relative p-6 md:p-8 rounded-xl backdrop-blur-sm border border-white/10 
+                transition-all duration-300 hover:scale-105 hover:border-white/20 w-full
                 ${tier.popular ? 'bg-gradient-to-b from-siso-red/10 to-siso-orange/10' : 'bg-black/30'}`}
             >
               {tier.popular && (

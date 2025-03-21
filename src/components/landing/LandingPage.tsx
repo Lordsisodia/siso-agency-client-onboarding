@@ -41,7 +41,7 @@ const LandingPage = () => {
   usePerformanceMetrics();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  // Preload the critical components as soon as the hero is rendered
+  // Viewport loading hooks for sections
   const video = useViewportLoading({ threshold: 0.05 });
   const whyChoose = useViewportLoading({ threshold: 0.05 });
   const features = useViewportLoading({ threshold: 0.05 });
@@ -51,12 +51,9 @@ const LandingPage = () => {
   const testimonials = useViewportLoading({ threshold: 0.05 });
   const cta = useViewportLoading({ threshold: 0.05 });
 
-  console.log('[LandingPage] Rendering landing page with enhanced hero section');
-
-  // Preload all main sections eagerly but staggered
+  // Preload components
   useEffect(() => {
     const preloadComponents = async () => {
-      // Start preloading important components right away
       const imports = [
         import('./sections/VideoSection'),
         import('./sections/WhyChooseSection')
@@ -65,7 +62,6 @@ const LandingPage = () => {
       try {
         await Promise.all(imports);
         
-        // Staggered loading for other components
         setTimeout(async () => {
           await import('./sections/FeaturesSection');
           await import('./sections/TechStackSection');
@@ -111,9 +107,17 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-gradient-to-b from-black via-siso-bg to-black">
-      {/* DNS Prefetch and preconnect already handled in useEffect */}
-      
-      <div className="fixed inset-0 z-0 opacity-0 animate-fade-in" style={{ animationDelay: '0.3s', animationDuration: '1.5s', animationFillMode: 'forwards', transform: 'translateZ(0)', willChange: 'opacity' }}>
+      {/* Background waves with constrained size */}
+      <div className="fixed inset-0 z-0 opacity-0 animate-fade-in" 
+           style={{ 
+             animationDelay: '0.3s', 
+             animationDuration: '1.5s', 
+             animationFillMode: 'forwards', 
+             transform: 'translateZ(0)', 
+             willChange: 'opacity',
+             maxWidth: '100vw',
+             overflow: 'hidden'
+           }}>
         <Waves 
           lineColor="rgba(255, 87, 34, 0.12)"
           backgroundColor="transparent"
@@ -130,6 +134,7 @@ const LandingPage = () => {
         />
       </div>
       
+      {/* Navigation */}
       <ErrorBoundary 
         fallback={<LoadingFallback error={new Error()} />}
         onError={(error) => console.error('[LandingPage] Error in ScrollNav:', error)}
@@ -139,7 +144,13 @@ const LandingPage = () => {
         </Suspense>
       </ErrorBoundary>
       
-      <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{ transform: 'translateZ(0)', willChange: 'transform' }}>
+      {/* Background gradient elements with constraints */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" 
+           style={{ 
+             transform: 'translateZ(0)', 
+             willChange: 'transform',
+             maxWidth: '100vw' 
+           }}>
         <div className="absolute top-1/4 -left-1/4 w-[300px] md:w-[700px] h-[300px] md:h-[700px] 
           bg-siso-red/10 rounded-full filter blur-[100px] md:blur-[140px] 
           animate-float-slow transform-gpu will-change-transform"
@@ -154,73 +165,76 @@ const LandingPage = () => {
         />
       </div>
 
-      <div className="relative z-10 w-full mx-auto space-y-12 md:space-y-24">
-        <ErrorBoundary
-          fallback={<LoadingFallback error={new Error()} />}
-          onError={(error) => console.error('[LandingPage] Error in HeroSection:', error)}
-        >
-          <HeroSection />
-        </ErrorBoundary>
+      {/* Main content with proper constraints */}
+      <div className="container-fluid relative z-10">
+        <div className="center-content space-y-12 md:space-y-24">
+          <ErrorBoundary
+            fallback={<LoadingFallback error={new Error()} />}
+            onError={(error) => console.error('[LandingPage] Error in HeroSection:', error)}
+          >
+            <HeroSection />
+          </ErrorBoundary>
 
-        <ErrorBoundary
-          fallback={<LoadingFallback error={new Error()} />}
-          onError={(error) => console.error('[LandingPage] Error in VideoSection:', error)}
-        >
-          <section id="video" ref={video.elementRef} className="transform-gpu will-change-opacity">
-            <Suspense fallback={<LoadingFallback />}>
-              {(video.isVisible || video.isLoaded || isPageLoaded) && <VideoSection />}
-            </Suspense>
-          </section>
-        </ErrorBoundary>
+          <ErrorBoundary
+            fallback={<LoadingFallback error={new Error()} />}
+            onError={(error) => console.error('[LandingPage] Error in VideoSection:', error)}
+          >
+            <section id="video" ref={video.elementRef} className="transform-gpu will-change-opacity w-full">
+              <Suspense fallback={<LoadingFallback />}>
+                {(video.isVisible || video.isLoaded || isPageLoaded) && <VideoSection />}
+              </Suspense>
+            </section>
+          </ErrorBoundary>
 
-        <ErrorBoundary
-          fallback={<LoadingFallback error={new Error()} />}
-          onError={(error) => console.error('[LandingPage] Error in other sections:', error)}
-        >
-          <section id="why-choose" ref={whyChoose.elementRef} className="transform-gpu will-change-opacity">
-            <Suspense fallback={<LoadingFallback />}>
-              {(whyChoose.isVisible || whyChoose.isLoaded || isPageLoaded) && <WhyChooseSection />}
-            </Suspense>
-          </section>
+          <ErrorBoundary
+            fallback={<LoadingFallback error={new Error()} />}
+            onError={(error) => console.error('[LandingPage] Error in other sections:', error)}
+          >
+            <section id="why-choose" ref={whyChoose.elementRef} className="transform-gpu will-change-opacity w-full">
+              <Suspense fallback={<LoadingFallback />}>
+                {(whyChoose.isVisible || whyChoose.isLoaded || isPageLoaded) && <WhyChooseSection />}
+              </Suspense>
+            </section>
 
-          <section id="features" ref={features.elementRef} className="transform-gpu will-change-opacity">
-            <Suspense fallback={<LoadingFallback />}>
-              {(features.isVisible || features.isLoaded || isPageLoaded) && <FeaturesSection />}
-            </Suspense>
-          </section>
-          
-          <section id="tech-stack" ref={techStack.elementRef} className="transform-gpu will-change-opacity">
-            <Suspense fallback={<LoadingFallback />}>
-              {(techStack.isVisible || techStack.isLoaded || isPageLoaded) && <TechStackSection />}
-            </Suspense>
-          </section>
+            <section id="features" ref={features.elementRef} className="transform-gpu will-change-opacity w-full">
+              <Suspense fallback={<LoadingFallback />}>
+                {(features.isVisible || features.isLoaded || isPageLoaded) && <FeaturesSection />}
+              </Suspense>
+            </section>
+            
+            <section id="tech-stack" ref={techStack.elementRef} className="transform-gpu will-change-opacity w-full">
+              <Suspense fallback={<LoadingFallback />}>
+                {(techStack.isVisible || techStack.isLoaded || isPageLoaded) && <TechStackSection />}
+              </Suspense>
+            </section>
 
-          <section id="getting-started" ref={gettingStarted.elementRef} className="transform-gpu will-change-opacity">
-            <Suspense fallback={<LoadingFallback />}>
-              {(gettingStarted.isVisible || gettingStarted.isLoaded || isPageLoaded) && <GettingStartedSection />}
-            </Suspense>
-          </section>
+            <section id="getting-started" ref={gettingStarted.elementRef} className="transform-gpu will-change-opacity w-full">
+              <Suspense fallback={<LoadingFallback />}>
+                {(gettingStarted.isVisible || gettingStarted.isLoaded || isPageLoaded) && <GettingStartedSection />}
+              </Suspense>
+            </section>
 
-          <section id="pricing" ref={pricing.elementRef} className="transform-gpu will-change-opacity">
-            <Suspense fallback={<LoadingFallback />}>
-              {(pricing.isVisible || pricing.isLoaded || isPageLoaded) && <PricingSection />}
-            </Suspense>
-          </section>
+            <section id="pricing" ref={pricing.elementRef} className="transform-gpu will-change-opacity w-full">
+              <Suspense fallback={<LoadingFallback />}>
+                {(pricing.isVisible || pricing.isLoaded || isPageLoaded) && <PricingSection />}
+              </Suspense>
+            </section>
 
-          <section id="testimonials" ref={testimonials.elementRef} className="transform-gpu will-change-opacity">
-            <Suspense fallback={<LoadingFallback />}>
-              {(testimonials.isVisible || testimonials.isLoaded || isPageLoaded) && <TestimonialsSection />}
-            </Suspense>
-          </section>
+            <section id="testimonials" ref={testimonials.elementRef} className="transform-gpu will-change-opacity w-full">
+              <Suspense fallback={<LoadingFallback />}>
+                {(testimonials.isVisible || testimonials.isLoaded || isPageLoaded) && <TestimonialsSection />}
+              </Suspense>
+            </section>
 
-          <section id="cta" ref={cta.elementRef} className="transform-gpu will-change-opacity">
-            <Suspense fallback={<LoadingFallback />}>
-              {(cta.isVisible || cta.isLoaded || isPageLoaded) && <CallToActionSection />}
-            </Suspense>
-          </section>
-        </ErrorBoundary>
+            <section id="cta" ref={cta.elementRef} className="transform-gpu will-change-opacity w-full">
+              <Suspense fallback={<LoadingFallback />}>
+                {(cta.isVisible || cta.isLoaded || isPageLoaded) && <CallToActionSection />}
+              </Suspense>
+            </section>
+          </ErrorBoundary>
 
-        <Footer />
+          <Footer />
+        </div>
       </div>
     </div>
   );

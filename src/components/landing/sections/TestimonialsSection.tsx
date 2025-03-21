@@ -51,12 +51,14 @@ const caseStudyItems = [
 
 export const TestimonialsSection = () => {
   return (
-    <section id="testimonials" className="py-16">
-      <Gallery4 
-        title="Case Studies" 
-        description="Discover how leading companies and developers are leveraging modern web technologies to build exceptional digital experiences. These case studies showcase real-world applications and success stories."
-        items={caseStudyItems}
-      />
+    <section id="testimonials" className="py-16 w-full max-w-full overflow-hidden">
+      <div className="container-fluid">
+        <Gallery4 
+          title="Case Studies" 
+          description="Discover how leading companies and developers are leveraging modern web technologies to build exceptional digital experiences. These case studies showcase real-world applications and success stories."
+          items={caseStudyItems}
+        />
+      </div>
     </section>
   );
 };

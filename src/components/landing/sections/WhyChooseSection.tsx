@@ -58,11 +58,11 @@ export const WhyChooseSection = () => {
   };
 
   return (
-    <section className="py-24 relative overflow-hidden">
-      {/* Enhanced Background Elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 -left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-siso-red/10 to-siso-orange/10 rounded-full filter blur-[100px] animate-float-slow" />
-        <div className="absolute bottom-1/4 -right-1/4 w-[500px] h-[500px] bg-gradient-to-r from-siso-orange/10 to-siso-red/10 rounded-full filter blur-[100px] animate-float-slower" />
+    <section className="py-24 relative overflow-hidden w-full box-border">
+      {/* Background Elements with constrained positions */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-gradient-to-r from-siso-red/10 to-siso-orange/10 rounded-full filter blur-[100px] animate-float-slow" />
+        <div className="absolute bottom-1/4 right-0 w-[500px] h-[500px] bg-gradient-to-r from-siso-orange/10 to-siso-red/10 rounded-full filter blur-[100px] animate-float-slower" />
         
         {/* Added particle-like decorative elements */}
         <div className="absolute inset-0 overflow-hidden">
@@ -80,7 +80,7 @@ export const WhyChooseSection = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4">
+      <div className="container-fluid">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -111,7 +111,7 @@ export const WhyChooseSection = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto"
+          className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 max-w-6xl mx-auto"
         >
           {features.map((feature, index) => (
             <motion.div 
@@ -121,13 +121,13 @@ export const WhyChooseSection = () => {
                 scale: 1.02,
                 transition: { duration: 0.2 }
               }}
-              className="relative group"
+              className="relative group w-full"
             >
               {/* Enhanced card background with multiple layers */}
               <div className="absolute inset-0 bg-gradient-to-r from-siso-red/5 to-siso-orange/5 rounded-xl transform group-hover:scale-105 transition-transform duration-300 blur-xl" />
               <div className="absolute inset-0 bg-gradient-to-br from-siso-red/3 to-siso-orange/3 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               
-              <div className="relative bg-black/20 backdrop-blur-sm border border-siso-text/10 rounded-xl p-6 hover:border-siso-orange/20 transition-all duration-300">
+              <div className="relative bg-black/20 backdrop-blur-sm border border-siso-text/10 rounded-xl p-6 hover:border-siso-orange/20 transition-all duration-300 h-full">
                 <div className="flex flex-col gap-4">
                   {/* Enhanced icon container with animations */}
                   <div className="relative w-12 h-12">
@@ -157,12 +157,6 @@ export const WhyChooseSection = () => {
                       <span className="text-sm text-siso-text-bold">{feature.highlight}</span>
                     </div>
                   </div>
-                </div>
-
-                {/* Corner decorative elements */}
-                <div className="absolute top-0 right-0 w-16 h-16 pointer-events-none">
-                  <div className="absolute top-4 right-4 w-2 h-2 bg-siso-orange/20 rounded-full animate-pulse" />
-                  <div className="absolute top-6 right-6 w-1 h-1 bg-siso-red/20 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }} />
                 </div>
               </div>
             </motion.div>

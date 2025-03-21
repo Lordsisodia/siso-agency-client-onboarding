@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -27,7 +28,7 @@ export function TestimonialCard({
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioContent, setAudioContent] = useState<string | null>(null);
 
-  // [Analysis] Extract video ID from YouTube URL for thumbnail and direct link
+  // Extract video ID from YouTube URL for thumbnail and direct link
   const getYouTubeInfo = (url: string) => {
     const videoId = url.split('embed/')[1]?.split('?')[0];
     return {
@@ -72,9 +73,9 @@ export function TestimonialCard({
     <div 
       className="group relative p-4 md:p-6 rounded-xl backdrop-blur-sm border border-siso-orange/40 
         bg-black/30 transition-all duration-300 hover:scale-[1.02] hover:border-siso-orange
-        touch-manipulation"
+        touch-manipulation w-full box-border"
     >
-      {/* Profile Section - Optimized for touch */}
+      {/* Profile Section */}
       <div className="flex items-center gap-3 mb-3">
         <div className="relative h-12 w-12 md:h-10 md:w-10 flex-shrink-0">
           <a 
@@ -91,19 +92,19 @@ export function TestimonialCard({
             />
           </a>
         </div>
-        <div className="text-left min-w-0">
+        <div className="text-left min-w-0 flex-1">
           <h4 className="text-white font-medium text-base md:text-sm truncate">{name}</h4>
           <p className="text-gray-400 text-sm md:text-xs truncate">{role}</p>
           <p className="text-gray-400 text-sm md:text-xs truncate">{company}</p>
         </div>
       </div>
 
-      {/* Quote - Adjusted for mobile readability */}
-      <p className="text-gray-300 italic text-base md:text-sm text-left mb-3 line-clamp-4 md:line-clamp-none">{quote}</p>
+      {/* Quote - with text truncation to prevent overflow */}
+      <p className="text-gray-300 italic text-base md:text-sm text-left mb-3 line-clamp-4 md:line-clamp-none max-w-full overflow-hidden">{quote}</p>
 
-      {/* Media Section - Optimized for mobile */}
+      {/* Media Section - optimized to prevent overflow */}
       {videoUrl ? (
-        <div className="relative rounded-lg overflow-hidden bg-black/20 aspect-video">
+        <div className="relative rounded-lg overflow-hidden bg-black/20 aspect-video w-full">
           <a
             href={getYouTubeInfo(videoUrl).directUrl}
             target="_blank"
@@ -119,7 +120,7 @@ export function TestimonialCard({
           </a>
         </div>
       ) : audioReview ? (
-        <div className="mt-4">
+        <div className="mt-4 w-full">
           <Button
             variant="outline"
             size="lg"
