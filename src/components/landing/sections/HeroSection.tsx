@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { SlideIn, FadeIn } from '@/components/ui/animations';
 import { Spotlight } from '@/components/ui/spotlight';
 import { EnhancedHero } from '@/components/ui/enhanced-hero';
+import { ContainerScroll } from '@/components/ui/container-scroll-animation';
+import { GradientHeading } from '@/components/ui/gradient-heading';
 
 export const HeroSection = memo(() => {
   console.log('[HeroSection] Rendering enhanced hero section'); // Debug log
@@ -24,14 +26,24 @@ export const HeroSection = memo(() => {
         <Spotlight className="hidden md:block" size={800} />
       </div>
       
-      <SlideIn 
-        direction="up" 
-        delay={0.1} 
-        duration={0.8}
-        className="relative z-10 flex items-center justify-center h-full pt-16 pb-12 md:pb-16"
-      >
-        <EnhancedHero />
-      </SlideIn>
+      <div className="relative z-10 pt-16 pb-12 md:pb-0">
+        <ContainerScroll
+          titleComponent={
+            <div className="mb-4">
+              <GradientHeading variant="sunset" size="lg" className="text-center">
+                <span className="text-siso-text-bold">Grow your agency with</span>
+              </GradientHeading>
+              <p className="text-lg text-siso-text/80 max-w-3xl mx-auto mt-4">
+                From vision to MVP in record time with our AI-powered development platform
+              </p>
+            </div>
+          }
+        >
+          <div className="w-full h-full flex items-center justify-center p-4">
+            <EnhancedHero />
+          </div>
+        </ContainerScroll>
+      </div>
     </section>
   );
 });
