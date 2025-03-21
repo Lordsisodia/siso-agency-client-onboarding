@@ -3,59 +3,68 @@ import { Gallery4 } from '@/components/ui/gallery4';
 
 const caseStudyItems = [
   {
-    id: "shadcn-ui",
-    title: "shadcn/ui: Building a Modern Component Library",
+    id: "netflix",
+    title: "Netflix: Streaming Platform Redesign",
     description:
-      "Explore how shadcn/ui revolutionized React component libraries by providing a unique approach to component distribution and customization, making it easier for developers to build beautiful, accessible applications.",
-    href: "https://ui.shadcn.com",
+      "A complete UX/UI overhaul of Netflix's streaming platform, focusing on personalization algorithms and recommendation systems that increased user engagement by 42% and reduced churn rate by 15%.",
+    href: "https://netflix.com",
     image:
-      "https://images.unsplash.com/photo-1551250928-243dc937c49d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w2NDI3NzN8MHwxfGFsbHwxMjN8fHx8fHwyfHwxNzIzODA2OTM5fA&ixlib=rb-4.0.3&q=80&w=1080",
+      "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?q=80&w=1769&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
   {
-    id: "tailwind",
-    title: "Tailwind CSS: The Utility-First Revolution",
+    id: "spotify",
+    title: "Spotify: AI-Powered Music Discovery",
     description:
-      "Discover how Tailwind CSS transformed the way developers style their applications, offering a utility-first approach that speeds up development while maintaining complete design flexibility.",
-    href: "https://tailwindcss.com",
+      "Implementation of advanced AI algorithms for Spotify's discovery feature that analyzes listening patterns and creates personalized playlists, resulting in a 37% increase in daily active users and 28% more time spent in-app.",
+    href: "https://spotify.com",
     image:
-      "https://images.unsplash.com/photo-1551250928-e4a05afaed1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w2NDI3NzN8MHwxfGFsbHwxMjR8fHx8fHwyfHwxNzIzODA2OTM5fA&ixlib=rb-4.0.3&q=80&w=1080",
+      "https://images.unsplash.com/photo-1614680376408-81e91ffe3db7?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
   {
-    id: "astro",
-    title: "Astro: The All-in-One Web Framework",
+    id: "airbnb",
+    title: "Airbnb: Seamless Booking Experience",
     description:
-      "Learn how Astro's innovative 'Islands Architecture' and zero-JS-by-default approach is helping developers build faster websites while maintaining rich interactivity where needed.",
-    href: "https://astro.build",
+      "Redesigned Airbnb's booking flow with an emphasis on trust and transparency, incorporating verified reviews and 360° property tours. This resulted in a 53% conversion rate improvement and 24% increase in first-time bookings.",
+    href: "https://airbnb.com",
     image:
-      "https://images.unsplash.com/photo-1536735561749-fc87494598cb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w2NDI3NzN8MHwxfGFsbHwxNzd8fHx8fHwyfHwxNzIzNjM0NDc0fA&ixlib=rb-4.0.3&q=80&w=1080",
+      "https://images.unsplash.com/photo-1501876725168-00c445821c9e?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
   {
-    id: "react",
-    title: "React: Pioneering Component-Based UI",
+    id: "uber",
+    title: "Uber: Real-time Driver Mapping System",
     description:
-      "See how React continues to shape modern web development with its component-based architecture, enabling developers to build complex user interfaces with reusable, maintainable code.",
-    href: "https://react.dev",
+      "Developed a sophisticated real-time mapping system for Uber that optimizes driver routes and predicts high-demand areas before they occur. This system reduced average wait times by 31% and increased driver earnings by 18%.",
+    href: "https://uber.com",
     image:
-      "https://images.unsplash.com/photo-1548324215-9133768e4094?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w2NDI3NzN8MHwxfGFsbHwxMzF8fHx8fHwyfHwxNzIzNDM1MzA1fA&ixlib=rb-4.0.3&q=80&w=1080",
+      "https://images.unsplash.com/photo-1581515286348-98549702050f?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
   {
-    id: "nextjs",
-    title: "Next.js: The React Framework for Production",
+    id: "slack",
+    title: "Slack: Enterprise Communication Hub",
     description:
-      "Explore how Next.js has become the go-to framework for building full-stack React applications, offering features like server components, file-based routing, and automatic optimization.",
-    href: "https://nextjs.org",
+      "Created a centralized communication solution for a Fortune 500 company, integrating Slack with 27 internal tools and automating workflows. This implementation reduced internal email by 71% and improved project completion time by 32%.",
+    href: "https://slack.com",
     image:
-      "https://images.unsplash.com/photo-1550070881-a5d71eda5800?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w2NDI3NzN8MHwxfGFsbHwxMjV8fHx8fHwyfHwxNzIzNDM1Mjk4fA&ixlib=rb-4.0.3&q=80&w=1080",
+      "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  },
+  {
+    id: "doordash",
+    title: "DoorDash: Order Tracking Optimization",
+    description:
+      "Revolutionized DoorDash's order tracking system with live updates and accurate delivery estimates using machine learning algorithms. The enhanced system improved customer satisfaction ratings by 47% and increased repeat orders by 29%.",
+    href: "https://doordash.com",
+    image:
+      "https://images.unsplash.com/photo-1593246049226-ded77bf90326?q=80&w=2235&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
 ];
 
 export const TestimonialsSection = () => {
   return (
-    <section id="testimonials" className="py-16 w-full max-w-full overflow-hidden">
-      <div className="container-fluid">
+    <section id="testimonials" className="py-16 w-full max-w-full overflow-hidden bg-gradient-to-b from-black/40 to-black/20">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <Gallery4 
-          title="Case Studies" 
-          description="Discover how leading companies and developers are leveraging modern web technologies to build exceptional digital experiences. These case studies showcase real-world applications and success stories."
+          title="Success Stories" 
+          description="Discover how leading companies have transformed their digital experiences with our solutions. These case studies showcase measurable results and innovative approaches."
           items={caseStudyItems}
         />
       </div>

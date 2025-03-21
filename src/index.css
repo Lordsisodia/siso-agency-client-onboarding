@@ -46,3 +46,41 @@ body {
   margin-right: auto;
   box-sizing: border-box;
 }
+
+/* Case Studies Section Styles */
+#testimonials .carousel-item {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+#testimonials .carousel-item:hover {
+  transform: translateY(-8px);
+}
+
+#testimonials .carousel-content {
+  background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+}
+
+#testimonials img {
+  transition: transform 0.7s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+#testimonials a:hover img {
+  transform: scale(1.05);
+}
+
+#testimonials .case-study-title {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+#testimonials .case-study-description {
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.6;
+}
