@@ -79,83 +79,81 @@ function Hero() {
   };
 
   return (
-    <div className="w-full relative z-10">
+    <div className="w-full">
       <OnboardingStyles />
-      <div className="container mx-auto px-4 flex items-center justify-center min-h-[calc(80vh-80px)]">
-        <motion.div 
-          className="flex gap-8 py-16 lg:py-20 items-center justify-center flex-col max-w-4xl mx-auto text-center"
-          initial="hidden"
-          animate="visible"
-          variants={containerVariants}
-        >
-          <div className="flex gap-6 flex-col items-center hero-content">
-            <motion.h1 
-              className="text-5xl md:text-7xl max-w-4xl tracking-tighter text-center font-regular"
-              variants={itemVariants}
-            >
-              <span className="text-siso-text-bold whitespace-normal md:whitespace-nowrap">Grow your agency with</span>
-              <div className="hero-title-container h-16 md:h-20 relative">
-                {titles.map((title, index) => (
-                  <motion.span
-                    key={index}
-                    className={`hero-title absolute inset-0 flex justify-center font-semibold bg-gradient-to-r from-siso-red to-siso-orange bg-clip-text text-transparent ${
-                      titleNumber === index ? "opacity-100" : "opacity-0"
-                    }`}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={
-                      titleNumber === index
-                        ? {
-                            opacity: 1,
-                            y: 0,
-                          }
-                        : {
-                            opacity: 0,
-                            y: titleNumber > index ? -30 : 30,
-                          }
-                    }
-                    transition={{ 
-                      type: "spring", 
-                      stiffness: 100, 
-                      damping: 15,
-                      duration: 0.6
-                    }}
-                  >
-                    {title}
-                  </motion.span>
-                ))}
-              </div>
-            </motion.h1>
-
-            <motion.p 
-              className="text-lg md:text-xl leading-relaxed tracking-tight text-siso-text max-w-2xl text-center mx-auto"
-              variants={itemVariants}
-            >
-              From vision to MVP in 48-72 hours—trusted by 49+ agencies with 1,000+ developers in our network.
-            </motion.p>
-          </div>
-          <motion.div 
-            className="flex flex-row gap-4 hero-action-buttons"
-            variants={buttonVariants}
+      <motion.div 
+        className="flex flex-col gap-8 items-center justify-center max-w-4xl mx-auto text-center"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        <div className="flex gap-6 flex-col items-center hero-content">
+          <motion.h1 
+            className="text-5xl md:text-7xl max-w-4xl tracking-tighter text-center font-regular"
+            variants={itemVariants}
           >
-            <RainbowButton
-              onClick={handleGetStarted}
-              className="group flex items-center gap-2 text-base md:text-lg font-medium px-6 py-3"
-            >
-              <span>Build Your App Now</span>
-              <MoveRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </RainbowButton>
-            
-            <Button 
-              variant="outline"
-              size="lg" 
-              className="border-siso-text/20 hover:bg-siso-bg-alt hover:text-siso-text-bold transition-all text-base"
-              onClick={handleTryAI}
-            >
-              Try AI Planner <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
-          </motion.div>
+            <span className="text-siso-text-bold whitespace-normal md:whitespace-nowrap">Grow your agency with</span>
+            <div className="hero-title-container h-16 md:h-20 relative">
+              {titles.map((title, index) => (
+                <motion.span
+                  key={index}
+                  className={`hero-title absolute inset-0 flex justify-center font-semibold bg-gradient-to-r from-siso-red to-siso-orange bg-clip-text text-transparent ${
+                    titleNumber === index ? "opacity-100" : "opacity-0"
+                  }`}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={
+                    titleNumber === index
+                      ? {
+                          opacity: 1,
+                          y: 0,
+                        }
+                      : {
+                          opacity: 0,
+                          y: titleNumber > index ? -30 : 30,
+                        }
+                  }
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 100, 
+                    damping: 15,
+                    duration: 0.6
+                  }}
+                >
+                  {title}
+                </motion.span>
+              ))}
+            </div>
+          </motion.h1>
+
+          <motion.p 
+            className="text-lg md:text-xl leading-relaxed tracking-tight text-siso-text max-w-2xl text-center mx-auto"
+            variants={itemVariants}
+          >
+            From vision to MVP in 48-72 hours—trusted by 49+ agencies with 1,000+ developers in our network.
+          </motion.p>
+        </div>
+        <motion.div 
+          className="flex flex-row gap-4 hero-action-buttons justify-center"
+          variants={buttonVariants}
+        >
+          <RainbowButton
+            onClick={handleGetStarted}
+            className="group flex items-center gap-2 text-base md:text-lg font-medium px-6 py-3"
+          >
+            <span>Build Your App Now</span>
+            <MoveRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </RainbowButton>
+          
+          <Button 
+            variant="outline"
+            size="lg" 
+            className="border-siso-text/20 hover:bg-siso-bg-alt hover:text-siso-text-bold transition-all text-base"
+            onClick={handleTryAI}
+          >
+            Try AI Planner <ArrowRight className="ml-2 w-4 h-4" />
+          </Button>
         </motion.div>
-      </div>
+      </motion.div>
     </div>
   );
 }
