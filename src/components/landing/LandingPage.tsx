@@ -1,3 +1,4 @@
+
 import { lazy, Suspense, memo, useEffect } from 'react';
 import { LoadingFallback } from './sections/LoadingFallback';
 import Footer from '@/components/Footer';
@@ -61,17 +62,17 @@ const LandingPage = () => {
       
       <div className="fixed inset-0 z-0 opacity-0 animate-fade-in" style={{ animationDelay: '0.3s', animationDuration: '1.5s', animationFillMode: 'forwards' }}>
         <Waves 
-          lineColor="rgba(255, 87, 34, 0.35)"
+          lineColor="rgba(255, 87, 34, 0.08)"
           backgroundColor="transparent"
-          waveSpeedX={0.05}
-          waveSpeedY={0.04}
-          waveAmpX={90}
-          waveAmpY={70}
-          friction={0.94}
-          tension={0.015}
-          maxCursorMove={170}
-          xGap={30}
-          yGap={60}
+          waveSpeedX={0.03}
+          waveSpeedY={0.02}
+          waveAmpX={30}
+          waveAmpY={20}
+          friction={0.97}
+          tension={0.008}
+          maxCursorMove={100}
+          xGap={40}
+          yGap={80}
           className="fixed inset-0 pointer-events-none"
         />
       </div>
@@ -87,16 +88,16 @@ const LandingPage = () => {
       
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-1/4 w-[300px] md:w-[700px] h-[300px] md:h-[700px] 
-          bg-siso-red/20 rounded-full filter blur-[100px] md:blur-[140px] 
+          bg-siso-red/10 rounded-full filter blur-[100px] md:blur-[140px] 
           animate-float-slow transform-gpu will-change-transform"
         />
         <div className="absolute bottom-1/4 -right-1/4 w-[300px] md:w-[700px] h-[300px] md:h-[700px] 
-          bg-siso-orange/20 rounded-full filter blur-[100px] md:blur-[140px] 
+          bg-siso-orange/10 rounded-full filter blur-[100px] md:blur-[140px] 
           animate-float-slower transform-gpu will-change-transform"
         />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
           w-[400px] md:w-[1200px] h-[400px] md:h-[1200px] 
-          bg-siso-red/10 rounded-full filter blur-[120px] md:blur-[180px] transform-gpu will-change-transform"
+          bg-siso-red/5 rounded-full filter blur-[120px] md:blur-[180px] transform-gpu will-change-transform"
         />
       </div>
 

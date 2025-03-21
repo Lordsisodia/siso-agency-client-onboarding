@@ -9,12 +9,17 @@ export default function Home() {
     <div className="relative min-h-screen bg-gradient-to-b from-siso-bg to-siso-bg/95 overflow-hidden">
       {/* Interactive background with waves */}
       <Waves 
-        lineColor="rgba(255, 87, 34, 0.08)"
+        lineColor="rgba(255, 87, 34, 0.04)"
         backgroundColor="transparent"
-        waveSpeedX={0.01} 
-        waveSpeedY={0.005}
-        waveAmpX={20}
-        waveAmpY={10}
+        waveSpeedX={0.005} 
+        waveSpeedY={0.003}
+        waveAmpX={15}
+        waveAmpY={8}
+        friction={0.98}
+        tension={0.007}
+        maxCursorMove={80}
+        xGap={60}
+        yGap={100}
         className="absolute inset-0 z-0"
       />
       

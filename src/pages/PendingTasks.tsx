@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { MainLayout } from '@/components/assistants/layout/MainLayout';
 import { Waves } from '@/components/ui/waves-background';
@@ -8,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-// Task type definition
 type Task = {
   id: string;
   title: string;
@@ -21,7 +19,6 @@ type Task = {
   tags?: string[];
 };
 
-// Sample data for tasks
 const sampleTasks: Task[] = [
   {
     id: '1',
@@ -75,7 +72,6 @@ const sampleTasks: Task[] = [
   }
 ];
 
-// Task Card Component
 const TaskCard = ({ task }: { task: Task }) => {
   const priorityColors = {
     low: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
@@ -138,7 +134,6 @@ export default function PendingTasks() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   
-  // Filter tasks based on search query and active tab
   const filteredTasks = sampleTasks.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          task.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -156,16 +151,17 @@ export default function PendingTasks() {
       <div className="relative min-h-screen">
         <div className="absolute inset-0 z-0">
           <Waves 
-            lineColor="rgba(255, 87, 34, 0.2)"
-            waveSpeedX={0.02}
-            waveSpeedY={0.01}
-            waveAmpX={40}
-            waveAmpY={20}
-            friction={0.9}
-            tension={0.01}
-            maxCursorMove={120}
-            xGap={12}
-            yGap={36}
+            lineColor="rgba(255, 87, 34, 0.05)"
+            backgroundColor="transparent"
+            waveSpeedX={0.01}
+            waveSpeedY={0.005}
+            waveAmpX={18}
+            waveAmpY={10}
+            friction={0.975}
+            tension={0.006}
+            maxCursorMove={80}
+            xGap={50}
+            yGap={80}
           />
         </div>
         
@@ -184,7 +180,6 @@ export default function PendingTasks() {
             </p>
           </motion.div>
           
-          {/* Search & Filter */}
           <div className="mb-8 flex flex-col md:flex-row gap-4 items-center justify-between bg-black/20 backdrop-blur-sm p-4 rounded-xl border border-siso-orange/20">
             <div className="relative flex-1 max-w-md w-full">
               <Input
@@ -202,7 +197,6 @@ export default function PendingTasks() {
             </Button>
           </div>
           
-          {/* Tabs for filtering tasks by status */}
           <Tabs defaultValue="all" className="mb-8" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="bg-black/30 border border-siso-border p-1">
               <TabsTrigger value="all" className="data-[state=active]:bg-siso-orange/20 data-[state=active]:text-siso-orange">
@@ -220,7 +214,6 @@ export default function PendingTasks() {
             </TabsList>
           </Tabs>
           
-          {/* Task Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTasks.length > 0 ? (
               filteredTasks.map(task => (

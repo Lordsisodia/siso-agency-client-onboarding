@@ -76,12 +76,17 @@ export default function NewProject() {
       <div className="container max-w-6xl mx-auto py-6 px-4 min-h-screen relative">
         {/* Waves background */}
         <Waves 
-          lineColor="rgba(255, 87, 34, 0.05)" 
+          lineColor="rgba(255, 87, 34, 0.03)" 
           backgroundColor="transparent" 
-          waveSpeedX={0.01} 
-          waveSpeedY={0.004} 
-          waveAmpX={24} 
-          waveAmpY={12} 
+          waveSpeedX={0.007} 
+          waveSpeedY={0.002} 
+          waveAmpX={12} 
+          waveAmpY={6} 
+          friction={0.985}
+          tension={0.004}
+          maxCursorMove={60}
+          xGap={70}
+          yGap={120}
           className="absolute inset-0 z-0 w-full h-full" 
         />
         
