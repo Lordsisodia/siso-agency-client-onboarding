@@ -81,9 +81,9 @@ function Hero() {
   return (
     <div className="w-full relative z-10">
       <OnboardingStyles />
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 flex items-center justify-center min-h-[calc(80vh-80px)]">
         <motion.div 
-          className="flex gap-8 py-16 lg:py-28 items-center justify-center flex-col"
+          className="flex gap-8 py-16 lg:py-20 items-center justify-center flex-col max-w-4xl mx-auto text-center"
           initial="hidden"
           animate="visible"
           variants={containerVariants}

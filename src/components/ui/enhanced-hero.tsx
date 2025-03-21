@@ -65,11 +65,11 @@ export function EnhancedHero() {
   };
 
   return (
-    <div className="w-full relative z-10">
+    <div className="w-full relative z-10 flex items-center justify-center min-h-[calc(80vh-80px)]">
       <OnboardingStyles />
       <div className="container mx-auto px-4">
         <motion.div 
-          className="flex gap-8 py-16 lg:py-24 items-center justify-center flex-col"
+          className="flex gap-8 py-16 lg:py-24 items-center justify-center flex-col max-w-4xl mx-auto text-center"
           initial="hidden"
           animate="visible"
           variants={containerVariants}
@@ -133,7 +133,7 @@ export function EnhancedHero() {
 
           <motion.div 
             variants={itemVariants}
-            className="flex flex-col sm:flex-row gap-4 hero-action-buttons items-center"
+            className="flex flex-col sm:flex-row gap-4 hero-action-buttons items-center justify-center"
           >
             <RainbowButton
               onClick={handleGetStarted}

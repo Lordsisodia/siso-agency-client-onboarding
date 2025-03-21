@@ -28,7 +28,7 @@ export const HeroSection = memo(() => {
   }, []);
 
   return (
-    <section id="hero" className="relative min-h-screen overflow-hidden transform-gpu">
+    <section id="hero" className="relative min-h-screen w-full flex items-center justify-center overflow-hidden transform-gpu">
       <div className="absolute inset-0 pointer-events-none">
         <Spotlight className="hidden md:block" size={800} />
       </div>
@@ -37,7 +37,7 @@ export const HeroSection = memo(() => {
         direction="up" 
         delay={0.1} 
         duration={0.5}
-        className="relative z-10 flex items-center justify-center h-full pt-16 pb-12 md:pb-16 transform-gpu will-change-transform"
+        className="relative z-10 flex items-center justify-center w-full h-full transform-gpu will-change-transform"
       >
         <Hero />
       </SlideIn>
