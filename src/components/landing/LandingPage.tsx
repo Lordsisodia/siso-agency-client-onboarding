@@ -9,6 +9,9 @@ import { HeroSection } from './sections/HeroSection';
 import { Waves } from '@/components/ui/waves-background';
 
 // [Analysis] Only lazy load non-critical sections
+const VideoSection = lazy(() => import('./sections/VideoSection').then(m => ({ 
+  default: memo(m.VideoSection) 
+})));
 const WhyChooseSection = lazy(() => import('./sections/WhyChooseSection').then(m => ({ 
   default: memo(m.WhyChooseSection) 
 })));
@@ -39,6 +42,7 @@ const LandingPage = () => {
   usePerformanceMetrics();
 
   // Setup viewport loading for each section
+  const video = useViewportLoading({ threshold: 0.1 });
   const whyChoose = useViewportLoading({ threshold: 0.1 });
   const features = useViewportLoading({ threshold: 0.1 });
   const techStack = useViewportLoading({ threshold: 0.1 });
@@ -112,6 +116,18 @@ const LandingPage = () => {
           onError={(error) => console.error('[LandingPage] Error in HeroSection:', error)}
         >
           <HeroSection />
+        </ErrorBoundary>
+
+        {/* Added Video Section after Hero Section */}
+        <ErrorBoundary
+          fallback={<LoadingFallback error={new Error()} />}
+          onError={(error) => console.error('[LandingPage] Error in VideoSection:', error)}
+        >
+          <section id="video" ref={video.elementRef}>
+            <Suspense fallback={<LoadingFallback />}>
+              {(video.isVisible || video.isLoaded) && <VideoSection />}
+            </Suspense>
+          </section>
         </ErrorBoundary>
 
         <ErrorBoundary
