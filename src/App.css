@@ -1,3 +1,4 @@
+
 /* Critical CSS - Inlined for fastest paint */
 #root {
   margin: 0;
@@ -6,6 +7,8 @@
   min-height: 100vh;
   height: 100%;
   width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 /* Performance optimized animations with will-change */
@@ -78,4 +81,15 @@
 .animate-float-delayed {
   animation: float-delayed 25s ease-in-out infinite;
   will-change: transform;
+}
+
+/* Ensure content doesn't overflow */
+body, html {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Fix flex layouts to prevent overflow */
+.flex {
+  max-width: 100%;
 }

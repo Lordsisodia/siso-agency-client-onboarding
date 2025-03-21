@@ -28,19 +28,21 @@ export const HeroSection = memo(() => {
   }, []);
 
   return (
-    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section id="hero" className="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <Spotlight className="hidden md:block" size={800} />
       </div>
       
-      <SlideIn 
-        direction="up" 
-        delay={0.1} 
-        duration={0.5}
-        className="relative z-10 w-full max-w-6xl mx-auto px-4 py-12 md:py-16 flex items-center justify-center transform-gpu will-change-transform"
-      >
-        <Hero />
-      </SlideIn>
+      <div className="w-full max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-16 flex items-center justify-center">
+        <SlideIn 
+          direction="up" 
+          delay={0.1} 
+          duration={0.5}
+          className="w-full transform-gpu will-change-transform"
+        >
+          <Hero />
+        </SlideIn>
+      </div>
     </section>
   );
 });

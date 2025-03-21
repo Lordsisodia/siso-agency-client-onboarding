@@ -54,7 +54,7 @@ export default function Index() {
 
   // If not logged in, show the enhanced landing page with optimized loading
   return (
-    <div className="relative w-full">
+    <div className="relative w-full max-w-full overflow-x-hidden">
       <Suspense fallback={
         <div className="w-full h-screen bg-black flex items-center justify-center">
           <div className="flex flex-col items-center space-y-4">

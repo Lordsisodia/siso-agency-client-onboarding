@@ -14,7 +14,7 @@ export const MainContent = ({
 }: MainContentProps) => {
   return (
     <motion.div 
-      className="min-h-screen"
+      className="min-h-screen w-full max-w-full overflow-x-hidden"
       animate={{
         marginLeft: !isMobile ? (isExpanded ? '18rem' : '4rem') : 0
       }}

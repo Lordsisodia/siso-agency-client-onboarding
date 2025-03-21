@@ -110,7 +110,7 @@ const LandingPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-black via-siso-bg to-black overflow-x-hidden">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-gradient-to-b from-black via-siso-bg to-black">
       {/* DNS Prefetch and preconnect already handled in useEffect */}
       
       <div className="fixed inset-0 z-0 opacity-0 animate-fade-in" style={{ animationDelay: '0.3s', animationDuration: '1.5s', animationFillMode: 'forwards', transform: 'translateZ(0)', willChange: 'opacity' }}>
@@ -154,7 +154,7 @@ const LandingPage = () => {
         />
       </div>
 
-      <div className="relative z-10 px-4 md:px-0 space-y-12 md:space-y-24">
+      <div className="relative z-10 w-full mx-auto space-y-12 md:space-y-24">
         <ErrorBoundary
           fallback={<LoadingFallback error={new Error()} />}
           onError={(error) => console.error('[LandingPage] Error in HeroSection:', error)}

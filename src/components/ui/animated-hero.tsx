@@ -79,10 +79,10 @@ function Hero() {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full text-center">
       <OnboardingStyles />
       <motion.div 
-        className="flex flex-col gap-8 items-center justify-center max-w-4xl mx-auto text-center"
+        className="flex flex-col gap-8 items-center justify-center mx-auto text-center"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
